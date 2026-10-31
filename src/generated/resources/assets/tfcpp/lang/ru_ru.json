@@ -1,9 +1,24 @@
 {
+  "block.tfcpp.retort": "Реторта",
+  "block.tfcpp.retort_condenser": "Конденсатор реторты",
   "death.attack.tfcpp.asphyxiation": "%1$s задохнулся: в воздухе не осталось кислорода",
   "death.attack.tfcpp.carbon_monoxide": "%1$s уснул и больше не проснулся",
   "death.attack.tfcpp.toxic_gas": "%1$s отравился ядовитыми испарениями",
+  "fluid_type.tfcpp.mercury": "Ртуть",
+  "fluid_type.tfcpp.metal.arsenical_copper": "Расплав мышьяковистой меди",
+  "item.tfcpp.calcine.normal_zinc": "Цинковый огарок",
+  "item.tfcpp.calcine.poor_zinc": "Бедный цинковый огарок",
+  "item.tfcpp.calcine.rich_zinc": "Богатый цинковый огарок",
+  "item.tfcpp.calcine.small_zinc": "Малый цинковый огарок",
+  "item.tfcpp.glass_bulb": "Стеклянная колба",
+  "item.tfcpp.mercury_bulb": "Ртутная колба",
+  "item.tfcpp.metal.ingot.arsenical_copper": "Слиток черновой мышьяковистой меди",
+  "itemGroup.tfcpp": "TFC++",
   "tfcpp.gas.smell.ammonia": "Едкий запах нашатыря щиплет глаза",
   "tfcpp.gas.smell.chlorine": "Резкий запах хлорки обжигает нос",
   "tfcpp.gas.smell.hydrogen_sulfide": "В воздухе стоит запах тухлых яиц",
-  "tfcpp.gas.smell.sulfur_dioxide": "Резкий удушливый запах горелой серы перехватывает горло"
+  "tfcpp.gas.smell.sulfur_dioxide": "Резкий удушливый запах горелой серы перехватывает горло",
+  "tfcpp.retort.no_condenser": "Рядом с ретортой нет конденсатора: пары уйдут в помещение",
+  "tfcpp.retort.status": "%1$s °C, загрузка: %2$s, углерод: %3$s, %4$s мБ: %5$s",
+  "tfcpp.retort.status.empty_tank": "пока ничего не сконденсировалось"
 }

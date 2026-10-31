@@ -5,6 +5,12 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "CharcoalForgeBlockMixin",
+    "HeatingRecipeMixin",
+    "MeltContextMixins$Crucible",
+    "MeltContextMixins$Firebox",
+    "MeltContextMixins$Firepit",
+    "MeltContextMixins$Forge",
+    "MeltContextMixins$PitKiln",
     "TFCBlockEntityMixin"
   ],
   "injectors": {

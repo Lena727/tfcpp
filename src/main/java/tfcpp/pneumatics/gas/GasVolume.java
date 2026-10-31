@@ -23,6 +23,9 @@ public interface GasVolume
     /** Called after gas changes in a cell belonging to storage other than the one being stepped, so that it gets saved. */
     default void markChanged(int x, int y, int z) {}
 
+    /** Gas has condensed out of the air onto surfaces at this position. */
+    default void deposit(int x, int y, int z, Gas gas, float moles) {}
+
     /** @return the fraction of gas per second escaping to the atmosphere from this position */
     float atmosphereExchangeRate(int x, int y, int z);
 }

@@ -10,12 +10,10 @@ import net.dries007.tfc.common.blockentities.BurningLogPileBlockEntity;
 import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
 import net.dries007.tfc.common.blockentities.FireboxBlockEntity;
 import net.dries007.tfc.common.blockentities.PitKilnBlockEntity;
-import net.dries007.tfc.common.blocks.TFCBlocks;
 import net.dries007.tfc.common.blocks.devices.CharcoalForgeBlock;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -51,9 +49,6 @@ public final class FireSource
         }
     }
 
-    /** Hot flue gas rises as a plume until it hits a ceiling, then cools and spreads from there. */
-    private static final int MAX_PLUME_RISE = 48;
-    private static final int MAX_CHARGE_HEIGHT = 16;
     /** Bellows roughly double the rate of combustion, which is also how TFC treats fuel burn rate. */
     private static final float BELLOWS_POWER_FACTOR = 2f;
     private static final long MAX_CATCH_UP_TICKS = 20 * 60 * 10;
@@ -115,7 +110,7 @@ public final class FireSource
         }
 
         final BlockPos pos = entity.getBlockPos();
-        final int intakeY = firstOpenAbove(level, volume, entity instanceof BloomeryBlockEntity bloomery ? bloomery.getInternalBlockPos() : pos);
+        final int intakeY = GasEmission.outletHeight(level, volume, entity instanceof BloomeryBlockEntity bloomery ? bloomery.getInternalBlockPos() : pos);
         if (intakeY == Integer.MIN_VALUE)
         {
             return;
@@ -131,60 +126,10 @@ public final class FireSource
         final float carbonMonoxideShare = Combustion.carbonMonoxideShare(kind.carbonMonoxideShare, oxygen);
         final float carbon = Combustion.carbonRate(kind.kilowatts * bellowsFactor(), carbonMonoxideShare) * seconds;
 
-        emit(volume, pos.getX(), intakeY, pos.getZ(), carbon, carbonMonoxideShare);
-    }
-
-    private void emit(LevelGasVolume volume, int x, int fromY, int z, float carbon, float carbonMonoxideShare)
-    {
-        int y = fromY;
-        for (int rise = 0; rise < MAX_PLUME_RISE; rise++)
-        {
-            if (volume.isOpenToSky(x, y, z))
-            {
-                return; // Goes straight into the atmosphere, without creating any cells
-            }
-            if (!volume.isPassable(x, y + 1, z))
-            {
-                break;
-            }
-            y++;
-        }
-
-        final @Nullable float[] cell = volume.cellForEmission(x, y, z);
-        if (cell != null)
-        {
-            volume.markChanged(x, y, z);
-            Combustion.addFlueGas(cell, carbon, carbonMonoxideShare);
-            cell[Gas.METHANE.ordinal()] += carbon * kind.methanePerCarbon;
-        }
-    }
-
-    /**
-     * @return the height where this device's flue gas comes out: up through its own burning charge, and at most one covering block, which is how a charcoal pit vents through its earth.
-     * Anything thicker smothers the fire, so a device can never leak into a separate room above it.
-     */
-    private static int firstOpenAbove(ServerLevel level, LevelGasVolume volume, BlockPos pos)
-    {
-        final BlockPos.MutableBlockPos cursor = pos.mutable();
-        boolean usedCover = false;
-        for (int rise = 0; rise < MAX_CHARGE_HEIGHT; rise++)
-        {
-            cursor.setY(pos.getY() + rise);
-            if (volume.isPassable(cursor.getX(), cursor.getY(), cursor.getZ()))
-            {
-                return cursor.getY();
-            }
-            final Block block = level.getBlockState(cursor).getBlock();
-            if (block != TFCBlocks.MOLTEN.get() && block != TFCBlocks.BURNING_LOG_PILE.get() && rise > 0)
-            {
-                if (usedCover)
-                {
-                    return Integer.MIN_VALUE;
-                }
-                usedCover = true;
-            }
-        }
-        return Integer.MIN_VALUE;
+        final float[] flue = new float[Gas.COUNT];
+        Combustion.addFlueGas(flue, carbon, carbonMonoxideShare);
+        flue[Gas.METHANE.ordinal()] += carbon * kind.methanePerCarbon;
+        GasEmission.addToPlume(volume, pos.getX(), intakeY, pos.getZ(), flue);
     }
 
     private boolean isBurning(BlockState state)

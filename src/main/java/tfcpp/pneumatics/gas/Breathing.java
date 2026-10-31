@@ -12,6 +12,7 @@ import net.minecraft.world.effect.MobEffects;
 import org.jetbrains.annotations.Nullable;
 
 import tfcpp.core.TFCpp;
+import tfcpp.pneumatics.gas.Physiology.BodyBurden;
 
 /**
  * Applies the air at a player's mouth to their body, once per second.
@@ -25,6 +26,8 @@ public final class Breathing
     public static final ResourceKey<DamageType> TOXIC_GAS = ResourceKey.create(Registries.DAMAGE_TYPE, TFCpp.id("toxic_gas"));
 
     private static final float SECONDS = INTERVAL_TICKS / 20f;
+    /** Antimony compounds cause the same kind of harm as arsenic, at roughly a third of the toxicity. */
+    private static final float ANTIMONY_RELATIVE_TOXICITY = 0.3f;
     private static final long SMELL_MESSAGE_INTERVAL_TICKS = 200;
     private static final int EFFECT_TICKS = 60;
     /** Fraction of health per second. About three minutes to escape from a dangerous level, about ten seconds at a fatal one. */
@@ -46,6 +49,9 @@ public final class Breathing
         final float carbonMonoxide = air == null ? 0 : GasMath.ppm(air[Gas.CARBON_MONOXIDE.ordinal()]);
 
         state.carboxyhemoglobin = Physiology.stepCarboxyhemoglobin(state.carboxyhemoglobin, carbonMonoxide, oxygen, SECONDS);
+        state.arsenicMg = BodyBurden.ARSENIC.step(state.arsenicMg, moles(air, Gas.ARSENIC_TRIOXIDE) + ANTIMONY_RELATIVE_TOXICITY * moles(air, Gas.ANTIMONY_TRIOXIDE), Gas.ARSENIC_TRIOXIDE.molarMass(), SECONDS);
+        state.mercuryMg = BodyBurden.MERCURY.step(state.mercuryMg, moles(air, Gas.MERCURY_VAPOR), Gas.MERCURY_VAPOR.molarMass(), SECONDS);
+        state.zincOxideMg = BodyBurden.ZINC_OXIDE.step(state.zincOxideMg, moles(air, Gas.ZINC_OXIDE_FUME), Gas.ZINC_OXIDE_FUME.molarMass(), SECONDS);
 
         if (player.isCreative() || player.isSpectator())
         {
@@ -53,10 +59,55 @@ public final class Breathing
         }
 
         applyCarbonMonoxide(player, state.carboxyhemoglobin);
+        applyBodyBurdens(player, state);
         applyHypoxia(player, Physiology.hypoxiaSeverity(oxygen));
         if (air != null)
         {
             applyAcuteGases(player, state, air, level.getGameTime());
+        }
+    }
+
+    private static float moles(@Nullable float[] air, Gas gas)
+    {
+        return air == null ? 0 : air[gas.ordinal()];
+    }
+
+    /** None of these have any smell, and they build up unnoticed until the body starts to fail. */
+    private static void applyBodyBurdens(ServerPlayer player, BreathingState state)
+    {
+        final int arsenic = BodyBurden.ARSENIC.severity(state.arsenicMg);
+        if (arsenic >= 1)
+        {
+            player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, EFFECT_TICKS, arsenic - 1, false, false, true));
+        }
+        if (arsenic >= 2)
+        {
+            player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, EFFECT_TICKS * 2, 0, false, false, true));
+        }
+        if (arsenic >= 3)
+        {
+            hurt(player, TOXIC_GAS, SERIOUS_DAMAGE * 4);
+        }
+
+        final int mercury = BodyBurden.MERCURY.severity(state.mercuryMg);
+        if (mercury >= 1)
+        {
+            player.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, EFFECT_TICKS, mercury - 1, false, false, true)); // Tremor
+        }
+        if (mercury >= 2)
+        {
+            player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, EFFECT_TICKS * 2, 0, false, false, true));
+        }
+        if (mercury >= 3)
+        {
+            hurt(player, TOXIC_GAS, SERIOUS_DAMAGE * 2);
+        }
+
+        final int fever = BodyBurden.ZINC_OXIDE.severity(state.zincOxideMg);
+        if (fever >= 1)
+        {
+            player.addEffect(new MobEffectInstance(MobEffects.HUNGER, EFFECT_TICKS, fever - 1, false, false, true));
+            player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, EFFECT_TICKS, 0, false, false, true));
         }
     }
 

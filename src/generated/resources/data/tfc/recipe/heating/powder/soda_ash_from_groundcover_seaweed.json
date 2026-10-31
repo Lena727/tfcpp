@@ -1,0 +1,19 @@
+{
+  "type": "tfc:heating",
+  "ingredient": {
+    "item": "tfc:groundcover/seaweed"
+  },
+  "result_item": {
+    "modifiers": [
+      {
+        "type": "tfc:chance",
+        "chance": 0.1
+      }
+    ],
+    "stack": {
+      "count": 1,
+      "id": "tfc:powder/soda_ash"
+    }
+  },
+  "temperature": 500.0
+}

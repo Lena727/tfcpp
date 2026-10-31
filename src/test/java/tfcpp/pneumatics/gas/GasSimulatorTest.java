@@ -209,6 +209,35 @@ class GasSimulatorTest
     }
 
     @Test
+    void condensedDustIsAccountedFor()
+    {
+        final float[] settled = {0};
+        final Room room = new Room(3, 3, 3)
+        {
+            @Override
+            public void deposit(int x, int y, int z, Gas gas, float moles)
+            {
+                settled[0] += moles;
+            }
+        };
+        room.add(1, 1, 1, Gas.ARSENIC_TRIOXIDE, 2f);
+        room.run(300);
+
+        assertTrue(settled[0] > 0.5f, "Fumes must settle out");
+        assertEquals(2f, room.total(Gas.ARSENIC_TRIOXIDE) + settled[0], 0.02f);
+    }
+
+    @Test
+    void mercuryVapourLingersAtSaturationWhileTheExcessCondenses()
+    {
+        final Room room = new Room(1, 1, 1);
+        room.add(0, 0, 0, Gas.MERCURY_VAPOR, 0.1f);
+        room.run(600);
+
+        assertEquals(Gas.MERCURY_VAPOR.saturationMoles(), room.total(Gas.MERCURY_VAPOR), 1e-5f);
+    }
+
+    @Test
     void wallsStopGas()
     {
         final Room room = new Room(2, 1, 1)

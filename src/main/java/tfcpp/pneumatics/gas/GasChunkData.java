@@ -32,7 +32,7 @@ public final class GasChunkData
         @Nullable
         public CompoundTag write(GasChunkData data, HolderLookup.Provider provider)
         {
-            return data.isEmpty() ? null : data.save();
+            return data.isEmpty() && !data.hasDeposits() ? null : data.save();
         }
     };
 
@@ -60,6 +60,31 @@ public final class GasChunkData
 
     public long lastStepTick;
     public int stepIntervalTicks = 20;
+
+    /** Moles of each gas that have condensed onto surfaces in this chunk. They are not gone: this is the dust a later process can collect. */
+    private final float[] deposits = new float[Gas.COUNT];
+
+    public void addDeposit(Gas gas, float moles)
+    {
+        deposits[gas.ordinal()] += moles;
+    }
+
+    public float deposit(Gas gas)
+    {
+        return deposits[gas.ordinal()];
+    }
+
+    private boolean hasDeposits()
+    {
+        for (float deposit : deposits)
+        {
+            if (deposit > 0)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public boolean isEmpty()
     {
@@ -128,6 +153,13 @@ public final class GasChunkData
         tag.put("species", species);
         tag.putIntArray("keys", keys);
         tag.putIntArray("amounts", amounts);
+
+        final int[] depositBits = new int[Gas.COUNT];
+        for (int i = 0; i < Gas.COUNT; i++)
+        {
+            depositBits[i] = Float.floatToRawIntBits(deposits[i]);
+        }
+        tag.putIntArray("deposits", depositBits);
         return tag;
     }
 
@@ -149,6 +181,15 @@ public final class GasChunkData
         for (int i = 0; i < width; i++)
         {
             order[i] = Gas.byId(species.getString(i));
+        }
+
+        final int[] depositBits = tag.getIntArray("deposits");
+        for (int i = 0; i < width && i < depositBits.length; i++)
+        {
+            if (order[i] != null)
+            {
+                deposits[order[i].ordinal()] = Float.intBitsToFloat(depositBits[i]);
+            }
         }
 
         for (int index = 0; index < keys.length; index++)

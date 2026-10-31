@@ -1,0 +1,17 @@
+{
+  "type": "tfcpp:retort",
+  "byproducts": {
+    "sulfur_dioxide": 1.6862755
+  },
+  "input": {
+    "item": "tfc:ore/cinnabar"
+  },
+  "result": {
+    "amount": 25,
+    "id": "tfcpp:mercury"
+  },
+  "temperature": 600.0,
+  "vapor": {
+    "mercury_vapor": 1.6862755
+  }
+}

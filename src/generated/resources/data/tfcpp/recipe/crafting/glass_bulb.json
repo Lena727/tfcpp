@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": {
+      "item": "minecraft:glass_pane"
+    }
+  },
+  "pattern": [
+    "G"
+  ],
+  "result": {
+    "count": 1,
+    "id": "tfcpp:glass_bulb"
+  }
+}

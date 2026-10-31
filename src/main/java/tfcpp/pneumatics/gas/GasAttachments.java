@@ -20,6 +20,8 @@ public final class GasAttachments
 
     public static final Supplier<AttachmentType<BreathingState>> BREATHING = TYPES.register("breathing", () -> AttachmentType.builder(BreathingState::new)
         .serialize(BreathingState.SERIALIZER)
+        .copyOnDeath()
+        .copyHandler((state, holder, provider) -> state.afterDeath())
         .build());
 
     private GasAttachments() {}

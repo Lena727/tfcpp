@@ -1,0 +1,7 @@
+{
+  "type": "tfc:heating",
+  "ingredient": {
+    "item": "tfc:ore/cinnabar"
+  },
+  "temperature": 600.0
+}

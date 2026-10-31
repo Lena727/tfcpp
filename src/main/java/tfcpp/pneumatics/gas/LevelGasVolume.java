@@ -109,6 +109,17 @@ public final class LevelGasVolume implements GasVolume
     }
 
     @Override
+    public void deposit(int x, int y, int z, Gas gas, float moles)
+    {
+        final LevelChunk chunk = chunk(x, z);
+        if (chunk != null)
+        {
+            chunk.getData(GasAttachments.CHUNK).addDeposit(gas, moles);
+            chunk.setUnsaved(true);
+        }
+    }
+
+    @Override
     public boolean isPassable(int x, int y, int z)
     {
         if (y < level.getMinBuildHeight() || y >= level.getMaxBuildHeight())

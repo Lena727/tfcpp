@@ -1,0 +1,502 @@
+package tfcpp.metallurgy;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import net.minecraft.data.CachedOutput;
+import net.minecraft.data.DataProvider;
+import net.minecraft.data.PackOutput;
+import net.neoforged.fml.ModList;
+
+/**
+ * Generates tfcpp's recipes and data, and its overrides of TFC's own. Where a whole family of TFC's recipes changes in the same way, this reads them from the TFC jar and patches them, so nothing is listed by hand and nothing gets missed.
+ */
+public final class MetallurgyData implements DataProvider
+{
+    private static final int[] ORE_MILLIBUCKETS = {10, 15, 25, 35};
+    private static final String[] ORE_GRADES = {"small", "poor", "normal", "rich"};
+    private static final float CINNABAR_MERCURY_MOLES = Sulfide.CINNABAR.metalMoles(25f);
+
+    private static final float CAST_IRON_MELT = 1200f;
+    private static final float ORIGINAL_CAST_IRON_MELT = 1535f;
+
+    private final Path root;
+    private final Map<String, JsonElement> files = new LinkedHashMap<>();
+
+    public MetallurgyData(PackOutput output)
+    {
+        this.root = output.getOutputFolder();
+    }
+
+    @Override
+    public CompletableFuture<?> run(CachedOutput cache)
+    {
+        try
+        {
+            sulfideOres();
+            arsenicalCopper();
+            retort();
+            noMoreRedstone();
+            ironTemperatures();
+            impossibleRecipes();
+            tags();
+            lootTables();
+        }
+        catch (IOException e)
+        {
+            return CompletableFuture.failedFuture(e);
+        }
+
+        final List<CompletableFuture<?>> saves = new ArrayList<>();
+        files.forEach((path, json) -> saves.add(DataProvider.saveStable(cache, json, root.resolve(path))));
+        return CompletableFuture.allOf(saves.toArray(CompletableFuture[]::new));
+    }
+
+    private void sulfideOres()
+    {
+        for (int i = 0; i < ORE_GRADES.length; i++)
+        {
+            final String grade = ORE_GRADES[i];
+
+            // Tetrahedrite smelts to copper still carrying its arsenic and antimony
+            put("data/tfc/recipe/heating/ore/" + grade + "_tetrahedrite.json", heatingToFluid(item("tfc:ore/" + grade + "_tetrahedrite"), "tfcpp:metal/arsenical_copper", ORE_MILLIBUCKETS[i], 1080f));
+
+            // Bismuthinite has to be roasted before it gives up its bismuth, well above the 271 C that bismuth melts at
+            put("data/tfc/recipe/heating/ore/" + grade + "_bismuthinite.json", heatingToFluid(item("tfc:ore/" + grade + "_bismuthinite"), "tfc:metal/bismuth", ORE_MILLIBUCKETS[i], 600f));
+
+            // Sphalerite does not melt to zinc at all. Roasting gives an oxide, and only a retort can reduce that.
+            final JsonObject sphalerite = new JsonObject();
+            sphalerite.addProperty("type", "tfc:heating");
+            sphalerite.add("ingredient", item("tfc:ore/" + grade + "_sphalerite"));
+            sphalerite.add("result_item", stack("tfcpp:calcine/" + grade + "_zinc", 1));
+            sphalerite.addProperty("temperature", 900f);
+            put("data/tfc/recipe/heating/ore/" + grade + "_sphalerite.json", sphalerite);
+        }
+
+        // Roasting cinnabar in an open furnace leaves nothing: all the mercury goes up as vapour
+        final JsonObject cinnabar = new JsonObject();
+        cinnabar.addProperty("type", "tfc:heating");
+        cinnabar.add("ingredient", item("tfc:ore/cinnabar"));
+        cinnabar.addProperty("temperature", 600f);
+        put("data/tfcpp/recipe/heating/cinnabar.json", cinnabar);
+
+        final JsonObject cinnabarHeat = new JsonObject();
+        cinnabarHeat.add("ingredient", item("tfc:ore/cinnabar"));
+        cinnabarHeat.addProperty("heat_capacity", 1.1428572f);
+        put("data/tfcpp/tfc/item_heat/cinnabar.json", cinnabarHeat);
+    }
+
+    private void arsenicalCopper() throws IOException
+    {
+        final JsonObject fluidHeat = new JsonObject();
+        fluidHeat.addProperty("fluid", "tfcpp:metal/arsenical_copper");
+        fluidHeat.addProperty("melt_temperature", 1050f); // Arsenic lowers the melting point of copper
+        fluidHeat.addProperty("specific_heat_capacity", 0.008571429f);
+        put("data/tfcpp/tfc/fluid_heat/arsenical_copper.json", fluidHeat);
+
+        final JsonObject ingotHeat = new JsonObject();
+        ingotHeat.add("ingredient", item("tfcpp:metal/ingot/arsenical_copper"));
+        ingotHeat.addProperty("heat_capacity", 2.857143f);
+        ingotHeat.addProperty("forging_temperature", 630f);
+        ingotHeat.addProperty("welding_temperature", 840f);
+        put("data/tfcpp/tfc/item_heat/arsenical_copper_ingot.json", ingotHeat);
+
+        put("data/tfcpp/recipe/heating/arsenical_copper_ingot.json", heatingToFluid(item("tfcpp:metal/ingot/arsenical_copper"), "tfcpp:metal/arsenical_copper", 100, 1050f));
+
+        final JsonObject casting = new JsonObject();
+        casting.addProperty("type", "tfc:casting");
+        casting.addProperty("break_chance", 0.1f);
+        casting.add("fluid", fluid("tfcpp:metal/arsenical_copper", 100));
+        casting.add("mold", item("tfc:ceramic/ingot_mold"));
+        casting.add("result", stack("tfcpp:metal/ingot/arsenical_copper", 1));
+        put("data/tfcpp/recipe/casting/arsenical_copper_ingot.json", casting);
+
+        // It casts into every copper tool: being harder than pure copper, it was what early bronze age tools were actually made of
+        final Path castingDir = tfcFile("data/tfc/recipe/casting");
+        try (Stream<Path> recipes = Files.list(castingDir))
+        {
+            for (Path path : (Iterable<Path>) recipes::iterator)
+            {
+                final String name = path.getFileName().toString();
+                if (name.startsWith("copper_") && !name.contains("ingot"))
+                {
+                    final JsonObject recipe = read(path);
+                    final JsonObject mold = recipe.getAsJsonObject("fluid");
+                    final JsonObject tagged = new JsonObject();
+                    tagged.addProperty("amount", mold.get("amount").getAsInt());
+                    tagged.addProperty("tag", "tfcpp:castable_copper");
+                    recipe.add("fluid", tagged);
+                    put("data/tfc/recipe/casting/" + name, recipe);
+
+                    final String part = recipe.getAsJsonObject("result").get("id").getAsString().split("/")[1];
+                    remeltsImpure(part);
+                    remeltsImpure(part.replace("_head", "").replace("_blade", ""));
+                }
+            }
+        }
+
+        final JsonObject fireIngot = read(tfcFile("data/tfc/recipe/casting/copper_fire_ingot.json"));
+        fireIngot.add("fluid", fluid("tfcpp:metal/arsenical_copper", fireIngot.getAsJsonObject("fluid").get("amount").getAsInt()));
+        fireIngot.add("result", stack("tfcpp:metal/ingot/arsenical_copper", 1));
+        put("data/tfcpp/recipe/casting/arsenical_copper_fire_ingot.json", fireIngot);
+
+        // Bronze hides arsenic well, so it works in place of copper. Silver and gold alloys are left out, being valued for their purity.
+        for (String alloy : List.of("bronze", "bismuth_bronze", "black_bronze", "brass"))
+        {
+            final JsonObject recipe = read(tfcFile("data/tfc/recipe/alloy/" + alloy + ".json"));
+            for (JsonElement content : recipe.getAsJsonArray("contents"))
+            {
+                final JsonObject range = content.getAsJsonObject();
+                if (range.get("fluid").getAsString().equals("tfc:metal/copper"))
+                {
+                    range.addProperty("fluid", "tfcpp:metal/arsenical_copper");
+                }
+            }
+            put("data/tfcpp/recipe/alloy/arsenical_" + alloy + ".json", recipe);
+        }
+    }
+
+    /**
+     * A tool cast from arsenical copper is the same item as one cast from pure copper, so melting it down has to give the impure metal. Otherwise casting and remelting would remove arsenic for nothing, which takes electrolysis in reality.
+     * Scrap tools being of unknown purity is also how scrap copper really behaves.
+     */
+    private void remeltsImpure(String part) throws IOException
+    {
+        final Path path = tfcFile("data/tfc/recipe/heating/metal/" + part + "/copper.json");
+        if (Files.exists(path))
+        {
+            final JsonObject recipe = read(path);
+            recipe.getAsJsonObject("result_fluid").addProperty("id", "tfcpp:metal/arsenical_copper");
+            put("data/tfc/recipe/heating/metal/" + part + "/copper.json", recipe);
+        }
+    }
+
+    private void retort()
+    {
+        // ZnO + C -> Zn + CO, with the CO venting off
+        for (int i = 0; i < ORE_GRADES.length; i++)
+        {
+            final float moles = Sulfide.SPHALERITE.metalMoles(ORE_MILLIBUCKETS[i]);
+            final JsonObject zinc = new JsonObject();
+            zinc.addProperty("type", "tfcpp:retort");
+            zinc.add("input", item("tfcpp:calcine/" + ORE_GRADES[i] + "_zinc"));
+            zinc.addProperty("carbon", moles);
+            zinc.addProperty("temperature", 1000f);
+            zinc.add("result", fluidStack("tfc:metal/zinc", ORE_MILLIBUCKETS[i]));
+            zinc.add("vapor", gases("zinc_oxide_fume", moles));
+            zinc.add("byproducts", gases("carbon_monoxide", moles));
+            put("data/tfcpp/recipe/retort/zinc_" + ORE_GRADES[i] + ".json", zinc);
+        }
+
+        // HgS + O2 -> Hg + SO2
+        final JsonObject mercury = new JsonObject();
+        mercury.addProperty("type", "tfcpp:retort");
+        mercury.add("input", item("tfc:ore/cinnabar"));
+        mercury.addProperty("temperature", 600f);
+        mercury.add("result", fluidStack("tfcpp:mercury", 25));
+        mercury.add("vapor", gases("mercury_vapor", CINNABAR_MERCURY_MOLES));
+        mercury.add("byproducts", gases("sulfur_dioxide", CINNABAR_MERCURY_MOLES));
+        put("data/tfcpp/recipe/retort/mercury.json", mercury);
+
+        final JsonObject retort = shaped("tfcpp:retort", "BBB", "B B", "BBB");
+        retort.getAsJsonObject("key").add("B", item("tfc:ceramic/fire_brick"));
+        put("data/tfcpp/recipe/crafting/retort.json", retort);
+
+        final JsonObject condenser = shaped("tfcpp:retort_condenser", "BSB", "B B", "BSB");
+        condenser.getAsJsonObject("key").add("B", item("tfc:ceramic/fire_brick"));
+        condenser.getAsJsonObject("key").add("S", item("tfc:metal/sheet/copper"));
+        put("data/tfcpp/recipe/crafting/retort_condenser.json", condenser);
+
+        final JsonObject bulb = shaped("tfcpp:glass_bulb", "G");
+        bulb.getAsJsonObject("key").add("G", item("minecraft:glass_pane"));
+        put("data/tfcpp/recipe/crafting/glass_bulb.json", bulb);
+
+        // A real thermometer is a bulb of mercury in glass. This replaces TFC's use of redstone, now that cinnabar no longer gives any.
+        final JsonObject thermometer = shaped("tfc:thermometer", "G", "B", "S");
+        final JsonObject key = thermometer.getAsJsonObject("key");
+        key.add("G", item("minecraft:glass_pane"));
+        key.add("S", item("tfc:metal/sheet/brass"));
+        key.add("B", item("tfcpp:mercury_bulb"));
+        put("data/tfc/recipe/crafting/thermometer.json", thermometer);
+    }
+
+    /** With no redstone in the world, the mechanisms that TFC built from it are built from brass clockwork instead. */
+    private void noMoreRedstone() throws IOException
+    {
+        final Path recipes = tfcFile("data/tfc/recipe");
+        try (Stream<Path> paths = Files.walk(recipes))
+        {
+            for (Path path : (Iterable<Path>) paths::iterator)
+            {
+                final String relative = recipes.relativize(path).toString().replace('\\', '/');
+                if (relative.endsWith(".json") && !relative.equals("quern/redstone.json") && !relative.equals("crafting/thermometer.json"))
+                {
+                    final JsonObject recipe = read(path);
+                    if (replaceRedstone(recipe))
+                    {
+                        put("data/tfc/recipe/" + relative, recipe);
+                    }
+                }
+            }
+        }
+    }
+
+    private static boolean replaceRedstone(JsonElement json)
+    {
+        boolean replaced = false;
+        if (json.isJsonArray())
+        {
+            for (JsonElement element : json.getAsJsonArray())
+            {
+                replaced |= replaceRedstone(element);
+            }
+        }
+        else if (json.isJsonObject())
+        {
+            final JsonObject object = json.getAsJsonObject();
+            final boolean isItem = object.has("item") && object.get("item").getAsString().equals("minecraft:redstone");
+            final boolean isTag = object.has("tag") && object.get("tag").getAsString().equals("c:dusts/redstone");
+            if (isItem || isTag)
+            {
+                object.remove("tag");
+                object.addProperty("item", "tfc:brass_mechanisms");
+                return true;
+            }
+            for (Map.Entry<String, JsonElement> entry : object.entrySet())
+            {
+                replaced |= replaceRedstone(entry.getValue());
+            }
+        }
+        return replaced;
+    }
+
+    /** Carbon lowers the melting point of iron by close to 400 C, which is why cast iron could flow from a furnace when pure iron could not. */
+    private void ironTemperatures() throws IOException
+    {
+        for (String metal : List.of("cast_iron", "pig_iron"))
+        {
+            final JsonObject heat = read(tfcFile("data/tfc/tfc/fluid_heat/" + metal + ".json"));
+            heat.addProperty("melt_temperature", CAST_IRON_MELT);
+            put("data/tfc/tfc/fluid_heat/" + metal + ".json", heat);
+        }
+
+        // TFC derives working temperatures from the melting point, and welding has to stay below it
+        final Path itemHeat = tfcFile("data/tfc/tfc/item_heat");
+        try (Stream<Path> definitions = Files.walk(itemHeat))
+        {
+            for (Path path : (Iterable<Path>) definitions::iterator)
+            {
+                final String relative = itemHeat.relativize(path).toString().replace('\\', '/');
+                if (relative.endsWith(".json") && (relative.contains("cast_iron") || relative.contains("pig_iron")))
+                {
+                    final JsonObject definition = read(path);
+                    for (String field : List.of("forging_temperature", "welding_temperature"))
+                    {
+                        if (definition.has(field))
+                        {
+                            definition.addProperty(field, definition.get(field).getAsFloat() * CAST_IRON_MELT / ORIGINAL_CAST_IRON_MELT);
+                        }
+                    }
+                    put("data/tfc/tfc/item_heat/" + relative, definition);
+                }
+            }
+        }
+
+        final Path heating = tfcFile("data/tfc/recipe/heating");
+        try (Stream<Path> recipes = Files.walk(heating))
+        {
+            for (Path path : (Iterable<Path>) recipes::iterator)
+            {
+                final String relative = heating.relativize(path).toString().replace('\\', '/');
+                if (relative.endsWith(".json") && (relative.contains("cast_iron") || relative.contains("pig_iron")))
+                {
+                    final JsonObject recipe = read(path);
+                    recipe.addProperty("temperature", CAST_IRON_MELT);
+                    put("data/tfc/recipe/heating/" + relative, recipe);
+                }
+            }
+        }
+    }
+
+    /** Recipes that break the conservation of elements. */
+    private void impossibleRecipes() throws IOException
+    {
+        final JsonObject disabled = new JsonObject();
+        final JsonArray conditions = new JsonArray();
+        final JsonObject never = new JsonObject();
+        never.addProperty("type", "neoforge:false");
+        conditions.add(never);
+        disabled.add("neoforge:conditions", conditions);
+
+        put("data/tfc/recipe/quern/redstone.json", disabled); // Cinnabar and cryolite do not contain redstone, whatever that would be
+        put("data/tfc/recipe/quern/ore/gypsum.json", disabled); // Grinding limestone does not make it a sulfate
+
+        // Seaweed ash holds only a few percent of soda, by weight of the dried plant. Three times its own weight would be creating matter.
+        final Path powders = tfcFile("data/tfc/recipe/heating/powder");
+        try (Stream<Path> recipes = Files.list(powders))
+        {
+            for (Path path : (Iterable<Path>) recipes::iterator)
+            {
+                final String name = path.getFileName().toString();
+                if (name.startsWith("soda_ash_"))
+                {
+                    final JsonObject recipe = read(path);
+                    final JsonObject result = new JsonObject();
+                    final JsonArray modifiers = new JsonArray();
+                    final JsonObject chance = new JsonObject();
+                    chance.addProperty("type", "tfc:chance");
+                    chance.addProperty("chance", 0.1f);
+                    modifiers.add(chance);
+                    result.add("modifiers", modifiers);
+                    result.add("stack", stack("tfc:powder/soda_ash", 1));
+                    recipe.add("result_item", result);
+                    put("data/tfc/recipe/heating/powder/" + name, recipe);
+                }
+            }
+        }
+    }
+
+    private void tags()
+    {
+        addToTag("data/tfc/tags/fluid/molten_metals.json", "tfcpp:metal/arsenical_copper");
+        addToTag("data/tfc/tags/fluid/usable_in_ingot_mold.json", "tfcpp:metal/arsenical_copper");
+        addToTag("data/tfc/tags/fluid/usable_in_tool_head_mold.json", "tfcpp:metal/arsenical_copper");
+        addToTag("data/tfc/tags/fluid/usable_in_jug.json", "tfcpp:mercury"); // Glazed pottery and glass both hold mercury, which attacks neither
+        addToTag("data/tfcpp/tags/fluid/castable_copper.json", "tfc:metal/copper", "tfcpp:metal/arsenical_copper");
+        addToTag("data/c/tags/fluid/mercury.json", "tfcpp:mercury");
+        addToTag("data/c/tags/item/ingots/arsenical_copper.json", "tfcpp:metal/ingot/arsenical_copper");
+        addToTag("data/tfc/tags/block/charcoal_forge_invisible.json", "tfcpp:retort");
+        addToTag("data/minecraft/tags/block/mineable/pickaxe.json", "tfcpp:retort", "tfcpp:retort_condenser");
+    }
+
+    private void lootTables()
+    {
+        for (String block : List.of("retort", "retort_condenser"))
+        {
+            final JsonObject entry = new JsonObject();
+            entry.addProperty("type", "minecraft:item");
+            entry.addProperty("name", "tfcpp:" + block);
+            final JsonArray entries = new JsonArray();
+            entries.add(entry);
+
+            final JsonObject pool = new JsonObject();
+            pool.addProperty("rolls", 1);
+            pool.add("entries", entries);
+            final JsonArray pools = new JsonArray();
+            pools.add(pool);
+
+            final JsonObject table = new JsonObject();
+            table.addProperty("type", "minecraft:block");
+            table.add("pools", pools);
+            put("data/tfcpp/loot_table/blocks/" + block + ".json", table);
+        }
+    }
+
+    private void put(String path, JsonElement json)
+    {
+        files.put(path, json);
+    }
+
+    private void addToTag(String path, String... values)
+    {
+        final JsonArray array = new JsonArray();
+        for (String value : values)
+        {
+            array.add(value);
+        }
+        final JsonObject tag = new JsonObject();
+        tag.addProperty("replace", false);
+        tag.add("values", array);
+        put(path, tag);
+    }
+
+    private static Path tfcFile(String path)
+    {
+        return ModList.get().getModFileById("tfc").getFile().findResource(path);
+    }
+
+    private static JsonObject read(Path path) throws IOException
+    {
+        return JsonParser.parseString(Files.readString(path)).getAsJsonObject();
+    }
+
+    private static JsonObject heatingToFluid(JsonObject ingredient, String fluid, int amount, float temperature)
+    {
+        final JsonObject recipe = new JsonObject();
+        recipe.addProperty("type", "tfc:heating");
+        recipe.add("ingredient", ingredient);
+        recipe.add("result_fluid", fluidStack(fluid, amount));
+        recipe.addProperty("temperature", temperature);
+        return recipe;
+    }
+
+    private static JsonObject shaped(String result, String... pattern)
+    {
+        final JsonObject recipe = new JsonObject();
+        recipe.addProperty("type", "minecraft:crafting_shaped");
+        recipe.addProperty("category", "misc");
+        recipe.add("key", new JsonObject());
+        final JsonArray rows = new JsonArray();
+        for (String row : pattern)
+        {
+            rows.add(row);
+        }
+        recipe.add("pattern", rows);
+        recipe.add("result", stack(result, 1));
+        return recipe;
+    }
+
+    private static JsonObject item(String id)
+    {
+        final JsonObject json = new JsonObject();
+        json.addProperty("item", id);
+        return json;
+    }
+
+    private static JsonObject stack(String id, int count)
+    {
+        final JsonObject json = new JsonObject();
+        json.addProperty("count", count);
+        json.addProperty("id", id);
+        return json;
+    }
+
+    private static JsonObject fluid(String id, int amount)
+    {
+        final JsonObject json = new JsonObject();
+        json.addProperty("amount", amount);
+        json.addProperty("fluid", id);
+        return json;
+    }
+
+    private static JsonObject fluidStack(String id, int amount)
+    {
+        final JsonObject json = new JsonObject();
+        json.addProperty("amount", amount);
+        json.addProperty("id", id);
+        return json;
+    }
+
+    private static JsonObject gases(String id, float moles)
+    {
+        final JsonObject json = new JsonObject();
+        json.addProperty(id, moles);
+        return json;
+    }
+
+    @Override
+    public String getName()
+    {
+        return "tfcpp metallurgy data";
+    }
+}

@@ -7,6 +7,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 
+import tfcpp.metallurgy.Metallurgy;
 import tfcpp.pneumatics.gas.GasAttachments;
 import tfcpp.pneumatics.gas.GasEvents;
 
@@ -25,6 +26,7 @@ public final class TFCpp
         container.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
 
         GasAttachments.TYPES.register(modBus);
+        Metallurgy.register(modBus);
 
         NeoForge.EVENT_BUS.register(GasEvents.class);
     }

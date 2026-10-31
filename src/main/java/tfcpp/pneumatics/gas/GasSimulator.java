@@ -1,5 +1,6 @@
 package tfcpp.pneumatics.gas;
 
+import java.util.Arrays;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -24,6 +25,7 @@ public final class GasSimulator
     /** A pair of cells evens out at twice this rate, so anything above 1/2 would overshoot and oscillate. */
     private static final float MAX_PRESSURE = 0.24f;
 
+    private static final Gas[] CONDENSING = Arrays.stream(Gas.VALUES).filter(gas -> gas.depositionRate() > 0).toArray(Gas[]::new);
     private static final int[][] SIDES = {{0, 1, 0}, {1, 0, 0}, {-1, 0, 0}, {0, 0, 1}, {0, 0, -1}, {0, -1, 0}};
 
     private final float[] flux = new float[Gas.COUNT];
@@ -64,6 +66,8 @@ public final class GasSimulator
             }
         }
 
+        condense(volume, cell, x, y, z, seconds);
+
         exchange(volume, cell, x, y, z, x + 1, y, z, false, seconds);
         exchange(volume, cell, x, y, z, x, y, z + 1, false, seconds);
         exchange(volume, cell, x, y, z, x, y + 1, z, true, seconds);
@@ -74,6 +78,20 @@ public final class GasSimulator
         if (GasMath.total(cell) < REMOVE_CELL_MOLES)
         {
             volume.removeCell(x, y, z);
+        }
+    }
+
+    private static void condense(GasVolume volume, float[] cell, int x, int y, int z, float seconds)
+    {
+        for (Gas gas : CONDENSING)
+        {
+            final float excess = cell[gas.ordinal()] - gas.saturationMoles();
+            if (excess > 0)
+            {
+                final float settled = excess * Math.min(gas.depositionRate() * seconds, 1f);
+                cell[gas.ordinal()] -= settled;
+                volume.deposit(x, y, z, gas, settled);
+            }
         }
     }
 

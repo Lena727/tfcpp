@@ -107,6 +107,48 @@ class ChemistryTest
     }
 
     @Test
+    void arsenicBuildsUpSlowlyAndUnnoticed()
+    {
+        // 1 mg/m3 of arsenic trioxide, a level that real smelter workers were exposed to
+        final float moles = 0.001f / 197.84f;
+        float burden = 0;
+        for (int second = 0; second < 3600; second++)
+        {
+            burden = Physiology.BodyBurden.ARSENIC.step(burden, moles, 197.84f, 1f);
+        }
+        assertEquals(0, Physiology.BodyBurden.ARSENIC.severity(burden), "One hour must not yet cause symptoms, got " + burden);
+        assertFalse(Physiology.isNoticeable(Gas.ARSENIC_TRIOXIDE, 1e6f));
+    }
+
+    @Test
+    void deathDoesNotCurePoisonOrTrapAPlayerInALoop()
+    {
+        final BreathingState state = new BreathingState();
+        state.carboxyhemoglobin = 80f;
+        state.arsenicMg = 1000f;
+        state.mercuryMg = 3f;
+
+        final BreathingState respawned = state.afterDeath();
+
+        assertEquals(0f, respawned.carboxyhemoglobin);
+        assertEquals(3f, respawned.mercuryMg);
+        assertTrue(respawned.arsenicMg > 0f, "Arsenic must stay in the body");
+        assertTrue(Physiology.BodyBurden.ARSENIC.severity(respawned.arsenicMg) < 3, "It must not be enough to kill the player again");
+    }
+
+    @Test
+    void savedChunkKeepsDeposits()
+    {
+        final GasChunkData data = new GasChunkData();
+        data.addDeposit(Gas.ARSENIC_TRIOXIDE, 3f);
+
+        final GasChunkData loaded = new GasChunkData();
+        loaded.load(data.save());
+
+        assertEquals(3f, loaded.deposit(Gas.ARSENIC_TRIOXIDE), "Deposits with no gas cells left must still survive");
+    }
+
+    @Test
     void savedChunkRoundTrips()
     {
         final GasChunkData data = new GasChunkData();

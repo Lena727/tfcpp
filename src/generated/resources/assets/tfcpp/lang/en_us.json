@@ -1,9 +1,24 @@
 {
+  "block.tfcpp.retort": "Retort",
+  "block.tfcpp.retort_condenser": "Retort Condenser",
   "death.attack.tfcpp.asphyxiation": "%1$s ran out of air to breathe",
   "death.attack.tfcpp.carbon_monoxide": "%1$s fell asleep and never woke up",
   "death.attack.tfcpp.toxic_gas": "%1$s choked on toxic fumes",
+  "fluid_type.tfcpp.mercury": "Mercury",
+  "fluid_type.tfcpp.metal.arsenical_copper": "Molten Arsenical Copper",
+  "item.tfcpp.calcine.normal_zinc": "Zinc Calcine",
+  "item.tfcpp.calcine.poor_zinc": "Poor Zinc Calcine",
+  "item.tfcpp.calcine.rich_zinc": "Rich Zinc Calcine",
+  "item.tfcpp.calcine.small_zinc": "Small Zinc Calcine",
+  "item.tfcpp.glass_bulb": "Glass Bulb",
+  "item.tfcpp.mercury_bulb": "Mercury Bulb",
+  "item.tfcpp.metal.ingot.arsenical_copper": "Arsenical Copper Ingot",
+  "itemGroup.tfcpp": "TFC++",
   "tfcpp.gas.smell.ammonia": "A pungent smell of ammonia stings your eyes",
   "tfcpp.gas.smell.chlorine": "A sharp bleach-like smell burns your nose",
   "tfcpp.gas.smell.hydrogen_sulfide": "The air stinks of rotten eggs",
-  "tfcpp.gas.smell.sulfur_dioxide": "A sharp, choking smell of burning sulfur catches your throat"
+  "tfcpp.gas.smell.sulfur_dioxide": "A sharp, choking smell of burning sulfur catches your throat",
+  "tfcpp.retort.no_condenser": "No condenser beside the retort: the vapour will escape into the room",
+  "tfcpp.retort.status": "%1$s C, charge: %2$s, carbon: %3$s, %4$s mB of %5$s",
+  "tfcpp.retort.status.empty_tank": "nothing condensed yet"
 }

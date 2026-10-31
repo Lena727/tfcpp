@@ -1,0 +1,18 @@
+{
+  "type": "tfcpp:retort",
+  "byproducts": {
+    "carbon_monoxide": 3.82227
+  },
+  "carbon": 3.82227,
+  "input": {
+    "item": "tfcpp:calcine/rich_zinc"
+  },
+  "result": {
+    "amount": 35,
+    "id": "tfc:metal/zinc"
+  },
+  "temperature": 1000.0,
+  "vapor": {
+    "zinc_oxide_fume": 3.82227
+  }
+}

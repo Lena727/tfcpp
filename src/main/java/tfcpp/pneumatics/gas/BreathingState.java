@@ -16,6 +16,9 @@ public final class BreathingState
         {
             final BreathingState state = new BreathingState();
             state.carboxyhemoglobin = tag.getFloat("coHb");
+            state.arsenicMg = tag.getFloat("arsenic");
+            state.mercuryMg = tag.getFloat("mercury");
+            state.zincOxideMg = tag.getFloat("zincOxide");
             return state;
         }
 
@@ -25,12 +28,28 @@ public final class BreathingState
         {
             final CompoundTag tag = new CompoundTag();
             tag.putFloat("coHb", state.carboxyhemoglobin);
+            tag.putFloat("arsenic", state.arsenicMg);
+            tag.putFloat("mercury", state.mercuryMg);
+            tag.putFloat("zincOxide", state.zincOxideMg);
             return tag;
         }
     };
 
+    /**
+     * @return what carries over to a respawned player. Dying must not be a cure for slow poisoning, so those burdens stay, but only up to a level that cannot kill again and trap a player in a loop. Blood is fresh.
+     */
+    BreathingState afterDeath()
+    {
+        final BreathingState state = new BreathingState();
+        state.arsenicMg = Physiology.BodyBurden.ARSENIC.survivable(arsenicMg);
+        state.mercuryMg = Physiology.BodyBurden.MERCURY.survivable(mercuryMg);
+        return state;
+    }
+
     /** Share of haemoglobin bound by CO, in percent. */
     public float carboxyhemoglobin;
+    /** Body burdens in milligrams. These leave the body slowly, so small exposures add up over days. */
+    public float arsenicMg, mercuryMg, zincOxideMg;
     /** Game tick before which no smell message is shown again. */
     public long nextSmellMessageTick;
 }
