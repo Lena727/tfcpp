@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "tfcpp:retort"
+    "tfcpp:retort",
+    "tfcpp:pressure_vessel"
   ]
 }

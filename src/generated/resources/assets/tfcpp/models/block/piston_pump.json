@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "tfcpp:block/piston_pump",
+    "side": "tfcpp:block/pipe_fitting",
+    "top": "tfcpp:block/pipe_fitting"
+  }
+}

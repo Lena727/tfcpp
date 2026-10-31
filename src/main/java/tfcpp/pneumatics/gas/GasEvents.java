@@ -18,6 +18,7 @@ import tfcpp.geology.SeamGas;
 import tfcpp.mechanics.ShaftTracker;
 import tfcpp.pneumatics.instruments.DavyLamp;
 import tfcpp.pneumatics.instruments.SentinelCageItem;
+import tfcpp.pneumatics.pipes.PipeTracker;
 
 public final class GasEvents
 {
@@ -28,16 +29,20 @@ public final class GasEvents
         {
             GasTracker.get(level).tick(level);
             ShaftTracker.get(level).tick(level);
+            PipeTracker.get(level).tick(level);
         }
     }
 
     @SubscribeEvent
     public static void onChunkLoad(ChunkEvent.Load event)
     {
-        if (event.getLevel() instanceof ServerLevel level && event.getChunk() instanceof LevelChunk chunk
-            && chunk.hasData(GasAttachments.CHUNK) && chunk.getData(GasAttachments.CHUNK).isActive())
+        if (event.getLevel() instanceof ServerLevel level && event.getChunk() instanceof LevelChunk chunk)
         {
-            GasTracker.get(level).activate(chunk.getPos().toLong());
+            if (chunk.hasData(GasAttachments.CHUNK) && chunk.getData(GasAttachments.CHUNK).isActive())
+            {
+                GasTracker.get(level).activate(chunk.getPos().toLong());
+            }
+            PipeTracker.get(level).onChunkLoad(chunk);
         }
     }
 
@@ -47,6 +52,10 @@ public final class GasEvents
         if (event.getLevel() instanceof ServerLevel level)
         {
             GasTracker.get(level).deactivate(event.getChunk().getPos().toLong());
+            if (event.getChunk() instanceof LevelChunk chunk)
+            {
+                PipeTracker.get(level).onChunkUnload(level, chunk);
+            }
         }
     }
 

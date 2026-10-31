@@ -150,6 +150,52 @@ public final class Deflagration
         return new Result(burned.size(), heat, shocks);
     }
 
+    /**
+     * The shock of a vessel bursting at this position: nothing burns, but the same shells of open space share the energy.
+     *
+     * @param maximumKilopascals the pressure it burst at, which it cannot exceed however small the first shell
+     */
+    public static Result blast(GasVolume volume, int x, int y, int z, float kilojoules, float maximumKilopascals, int maxShockedCells)
+    {
+        final LongOpenHashSet seen = new LongOpenHashSet();
+        final List<int[]> first = new ArrayList<>();
+        first.add(new int[] {x, y, z});
+        seen.add(BlockPos.asLong(x, y, z));
+
+        float openVolume = cellVolume(volume, x, y, z);
+        final List<Shock> shocks = new ArrayList<>();
+        shocks.add(new Shock(x, y, z, Math.min(PRESSURE_KPA_PER_KJ * kilojoules / openVolume, maximumKilopascals), false));
+
+        List<int[]> shell = first;
+        while (!shell.isEmpty() && shocks.size() < maxShockedCells)
+        {
+            final List<int[]> next = new ArrayList<>();
+            for (int[] pos : shell)
+            {
+                for (int[] side : SIDES)
+                {
+                    final int nx = pos[0] + side[0], ny = pos[1] + side[1], nz = pos[2] + side[2];
+                    if (volume.isPassable(nx, ny, nz) && seen.add(BlockPos.asLong(nx, ny, nz)))
+                    {
+                        next.add(new int[] {nx, ny, nz});
+                        openVolume += cellVolume(volume, nx, ny, nz);
+                    }
+                }
+            }
+            final float pressure = Math.min(PRESSURE_KPA_PER_KJ * kilojoules / openVolume, maximumKilopascals);
+            if (pressure < MINIMUM_KPA)
+            {
+                break;
+            }
+            for (int[] pos : next)
+            {
+                shocks.add(new Shock(pos[0], pos[1], pos[2], pressure, false));
+            }
+            shell = next;
+        }
+        return new Result(0, kilojoules, shocks);
+    }
+
     private static float cellVolume(GasVolume volume, int x, int y, int z)
     {
         return volume.atmosphereExchangeRate(x, y, z) > 0 ? OPEN_SKY_VOLUME : 1f;

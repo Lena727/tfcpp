@@ -31,6 +31,7 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import tfcpp.core.TFCpp;
 import tfcpp.pneumatics.instruments.Instruments;
+import tfcpp.pneumatics.pipes.Pipes;
 
 public final class Metallurgy
 {
@@ -89,6 +90,7 @@ public final class Metallurgy
                 output.accept(RETORT_ITEM.get());
                 output.accept(RETORT_CONDENSER_ITEM.get());
                 Instruments.addToTab(output);
+                Pipes.addToTab(output);
             })
             .build());
     }

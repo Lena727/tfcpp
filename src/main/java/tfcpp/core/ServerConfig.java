@@ -16,6 +16,7 @@ public final class ServerConfig
     public static final ModConfigSpec.IntValue GAS_BLAST_CELLS;
     public static final ModConfigSpec.IntValue GAS_BLAST_BLOCKS;
     public static final ModConfigSpec.IntValue GAS_FAN_CELLS_PER_TICK;
+    public static final ModConfigSpec.IntValue PIPE_REBUILD_SEGMENTS_PER_TICK;
 
     static
     {
@@ -44,6 +45,10 @@ public final class ServerConfig
         GAS_FAN_CELLS_PER_TICK = builder
             .comment("Most cells of open space that mine fans may walk in one tick. A fan over budget waits for its next turn, and air moves more slowly.")
             .defineInRange("gasFanCellsPerTick", 2048, 512, 262144);
+
+        PIPE_REBUILD_SEGMENTS_PER_TICK = builder
+            .comment("Most pipe segments to join into networks in one tick after pipes change or chunks load. The rest wait, holding what they hold.")
+            .defineInRange("pipeRebuildSegmentsPerTick", 4096, 64, 1_000_000);
 
         SPEC = builder.build();
     }

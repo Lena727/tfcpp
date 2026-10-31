@@ -27,6 +27,7 @@ import tfcpp.core.TFCpp;
 import tfcpp.metallurgy.Metallurgy;
 import tfcpp.metallurgy.RetortRecipe;
 import tfcpp.pneumatics.instruments.Instruments;
+import tfcpp.pneumatics.pipes.Pipes;
 
 /** Only loaded by JEI itself, so nothing here is touched when JEI is absent. */
 @JeiPlugin
@@ -57,6 +58,11 @@ public final class TFCppJeiPlugin implements IModPlugin
         info(registration, new ItemStack(Instruments.SENTINEL_CAGE.get()), "tfcpp.info.sentinel_cage");
         info(registration, new ItemStack(Instruments.SETTLING_BAFFLE_ITEM.get()), "tfcpp.info.settling_baffle");
         info(registration, new ItemStack(Instruments.MINE_FAN_ITEM.get()), "tfcpp.info.mine_fan");
+        Pipes.PIPE_ITEMS.values().forEach(pipe -> info(registration, new ItemStack(pipe.get()), "tfcpp.info.pipes"));
+        info(registration, new ItemStack(Pipes.PRESSURE_VESSEL.get()), "tfcpp.info.pressure_vessel");
+        info(registration, new ItemStack(Pipes.PISTON_PUMP.get()), "tfcpp.info.piston_pump");
+        info(registration, new ItemStack(Pipes.SAFETY_VALVE.get()), "tfcpp.info.safety_valve");
+        info(registration, new ItemStack(Pipes.MANOMETER.get()), "tfcpp.info.manometer");
         info(registration, new ItemStack(TFCBlocks.STEEL_PUMP.get()), "tfcpp.info.shaft_load");
         info(registration, new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("tfc", "ore/bituminous_coal"))), "tfcpp.info.coal");
         info(registration, new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("tfc", "ore/lignite"))), "tfcpp.info.coal");

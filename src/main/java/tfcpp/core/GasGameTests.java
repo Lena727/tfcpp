@@ -2,6 +2,7 @@ package tfcpp.core;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 import com.mojang.authlib.GameProfile;
 import net.dries007.tfc.common.blockentities.CrucibleBlockEntity;
 import net.dries007.tfc.common.blockentities.rotation.RotatingBlockEntity;
@@ -48,6 +49,7 @@ import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -79,6 +81,15 @@ import tfcpp.pneumatics.gas.GasTracker;
 import tfcpp.pneumatics.gas.LevelGasVolume;
 import tfcpp.pneumatics.gas.Physiology;
 import tfcpp.pneumatics.instruments.DavyLamp;
+import tfcpp.pneumatics.pipes.PipeChunkData;
+import tfcpp.pneumatics.pipes.PipeFittingBlock;
+import tfcpp.pneumatics.pipes.PipeMaterial;
+import tfcpp.pneumatics.pipes.PipeNetwork;
+import tfcpp.pneumatics.pipes.PipePhysics;
+import tfcpp.pneumatics.pipes.PipeSegment;
+import tfcpp.pneumatics.pipes.PipeTracker;
+import tfcpp.pneumatics.pipes.Pipes;
+import tfcpp.pneumatics.pipes.PistonPumpBlockEntity;
 import tfcpp.pneumatics.instruments.Instruments;
 import tfcpp.pneumatics.instruments.SentinelCageItem;
 import tfcpp.pneumatics.instruments.SettlingBaffleBlockEntity;
@@ -720,6 +731,282 @@ public final class GasGameTests
         final float speed = water.getRotationNode().rotation().speed();
         helper.assertTrue(Math.abs(speed - 0.5f * WaterWheelBlockEntity.MAX_SPEED) < 1e-3f, "A wheel at half load should settle at half speed, got " + speed + " of " + WaterWheelBlockEntity.MAX_SPEED);
         helper.assertTrue(Math.abs(source.tfcpp$stallTorque() - ShaftPhysics.waterWheelStallTorque(WaterWheelBlockEntity.MAX_SPEED)) < 1e-3f, "Its stall torque comes from the free speed, not the slowed one");
+        helper.succeed();
+    }
+
+    private static PipeTracker pipes(GameTestHelper helper)
+    {
+        return PipeTracker.get(helper.getLevel());
+    }
+
+    @Nullable
+    private static PipeNetwork networkAt(GameTestHelper helper, int x, int y, int z)
+    {
+        return pipes(helper).networkAt(helper.absolutePos(new BlockPos(x, y, z)));
+    }
+
+    private static Block ironPipe()
+    {
+        return Pipes.PIPES.get(PipeMaterial.WROUGHT_IRON).get();
+    }
+
+    private static BlockState fitting(Supplier<Block> block, Direction facing, boolean open)
+    {
+        return block.get().defaultBlockState().setValue(PipeFittingBlock.FACING, facing).setValue(PipeFittingBlock.OPEN, open);
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60)
+    public static void pipesJoinAndAClosedValveParts(GameTestHelper helper)
+    {
+        helper.setBlock(1, 1, 2, ironPipe());
+        helper.setBlock(2, 1, 2, fitting(Pipes.VALVE, Direction.EAST, true));
+        helper.setBlock(3, 1, 2, ironPipe());
+
+        helper.runAtTickTime(5, () -> {
+            final PipeNetwork joined = networkAt(helper, 1, 1, 2);
+            helper.assertTrue(joined != null && joined == networkAt(helper, 3, 1, 2), "An open valve should join the two pipes");
+            helper.assertTrue(Math.abs(joined.pressure() - 1f) < 0.01f, "New pipe is full of air at 1 atm, got " + joined.pressure());
+            joined.contents().air *= 2f;
+        });
+        helper.runAtTickTime(10, () -> {
+            final BlockPos valve = helper.absolutePos(new BlockPos(2, 1, 2));
+            helper.getLevel().setBlockAndUpdate(valve, fitting(Pipes.VALVE, Direction.EAST, false));
+            pipes(helper).onConnectionChanged(helper.getLevel(), valve);
+        });
+        helper.runAtTickTime(15, () -> {
+            final PipeNetwork left = networkAt(helper, 1, 1, 2), right = networkAt(helper, 3, 1, 2);
+            helper.assertTrue(left != null && right != null && left != right, "A closed valve should part them");
+            helper.assertTrue(Math.abs(left.pressure() - 2f) < 0.05f && Math.abs(right.pressure() - 2f) < 0.05f, "Each side keeps the pressure it had");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 100)
+    public static void aVentLetsPressureOutIntoTheRoom(GameTestHelper helper)
+    {
+        sealedBox(helper, 3, 2, Blocks.OBSIDIAN);
+        helper.setBlock(2, 1, 1, Pipes.PRESSURE_VESSEL.get());
+        helper.setBlock(2, 1, 2, fitting(Pipes.VENT, Direction.SOUTH, true));
+
+        helper.runAtTickTime(5, () -> {
+            final PipeNetwork network = networkAt(helper, 2, 1, 1);
+            helper.assertTrue(network != null, "The vessel and vent should form a network");
+            network.contents().gases[Gas.SULFUR_DIOXIDE.ordinal()] = 40f;
+        });
+        helper.runAtTickTime(70, () -> {
+            final PipeNetwork network = networkAt(helper, 2, 1, 1);
+            helper.assertTrue(network.pressure() < 1.2f, "The vessel should have blown down, it is at " + network.pressure());
+            final float total = totalInBox(helper, 3, 2, Gas.SULFUR_DIOXIDE) + network.contents().gases[Gas.SULFUR_DIOXIDE.ordinal()];
+            helper.assertTrue(Math.abs(total - 40f) < 0.5f, "The gas must all still be somewhere, found " + total);
+            helper.assertTrue(totalInBox(helper, 3, 2, Gas.SULFUR_DIOXIDE) > 10f, "Some of it should be in the room");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 100)
+    public static void aVesselBurstsAndEverythingComesOut(GameTestHelper helper)
+    {
+        sealedBox(helper, 3, 2, Blocks.OBSIDIAN);
+        helper.setBlock(2, 1, 2, Pipes.PRESSURE_VESSEL.get());
+        helper.setBlock(1, 1, 1, Blocks.GLASS);
+
+        helper.runAtTickTime(5, () -> {
+            final PipeNetwork network = networkAt(helper, 2, 1, 2);
+            helper.assertTrue(network != null, "A vessel is a network by itself");
+            network.contents().gases[Gas.CARBON_DIOXIDE.ordinal()] = PipePhysics.moles(15f, 293f, 0.5f);
+        });
+        helper.runAtTickTime(40, () -> {
+            helper.assertBlockPresent(Blocks.AIR, new BlockPos(2, 1, 2));
+            helper.assertBlockPresent(Blocks.AIR, new BlockPos(1, 1, 1));
+            final float released = totalInBox(helper, 3, 2, Gas.CARBON_DIOXIDE);
+            helper.assertTrue(Math.abs(released - PipePhysics.moles(15f, 293f, 0.5f)) < 1f, "All the gas should be in the room, found " + released);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 100)
+    public static void aSafetyValveKeepsAVesselFromBursting(GameTestHelper helper)
+    {
+        sealedBox(helper, 3, 2, Blocks.OBSIDIAN);
+        helper.setBlock(2, 1, 1, Pipes.PRESSURE_VESSEL.get());
+        helper.setBlock(2, 1, 2, fitting(Pipes.SAFETY_VALVE, Direction.SOUTH, false));
+
+        helper.runAtTickTime(5, () -> {
+            final PipeNetwork network = networkAt(helper, 2, 1, 1);
+            helper.assertTrue(network != null, "The vessel and valve should form a network");
+            network.contents().air = PipePhysics.moles(9.5f, 293f, network.volume());
+        });
+        helper.runAtTickTime(60, () -> {
+            final PipeNetwork network = networkAt(helper, 2, 1, 1);
+            helper.assertTrue(network != null, "The vessel must not have burst");
+            final float gauge = network.pressure() - 1f;
+            helper.assertTrue(gauge < 7.5f && gauge > 5f, "The valve should have let it down to where it seats, near 7 atm, got " + gauge);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 100)
+    public static void aVentLetsGasOutAndKeepsTheWater(GameTestHelper helper)
+    {
+        sealedBox(helper, 3, 2, Blocks.OBSIDIAN);
+        helper.setBlock(2, 1, 1, Pipes.PRESSURE_VESSEL.get());
+        helper.setBlock(2, 1, 2, fitting(Pipes.VENT, Direction.SOUTH, true));
+
+        helper.runAtTickTime(5, () -> {
+            final PipeNetwork network = networkAt(helper, 2, 1, 1);
+            network.contents().liquid = "minecraft:water";
+            network.contents().litres = 100f;
+            network.contents().air = PipePhysics.moles(3f, 293f, 0.5f);
+        });
+        helper.runAtTickTime(60, () -> {
+            final PipeNetwork network = networkAt(helper, 2, 1, 1);
+            helper.assertTrue(network.pressure() < 1.2f, "The gas should be out, it is at " + network.pressure());
+            helper.assertTrue(Math.abs(network.contents().litres - 100f) < 0.01f, "All the water should still be there, found " + network.contents().litres);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 100)
+    public static void aSafetyValveLetsSteamOutOfABoiler(GameTestHelper helper)
+    {
+        sealedBox(helper, 3, 2, Blocks.OBSIDIAN);
+        helper.setBlock(2, 1, 1, Pipes.PRESSURE_VESSEL.get());
+        helper.setBlock(2, 1, 2, fitting(Pipes.SAFETY_VALVE, Direction.SOUTH, false));
+
+        helper.runAtTickTime(5, () -> {
+            final PipeNetwork network = networkAt(helper, 2, 1, 1);
+            network.contents().liquid = "minecraft:water";
+            network.contents().litres = 100f;
+            network.contents().air = 0f;
+            network.contents().temperature = 455f; // About 10 atm of steam, above where the valve lifts and below where the joints go
+        });
+        helper.runAtTickTime(60, () -> {
+            final PipeNetwork network = networkAt(helper, 2, 1, 1);
+            helper.assertTrue(network != null, "The boiler must not have burst");
+            helper.assertTrue(network.contents().litres < 100f, "It should have lost water as steam");
+            helper.assertTrue(network.contents().temperature < 455f, "Boiling should have cooled it, it is at " + network.contents().temperature);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60)
+    public static void aChunkThatLoadsLaterJoinsTheNetworkBesideIt(GameTestHelper helper)
+    {
+        helper.setBlock(1, 1, 1, ironPipe());
+        helper.setBlock(2, 1, 1, ironPipe());
+
+        helper.runAtTickTime(5, () -> {
+            final PipeSegment far = pipes(helper).segmentAt(helper.absolutePos(new BlockPos(2, 1, 1)));
+            final PipeNetwork network = networkAt(helper, 1, 1, 1);
+            helper.assertTrue(network == far.network, "The two should have joined");
+
+            // The state a chunk load leaves things in: one part already a network, and a segment beside it waiting
+            pipes(helper).onConnectionChanged(helper.getLevel(), far.pos);
+        });
+        helper.runAtTickTime(10, () -> {
+            final PipeNetwork network = networkAt(helper, 1, 1, 1);
+            helper.assertTrue(network != null && network == networkAt(helper, 2, 1, 1), "They should form one network again");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60)
+    public static void aManometerIsBlownOutByTooMuchPressure(GameTestHelper helper)
+    {
+        sealedBox(helper, 3, 2, Blocks.OBSIDIAN);
+        helper.setBlock(2, 1, 1, Pipes.PRESSURE_VESSEL.get());
+        helper.setBlock(2, 1, 2, Pipes.MANOMETER.get());
+
+        helper.runAtTickTime(5, () -> networkAt(helper, 2, 1, 1).contents().air = PipePhysics.moles(5f, 293f, 0.5f));
+        helper.runAtTickTime(40, () -> {
+            helper.assertBlockPresent(Blocks.AIR, new BlockPos(2, 1, 2));
+            helper.assertTrue(totalInBox(helper, 3, 2, Gas.MERCURY_VAPOR) > 0f, "The mercury should be in the room");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60)
+    public static void pistonPumpCompressesAirAndLoadsTheShaft(GameTestHelper helper)
+    {
+        helper.setBlock(2, 1, 2, Pipes.PISTON_PUMP.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH));
+        helper.setBlock(2, 1, 1, Pipes.PRESSURE_VESSEL.get());
+
+        helper.runAtTickTime(5, () -> {
+            final PistonPumpBlockEntity pump = (PistonPumpBlockEntity) helper.getBlockEntity(new BlockPos(2, 1, 2));
+            final PipeNetwork vessel = networkAt(helper, 2, 1, 1);
+            helper.assertTrue(vessel != null, "The vessel should be a network");
+            final float before = pump.pump(helper.getLevel(), 0.5f);
+            helper.assertTrue(Math.abs(vessel.pressure() - 2f) < 0.05f, "Half a cubic metre of air into half a cubic metre should give 2 atm, got " + vessel.pressure());
+            final float after = pump.pump(helper.getLevel(), 0.5f);
+            helper.assertTrue(after > before + 0.2f, "The pump should work harder against the pressure: " + before + " then " + after);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60)
+    public static void pistonPumpTakesWaterAwayAndTapPutsItInABarrel(GameTestHelper helper)
+    {
+        helper.setBlock(3, 0, 2, Blocks.WATER);
+        helper.setBlock(3, 1, 2, Pipes.PISTON_PUMP.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH));
+        helper.setBlock(3, 1, 3, Blocks.WATER);
+        helper.setBlock(3, 0, 3, Blocks.OBSIDIAN);
+        helper.setBlock(2, 1, 3, Blocks.OBSIDIAN);
+        helper.setBlock(4, 1, 3, Blocks.OBSIDIAN);
+        helper.setBlock(3, 1, 4, Blocks.OBSIDIAN);
+        helper.setBlock(3, 1, 1, ironPipe());
+        // TFC's barrel only takes liquid in from the top
+        helper.setBlock(3, 2, 1, ironPipe());
+        helper.setBlock(2, 2, 1, ironPipe());
+        helper.setBlock(2, 1, 1, fitting(Pipes.TAP, Direction.DOWN, true));
+        helper.setBlock(2, 0, 1, TFCBlocks.WOODS.get(Wood.OAK).get(Wood.BlockType.BARREL).get());
+
+        helper.runAtTickTime(5, () -> {
+            final PistonPumpBlockEntity pump = (PistonPumpBlockEntity) helper.getBlockEntity(new BlockPos(3, 1, 2));
+            pump.pump(helper.getLevel(), 0.002f);
+            helper.assertFalse(helper.getLevel().getFluidState(helper.absolutePos(new BlockPos(3, 1, 3))).isSource(), "The source block must be gone");
+            final PipeNetwork network = networkAt(helper, 3, 1, 1);
+            helper.assertTrue(network != null && network.contents().litres > 1.5f, "The water should be in the pipe");
+            helper.assertTrue(network.contents().liquid.equals("minecraft:water"), "and it should be water");
+        });
+        helper.runAtTickTime(30, () -> {
+            final IFluidHandler barrel = helper.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, helper.absolutePos(new BlockPos(2, 0, 1)), Direction.UP);
+            helper.assertTrue(barrel != null, "The barrel should hold liquid");
+            helper.assertTrue(barrel.getFluidInTank(0).getAmount() >= 1, "The tap should have let water into the barrel, it holds " + barrel.getFluidInTank(0).getAmount());
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 30)
+    public static void pipesKeepTheirShareThroughSavingAndLoading(GameTestHelper helper)
+    {
+        helper.setBlock(1, 1, 1, ironPipe());
+        helper.setBlock(2, 1, 1, ironPipe());
+
+        helper.runAtTickTime(5, () -> {
+            final PipeNetwork network = networkAt(helper, 1, 1, 1);
+            network.contents().gases[Gas.METHANE.ordinal()] = 3f;
+
+            final LevelChunk chunk = helper.getLevel().getChunkAt(helper.absolutePos(new BlockPos(1, 1, 1)));
+            final PipeChunkData loaded = new PipeChunkData();
+            loaded.load(chunk.getData(GasAttachments.PIPE_CHUNK).save());
+
+            float total = 0f;
+            for (PipeSegment segment : loaded.segments())
+            {
+                total += segment.stored.gases[Gas.METHANE.ordinal()];
+            }
+            helper.assertTrue(Math.abs(total - 3f) < 0.01f, "The saved segments should hold all of it, not more or less, got " + total);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void pipeRecipesLoad(GameTestHelper helper)
+    {
+        for (String recipe : List.of("pipe/wood", "pipe/ceramic", "pipe/copper", "pipe/wrought_iron", "pipe/steel", "pipe_valve", "pipe_vent", "pipe_tap", "safety_valve", "mercury_manometer", "piston_pump", "pressure_vessel"))
+        {
+            helper.assertTrue(helper.getLevel().getRecipeManager().byKey(TFCpp.id("crafting/" + recipe)).isPresent(), "Missing recipe " + recipe);
+        }
         helper.succeed();
     }
 

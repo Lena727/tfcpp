@@ -53,6 +53,7 @@ public final class MetallurgyData implements DataProvider
             tags();
             lootTables();
             mining();
+            pipes();
         }
         catch (IOException e)
         {
@@ -377,7 +378,6 @@ public final class MetallurgyData implements DataProvider
         addToTag("data/tfcpp/tags/fluid/castable_copper.json", "tfc:metal/copper", "tfcpp:metal/arsenical_copper");
         addToTag("data/c/tags/fluid/mercury.json", "tfcpp:mercury");
         addToTag("data/c/tags/item/ingots/arsenical_copper.json", "tfcpp:metal/ingot/arsenical_copper");
-        addToTag("data/tfc/tags/block/charcoal_forge_invisible.json", "tfcpp:retort");
     }
 
     private void lootTables()
@@ -419,7 +419,7 @@ public final class MetallurgyData implements DataProvider
         addToTag("data/tfcpp/tags/item/open_flames.json", "minecraft:torch", "minecraft:soul_torch", "tfc:torch");
         addToTag("data/tfcpp/tags/entity_type/sentinel_animals.json", "tfc:rat", "tfc:quail");
         addToTag("data/tfc/tags/block/lamps.json", "tfcpp:davy_lamp");
-        addToTag("data/minecraft/tags/block/mineable/pickaxe.json", "tfcpp:retort", "tfcpp:retort_condenser", "tfcpp:davy_lamp", "tfcpp:settling_baffle", "tfcpp:mine_fan");
+        addToTag("data/minecraft/tags/block/mineable/pickaxe.json", "tfcpp:retort", "tfcpp:retort_condenser", "tfcpp:davy_lamp", "tfcpp:settling_baffle", "tfcpp:mine_fan", "#tfcpp:pipe_pickaxe");
         addToTag("data/c/tags/item/dusts/arsenic_trioxide.json", "tfcpp:powder/arsenic_trioxide");
         addToTag("data/c/tags/item/dusts/antimony_trioxide.json", "tfcpp:powder/antimony_trioxide");
         addToTag("data/c/tags/item/dusts/zinc_oxide.json", "tfcpp:powder/zinc_oxide");
@@ -486,6 +486,81 @@ public final class MetallurgyData implements DataProvider
         lampTable.addProperty("type", "minecraft:block");
         lampTable.add("pools", lampPools);
         put("data/tfcpp/loot_table/blocks/davy_lamp.json", lampTable);
+    }
+
+    private void pipes()
+    {
+        final JsonObject wood = shaped("tfcpp:pipe/wood", "L", "L", "L");
+        wood.getAsJsonObject("result").addProperty("count", 3);
+        final JsonObject lumber = new JsonObject();
+        lumber.addProperty("tag", "tfc:lumber");
+        wood.getAsJsonObject("key").add("L", lumber);
+        put("data/tfcpp/recipe/crafting/pipe/wood.json", wood);
+
+        final JsonObject ceramic = shaped("tfcpp:pipe/ceramic", "B", "B", "B");
+        ceramic.getAsJsonObject("result").addProperty("count", 3);
+        ceramic.getAsJsonObject("key").add("B", item("tfc:ceramic/fire_brick"));
+        put("data/tfcpp/recipe/crafting/pipe/ceramic.json", ceramic);
+
+        for (String metal : List.of("copper", "wrought_iron", "steel"))
+        {
+            final JsonObject pipe = shaped("tfcpp:pipe/" + metal, "S", "S");
+            pipe.getAsJsonObject("result").addProperty("count", 2);
+            pipe.getAsJsonObject("key").add("S", item("tfc:metal/sheet/" + metal));
+            put("data/tfcpp/recipe/crafting/pipe/" + metal + ".json", pipe);
+        }
+
+        fitting("pipe_valve", "tfc:brass_mechanisms", "tfc:metal/sheet/wrought_iron");
+        fitting("pipe_vent", "tfc:metal/rod/wrought_iron", "tfc:metal/sheet/wrought_iron");
+        fitting("pipe_tap", "tfc:metal/rod/copper", "tfc:metal/sheet/wrought_iron");
+        fitting("safety_valve", "tfc:brass_mechanisms", "tfc:metal/ingot/wrought_iron");
+        fitting("mercury_manometer", "tfcpp:mercury_bulb", "minecraft:glass_pane");
+        fitting("piston_pump", "tfc:brass_mechanisms", "tfc:metal/double_sheet/wrought_iron");
+
+        final JsonObject vessel = shaped("tfcpp:pressure_vessel", "SSS", "S S", "SSS");
+        vessel.getAsJsonObject("key").add("S", item("tfc:metal/double_sheet/wrought_iron"));
+        put("data/tfcpp/recipe/crafting/pressure_vessel.json", vessel);
+
+        final List<String> blocks = new ArrayList<>(List.of("pipe_valve", "pipe_vent", "pipe_tap", "safety_valve", "mercury_manometer", "pressure_vessel", "piston_pump"));
+        final List<String> pickaxe = new ArrayList<>();
+        blocks.forEach(block -> pickaxe.add("tfcpp:" + block));
+        for (String material : List.of("wood", "ceramic", "copper", "wrought_iron", "steel"))
+        {
+            blocks.add("pipe/" + material);
+            if (!material.equals("wood"))
+            {
+                pickaxe.add("tfcpp:pipe/" + material);
+            }
+        }
+        addToTag("data/tfcpp/tags/block/pipe_pickaxe.json", pickaxe.toArray(String[]::new));
+        addToTag("data/minecraft/tags/block/mineable/axe.json", "tfcpp:pipe/wood");
+        addToTag("data/tfc/tags/block/charcoal_forge_invisible.json", "tfcpp:retort", "tfcpp:pressure_vessel");
+
+        for (String block : blocks)
+        {
+            final JsonObject entry = new JsonObject();
+            entry.addProperty("type", "minecraft:item");
+            entry.addProperty("name", "tfcpp:" + block);
+            final JsonArray entries = new JsonArray();
+            entries.add(entry);
+            final JsonObject pool = new JsonObject();
+            pool.addProperty("rolls", 1);
+            pool.add("entries", entries);
+            final JsonArray pools = new JsonArray();
+            pools.add(pool);
+            final JsonObject table = new JsonObject();
+            table.addProperty("type", "minecraft:block");
+            table.add("pools", pools);
+            put("data/tfcpp/loot_table/blocks/" + block + ".json", table);
+        }
+    }
+
+    private void fitting(String name, String core, String body)
+    {
+        final JsonObject recipe = shaped("tfcpp:" + name, " C ", "BBB");
+        recipe.getAsJsonObject("key").add("C", item(core));
+        recipe.getAsJsonObject("key").add("B", item(body));
+        put("data/tfcpp/recipe/crafting/" + name + ".json", recipe);
     }
 
     private void put(String path, JsonElement json)

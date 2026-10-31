@@ -5,6 +5,7 @@
     "tfcpp:retort_condenser",
     "tfcpp:davy_lamp",
     "tfcpp:settling_baffle",
-    "tfcpp:mine_fan"
+    "tfcpp:mine_fan",
+    "#tfcpp:pipe_pickaxe"
   ]
 }

@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 import tfcpp.core.ServerConfig;
 import tfcpp.pneumatics.gas.GasAttachments;
+import tfcpp.pneumatics.pipes.PistonPumpBlockEntity;
 
 /**
  * Adds up the load on each rotation network of a level once per second, and tells each source how far that slows it down. Costs nothing in a level without any shafts.
@@ -53,7 +54,7 @@ public final class ShaftTracker
         else if (entity instanceof RotatingBlockEntity || entity instanceof TripHammerBlockEntity || entity instanceof BellowsBlockEntity || entity instanceof PumpBlockEntity)
         {
             consumers.add(entity);
-            if (entity instanceof PumpBlockEntity || entity instanceof MineFanBlockEntity)
+            if (entity instanceof PumpBlockEntity || entity instanceof MineFanBlockEntity || entity instanceof PistonPumpBlockEntity)
             {
                 workers.add(entity);
             }
@@ -124,6 +125,10 @@ public final class ShaftTracker
                 }
                 workerTorque.put(worker, fan.tickFan(level, SECONDS, mayWalk));
             }
+            else if (worker instanceof PistonPumpBlockEntity piston)
+            {
+                workerTorque.put(worker, piston.tickPump(level, SECONDS));
+            }
             else if (worker instanceof PumpBlockEntity pump)
             {
                 final @Nullable Node crank = MassPump.crankNode(level, pump);
@@ -175,7 +180,7 @@ public final class ShaftTracker
 
     private float workingTorque(BlockEntity entity)
     {
-        if (entity instanceof MineFanBlockEntity)
+        if (entity instanceof MineFanBlockEntity || entity instanceof PistonPumpBlockEntity)
         {
             return workerTorque.getFloat(entity);
         }

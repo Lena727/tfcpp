@@ -1,6 +1,7 @@
 package tfcpp.compat.emi;
 
 import java.util.List;
+import java.util.function.Supplier;
 import dev.emi.emi.api.EmiEntrypoint;
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
@@ -21,6 +22,7 @@ import tfcpp.core.TFCpp;
 import tfcpp.metallurgy.Metallurgy;
 import tfcpp.metallurgy.RetortRecipe;
 import tfcpp.pneumatics.instruments.Instruments;
+import tfcpp.pneumatics.pipes.Pipes;
 
 /** Only loaded by EMI itself, so nothing here is touched when EMI is absent. */
 @EmiEntrypoint
@@ -44,6 +46,11 @@ public final class TFCppEmiPlugin implements EmiPlugin
         info(registry, "sentinel_cage", "tfcpp.info.sentinel_cage", Instruments.ANIMAL_CAGE.get(), Instruments.SENTINEL_CAGE.get());
         info(registry, "settling_baffle", "tfcpp.info.settling_baffle", Instruments.SETTLING_BAFFLE_ITEM.get());
         info(registry, "mine_fan", "tfcpp.info.mine_fan", Instruments.MINE_FAN_ITEM.get());
+        info(registry, "pipes", "tfcpp.info.pipes", Pipes.PIPE_ITEMS.values().stream().map(Supplier::get).toArray(Item[]::new));
+        info(registry, "pressure_vessel", "tfcpp.info.pressure_vessel", Pipes.PRESSURE_VESSEL.get().asItem());
+        info(registry, "piston_pump", "tfcpp.info.piston_pump", Pipes.PISTON_PUMP.get().asItem());
+        info(registry, "safety_valve", "tfcpp.info.safety_valve", Pipes.SAFETY_VALVE.get().asItem());
+        info(registry, "manometer", "tfcpp.info.manometer", Pipes.MANOMETER.get().asItem());
         info(registry, "shaft_load", "tfcpp.info.shaft_load", TFCBlocks.STEEL_PUMP.get().asItem());
         info(registry, "coal", "tfcpp.info.coal", BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("tfc", "ore/bituminous_coal")), BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("tfc", "ore/lignite")));
     }

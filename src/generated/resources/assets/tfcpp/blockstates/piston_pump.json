@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "tfcpp:block/piston_pump",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "tfcpp:block/piston_pump"
+    },
+    "facing=south": {
+      "model": "tfcpp:block/piston_pump",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "tfcpp:block/piston_pump",
+      "y": 270
+    }
+  }
+}

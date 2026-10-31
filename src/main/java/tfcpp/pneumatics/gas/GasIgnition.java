@@ -78,11 +78,21 @@ public final class GasIgnition
     {
         final LevelGasVolume volume = GasTracker.get(level).volume(level);
         final Deflagration.Result result = Deflagration.run(volume, x, y, z, ServerConfig.GAS_FLAME_CELLS.getAsInt(), ServerConfig.GAS_BLAST_CELLS.getAsInt());
-        if (result.burnedCells() == 0)
+        if (result.burnedCells() > 0)
         {
-            return;
+            applyBlast(level, x, y, z, result);
         }
+    }
 
+    /** A vessel bursting at this position, with this much energy in what it held. Its shock works like that of a flame, and only the flame is missing. */
+    public static void rupture(ServerLevel level, BlockPos pos, float kilojoules, float kilopascals)
+    {
+        final LevelGasVolume volume = GasTracker.get(level).volume(level);
+        applyBlast(level, pos.getX(), pos.getY(), pos.getZ(), Deflagration.blast(volume, pos.getX(), pos.getY(), pos.getZ(), kilojoules, kilopascals, ServerConfig.GAS_BLAST_CELLS.getAsInt()));
+    }
+
+    private static void applyBlast(ServerLevel level, int x, int y, int z, Deflagration.Result result)
+    {
         final float loudness = Math.min(4f + result.kilojoules() / 2000f, 32f);
         level.playSound(null, x + 0.5, y + 0.5, z + 0.5, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, loudness, 0.7f + level.random.nextFloat() * 0.2f);
 

@@ -12,6 +12,7 @@ import tfcpp.metallurgy.Metallurgy;
 import tfcpp.pneumatics.gas.GasAttachments;
 import tfcpp.pneumatics.gas.GasEvents;
 import tfcpp.pneumatics.instruments.Instruments;
+import tfcpp.pneumatics.pipes.Pipes;
 
 @Mod(TFCpp.MOD_ID)
 public final class TFCpp
@@ -30,6 +31,7 @@ public final class TFCpp
         GasAttachments.TYPES.register(modBus);
         Metallurgy.register(modBus);
         Instruments.register(modBus);
+        Pipes.register(modBus);
 
         NeoForge.EVENT_BUS.register(GasEvents.class);
         NeoForge.EVENT_BUS.addListener(WaterBodies::onCreateFluidSource);

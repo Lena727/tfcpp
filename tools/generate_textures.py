@@ -139,6 +139,56 @@ for y in range(16):
             fan_front[y][x] = shade((182, 104, 70), int(r) * 3)  # Copper blades
 write_png(ROOT / 'block/mine_fan_front.png', fan_front)
 
+for material, color in {'wood': (128, 94, 58), 'ceramic': (176, 120, 88), 'copper': (190, 112, 74), 'wrought_iron': (110, 110, 114), 'steel': (150, 154, 160)}.items():
+    pipe_side = noise(50 + len(material), color, 8)
+    for i in range(16):
+        pipe_side[i][0] = pipe_side[i][15] = shade(color, -30)
+    write_png(ROOT / f'block/pipe/{material}.png', pipe_side)
+    item_pipe = [[(0, 0, 0, 0)] * 16 for _ in range(16)]
+    for y in range(5, 11):
+        for x in range(1, 15):
+            item_pipe[y][x] = shade(color, 18 if y == 5 else (-26 if y == 10 else 0))
+    write_png(ROOT / f'item/pipe/{material}.png', item_pipe)
+
+iron = (104, 104, 108)
+fitting_side = noise(60, iron, 6)
+write_png(ROOT / 'block/pipe_fitting.png', fitting_side)
+
+
+def fitting_face(seed, mark, draw):
+    face = noise(seed, iron, 6)
+    for y in range(16):
+        for x in range(16):
+            if draw(x - 7.5, y - 7.5):
+                face[y][x] = shade(mark, (x + y) % 3 * 4)
+    return face
+
+
+write_png(ROOT / 'block/pipe_valve.png', fitting_face(61, (176, 60, 44), lambda x, y: 4 < (x * x + y * y) ** 0.5 < 6.5 or abs(x) < 1 or abs(y) < 1))  # A red hand wheel
+write_png(ROOT / 'block/pipe_vent.png', fitting_face(62, (36, 32, 30), lambda x, y: (x * x + y * y) ** 0.5 < 6))  # An open throat
+write_png(ROOT / 'block/pipe_tap.png', fitting_face(63, (190, 112, 74), lambda x, y: (x * x + y * y) ** 0.5 < 3 or (abs(x) < 1 and y > 0 and y < 7)))  # A copper spout
+write_png(ROOT / 'block/safety_valve.png', fitting_face(64, (60, 58, 54), lambda x, y: abs(y + 3) < 1 or (x * x + (y - 2) ** 2) ** 0.5 < 3))  # Lever and weight
+write_png(ROOT / 'block/piston_pump.png', fitting_face(65, (190, 112, 74), lambda x, y: 3 < (x * x + y * y) ** 0.5 < 6))  # The cylinder head
+
+manometer = noise(66, (150, 124, 90), 6)
+for y in range(1, 15):
+    for x in (5, 10):
+        manometer[y][x] = shade((206, 226, 232), 0)  # The glass U-tube
+for x in range(5, 11):
+    manometer[14][x] = shade((206, 226, 232), 0)
+for y in range(9, 15):
+    for x in (5, 10):
+        manometer[y][x] = shade((176, 180, 188), 0)  # Mercury
+write_png(ROOT / 'block/mercury_manometer.png', manometer)
+
+vessel = noise(67, (92, 92, 96), 6)
+for i in range(16):
+    for j in (2, 13):
+        vessel[j][i] = shade((64, 64, 68), 0)
+        if i % 3 == 0:
+            vessel[j][i] = shade((140, 140, 146), 0)  # Rivets
+write_png(ROOT / 'block/pressure_vessel.png', vessel)
+
 side = bricks(3, (170, 118, 84))
 for y in range(9, 12):
     for x in range(5, 11):

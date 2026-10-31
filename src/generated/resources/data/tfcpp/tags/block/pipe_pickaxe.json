@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "tfcpp:pipe_valve",
+    "tfcpp:pipe_vent",
+    "tfcpp:pipe_tap",
+    "tfcpp:safety_valve",
+    "tfcpp:mercury_manometer",
+    "tfcpp:pressure_vessel",
+    "tfcpp:piston_pump",
+    "tfcpp:pipe/ceramic",
+    "tfcpp:pipe/copper",
+    "tfcpp:pipe/wrought_iron",
+    "tfcpp:pipe/steel"
+  ]
+}

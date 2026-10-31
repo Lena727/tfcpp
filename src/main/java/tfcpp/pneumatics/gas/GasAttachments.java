@@ -7,6 +7,8 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import tfcpp.core.TFCpp;
 import tfcpp.mechanics.ShaftTracker;
+import tfcpp.pneumatics.pipes.PipeChunkData;
+import tfcpp.pneumatics.pipes.PipeTracker;
 
 public final class GasAttachments
 {
@@ -21,6 +23,12 @@ public final class GasAttachments
 
     /** Per-level runtime state, rebuilt on load like the tracker above. */
     public static final Supplier<AttachmentType<ShaftTracker>> SHAFTS = TYPES.register("shafts", () -> AttachmentType.builder(ShaftTracker::new).build());
+
+    public static final Supplier<AttachmentType<PipeTracker>> PIPES = TYPES.register("pipes", () -> AttachmentType.builder(PipeTracker::new).build());
+
+    public static final Supplier<AttachmentType<PipeChunkData>> PIPE_CHUNK = TYPES.register("pipe_chunk", () -> AttachmentType.builder(PipeChunkData::new)
+        .serialize(PipeChunkData.SERIALIZER)
+        .build());
 
     public static final Supplier<AttachmentType<BreathingState>> BREATHING = TYPES.register("breathing", () -> AttachmentType.builder(BreathingState::new)
         .serialize(BreathingState.SERIALIZER)
