@@ -1,0 +1,103 @@
+package tfcpp.core;
+
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.PackOutput;
+import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.damagesource.DamageType;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.common.data.LanguageProvider;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
+
+import tfcpp.pneumatics.gas.Breathing;
+
+@EventBusSubscriber(modid = TFCpp.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+public final class DataGenerators
+{
+    @SubscribeEvent
+    public static void onGatherData(GatherDataEvent event)
+    {
+        final PackOutput output = event.getGenerator().getPackOutput();
+
+        final DatapackBuiltinEntriesProvider datapack = event.getGenerator().addProvider(event.includeServer(), new DatapackBuiltinEntriesProvider(output, event.getLookupProvider(), new RegistrySetBuilder()
+            .add(Registries.DAMAGE_TYPE, context -> {
+                context.register(Breathing.ASPHYXIATION, new DamageType("tfcpp.asphyxiation", 0f));
+                context.register(Breathing.CARBON_MONOXIDE, new DamageType("tfcpp.carbon_monoxide", 0f));
+                context.register(Breathing.TOXIC_GAS, new DamageType("tfcpp.toxic_gas", 0f));
+            }), Set.of(TFCpp.MOD_ID)));
+
+        event.getGenerator().addProvider(event.includeServer(), new DamageTags(output, datapack.getRegistryProvider(), event.getExistingFileHelper()));
+
+        event.getGenerator().addProvider(event.includeClient(), new English(output));
+        event.getGenerator().addProvider(event.includeClient(), new Russian(output));
+    }
+
+    /** Gas acts on the lungs and blood, so armour does not reduce it, and it does not knock anybody back. */
+    private static final class DamageTags extends TagsProvider<DamageType>
+    {
+        DamageTags(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup, ExistingFileHelper helper)
+        {
+            super(output, Registries.DAMAGE_TYPE, lookup, TFCpp.MOD_ID, helper);
+        }
+
+        @Override
+        protected void addTags(HolderLookup.Provider provider)
+        {
+            for (TagKey<DamageType> tag : List.of(DamageTypeTags.BYPASSES_ARMOR, DamageTypeTags.BYPASSES_SHIELD, DamageTypeTags.NO_KNOCKBACK))
+            {
+                tag(tag).add(Breathing.ASPHYXIATION, Breathing.CARBON_MONOXIDE, Breathing.TOXIC_GAS);
+            }
+        }
+    }
+
+    private static final class English extends LanguageProvider
+    {
+        English(PackOutput output)
+        {
+            super(output, TFCpp.MOD_ID, "en_us");
+        }
+
+        @Override
+        protected void addTranslations()
+        {
+            add("death.attack.tfcpp.asphyxiation", "%1$s ran out of air to breathe");
+            add("death.attack.tfcpp.carbon_monoxide", "%1$s fell asleep and never woke up");
+            add("death.attack.tfcpp.toxic_gas", "%1$s choked on toxic fumes");
+            add("tfcpp.gas.smell.sulfur_dioxide", "A sharp, choking smell of burning sulfur catches your throat");
+            add("tfcpp.gas.smell.hydrogen_sulfide", "The air stinks of rotten eggs");
+            add("tfcpp.gas.smell.ammonia", "A pungent smell of ammonia stings your eyes");
+            add("tfcpp.gas.smell.chlorine", "A sharp bleach-like smell burns your nose");
+        }
+    }
+
+    private static final class Russian extends LanguageProvider
+    {
+        Russian(PackOutput output)
+        {
+            super(output, TFCpp.MOD_ID, "ru_ru");
+        }
+
+        @Override
+        protected void addTranslations()
+        {
+            add("death.attack.tfcpp.asphyxiation", "%1$s задохнулся: в воздухе не осталось кислорода");
+            add("death.attack.tfcpp.carbon_monoxide", "%1$s уснул и больше не проснулся");
+            add("death.attack.tfcpp.toxic_gas", "%1$s отравился ядовитыми испарениями");
+            add("tfcpp.gas.smell.sulfur_dioxide", "Резкий удушливый запах горелой серы перехватывает горло");
+            add("tfcpp.gas.smell.hydrogen_sulfide", "В воздухе стоит запах тухлых яиц");
+            add("tfcpp.gas.smell.ammonia", "Едкий запах нашатыря щиплет глаза");
+            add("tfcpp.gas.smell.chlorine", "Резкий запах хлорки обжигает нос");
+        }
+    }
+
+    private DataGenerators() {}
+}

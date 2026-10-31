@@ -1,0 +1,9 @@
+{
+  "death.attack.tfcpp.asphyxiation": "%1$s задохнулся: в воздухе не осталось кислорода",
+  "death.attack.tfcpp.carbon_monoxide": "%1$s уснул и больше не проснулся",
+  "death.attack.tfcpp.toxic_gas": "%1$s отравился ядовитыми испарениями",
+  "tfcpp.gas.smell.ammonia": "Едкий запах нашатыря щиплет глаза",
+  "tfcpp.gas.smell.chlorine": "Резкий запах хлорки обжигает нос",
+  "tfcpp.gas.smell.hydrogen_sulfide": "В воздухе стоит запах тухлых яиц",
+  "tfcpp.gas.smell.sulfur_dioxide": "Резкий удушливый запах горелой серы перехватывает горло"
+}

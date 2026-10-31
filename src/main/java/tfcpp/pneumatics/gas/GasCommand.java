@@ -1,0 +1,89 @@
+package tfcpp.pneumatics.gas;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+
+/**
+ * Operator tools for testing and inspecting the gas grid. Players are meant to read the air with instruments.
+ */
+public final class GasCommand
+{
+    static void register(CommandDispatcher<CommandSourceStack> dispatcher)
+    {
+        dispatcher.register(Commands.literal("tfcpp").requires(source -> source.hasPermission(2))
+            .then(Commands.literal("gas")
+                .then(Commands.literal("read")
+                    .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                        .executes(context -> read(context.getSource(), BlockPosArgument.getLoadedBlockPos(context, "pos")))))
+                .then(Commands.literal("add")
+                    .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                        .then(Commands.argument("gas", StringArgumentType.word())
+                            .suggests((context, builder) -> SharedSuggestionProvider.suggest(Arrays.stream(Gas.VALUES).map(Gas::id), builder))
+                            .then(Commands.argument("moles", FloatArgumentType.floatArg(0))
+                                .executes(context -> add(context.getSource(), BlockPosArgument.getLoadedBlockPos(context, "pos"), StringArgumentType.getString(context, "gas"), FloatArgumentType.getFloat(context, "moles")))))))
+                .then(Commands.literal("stats")
+                    .executes(context -> stats(context.getSource())))));
+    }
+
+    private static int read(CommandSourceStack source, BlockPos pos)
+    {
+        final ServerLevel level = source.getLevel();
+        final @Nullable float[] cell = GasTracker.get(level).volume(level).cell(pos.getX(), pos.getY(), pos.getZ());
+
+        final float oxygen = cell == null ? GasMath.OXYGEN_IN_AIR : GasMath.oxygenFraction(cell);
+        final StringBuilder text = new StringBuilder("O2 %.2f%%".formatted(oxygen * 100));
+        if (cell != null)
+        {
+            for (Gas gas : Gas.VALUES)
+            {
+                if (cell[gas.ordinal()] > 0)
+                {
+                    text.append(", %s %.0f ppm".formatted(gas.id(), GasMath.ppm(cell[gas.ordinal()])));
+                }
+            }
+        }
+        source.sendSuccess(() -> Component.literal(text.toString()), false);
+        return 1;
+    }
+
+    private static int add(CommandSourceStack source, BlockPos pos, String id, float moles)
+    {
+        final @Nullable Gas gas = Gas.byId(id);
+        if (gas == null)
+        {
+            source.sendFailure(Component.literal("Unknown gas: " + id));
+            return 0;
+        }
+
+        final ServerLevel level = source.getLevel();
+        final LevelGasVolume volume = GasTracker.get(level).volume(level);
+        final @Nullable float[] cell = volume.cellForEmission(pos.getX(), pos.getY(), pos.getZ());
+        if (cell == null)
+        {
+            source.sendFailure(Component.literal("This chunk is not loaded"));
+            return 0;
+        }
+        cell[gas.ordinal()] += moles;
+        return 1;
+    }
+
+    private static int stats(CommandSourceStack source)
+    {
+        final GasTracker tracker = GasTracker.get(source.getLevel());
+        source.sendSuccess(() -> Component.literal("Chunks with gas: %d, fires tracked: %d".formatted(tracker.activeChunkCount(), tracker.fireCount())), false);
+        return 1;
+    }
+
+    private GasCommand() {}
+}

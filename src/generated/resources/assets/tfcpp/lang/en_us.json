@@ -1,0 +1,9 @@
+{
+  "death.attack.tfcpp.asphyxiation": "%1$s ran out of air to breathe",
+  "death.attack.tfcpp.carbon_monoxide": "%1$s fell asleep and never woke up",
+  "death.attack.tfcpp.toxic_gas": "%1$s choked on toxic fumes",
+  "tfcpp.gas.smell.ammonia": "A pungent smell of ammonia stings your eyes",
+  "tfcpp.gas.smell.chlorine": "A sharp bleach-like smell burns your nose",
+  "tfcpp.gas.smell.hydrogen_sulfide": "The air stinks of rotten eggs",
+  "tfcpp.gas.smell.sulfur_dioxide": "A sharp, choking smell of burning sulfur catches your throat"
+}

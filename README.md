@@ -1,0 +1,43 @@
+# TFC++
+
+An addon for [TerraFirmaCraft](https://github.com/TerraFirmaCraft/TerraFirmaCraft) that continues it from medieval metallurgy into coal chemistry, acids, oil, polymers and electricity, under real physics and chemistry.
+
+Built for dedicated servers with many players. Licensed under the [EUPL-1.2](LICENSE.txt).
+
+| | |
+|---|---|
+| Minecraft | 1.21.1 |
+| NeoForge | 21.1.234 or newer |
+| TerraFirmaCraft | exactly 4.2.12 |
+
+## Building
+
+Requires JDK 21 (Gradle downloads it if missing).
+
+```bash
+./gradlew build
+```
+
+| Task | What it does |
+|---|---|
+| `test` | Unit tests of the physics, without Minecraft |
+| `runGameTestServer` | In-game tests on a headless server with TFC |
+| `runData` | Regenerates `src/generated/resources` |
+| `runClient` | Starts a development client |
+
+`runData` must run in its own Gradle invocation before anything that reads the generated files.
+
+## Mixins into TFC
+
+tfcpp supports one exact TFC version and changes TFC freely wherever that gives better physics. All injections are required: if a target disappears in a new TFC version the game fails at startup, and this table is the map for porting them.
+
+| Mixin | Target | Why |
+|---|---|---|
+| `TFCBlockEntityMixin` | `TFCBlockEntity.onLoad`, `setRemoved`, `onChunkUnloaded` | Tells the gas grid exactly which fires exist, with no scanning of block entities |
+| `CharcoalForgeBlockMixin` | `CharcoalForgeBlock.isValid` | Removes the sky requirement: a forge without a chimney works, and fills the room with flue gas |
+
+## Documentation
+
+- [Stage 0 audit of TFC's API](docs/stage0-tfc-audit.md)
+- [Where TFC breaks physics](docs/tfc-physics-audit.md)
+- [Version reports](docs/reports)
