@@ -30,6 +30,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import tfcpp.core.TFCpp;
+import tfcpp.pneumatics.instruments.Instruments;
 
 public final class Metallurgy
 {
@@ -87,6 +88,7 @@ public final class Metallurgy
                 output.accept(MERCURY_BULB.get());
                 output.accept(RETORT_ITEM.get());
                 output.accept(RETORT_CONDENSER_ITEM.get());
+                Instruments.addToTab(output);
             })
             .build());
     }

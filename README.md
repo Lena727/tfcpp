@@ -23,7 +23,7 @@ Requires JDK 21 (Gradle downloads it if missing).
 | `test` | Unit tests of the physics, without Minecraft |
 | `runGameTestServer` | In-game tests on a headless server with TFC |
 | `runData` | Regenerates `src/generated/resources` |
-| `runClient` | Starts a development client |
+| `runClient` | Starts a development client with JEI. `-PquickPlayWorld=<save folder>` joins that world directly |
 
 `runData` must run in its own Gradle invocation before anything that reads the generated files.
 

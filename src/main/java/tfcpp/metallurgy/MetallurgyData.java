@@ -16,6 +16,7 @@ import com.google.gson.JsonParser;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
+import net.minecraft.world.item.DyeColor;
 import net.neoforged.fml.ModList;
 
 /**
@@ -51,6 +52,7 @@ public final class MetallurgyData implements DataProvider
             impossibleRecipes();
             tags();
             lootTables();
+            mining();
         }
         catch (IOException e)
         {
@@ -376,7 +378,6 @@ public final class MetallurgyData implements DataProvider
         addToTag("data/c/tags/fluid/mercury.json", "tfcpp:mercury");
         addToTag("data/c/tags/item/ingots/arsenical_copper.json", "tfcpp:metal/ingot/arsenical_copper");
         addToTag("data/tfc/tags/block/charcoal_forge_invisible.json", "tfcpp:retort");
-        addToTag("data/minecraft/tags/block/mineable/pickaxe.json", "tfcpp:retort", "tfcpp:retort_condenser");
     }
 
     private void lootTables()
@@ -400,6 +401,83 @@ public final class MetallurgyData implements DataProvider
             table.add("pools", pools);
             put("data/tfcpp/loot_table/blocks/" + block + ".json", table);
         }
+    }
+
+    /** What goes down a mine: the tags telling flames from safe lamps, the instruments and the dust chamber. */
+    private void mining()
+    {
+        final List<String> flames = new ArrayList<>(List.of("tfc:firebox", "tfc:pit_kiln", "tfc:candle_cake", "#minecraft:candle_cakes"));
+        for (DyeColor color : DyeColor.values())
+        {
+            flames.add("tfc:candle/" + color.getName());
+            flames.add("tfc:candle_cake/" + color.getName());
+        }
+        addToTag("data/tfcpp/tags/block/open_flames_tfc.json", flames.toArray(String[]::new));
+        addToTag("data/tfcpp/tags/block/open_flames.json",
+            "#tfcpp:open_flames_tfc", "minecraft:torch", "minecraft:wall_torch", "minecraft:soul_torch", "minecraft:soul_wall_torch", "minecraft:fire", "minecraft:soul_fire", "minecraft:lava", "minecraft:campfire", "minecraft:soul_campfire", "#minecraft:candles",
+            "tfc:torch", "tfc:wall_torch", "tfc:firepit", "tfc:grill", "tfc:pot", "tfc:stove", "tfc:stove_pot", "tfc:charcoal_forge", "tfc:burning_log_pile", "tfc:bloomery", "tfc:blast_furnace", "tfc:candle", "tfc:jack_o_lantern", "#tfc:lamps");
+        addToTag("data/tfcpp/tags/item/open_flames.json", "minecraft:torch", "minecraft:soul_torch", "tfc:torch");
+        addToTag("data/tfcpp/tags/entity_type/sentinel_animals.json", "tfc:rat", "tfc:quail");
+        addToTag("data/tfc/tags/block/lamps.json", "tfcpp:davy_lamp");
+        addToTag("data/minecraft/tags/block/mineable/pickaxe.json", "tfcpp:retort", "tfcpp:retort_condenser", "tfcpp:davy_lamp", "tfcpp:settling_baffle");
+        addToTag("data/c/tags/item/dusts/arsenic_trioxide.json", "tfcpp:powder/arsenic_trioxide");
+        addToTag("data/c/tags/item/dusts/antimony_trioxide.json", "tfcpp:powder/antimony_trioxide");
+        addToTag("data/c/tags/item/dusts/zinc_oxide.json", "tfcpp:powder/zinc_oxide");
+
+        final JsonObject gauze = shaped("tfcpp:wire_gauze", "RR", "RR");
+        gauze.getAsJsonObject("key").add("R", item("tfc:metal/rod/copper"));
+        put("data/tfcpp/recipe/crafting/wire_gauze.json", gauze);
+
+        // Davy's lamp has no glass: the gauze is what surrounds the flame
+        final JsonObject lamp = shaped("tfcpp:davy_lamp", "G", "L");
+        lamp.getAsJsonObject("key").add("G", item("tfcpp:wire_gauze"));
+        lamp.getAsJsonObject("key").add("L", item("tfc:metal/unfinished_lamp/copper"));
+        put("data/tfcpp/recipe/crafting/davy_lamp.json", lamp);
+
+        final JsonObject cage = shaped("tfcpp:animal_cage", "RRR", "R R", "RRR");
+        cage.getAsJsonObject("key").add("R", item("tfc:metal/rod/copper"));
+        put("data/tfcpp/recipe/crafting/animal_cage.json", cage);
+
+        final JsonObject baffle = shaped("tfcpp:settling_baffle", "BSB", "BSB", "BSB");
+        baffle.getAsJsonObject("key").add("B", item("tfc:ceramic/fire_brick"));
+        baffle.getAsJsonObject("key").add("S", item("tfc:metal/sheet/copper"));
+        put("data/tfcpp/recipe/crafting/settling_baffle.json", baffle);
+
+        final JsonObject entry = new JsonObject();
+        entry.addProperty("type", "minecraft:item");
+        entry.addProperty("name", "tfcpp:settling_baffle");
+        final JsonArray entries = new JsonArray();
+        entries.add(entry);
+        final JsonObject pool = new JsonObject();
+        pool.addProperty("rolls", 1);
+        pool.add("entries", entries);
+        final JsonArray pools = new JsonArray();
+        pools.add(pool);
+        final JsonObject table = new JsonObject();
+        table.addProperty("type", "minecraft:block");
+        table.add("pools", pools);
+        put("data/tfcpp/loot_table/blocks/settling_baffle.json", table);
+
+        // The same as a TFC lamp: it keeps the fuel inside when broken
+        final JsonObject copy = new JsonObject();
+        copy.addProperty("function", "tfc:copy_fluid");
+        final JsonArray functions = new JsonArray();
+        functions.add(copy);
+        final JsonObject lampEntry = new JsonObject();
+        lampEntry.addProperty("type", "minecraft:item");
+        lampEntry.add("functions", functions);
+        lampEntry.addProperty("name", "tfcpp:davy_lamp");
+        final JsonArray lampEntries = new JsonArray();
+        lampEntries.add(lampEntry);
+        final JsonObject lampPool = new JsonObject();
+        lampPool.addProperty("rolls", 1);
+        lampPool.add("entries", lampEntries);
+        final JsonArray lampPools = new JsonArray();
+        lampPools.add(lampPool);
+        final JsonObject lampTable = new JsonObject();
+        lampTable.addProperty("type", "minecraft:block");
+        lampTable.add("pools", lampPools);
+        put("data/tfcpp/loot_table/blocks/davy_lamp.json", lampTable);
     }
 
     private void put(String path, JsonElement json)

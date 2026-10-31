@@ -9,6 +9,50 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GasSimulatorTest
 {
+    @Test
+    void evenMixtureNeverSeparates()
+    {
+        final Room room = new Room(1, 6, 1);
+        for (int y = 0; y < 6; y++)
+        {
+            room.createCell(0, y, 0)[Gas.METHANE.ordinal()] = 0.09f * GasMath.CELL_MOLES;
+        }
+
+        final GasSimulator simulator = new GasSimulator();
+        for (int second = 0; second < 600; second++)
+        {
+            for (int y = 0; y < 6; y++)
+            {
+                simulator.stepCell(room, 0, y, 0, 1f);
+            }
+        }
+
+        assertEquals(room.cell(0, 0, 0)[Gas.METHANE.ordinal()], room.cell(0, 5, 0)[Gas.METHANE.ordinal()], 1e-2f, "Air stays mixed: gravity cannot unmix a uniform gas");
+    }
+
+    @Test
+    void stableLayerLastsMuchLongerThanOpenMixing()
+    {
+        final Room layered = new Room(1, 2, 1);
+        layered.createCell(0, 1, 0)[Gas.METHANE.ordinal()] = 0.5f * GasMath.CELL_MOLES;
+
+        final Room level = new Room(2, 1, 1);
+        level.createCell(1, 0, 0)[Gas.METHANE.ordinal()] = 0.5f * GasMath.CELL_MOLES;
+
+        final GasSimulator simulator = new GasSimulator();
+        for (int second = 0; second < 30; second++)
+        {
+            simulator.stepCell(layered, 0, 0, 0, 1f);
+            simulator.stepCell(layered, 0, 1, 0, 1f);
+            simulator.stepCell(level, 0, 0, 0, 1f);
+            simulator.stepCell(level, 1, 0, 0, 1f);
+        }
+
+        final float[] below = layered.cell(0, 0, 0);
+        final float mixedAcross = below == null ? 0 : below[Gas.METHANE.ordinal()];
+        assertTrue(mixedAcross < 0.5f * level.cell(0, 0, 0)[Gas.METHANE.ordinal()], "A layer under a roof should mix far more slowly than gas spreading sideways: " + mixedAcross);
+    }
+
     /** A sealed rectangular room, optionally with an open roof. */
     private static class Room implements GasVolume
     {
@@ -100,11 +144,11 @@ class GasSimulatorTest
     void heavyGasPoolsLowAndLightGasCollectsHigh()
     {
         final Room room = new Room(5, 5, 5);
-        room.add(2, 2, 2, Gas.SULFUR_DIOXIDE, 40f);
-        room.add(2, 2, 2, Gas.HYDROGEN, 40f);
+        room.add(1, 2, 1, Gas.SULFUR_DIOXIDE, 40f);
+        room.add(3, 2, 3, Gas.HYDROGEN, 40f);
         room.run(120);
 
-        assertTrue(room.layer(0, Gas.SULFUR_DIOXIDE) > 2 * room.layer(4, Gas.SULFUR_DIOXIDE), "SO2 should sink");
+        assertTrue(room.layer(0, Gas.SULFUR_DIOXIDE) > 2 * room.layer(4, Gas.SULFUR_DIOXIDE), "SO2 should sink: " + room.layer(0, Gas.SULFUR_DIOXIDE) + " at the floor, " + room.layer(4, Gas.SULFUR_DIOXIDE) + " at the roof");
         assertTrue(room.layer(4, Gas.HYDROGEN) > 2 * room.layer(0, Gas.HYDROGEN), "H2 should rise");
     }
 

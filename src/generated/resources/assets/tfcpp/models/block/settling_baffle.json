@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "tfcpp:block/retort_top",
+    "side": "tfcpp:block/settling_baffle"
+  }
+}

@@ -56,6 +56,8 @@ neoForge {
     runs {
         register("client") {
             client()
+            // Joins a saved world directly, for checking a build on a real client: -PquickPlayWorld=<folder>
+            (findProperty("quickPlayWorld") as String?)?.let { programArguments.addAll("--quickPlaySingleplayer", it) }
         }
         register("server") {
             server()
@@ -92,6 +94,7 @@ dependencies {
     compileOnly("mezz.jei:jei-$minecraftVersion-common-api:${property("jei_version")}")
     compileOnly("mezz.jei:jei-$minecraftVersion-neoforge-api:${property("jei_version")}")
     compileOnly("dev.emi:emi-neoforge:${property("emi_version")}:api")
+    runtimeOnly("mezz.jei:jei-$minecraftVersion-neoforge:${property("jei_version")}") // Only for running from this project: the built jar does not need it
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

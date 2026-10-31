@@ -19,6 +19,8 @@ public final class BreathingState
             state.arsenicMg = tag.getFloat("arsenic");
             state.mercuryMg = tag.getFloat("mercury");
             state.zincOxideMg = tag.getFloat("zincOxide");
+            state.gauzeSeconds = tag.getFloat("gauze");
+            state.lampBurnTicks = tag.getInt("lampBurn");
             return state;
         }
 
@@ -31,6 +33,8 @@ public final class BreathingState
             tag.putFloat("arsenic", state.arsenicMg);
             tag.putFloat("mercury", state.mercuryMg);
             tag.putFloat("zincOxide", state.zincOxideMg);
+            tag.putFloat("gauze", state.gauzeSeconds);
+            tag.putInt("lampBurn", state.lampBurnTicks);
             return tag;
         }
     };
@@ -52,4 +56,8 @@ public final class BreathingState
     public float arsenicMg, mercuryMg, zincOxideMg;
     /** Game tick before which no smell message is shown again. */
     public long nextSmellMessageTick;
+    /** Seconds the gauze of a carried lamp has spent with gas burning inside it. */
+    public float gauzeSeconds;
+    /** Ticks a carried lamp has burned since it last used up a millibucket of oil. */
+    public int lampBurnTicks;
 }

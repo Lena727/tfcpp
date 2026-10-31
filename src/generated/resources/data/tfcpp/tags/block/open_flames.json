@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    "#tfcpp:open_flames_tfc",
+    "minecraft:torch",
+    "minecraft:wall_torch",
+    "minecraft:soul_torch",
+    "minecraft:soul_wall_torch",
+    "minecraft:fire",
+    "minecraft:soul_fire",
+    "minecraft:lava",
+    "minecraft:campfire",
+    "minecraft:soul_campfire",
+    "#minecraft:candles",
+    "tfc:torch",
+    "tfc:wall_torch",
+    "tfc:firepit",
+    "tfc:grill",
+    "tfc:pot",
+    "tfc:stove",
+    "tfc:stove_pot",
+    "tfc:charcoal_forge",
+    "tfc:burning_log_pile",
+    "tfc:bloomery",
+    "tfc:blast_furnace",
+    "tfc:candle",
+    "tfc:jack_o_lantern",
+    "#tfc:lamps"
+  ]
+}

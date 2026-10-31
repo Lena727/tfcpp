@@ -79,6 +79,51 @@ for index, (grade, color) in enumerate({'small': (214, 212, 198), 'poor': (196, 
 write_png(ROOT / 'item/glass_bulb.png', bulb(20, (196, 222, 226), 150))
 write_png(ROOT / 'item/mercury_bulb.png', bulb(21, (176, 180, 188), 255))
 
+for name, color in {'arsenic_trioxide': (236, 236, 228), 'antimony_trioxide': (222, 220, 208), 'zinc_oxide': (240, 240, 236)}.items():
+    write_png(ROOT / f'item/powder/{name}.png', heap(30 + len(name), color))
+
+
+def grid(seed, base, step):
+    rng = random.Random(seed)
+    pixels = [[(0, 0, 0, 0)] * 16 for _ in range(16)]
+    for y in range(2, 14):
+        for x in range(2, 14):
+            if x == 2 or x == 13 or y == 2 or y == 13 or x % step == 0 or y % step == 0:
+                pixels[y][x] = shade(base, rng.randint(-14, 14))
+    return pixels
+
+
+write_png(ROOT / 'item/wire_gauze.png', grid(40, (190, 112, 74), 2))
+
+cage = grid(41, (176, 104, 70), 3)
+write_png(ROOT / 'item/animal_cage.png', cage)
+
+sentinel = [row[:] for row in cage]
+for y in range(8, 12):
+    for x in range(6, 10):
+        sentinel[y][x] = shade((226, 196, 74), (x + y) % 3 * 6)  # A small, bright bird
+sentinel[9][10] = shade((214, 120, 50), 0)
+write_png(ROOT / 'item/sentinel_cage.png', sentinel)
+
+lamp = [[(0, 0, 0, 0)] * 16 for _ in range(16)]
+for y in range(3, 11):
+    for x in range(5, 11):
+        lamp[y][x] = shade((196, 120, 80), 18) if x % 2 == 0 or y % 2 == 0 else (0, 0, 0, 0)  # The gauze
+lamp[7][7] = lamp[7][8] = lamp[8][7] = lamp[8][8] = shade((250, 200, 90), 0)  # The flame
+for y in range(11, 15):
+    for x in range(4, 12):
+        lamp[y][x] = shade((166, 98, 62), (x + y) % 3 * 5 - 5)  # The oil vessel
+for x in range(6, 10):
+    lamp[2][x] = shade((166, 98, 62), 0)
+write_png(ROOT / 'item/davy_lamp.png', lamp)
+
+baffle = bricks(6, (150, 112, 88))
+for y in range(16):
+    for x in range(16):
+        if y % 4 == 1:
+            baffle[y][x] = shade((182, 104, 70), x % 3 * 4)  # Copper plates
+write_png(ROOT / 'block/settling_baffle.png', baffle)
+
 side = bricks(3, (170, 118, 84))
 for y in range(9, 12):
     for x in range(5, 11):

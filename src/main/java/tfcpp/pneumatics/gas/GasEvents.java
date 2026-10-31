@@ -2,13 +2,21 @@ package tfcpp.pneumatics.gas;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+
+import tfcpp.geology.SeamGas;
+import tfcpp.pneumatics.instruments.DavyLamp;
+import tfcpp.pneumatics.instruments.SentinelCageItem;
 
 public final class GasEvents
 {
@@ -25,7 +33,7 @@ public final class GasEvents
     public static void onChunkLoad(ChunkEvent.Load event)
     {
         if (event.getLevel() instanceof ServerLevel level && event.getChunk() instanceof LevelChunk chunk
-            && chunk.hasData(GasAttachments.CHUNK) && !chunk.getData(GasAttachments.CHUNK).isEmpty())
+            && chunk.hasData(GasAttachments.CHUNK) && chunk.getData(GasAttachments.CHUNK).isActive())
         {
             GasTracker.get(level).activate(chunk.getPos().toLong());
         }
@@ -47,6 +55,27 @@ public final class GasEvents
         if (player instanceof ServerPlayer serverPlayer && player.tickCount % Breathing.INTERVAL_TICKS == 0)
         {
             Breathing.tick(serverPlayer);
+            DavyLamp.tickHeld(serverPlayer);
+        }
+    }
+
+    /** Last, so that a block protected by another mod does not let out any gas. */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onBlockBroken(BlockEvent.BreakEvent event)
+    {
+        if (event.getLevel() instanceof ServerLevel level)
+        {
+            SeamGas.onBlockBroken(level, event.getPos(), event.getState(), event.getPlayer());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityInteract(PlayerInteractEvent.EntityInteract event)
+    {
+        if (SentinelCageItem.tryCapture(event.getEntity(), event.getHand(), event.getTarget()))
+        {
+            event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
+            event.setCanceled(true);
         }
     }
 

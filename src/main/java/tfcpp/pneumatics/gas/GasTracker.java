@@ -2,7 +2,9 @@ package tfcpp.pneumatics.gas;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -24,6 +26,7 @@ public final class GasTracker
     private final LongLinkedOpenHashSet activeChunks = new LongLinkedOpenHashSet();
     private final Long2ObjectMap<FireSource> fires = new Long2ObjectOpenHashMap<>();
     private final GasSimulator simulator = new GasSimulator();
+    private final LongArrayFIFOQueue ignitions = new LongArrayFIFOQueue();
 
     private LevelGasVolume volume;
     private long firesLastPolled;
@@ -50,6 +53,12 @@ public final class GasTracker
     public void deactivate(long chunkPos)
     {
         activeChunks.remove(chunkPos);
+    }
+
+    /** Lights the gas here at the end of this tick, once no cells are being walked. */
+    public void queueIgnition(BlockPos pos)
+    {
+        ignitions.enqueue(pos.asLong());
     }
 
     public int activeChunkCount()
@@ -118,10 +127,16 @@ public final class GasTracker
                 : STEP_INTERVAL_TICKS;
 
             activeChunks.removeFirstLong();
-            if (!data.isEmpty())
+            if (data.isActive())
             {
                 activeChunks.addAndMoveToLast(chunkPos);
             }
+        }
+
+        while (!ignitions.isEmpty())
+        {
+            final BlockPos pos = BlockPos.of(ignitions.dequeueLong());
+            GasIgnition.ignite(level, pos.getX(), pos.getY(), pos.getZ());
         }
     }
 }

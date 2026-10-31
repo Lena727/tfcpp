@@ -1,7 +1,10 @@
 package tfcpp.pneumatics.gas;
 
+import it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -32,7 +35,7 @@ public final class GasChunkData
         @Nullable
         public CompoundTag write(GasChunkData data, HolderLookup.Provider provider)
         {
-            return data.isEmpty() && !data.hasDeposits() ? null : data.save();
+            return data.isEmpty() && !data.hasDeposits() && data.seamFaces.isEmpty() && data.openedPockets.isEmpty() ? null : data.save();
         }
     };
 
@@ -63,6 +66,75 @@ public final class GasChunkData
 
     /** Moles of each gas that have condensed onto surfaces in this chunk. They are not gone: this is the dust a later process can collect. */
     private final float[] deposits = new float[Gas.COUNT];
+
+    /** Coal faces opened by mining, and the moles of gas each still has to bleed. Faces that have run out stay here, so that their gas is not counted again. */
+    private final Int2FloatOpenHashMap seamFaces = new Int2FloatOpenHashMap();
+    /** Regions of rock whose gas pocket was already opened. */
+    private final IntOpenHashSet openedPockets = new IntOpenHashSet();
+
+    /** Cleared while every face with gas left is sealed behind other blocks, so that those do not keep a chunk active forever. */
+    private boolean facesAwake = true;
+
+    public void addSeamFace(int key, float moles)
+    {
+        seamFaces.putIfAbsent(key, moles);
+        facesAwake = true;
+    }
+
+    public void setFacesAwake(boolean awake)
+    {
+        facesAwake = awake;
+    }
+
+    public boolean hasSeamFace(int key)
+    {
+        return seamFaces.containsKey(key);
+    }
+
+    public float removeSeamFace(int key)
+    {
+        return seamFaces.remove(key);
+    }
+
+    public void setSeamFace(int key, float moles)
+    {
+        seamFaces.put(key, moles);
+    }
+
+    public float seamFace(int key)
+    {
+        return seamFaces.get(key);
+    }
+
+    public int[] seamFaceKeys()
+    {
+        return seamFaces.keySet().toIntArray();
+    }
+
+    /** @return {@code true} if a face still has gas to give, which keeps the chunk being visited */
+    public boolean hasBleedingFace()
+    {
+        for (float moles : seamFaces.values())
+        {
+            if (moles > 0)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** @return {@code true} if this region had not been opened before */
+    public boolean openPocket(int regionKey)
+    {
+        return openedPockets.add(regionKey);
+    }
+
+    /** @return {@code true} if this chunk has anything to simulate */
+    public boolean isActive()
+    {
+        return !cells.isEmpty() || (facesAwake && hasBleedingFace());
+    }
 
     public void addDeposit(Gas gas, float moles)
     {
@@ -160,6 +232,16 @@ public final class GasChunkData
             depositBits[i] = Float.floatToRawIntBits(deposits[i]);
         }
         tag.putIntArray("deposits", depositBits);
+
+        final int[] faceKeys = seamFaceKeys();
+        final int[] faceBits = new int[faceKeys.length];
+        for (int i = 0; i < faceKeys.length; i++)
+        {
+            faceBits[i] = Float.floatToRawIntBits(seamFaces.get(faceKeys[i]));
+        }
+        tag.putIntArray("seamFaces", faceKeys);
+        tag.putIntArray("seamFaceMoles", faceBits);
+        tag.putIntArray("pockets", openedPockets.toIntArray());
         return tag;
     }
 
@@ -167,6 +249,14 @@ public final class GasChunkData
     public void load(CompoundTag tag)
     {
         cells.clear();
+
+        final int[] faceKeys = tag.getIntArray("seamFaces");
+        final int[] faceBits = tag.getIntArray("seamFaceMoles");
+        for (int i = 0; i < faceKeys.length && i < faceBits.length; i++)
+        {
+            seamFaces.put(faceKeys[i], Float.intBitsToFloat(faceBits[i]));
+        }
+        openedPockets.addAll(new IntArrayList(tag.getIntArray("pockets")));
 
         final ListTag species = tag.getList("species", Tag.TAG_STRING);
         final int[] keys = tag.getIntArray("keys");

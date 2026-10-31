@@ -12,6 +12,9 @@ public final class ServerConfig
     public static final ModConfigSpec.IntValue GAS_CHUNKS_PER_TICK;
     public static final ModConfigSpec.IntValue GAS_CELLS_PER_TICK;
     public static final ModConfigSpec.IntValue GAS_CELLS_PER_CHUNK;
+    public static final ModConfigSpec.IntValue GAS_FLAME_CELLS;
+    public static final ModConfigSpec.IntValue GAS_BLAST_CELLS;
+    public static final ModConfigSpec.IntValue GAS_BLAST_BLOCKS;
 
     static
     {
@@ -26,6 +29,16 @@ public final class ServerConfig
         GAS_CELLS_PER_CHUNK = builder
             .comment("Most gas cells a chunk may store. Gas stops spreading into new cells of a full chunk.")
             .defineInRange("gasCellsPerChunk", 8192, 64, 98304);
+
+        GAS_FLAME_CELLS = builder
+            .comment("Most gas cells one flame can burn in a single tick. Any gas beyond this stays unburned, and can be lit again.")
+            .defineInRange("gasFlameCells", 4096, 64, 65536);
+        GAS_BLAST_CELLS = builder
+            .comment("Most cells one blast can reach in a single tick, including those burned.")
+            .defineInRange("gasBlastCells", 16384, 64, 262144);
+        GAS_BLAST_BLOCKS = builder
+            .comment("Most blocks one blast can break.")
+            .defineInRange("gasBlastBlocks", 512, 0, 16384);
 
         SPEC = builder.build();
     }

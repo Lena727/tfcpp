@@ -1,5 +1,7 @@
 package tfcpp.pneumatics.gas;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Air composition arithmetic for one cell. A cell is one cubic metre, holding {@link #CELL_MOLES} of gas at 1 atm and 20 C (from pV = nRT).
  */
@@ -34,6 +36,21 @@ public final class GasMath
     public static float oxygenFraction(float[] cell)
     {
         return OXYGEN_IN_AIR * Math.max(0, 1 - fraction(total(cell)));
+    }
+
+    /** @return how much denser a cell is than plain air, as a fraction of the density of air. Whatever gas it holds has displaced that much air. A cell of {@code null} is plain air. */
+    public static float relativeDensity(@Nullable float[] cell)
+    {
+        if (cell == null)
+        {
+            return 0;
+        }
+        float excess = 0;
+        for (int i = 0; i < cell.length; i++)
+        {
+            excess += cell[i] * (Gas.VALUES[i].molarMass() - AIR_MOLAR_MASS);
+        }
+        return excess / (CELL_MOLES * AIR_MOLAR_MASS);
     }
 
     /** @return pressure in atm: a cell only goes over 1 atm once the added gas has displaced all of its air */

@@ -166,6 +166,11 @@ public final class Breathing
             player.displayClientMessage(Component.translatable("tfcpp.gas.smell." + smelled.id()), true);
         }
 
+        if (holdsOpenFlame(player) && Flammability.isFlammable(air))
+        {
+            GasTracker.get(player.serverLevel()).queueIgnition(BlockPos.containing(player.getEyePosition()));
+        }
+
         if (worst >= 1)
         {
             player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, EFFECT_TICKS, worst - 1, false, false, true));
@@ -174,6 +179,11 @@ public final class Breathing
         {
             hurt(player, TOXIC_GAS, worst == 2 ? SERIOUS_DAMAGE : FATAL_DAMAGE);
         }
+    }
+
+    private static boolean holdsOpenFlame(ServerPlayer player)
+    {
+        return player.getMainHandItem().is(GasIgnition.OPEN_FLAME_ITEMS) || player.getOffhandItem().is(GasIgnition.OPEN_FLAME_ITEMS);
     }
 
     private static void hurt(ServerPlayer player, ResourceKey<DamageType> type, float fractionOfMaxHealth)

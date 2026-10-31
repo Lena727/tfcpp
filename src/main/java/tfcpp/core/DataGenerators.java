@@ -21,6 +21,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tfcpp.metallurgy.MetallurgyAssets;
 import tfcpp.metallurgy.MetallurgyData;
 import tfcpp.pneumatics.gas.Breathing;
+import tfcpp.pneumatics.gas.GasIgnition;
 
 @EventBusSubscriber(modid = TFCpp.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public final class DataGenerators
@@ -35,6 +36,7 @@ public final class DataGenerators
                 context.register(Breathing.ASPHYXIATION, new DamageType("tfcpp.asphyxiation", 0f));
                 context.register(Breathing.CARBON_MONOXIDE, new DamageType("tfcpp.carbon_monoxide", 0f));
                 context.register(Breathing.TOXIC_GAS, new DamageType("tfcpp.toxic_gas", 0f));
+                context.register(GasIgnition.BLAST, new DamageType("tfcpp.blast", 0.1f));
             }), Set.of(TFCpp.MOD_ID)));
 
         event.getGenerator().addProvider(event.includeServer(), new DamageTags(output, datapack.getRegistryProvider(), event.getExistingFileHelper()));
@@ -62,6 +64,8 @@ public final class DataGenerators
             {
                 tag(tag).add(Breathing.ASPHYXIATION, Breathing.CARBON_MONOXIDE, Breathing.TOXIC_GAS);
             }
+            tag(DamageTypeTags.BYPASSES_ARMOR).add(GasIgnition.BLAST); // A pressure wave passes straight through armour and into the lungs
+            tag(DamageTypeTags.IS_EXPLOSION).add(GasIgnition.BLAST);
         }
     }
 
@@ -98,6 +102,40 @@ public final class DataGenerators
             add("tfcpp.retort.status", "%1$s C, charge: %2$s, carbon: %3$s, %4$s mB of %5$s");
             add("tfcpp.retort.status.empty_tank", "nothing condensed yet");
             add("tfcpp.retort.no_condenser", "No condenser beside the retort: the vapour will escape into the room");
+
+            add("death.attack.tfcpp.blast", "%1$s was caught in a gas explosion");
+            add("block.tfcpp.davy_lamp", "Davy Lamp");
+            add("block.tfcpp.davy_lamp.filled", "Davy Lamp");
+            add("item.tfcpp.wire_gauze", "Copper Wire Gauze");
+            add("item.tfcpp.animal_cage", "Animal Cage");
+            add("item.tfcpp.sentinel_cage", "Caged Sentinel Animal");
+            add("block.tfcpp.settling_baffle", "Settling Baffle");
+            add("item.tfcpp.powder.arsenic_trioxide", "White Arsenic");
+            add("item.tfcpp.powder.antimony_trioxide", "Antimony Trioxide");
+            add("item.tfcpp.powder.zinc_oxide", "Zinc Oxide");
+            add("tfcpp.davy_lamp.steady", "The flame burns steady and yellow");
+            add("tfcpp.davy_lamp.dim", "The flame burns low and dull: the air is short of oxygen");
+            add("tfcpp.davy_lamp.pale_cap", "A faint pale cap shows above the flame");
+            add("tfcpp.davy_lamp.blue_cap", "A blue cap stands above the flame");
+            add("tfcpp.davy_lamp.tall_cap", "A tall blue cap reaches up the gauze: get out soon");
+            add("tfcpp.davy_lamp.filled", "Flame fills the whole gauze: the air is explosive, get out now");
+            add("tfcpp.davy_lamp.out", "The flame has died: this air cannot keep a flame going, and soon not a person either");
+            add("tfcpp.sentinel.uneasy", "The animal in the cage is uneasy and breathing fast");
+            add("tfcpp.sentinel.collapsed", "The animal in the cage has collapsed: leave, the air is poisoned");
+            add("tfcpp.sentinel.dead", "The animal in the cage is dead");
+            add("tfcpp.sentinel.starved", "The animal in the cage has starved");
+            add("tfcpp.sentinel.state.lively", "Lively");
+            add("tfcpp.sentinel.state.uneasy", "Uneasy");
+            add("tfcpp.sentinel.state.collapsed", "Collapsed");
+            add("tfcpp.settling_baffle.nothing", "Too little dust on the plates to scrape off");
+            add("tfcpp.jei.retort", "Retort");
+            add("tfcpp.jei.retort.temperature", "%s °C");
+            add("tfcpp.jei.retort.carbon", "Carbon: %s mol");
+            add("tfcpp.jei.retort.condenser", "Needs a condenser beside it");
+            add("tfcpp.info.davy_lamp", "A lamp whose gauze keeps its flame from lighting the air around it. Carried in hand with oil in it, it shows firedamp as a blue cap above the flame, and goes out when oxygen runs low. It does not show carbon monoxide, and a gauze with gas burning in it for minutes gets hot enough to light the gas outside.");
+            add("tfcpp.info.sentinel_cage", "Right-click a rat or a quail with an empty cage. The animal takes in carbon monoxide twenty times as fast as a person, so it collapses long before you feel anything. Feed it grain from the other hand at least every three days.");
+            add("tfcpp.info.settling_baffle", "Place these in a closed chamber that furnace fumes pass through. Arsenic, antimony and zinc oxide dust settles on the plates, and is scraped off by right-clicking with an empty hand. Scraping stirs up some of the dust, so do not breathe it.");
+            add("tfcpp.info.coal", "Coal seams hold methane, more of it the deeper they lie, and some rock next to them holds gas under pressure. Mining lets it out. A flame lights air holding 5% to 15% of it, and the blast is followed by afterdamp full of carbon monoxide.");
         }
     }
 
@@ -134,6 +172,40 @@ public final class DataGenerators
             add("tfcpp.retort.status", "%1$s °C, загрузка: %2$s, углерод: %3$s, %4$s мБ: %5$s");
             add("tfcpp.retort.status.empty_tank", "пока ничего не сконденсировалось");
             add("tfcpp.retort.no_condenser", "Рядом с ретортой нет конденсатора: пары уйдут в помещение");
+
+            add("death.attack.tfcpp.blast", "%1$s попал под взрыв газа");
+            add("block.tfcpp.davy_lamp", "Лампа Дэви");
+            add("block.tfcpp.davy_lamp.filled", "Лампа Дэви");
+            add("item.tfcpp.wire_gauze", "Медная проволочная сетка");
+            add("item.tfcpp.animal_cage", "Клетка для животного");
+            add("item.tfcpp.sentinel_cage", "Сторожевое животное в клетке");
+            add("block.tfcpp.settling_baffle", "Пылеосадительная перегородка");
+            add("item.tfcpp.powder.arsenic_trioxide", "Белый мышьяк");
+            add("item.tfcpp.powder.antimony_trioxide", "Триоксид сурьмы");
+            add("item.tfcpp.powder.zinc_oxide", "Оксид цинка");
+            add("tfcpp.davy_lamp.steady", "Пламя горит ровно и жёлто");
+            add("tfcpp.davy_lamp.dim", "Пламя низкое и тусклое: в воздухе мало кислорода");
+            add("tfcpp.davy_lamp.pale_cap", "Над пламенем появился едва заметный бледный ореол");
+            add("tfcpp.davy_lamp.blue_cap", "Над пламенем стоит голубой ореол");
+            add("tfcpp.davy_lamp.tall_cap", "Высокий голубой ореол тянется вверх по сетке: скоро пора уходить");
+            add("tfcpp.davy_lamp.filled", "Пламя заполнило всю сетку: воздух взрывоопасен, уходите немедленно");
+            add("tfcpp.davy_lamp.out", "Пламя погасло: в этом воздухе огонь не горит, а вскоре не выживет и человек");
+            add("tfcpp.sentinel.uneasy", "Животное в клетке беспокоится и часто дышит");
+            add("tfcpp.sentinel.collapsed", "Животное в клетке упало: уходите, воздух отравлен");
+            add("tfcpp.sentinel.dead", "Животное в клетке погибло");
+            add("tfcpp.sentinel.starved", "Животное в клетке умерло от голода");
+            add("tfcpp.sentinel.state.lively", "Бодрое");
+            add("tfcpp.sentinel.state.uneasy", "Беспокоится");
+            add("tfcpp.sentinel.state.collapsed", "Лежит без сил");
+            add("tfcpp.settling_baffle.nothing", "На пластинах слишком мало пыли, соскрести нечего");
+            add("tfcpp.jei.retort", "Реторта");
+            add("tfcpp.jei.retort.temperature", "%s °C");
+            add("tfcpp.jei.retort.carbon", "Углерод: %s моль");
+            add("tfcpp.jei.retort.condenser", "Нужен конденсатор рядом");
+            add("tfcpp.info.davy_lamp", "Лампа, сетка которой не даёт пламени поджечь окружающий воздух. В руке и с маслом показывает рудничный газ голубым ореолом над пламенем и гаснет, когда не хватает кислорода. Угарный газ она не показывает, а сетка с горящим внутри газом за несколько минут раскаляется настолько, что поджигает газ снаружи.");
+            add("tfcpp.info.sentinel_cage", "Правым кликом пустой клеткой поймайте крысу или перепела. Животное набирает угарный газ в двадцать раз быстрее человека и падает задолго до того, как вы что-то почувствуете. Кормите его зерном из другой руки хотя бы раз в три дня.");
+            add("tfcpp.info.settling_baffle", "Ставятся в закрытой камере, через которую идут печные газы. Пыль мышьяка, сурьмы и оксида цинка оседает на пластинах, её соскребают правым кликом пустой рукой. При этом часть пыли снова поднимается в воздух, так что дышать ею нельзя.");
+            add("tfcpp.info.coal", "Угольные пласты содержат метан, и чем глубже, тем больше, а порода рядом с ними может держать газ под давлением. При добыче он выходит наружу. Пламя поджигает воздух с 5–15% метана, а после взрыва остаётся смесь с большим количеством угарного газа.");
         }
     }
 

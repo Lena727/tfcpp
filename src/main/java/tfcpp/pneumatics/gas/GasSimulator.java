@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
  * Moves gas between neighbouring cells. Every transfer removes from one cell what it adds to another, so gas is only ever lost to the atmosphere, or when a cell becomes too dilute to matter.
  * <ul>
  *     <li><strong>Mixing</strong>: flow proportional to the concentration difference. Air in a room is turbulent, so this uses an eddy diffusivity near 0.1 m2/s, not the molecular 2e-5 m2/s.</li>
- *     <li><strong>Buoyancy</strong>: a pocket of gas has reduced gravity g' = g * x * |M - Mair| / Mair, so it moves at a speed proportional to sqrt(g' h). Concentrated gas pours along the floor or collects under a roof, while dilute gas barely separates and stays mixed.</li>
+ *     <li><strong>Buoyancy</strong>: what drives it is the difference in density between two cells, g' = g * |rho1 - rho2| / rho. Where a denser cell lies over a lighter one they overturn at a speed proportional to sqrt(g' h), so gas pours down or rises as a body. Where a lighter cell lies over a denser one the layers are stable, and that same difference holds back mixing between them. A gas already mixed evenly into air has no difference to act on, and so never separates out again.</li>
  *     <li><strong>Pressure</strong>: a cell holding more than 1 atm pushes its contents out.</li>
  * </ul>
  */
@@ -19,8 +19,11 @@ public final class GasSimulator
 
     private static final float MIXING_PER_SECOND = 0.1f;
     private static final float MAX_MIXING = 0.16f;
-    private static final float BUOYANCY_PER_SECOND = 1.2f;
-    private static final float MAX_BUOYANCY = 0.4f;
+    /** At an exchange above one half the two cells trade places instead of evening out, which is a parcel of gas falling or rising as a body. A dense parcel does this, while a slight difference only stirs the air. */
+    private static final float BUOYANCY_PER_SECOND = 2f;
+    private static final float MAX_BUOYANCY = 0.95f;
+    /** How strongly a stable density step holds back mixing across it. A difference of 0.1% in density cuts mixing to a third, which is why a layer of firedamp can lie along a roof for days, and CO2 can lie in a still cave for years. */
+    private static final float STABLE_LAYER_DAMPING = 2000f;
     private static final float PRESSURE_PER_SECOND = 0.25f;
     /** A pair of cells evens out at twice this rate, so anything above 1/2 would overshoot and oscillate. */
     private static final float MAX_PRESSURE = 0.24f;
@@ -132,7 +135,9 @@ public final class GasSimulator
 
         @Nullable float[] to = volume.cell(nx, ny, nz);
 
-        final float mixing = Math.min(MIXING_PER_SECOND * seconds, MAX_MIXING);
+        final float mixing = vertical
+            ? verticalExchange(ny > y ? from : to, ny > y ? to : from, seconds)
+            : Math.min(MIXING_PER_SECOND * seconds, MAX_MIXING);
         final float totalFrom = GasMath.total(from);
         final float totalTo = to == null ? 0 : GasMath.total(to);
         final float pressureFlow = Math.min(PRESSURE_PER_SECOND * seconds, MAX_PRESSURE)
@@ -149,11 +154,6 @@ public final class GasSimulator
             }
 
             float flow = mixing * (from[i] - there);
-            if (vertical)
-            {
-                final boolean upward = ny > y;
-                flow += buoyancyFlow(Gas.VALUES[i], upward ? from[i] : there, upward ? there : from[i], seconds) * (upward ? 1 : -1);
-            }
             flow += pressureFlow > 0
                 ? pressureFlow * from[i] / totalFrom
                 : (totalTo > 0 ? pressureFlow * there / totalTo : 0);
@@ -187,14 +187,15 @@ public final class GasSimulator
         }
     }
 
-    /** @return moles moving upward between a lower and an upper cell, negative if moving downward */
-    private static float buoyancyFlow(Gas gas, float lower, float upper, float seconds)
+    /** @return the fraction exchanged between a lower and an upper cell, either of which can hold plain air */
+    private static float verticalExchange(@Nullable float[] lower, @Nullable float[] upper, float seconds)
     {
-        final float density = (gas.molarMass() - GasMath.AIR_MOLAR_MASS) / GasMath.AIR_MOLAR_MASS;
-        final boolean rises = density < 0;
-        final float source = rises ? lower : upper;
-        final float rate = BUOYANCY_PER_SECOND * (float) Math.sqrt(GasMath.fraction(source) * Math.abs(density)) * seconds;
-        final float moved = Math.min(rate, MAX_BUOYANCY) * source;
-        return rises ? moved : -moved;
+        final float mixing = Math.min(MIXING_PER_SECOND * seconds, MAX_MIXING);
+        final float difference = GasMath.relativeDensity(lower) - GasMath.relativeDensity(upper);
+        if (difference >= 0)
+        {
+            return mixing / (1 + STABLE_LAYER_DAMPING * difference);
+        }
+        return mixing + Math.min(BUOYANCY_PER_SECOND * (float) Math.sqrt(-difference) * seconds, MAX_BUOYANCY);
     }
 }

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "tfc:copy_fluid"
+            }
+          ],
+          "name": "tfcpp:davy_lamp"
+        }
+      ],
+      "rolls": 1
+    }
+  ]
+}

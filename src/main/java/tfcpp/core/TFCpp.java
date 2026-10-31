@@ -10,6 +10,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import tfcpp.metallurgy.Metallurgy;
 import tfcpp.pneumatics.gas.GasAttachments;
 import tfcpp.pneumatics.gas.GasEvents;
+import tfcpp.pneumatics.instruments.Instruments;
 
 @Mod(TFCpp.MOD_ID)
 public final class TFCpp
@@ -27,6 +28,7 @@ public final class TFCpp
 
         GasAttachments.TYPES.register(modBus);
         Metallurgy.register(modBus);
+        Instruments.register(modBus);
 
         NeoForge.EVENT_BUS.register(GasEvents.class);
     }

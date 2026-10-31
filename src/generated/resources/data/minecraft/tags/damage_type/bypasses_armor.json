@@ -2,6 +2,7 @@
   "values": [
     "tfcpp:asphyxiation",
     "tfcpp:carbon_monoxide",
-    "tfcpp:toxic_gas"
+    "tfcpp:toxic_gas",
+    "tfcpp:blast"
   ]
 }
