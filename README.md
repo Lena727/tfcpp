@@ -35,6 +35,10 @@ tfcpp supports one exact TFC version and changes TFC freely wherever that gives 
 |---|---|---|
 | `TFCBlockEntityMixin` | `TFCBlockEntity.onLoad`, `setRemoved`, `onChunkUnloaded` | Tells the gas grid exactly which fires exist, with no scanning of block entities |
 | `CharcoalForgeBlockMixin` | `CharcoalForgeBlock.isValid` | Removes the sky requirement: a forge without a chimney works, and fills the room with flue gas |
+| `ShaftSourceMixins$WaterWheel`, `$Windmill` | `WaterWheelBlockEntity.clientTick`, `WindmillBlockEntity.clientTick`, `saveAdditional`, `loadAdditional` | Slows the source under load, on both sides, and saves the factor so that it reaches clients |
+| `ShaftSourceMixins$Pump` | `PumpBlockEntity.serverTick`, `onRemoved` | Replaces a pump that made water from nothing with `MassPump`, which moves it |
+| `ShaftSourceMixins$Bellows` | `BellowsBlockEntity.tickBoth` | A shaft can now stop, and dividing by its speed would disable the bellows for good |
+| `ShaftSourceMixins$Aqueduct` | `AqueductBlock.pickupBlock` | A bucket from an aqueduct refilled for free, which made water from nothing |
 | `HeatingRecipeMixin` | `HeatingRecipe.assembleItem`, `assembleStacked` | The one place where every heating recipe converts an item: releases sulfide fumes at that exact moment |
 | `MeltContextMixins` | `serverTick` of crucible, forge, firepit, pit kiln, firebox | Tells `HeatingRecipeMixin` where the conversion is happening, as a vessel melting its contents has no idea where it is |
 

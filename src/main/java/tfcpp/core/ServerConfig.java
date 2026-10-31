@@ -15,6 +15,7 @@ public final class ServerConfig
     public static final ModConfigSpec.IntValue GAS_FLAME_CELLS;
     public static final ModConfigSpec.IntValue GAS_BLAST_CELLS;
     public static final ModConfigSpec.IntValue GAS_BLAST_BLOCKS;
+    public static final ModConfigSpec.IntValue GAS_FAN_CELLS_PER_TICK;
 
     static
     {
@@ -39,6 +40,10 @@ public final class ServerConfig
         GAS_BLAST_BLOCKS = builder
             .comment("Most blocks one blast can break.")
             .defineInRange("gasBlastBlocks", 512, 0, 16384);
+
+        GAS_FAN_CELLS_PER_TICK = builder
+            .comment("Most cells of open space that mine fans may walk in one tick. A fan over budget waits for its next turn, and air moves more slowly.")
+            .defineInRange("gasFanCellsPerTick", 2048, 512, 262144);
 
         SPEC = builder.build();
     }

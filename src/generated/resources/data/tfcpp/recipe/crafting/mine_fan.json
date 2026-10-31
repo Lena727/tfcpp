@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "M": {
+      "item": "tfc:brass_mechanisms"
+    },
+    "S": {
+      "item": "tfc:metal/sheet/copper"
+    }
+  },
+  "pattern": [
+    "SMS",
+    "S S",
+    "SMS"
+  ],
+  "result": {
+    "count": 1,
+    "id": "tfcpp:mine_fan"
+  }
+}

@@ -10,6 +10,7 @@ import dev.emi.emi.api.recipe.EmiRecipeCategory;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.WidgetHolder;
+import net.dries007.tfc.common.blocks.TFCBlocks;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -42,6 +43,8 @@ public final class TFCppEmiPlugin implements EmiPlugin
         info(registry, "davy_lamp", "tfcpp.info.davy_lamp", Instruments.DAVY_LAMP_ITEM.get());
         info(registry, "sentinel_cage", "tfcpp.info.sentinel_cage", Instruments.ANIMAL_CAGE.get(), Instruments.SENTINEL_CAGE.get());
         info(registry, "settling_baffle", "tfcpp.info.settling_baffle", Instruments.SETTLING_BAFFLE_ITEM.get());
+        info(registry, "mine_fan", "tfcpp.info.mine_fan", Instruments.MINE_FAN_ITEM.get());
+        info(registry, "shaft_load", "tfcpp.info.shaft_load", TFCBlocks.STEEL_PUMP.get().asItem());
         info(registry, "coal", "tfcpp.info.coal", BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("tfc", "ore/bituminous_coal")), BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("tfc", "ore/lignite")));
     }
 

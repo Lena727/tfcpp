@@ -15,6 +15,7 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import tfcpp.geology.SeamGas;
+import tfcpp.mechanics.ShaftTracker;
 import tfcpp.pneumatics.instruments.DavyLamp;
 import tfcpp.pneumatics.instruments.SentinelCageItem;
 
@@ -26,6 +27,7 @@ public final class GasEvents
         if (event.getLevel() instanceof ServerLevel level)
         {
             GasTracker.get(level).tick(level);
+            ShaftTracker.get(level).tick(level);
         }
     }
 

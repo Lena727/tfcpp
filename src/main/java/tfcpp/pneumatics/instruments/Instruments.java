@@ -23,6 +23,8 @@ import net.neoforged.neoforge.event.BlockEntityTypeAddBlocksEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import tfcpp.core.TFCpp;
+import tfcpp.mechanics.MineFanBlock;
+import tfcpp.mechanics.MineFanBlockEntity;
 import tfcpp.metallurgy.Metallurgy;
 
 /** What a miner carries to read the air, and what catches the dust from it. */
@@ -43,7 +45,10 @@ public final class Instruments
         .blockEntity(TFCBlockEntities.LAMP)));
     public static final Supplier<Block> SETTLING_BAFFLE = Metallurgy.BLOCKS.register("settling_baffle", () -> new SettlingBaffleBlock(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_ORANGE).strength(2f, 6f).sound(SoundType.STONE).requiresCorrectToolForDrops()));
 
+    public static final Supplier<Block> MINE_FAN = Metallurgy.BLOCKS.register("mine_fan", () -> new MineFanBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3f, 6f).sound(SoundType.METAL).requiresCorrectToolForDrops()));
+
     public static final Supplier<Item> DAVY_LAMP_ITEM = Metallurgy.ITEMS.register("davy_lamp", () -> new LampBlockItem(DAVY_LAMP.get(), new Item.Properties().stacksTo(1)));
+    public static final Supplier<Item> MINE_FAN_ITEM = Metallurgy.ITEMS.register("mine_fan", () -> new BlockItem(MINE_FAN.get(), new Item.Properties()));
     public static final Supplier<Item> WIRE_GAUZE = Metallurgy.ITEMS.register("wire_gauze", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> ANIMAL_CAGE = Metallurgy.ITEMS.register("animal_cage", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> SENTINEL_CAGE = Metallurgy.ITEMS.register("sentinel_cage", () -> new SentinelCageItem(new Item.Properties()));
@@ -54,8 +59,11 @@ public final class Instruments
 
     public static final Supplier<BlockEntityType<SettlingBaffleBlockEntity>> SETTLING_BAFFLE_ENTITY = Metallurgy.BLOCK_ENTITIES.register("settling_baffle", () -> BlockEntityType.Builder.of(SettlingBaffleBlockEntity::new, SETTLING_BAFFLE.get()).build(null));
 
+    public static final Supplier<BlockEntityType<MineFanBlockEntity>> MINE_FAN_ENTITY = Metallurgy.BLOCK_ENTITIES.register("mine_fan", () -> BlockEntityType.Builder.of(MineFanBlockEntity::new, MINE_FAN.get()).build(null));
+
     public static void addToTab(CreativeModeTab.Output output)
     {
+        output.accept(MINE_FAN_ITEM.get());
         output.accept(DAVY_LAMP_ITEM.get());
         output.accept(WIRE_GAUZE.get());
         output.accept(ANIMAL_CAGE.get());

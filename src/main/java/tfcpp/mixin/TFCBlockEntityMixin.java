@@ -8,10 +8,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import tfcpp.mechanics.ShaftTracker;
 import tfcpp.pneumatics.gas.GasTracker;
 
 /**
- * Lets the gas grid know exactly which fires exist, with no scanning of block entities.
+ * Lets the gas grid know exactly which fires exist, and the shafts which machines, with no scanning of block entities.
  */
 @Mixin(TFCBlockEntity.class)
 abstract class TFCBlockEntityMixin
@@ -23,6 +24,7 @@ abstract class TFCBlockEntityMixin
         if (self.getLevel() instanceof ServerLevel level)
         {
             GasTracker.get(level).onBlockEntityLoaded(self);
+            ShaftTracker.get(level).onBlockEntityLoaded(self);
         }
     }
 
@@ -44,6 +46,7 @@ abstract class TFCBlockEntityMixin
         if (self.getLevel() instanceof ServerLevel level)
         {
             GasTracker.get(level).onBlockEntityUnloaded(self);
+            ShaftTracker.get(level).onBlockEntityUnloaded(self);
         }
     }
 }

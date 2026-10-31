@@ -14,6 +14,7 @@ import mezz.jei.api.recipe.category.AbstractRecipeCategory;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import net.dries007.tfc.common.blocks.TFCBlocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -55,6 +56,8 @@ public final class TFCppJeiPlugin implements IModPlugin
         info(registration, new ItemStack(Instruments.ANIMAL_CAGE.get()), "tfcpp.info.sentinel_cage");
         info(registration, new ItemStack(Instruments.SENTINEL_CAGE.get()), "tfcpp.info.sentinel_cage");
         info(registration, new ItemStack(Instruments.SETTLING_BAFFLE_ITEM.get()), "tfcpp.info.settling_baffle");
+        info(registration, new ItemStack(Instruments.MINE_FAN_ITEM.get()), "tfcpp.info.mine_fan");
+        info(registration, new ItemStack(TFCBlocks.STEEL_PUMP.get()), "tfcpp.info.shaft_load");
         info(registration, new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("tfc", "ore/bituminous_coal"))), "tfcpp.info.coal");
         info(registration, new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("tfc", "ore/lignite"))), "tfcpp.info.coal");
     }

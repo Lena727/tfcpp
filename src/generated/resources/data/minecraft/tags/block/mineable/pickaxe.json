@@ -4,6 +4,7 @@
     "tfcpp:retort",
     "tfcpp:retort_condenser",
     "tfcpp:davy_lamp",
-    "tfcpp:settling_baffle"
+    "tfcpp:settling_baffle",
+    "tfcpp:mine_fan"
   ]
 }

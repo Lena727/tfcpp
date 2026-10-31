@@ -3,6 +3,9 @@ package tfcpp.pneumatics.gas;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import net.dries007.tfc.common.blockentities.rotation.RotatingBlockEntity;
+import net.dries007.tfc.util.rotation.Node;
+import net.dries007.tfc.util.rotation.Rotation;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -13,6 +16,9 @@ import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+
+import tfcpp.mechanics.ShaftPhysics;
+import tfcpp.mechanics.ShaftTracker;
 
 /**
  * Operator tools for testing and inspecting the gas grid. Players are meant to read the air with instruments.
@@ -33,7 +39,25 @@ public final class GasCommand
                             .then(Commands.argument("moles", FloatArgumentType.floatArg(0))
                                 .executes(context -> add(context.getSource(), BlockPosArgument.getLoadedBlockPos(context, "pos"), StringArgumentType.getString(context, "gas"), FloatArgumentType.getFloat(context, "moles")))))))
                 .then(Commands.literal("stats")
-                    .executes(context -> stats(context.getSource())))));
+                    .executes(context -> stats(context.getSource()))))
+            .then(Commands.literal("shaft")
+                .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                    .executes(context -> shaft(context.getSource(), BlockPosArgument.getLoadedBlockPos(context, "pos"))))));
+    }
+
+    private static int shaft(CommandSourceStack source, BlockPos pos)
+    {
+        if (!(source.getLevel().getBlockEntity(pos) instanceof RotatingBlockEntity rotating))
+        {
+            source.sendFailure(Component.literal("No shaft at " + pos.toShortString()));
+            return 0;
+        }
+        final Node node = rotating.getRotationNode();
+        final @Nullable Rotation rotation = node.rotation();
+        final float speed = rotation == null ? 0 : Math.abs(rotation.speed()) * ShaftPhysics.TICKS_PER_SECOND;
+        final float torque = ShaftTracker.get(source.getLevel()).networkTorque(node.network());
+        source.sendSuccess(() -> Component.literal("Network %d: %.2f rad/s (%.1f rpm), load %.2f kN m, %.2f kW".formatted(node.network(), speed, speed * 60f / (2f * Math.PI), torque, torque * speed)), false);
+        return 1;
     }
 
     private static int read(CommandSourceStack source, BlockPos pos)

@@ -4,6 +4,14 @@ import java.util.List;
 import java.util.UUID;
 import com.mojang.authlib.GameProfile;
 import net.dries007.tfc.common.blockentities.CrucibleBlockEntity;
+import net.dries007.tfc.common.blockentities.rotation.RotatingBlockEntity;
+import net.dries007.tfc.common.blockentities.rotation.WaterWheelBlockEntity;
+import net.dries007.tfc.common.blocks.DirectionPropertyBlock;
+import net.dries007.tfc.common.blocks.rotation.FluidPumpBlock;
+import net.dries007.tfc.common.blocks.rotation.WaterWheelBlock;
+import net.dries007.tfc.common.blocks.wood.Wood;
+import net.dries007.tfc.common.fluids.FluidHelpers;
+import net.dries007.tfc.util.rotation.Node;
 import net.dries007.tfc.common.blockentities.LampBlockEntity;
 import net.dries007.tfc.common.blocks.TFCBlocks;
 import net.dries007.tfc.common.blocks.devices.CharcoalForgeBlock;
@@ -20,6 +28,8 @@ import net.dries007.tfc.util.Metal;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.data.FluidHeat;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -34,6 +44,9 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluid;
@@ -47,6 +60,12 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import org.jetbrains.annotations.Nullable;
 
 import tfcpp.geology.SeamGas;
+import tfcpp.mechanics.MassPump;
+import tfcpp.mechanics.MineFanBlockEntity;
+import tfcpp.mechanics.ShaftPhysics;
+import tfcpp.mechanics.ShaftSource;
+import tfcpp.mechanics.ShaftTracker;
+import tfcpp.mechanics.WaterBodies;
 import tfcpp.metallurgy.Metallurgy;
 import tfcpp.metallurgy.RetortBlockEntity;
 import tfcpp.metallurgy.Sulfide;
@@ -556,6 +575,152 @@ public final class GasGameTests
             helper.assertTrue(totalInBox(helper, 3, 3, Gas.CARBON_DIOXIDE) > 20f, "The gauze must fail in the end");
             helper.succeed();
         });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 200)
+    public static void fanCarriesGasOutOfARoom(GameTestHelper helper)
+    {
+        sealedBox(helper, 3, 2, Blocks.OBSIDIAN);
+        // The fan stands in the roof, draws from the room below it, and blows sideways into the open air
+        helper.setBlock(2, 3, 2, Instruments.MINE_FAN.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.EAST));
+        helper.setBlock(3, 2, 2, Blocks.OBSIDIAN);
+        helper.setBlock(3, 3, 2, Blocks.AIR);
+        addGas(helper, 1, 1, 1, Gas.CARBON_DIOXIDE, 10f);
+
+        final MineFanBlockEntity fan = (MineFanBlockEntity) helper.getBlockEntity(new BlockPos(2, 3, 2));
+        for (int second = 0; second < 30; second++)
+        {
+            helper.assertTrue(fan.moveAir(helper.getLevel(), 1.57f, 1f) || second > 0, "The fan should find the gas");
+        }
+        final float left = totalInBox(helper, 3, 2, Gas.CARBON_DIOXIDE);
+        helper.assertTrue(left < 8f, "Half a minute of a fan should clear the room, " + left + " of 10 mol is left");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 100)
+    public static void twoSourcesDoNotMakeAThird(GameTestHelper helper)
+    {
+        sealedBox(helper, 3, 1, Blocks.OBSIDIAN);
+        helper.setBlock(1, 2, 1, Blocks.AIR);
+        for (int z = 1; z <= 3; z++)
+        {
+            helper.setBlock(1, 1, z, z == 2 ? Blocks.AIR : Blocks.WATER);
+            helper.setBlock(2, 1, z, Blocks.OBSIDIAN);
+        }
+        helper.runAtTickTime(60, () -> {
+            helper.assertFalse(helper.getLevel().getFluidState(helper.absolutePos(new BlockPos(1, 1, 2))).isSource(), "Water must not appear from nothing");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, skyAccess = true)
+    public static void onlyALargeBodyOfWaterFillsItself(GameTestHelper helper)
+    {
+        final BlockPos hole = new BlockPos(0, 1, 0);
+        for (int x = 0; x < 9; x++)
+        {
+            for (int z = 0; z < 9; z++)
+            {
+                helper.setBlock(x, 1, z, Blocks.WATER);
+            }
+        }
+        helper.setBlock(hole, Blocks.AIR);
+        helper.assertFalse(WaterBodies.isFedByCatchment(helper.getLevel(), helper.absolutePos(hole), Fluids.WATER, WaterBodies.FED_BY_CATCHMENT), "80 m2 of water is a pond");
+        helper.assertTrue(WaterBodies.isFedByCatchment(helper.getLevel(), helper.absolutePos(hole), Fluids.WATER, 64), "It has 64 m2 open to the sky");
+
+        for (int x = 0; x < 9; x++)
+        {
+            for (int z = 0; z < 9; z++)
+            {
+                helper.setBlock(x, 2, z, Blocks.OBSIDIAN);
+            }
+        }
+        helper.assertFalse(WaterBodies.isFedByCatchment(helper.getLevel(), helper.absolutePos(hole), Fluids.WATER, 1), "Under a roof it has no catchment, however large it is");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 100)
+    public static void pumpMovesWaterAndDoesNotMakeIt(GameTestHelper helper)
+    {
+        final BlockPos pump = new BlockPos(2, 2, 2), pipe = new BlockPos(2, 1, 2), intake = new BlockPos(2, 0, 2), outlet = new BlockPos(2, 2, 1);
+        helper.setBlock(1, 0, 2, Blocks.OBSIDIAN);
+        helper.setBlock(3, 0, 2, Blocks.WATER); // A pool of two blocks, so that the second has to run in to the pipe
+        helper.setBlock(4, 0, 2, Blocks.OBSIDIAN);
+        helper.setBlock(3, 0, 1, Blocks.OBSIDIAN);
+        helper.setBlock(3, 0, 3, Blocks.OBSIDIAN);
+        helper.setBlock(2, 0, 1, Blocks.OBSIDIAN);
+        helper.setBlock(2, 0, 3, Blocks.OBSIDIAN);
+        helper.setBlock(2, 1, 1, Blocks.OBSIDIAN);
+        helper.setBlock(intake, Blocks.WATER);
+
+        final BlockState pumpState = TFCBlocks.STEEL_PUMP.get().defaultBlockState().setValue(FluidPumpBlock.FACING, Direction.NORTH);
+        final BlockState pipeState = FluidHelpers.fillWithFluid(TFCBlocks.STEEL_PIPE.get().defaultBlockState().setValue(DirectionPropertyBlock.getProperty(Direction.DOWN), true).setValue(DirectionPropertyBlock.getProperty(Direction.UP), true), Fluids.WATER);
+        helper.assertTrue(pipeState != null, "A pipe should hold water");
+        helper.setBlock(pipe, pipeState);
+        helper.setBlock(pump, pumpState);
+
+        helper.assertTrue(MassPump.moveOneBlock(helper.getLevel(), helper.absolutePos(pump), pumpState), "The pump should find water at the end of its pipe");
+        helper.assertFalse(helper.getLevel().getFluidState(helper.absolutePos(intake)).isSource(), "The water must leave the intake");
+        helper.assertTrue(helper.getLevel().getFluidState(helper.absolutePos(outlet)).isSource(), "The water must arrive at the outlet");
+
+        helper.runAtTickTime(30, () -> {
+            helper.setBlock(2, 2, 0, Blocks.OBSIDIAN);
+            helper.setBlock(1, 2, 1, Blocks.OBSIDIAN);
+            helper.setBlock(3, 2, 1, Blocks.OBSIDIAN);
+            helper.setBlock(1, 1, 1, Blocks.AIR);
+            helper.setBlock(2, 2, 1, Blocks.AIR); // Clearing the outlet: what happens to the first block is not what this checks
+            helper.assertTrue(MassPump.moveOneBlock(helper.getLevel(), helper.absolutePos(pump), pumpState), "The rest of the pool must run in and be pumped too");
+            helper.assertFalse(helper.getLevel().getFluidState(helper.absolutePos(new BlockPos(3, 0, 2))).isSource(), "The second source must be the one taken");
+        });
+        helper.runAtTickTime(60, () -> {
+            helper.setBlock(2, 2, 1, Blocks.AIR);
+            helper.assertFalse(MassPump.moveOneBlock(helper.getLevel(), helper.absolutePos(pump), pumpState), "With the pool dry there is nothing left to pump");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 100)
+    public static void machinesLoadTheirNetwork(GameTestHelper helper)
+    {
+        final Block axle = TFCBlocks.WOODS.get(Wood.OAK).get(Wood.BlockType.AXLE).get();
+        helper.setBlock(1, 1, 2, TFCBlocks.CREATIVE_MOTOR.get().defaultBlockState().setValue(BlockStateProperties.AXIS, Direction.Axis.X));
+        helper.setBlock(2, 1, 2, axle.defaultBlockState().setValue(BlockStateProperties.AXIS, Direction.Axis.X));
+        helper.setBlock(3, 1, 2, Instruments.MINE_FAN.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.EAST));
+
+        helper.runAtTickTime(45, () -> {
+            final RotatingBlockEntity fan = (RotatingBlockEntity) helper.getBlockEntity(new BlockPos(3, 1, 2));
+            final long network = fan.getRotationNode().network();
+            helper.assertTrue(network != Node.NO_NETWORK, "The fan should join the shaft behind it");
+            final float torque = ShaftTracker.get(helper.getLevel()).networkTorque(network);
+            helper.assertTrue(torque >= 2 * ShaftPhysics.BEARING_TORQUE, "Shaft and fan should both load the network, got " + torque);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void sourcesTakeTheirSpeedFromTheLoad(GameTestHelper helper)
+    {
+        helper.setBlock(2, 3, 2, TFCBlocks.WOODS.get(Wood.OAK).get(Wood.BlockType.WATER_WHEEL).get().defaultBlockState().setValue(WaterWheelBlock.AXIS, Direction.Axis.X));
+        final BlockEntity wheel = helper.getBlockEntity(new BlockPos(2, 3, 2));
+        helper.assertTrue(wheel instanceof ShaftSource, "The water wheel mixin should be applied");
+        final ShaftSource source = (ShaftSource) wheel;
+        source.tfcpp$setSpeedFactor(0.5f);
+        helper.assertTrue(source.tfcpp$speedFactor() == 0.5f, "The factor should be kept");
+        final CompoundTag saved = wheel.saveWithoutMetadata(helper.getLevel().registryAccess());
+        helper.assertTrue(saved.getFloat("tfcppSpeedFactor") == 0.5f, "The factor should be saved, and with that synced");
+
+        // The same code runs on both sides, so this is what a shaft on a client does too
+        saved.putFloat("targetSpeed", WaterWheelBlockEntity.MAX_SPEED);
+        wheel.loadWithComponents(saved, helper.getLevel().registryAccess());
+        final WaterWheelBlockEntity water = (WaterWheelBlockEntity) wheel;
+        for (int tick = 0; tick < 500; tick++)
+        {
+            WaterWheelBlockEntity.clientTick(helper.getLevel(), wheel.getBlockPos(), wheel.getBlockState(), water);
+        }
+        final float speed = water.getRotationNode().rotation().speed();
+        helper.assertTrue(Math.abs(speed - 0.5f * WaterWheelBlockEntity.MAX_SPEED) < 1e-3f, "A wheel at half load should settle at half speed, got " + speed + " of " + WaterWheelBlockEntity.MAX_SPEED);
+        helper.assertTrue(Math.abs(source.tfcpp$stallTorque() - ShaftPhysics.waterWheelStallTorque(WaterWheelBlockEntity.MAX_SPEED)) < 1e-3f, "Its stall torque comes from the free speed, not the slowed one");
+        helper.succeed();
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 200)

@@ -1,6 +1,7 @@
 {
   "block.tfcpp.davy_lamp": "Davy Lamp",
   "block.tfcpp.davy_lamp.filled": "Davy Lamp",
+  "block.tfcpp.mine_fan": "Mine Fan",
   "block.tfcpp.retort": "Retort",
   "block.tfcpp.retort_condenser": "Retort Condenser",
   "block.tfcpp.settling_baffle": "Settling Baffle",
@@ -37,8 +38,10 @@
   "tfcpp.gas.smell.sulfur_dioxide": "A sharp, choking smell of burning sulfur catches your throat",
   "tfcpp.info.coal": "Coal seams hold methane, more of it the deeper they lie, and some rock next to them holds gas under pressure. Mining lets it out. A flame lights air holding 5% to 15% of it, and the blast is followed by afterdamp full of carbon monoxide.",
   "tfcpp.info.davy_lamp": "A lamp whose gauze keeps its flame from lighting the air around it. Carried in hand with oil in it, it shows firedamp as a blue cap above the flame, and goes out when oxygen runs low. It does not show carbon monoxide, and a gauze with gas burning in it for minutes gets hot enough to light the gas outside.",
+  "tfcpp.info.mine_fan": "Driven by a shaft at its back, it blows out of its front and draws air in through its other sides, along the open spaces leading to it. Air moves quickly along a narrow drift and hardly at all across a large chamber. The fan loads the shaft more the faster it turns.",
   "tfcpp.info.sentinel_cage": "Right-click a rat or a quail with an empty cage. The animal takes in carbon monoxide twenty times as fast as a person, so it collapses long before you feel anything. Feed it grain from the other hand at least every three days.",
   "tfcpp.info.settling_baffle": "Place these in a closed chamber that furnace fumes pass through. Arsenic, antimony and zinc oxide dust settles on the plates, and is scraped off by right-clicking with an empty hand. Scraping stirs up some of the dust, so do not breathe it.",
+  "tfcpp.info.shaft_load": "Every machine on a shaft takes torque from its source. The more it has to drive, the slower it turns, and past what the source can start against it stops. A water wheel gives its best power at half of its free speed. Pumps take more torque the higher they lift. Water itself no longer multiplies, and a pump moves it from its intake to its outlet.",
   "tfcpp.jei.retort": "Retort",
   "tfcpp.jei.retort.carbon": "Carbon: %s mol",
   "tfcpp.jei.retort.condenser": "Needs a condenser beside it",

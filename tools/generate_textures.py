@@ -124,6 +124,21 @@ for y in range(16):
             baffle[y][x] = shade((182, 104, 70), x % 3 * 4)  # Copper plates
 write_png(ROOT / 'block/settling_baffle.png', baffle)
 
+fan_side = noise(7, (120, 104, 92), 8)
+for i in range(16):
+    fan_side[0][i] = fan_side[15][i] = fan_side[i][0] = fan_side[i][15] = shade((86, 74, 66), 0)
+write_png(ROOT / 'block/mine_fan_side.png', fan_side)
+
+fan_front = [row[:] for row in fan_side]
+for y in range(16):
+    for x in range(16):
+        r = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+        if r < 7:
+            fan_front[y][x] = shade((48, 42, 38), 0)  # The dark throat
+        if r < 6.5 and (abs(x - y) < 1.5 or abs(x + y - 15) < 1.5):
+            fan_front[y][x] = shade((182, 104, 70), int(r) * 3)  # Copper blades
+write_png(ROOT / 'block/mine_fan_front.png', fan_front)
+
 side = bricks(3, (170, 118, 84))
 for y in range(9, 12):
     for x in range(5, 11):

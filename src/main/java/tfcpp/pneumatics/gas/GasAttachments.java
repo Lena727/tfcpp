@@ -6,6 +6,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import tfcpp.core.TFCpp;
+import tfcpp.mechanics.ShaftTracker;
 
 public final class GasAttachments
 {
@@ -17,6 +18,9 @@ public final class GasAttachments
 
     /** Per-level runtime state. Rebuilt on load, so it is not saved. */
     public static final Supplier<AttachmentType<GasTracker>> TRACKER = TYPES.register("gas_tracker", () -> AttachmentType.builder(GasTracker::new).build());
+
+    /** Per-level runtime state, rebuilt on load like the tracker above. */
+    public static final Supplier<AttachmentType<ShaftTracker>> SHAFTS = TYPES.register("shafts", () -> AttachmentType.builder(ShaftTracker::new).build());
 
     public static final Supplier<AttachmentType<BreathingState>> BREATHING = TYPES.register("breathing", () -> AttachmentType.builder(BreathingState::new)
         .serialize(BreathingState.SERIALIZER)

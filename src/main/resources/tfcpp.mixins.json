@@ -11,6 +11,11 @@
     "MeltContextMixins$Firepit",
     "MeltContextMixins$Forge",
     "MeltContextMixins$PitKiln",
+    "ShaftSourceMixins$Aqueduct",
+    "ShaftSourceMixins$Bellows",
+    "ShaftSourceMixins$Pump",
+    "ShaftSourceMixins$WaterWheel",
+    "ShaftSourceMixins$Windmill",
     "TFCBlockEntityMixin"
   ],
   "injectors": {

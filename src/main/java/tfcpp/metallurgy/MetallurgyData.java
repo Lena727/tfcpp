@@ -419,10 +419,15 @@ public final class MetallurgyData implements DataProvider
         addToTag("data/tfcpp/tags/item/open_flames.json", "minecraft:torch", "minecraft:soul_torch", "tfc:torch");
         addToTag("data/tfcpp/tags/entity_type/sentinel_animals.json", "tfc:rat", "tfc:quail");
         addToTag("data/tfc/tags/block/lamps.json", "tfcpp:davy_lamp");
-        addToTag("data/minecraft/tags/block/mineable/pickaxe.json", "tfcpp:retort", "tfcpp:retort_condenser", "tfcpp:davy_lamp", "tfcpp:settling_baffle");
+        addToTag("data/minecraft/tags/block/mineable/pickaxe.json", "tfcpp:retort", "tfcpp:retort_condenser", "tfcpp:davy_lamp", "tfcpp:settling_baffle", "tfcpp:mine_fan");
         addToTag("data/c/tags/item/dusts/arsenic_trioxide.json", "tfcpp:powder/arsenic_trioxide");
         addToTag("data/c/tags/item/dusts/antimony_trioxide.json", "tfcpp:powder/antimony_trioxide");
         addToTag("data/c/tags/item/dusts/zinc_oxide.json", "tfcpp:powder/zinc_oxide");
+
+        final JsonObject fan = shaped("tfcpp:mine_fan", "SMS", "S S", "SMS");
+        fan.getAsJsonObject("key").add("S", item("tfc:metal/sheet/copper"));
+        fan.getAsJsonObject("key").add("M", item("tfc:brass_mechanisms"));
+        put("data/tfcpp/recipe/crafting/mine_fan.json", fan);
 
         final JsonObject gauze = shaped("tfcpp:wire_gauze", "RR", "RR");
         gauze.getAsJsonObject("key").add("R", item("tfc:metal/rod/copper"));
@@ -443,20 +448,23 @@ public final class MetallurgyData implements DataProvider
         baffle.getAsJsonObject("key").add("S", item("tfc:metal/sheet/copper"));
         put("data/tfcpp/recipe/crafting/settling_baffle.json", baffle);
 
-        final JsonObject entry = new JsonObject();
-        entry.addProperty("type", "minecraft:item");
-        entry.addProperty("name", "tfcpp:settling_baffle");
-        final JsonArray entries = new JsonArray();
-        entries.add(entry);
-        final JsonObject pool = new JsonObject();
-        pool.addProperty("rolls", 1);
-        pool.add("entries", entries);
-        final JsonArray pools = new JsonArray();
-        pools.add(pool);
-        final JsonObject table = new JsonObject();
-        table.addProperty("type", "minecraft:block");
-        table.add("pools", pools);
-        put("data/tfcpp/loot_table/blocks/settling_baffle.json", table);
+        for (String block : List.of("settling_baffle", "mine_fan"))
+        {
+            final JsonObject entry = new JsonObject();
+            entry.addProperty("type", "minecraft:item");
+            entry.addProperty("name", "tfcpp:" + block);
+            final JsonArray entries = new JsonArray();
+            entries.add(entry);
+            final JsonObject pool = new JsonObject();
+            pool.addProperty("rolls", 1);
+            pool.add("entries", entries);
+            final JsonArray pools = new JsonArray();
+            pools.add(pool);
+            final JsonObject table = new JsonObject();
+            table.addProperty("type", "minecraft:block");
+            table.add("pools", pools);
+            put("data/tfcpp/loot_table/blocks/" + block + ".json", table);
+        }
 
         // The same as a TFC lamp: it keeps the fuel inside when broken
         final JsonObject copy = new JsonObject();

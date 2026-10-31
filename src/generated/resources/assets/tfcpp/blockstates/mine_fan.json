@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "tfcpp:block/mine_fan",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "tfcpp:block/mine_fan"
+    },
+    "facing=south": {
+      "model": "tfcpp:block/mine_fan",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "tfcpp:block/mine_fan",
+      "y": 270
+    }
+  }
+}

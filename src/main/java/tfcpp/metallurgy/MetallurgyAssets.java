@@ -60,6 +60,9 @@ public final class MetallurgyAssets
             simpleBlockWithItem(Metallurgy.RETORT_CONDENSER.get(), models().cubeAll("retort_condenser", modLoc("block/retort_condenser")));
             simpleBlockWithItem(Instruments.SETTLING_BAFFLE.get(), models().cubeColumn("settling_baffle", modLoc("block/settling_baffle"), modLoc("block/retort_top")));
 
+            horizontalBlock(Instruments.MINE_FAN.get(), models().orientable("mine_fan", modLoc("block/mine_fan_side"), modLoc("block/mine_fan_front"), modLoc("block/mine_fan_side")));
+            simpleBlockItem(Instruments.MINE_FAN.get(), models().getExistingFile(modLoc("block/mine_fan")));
+
             // The shape of a TFC copper lamp, whose models are referenced and not copied
             getVariantBuilder(Instruments.DAVY_LAMP.get()).forAllStates(state -> {
                 final String hanging = state.getValue(DavyLampBlock.HANGING) ? "_hanging" : "";

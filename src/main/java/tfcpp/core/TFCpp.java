@@ -7,6 +7,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 
+import tfcpp.mechanics.WaterBodies;
 import tfcpp.metallurgy.Metallurgy;
 import tfcpp.pneumatics.gas.GasAttachments;
 import tfcpp.pneumatics.gas.GasEvents;
@@ -31,5 +32,6 @@ public final class TFCpp
         Instruments.register(modBus);
 
         NeoForge.EVENT_BUS.register(GasEvents.class);
+        NeoForge.EVENT_BUS.addListener(WaterBodies::onCreateFluidSource);
     }
 }
