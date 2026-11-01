@@ -4,6 +4,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -14,6 +15,7 @@ import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
+import tfcpp.core.TickProfiler;
 import tfcpp.geology.SeamGas;
 import tfcpp.mechanics.ShaftTracker;
 import tfcpp.pneumatics.instruments.DavyLamp;
@@ -27,9 +29,21 @@ public final class GasEvents
     {
         if (event.getLevel() instanceof ServerLevel level)
         {
+            final long start = System.nanoTime();
             GasTracker.get(level).tick(level);
+            final long gasDone = System.nanoTime();
             ShaftTracker.get(level).tick(level);
+            final long shaftDone = System.nanoTime();
             PipeTracker.get(level).tick(level);
+            final long pipeDone = System.nanoTime();
+
+            TickProfiler.PROFILE.record(TickProfiler.GAS, gasDone - start);
+            TickProfiler.PROFILE.record(TickProfiler.SHAFT, shaftDone - gasDone);
+            TickProfiler.PROFILE.record(TickProfiler.PIPE, pipeDone - shaftDone);
+            if (level.dimension() == Level.OVERWORLD)
+            {
+                TickProfiler.PROFILE.endTick(); // Once per server tick, and the overworld is the one level that always ticks
+            }
         }
     }
 
@@ -65,7 +79,9 @@ public final class GasEvents
         final Player player = event.getEntity();
         if (player instanceof ServerPlayer serverPlayer && player.tickCount % Breathing.INTERVAL_TICKS == 0)
         {
+            final long start = System.nanoTime();
             Breathing.tick(serverPlayer);
+            TickProfiler.PROFILE.record(TickProfiler.BREATHING, System.nanoTime() - start); // Players tick before their level's Post event, so this lands in the tick that is about to be closed
             DavyLamp.tickHeld(serverPlayer);
         }
     }

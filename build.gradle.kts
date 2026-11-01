@@ -78,6 +78,8 @@ neoForge {
         register("gameTestServer") {
             type = "gameTestServer"
             systemProperty("neoforge.enabledGameTestNamespaces", modId)
+            // Runs the load test, which models a large base and logs what the mod costs per tick: -Pload=1
+            (findProperty("load") as String?)?.let { systemProperty("tfcpp.load", it) }
         }
     }
 

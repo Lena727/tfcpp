@@ -21,7 +21,7 @@ Requires JDK 21 (Gradle downloads it if missing).
 | Task | What it does |
 |---|---|
 | `test` | Unit tests of the physics, without Minecraft |
-| `runGameTestServer` | In-game tests on a headless server with TFC |
+| `runGameTestServer` | In-game tests on a headless server with TFC. `-Pload=<n>` also runs the load test (`n` multiplies the number of gas rooms; 1 is the base case), which builds a large base and logs the mod's cost per tick as `TFCPP_LOAD` lines; `/tfcpp perf` shows the same figures on a live server |
 | `runData` | Regenerates `src/generated/resources` |
 | `runClient` | Starts a development client with JEI. `-PquickPlayWorld=<save folder>` joins that world directly, and `-Psurvey=<chunks>` logs what ores worldgen made in new chunks far from spawn |
 
