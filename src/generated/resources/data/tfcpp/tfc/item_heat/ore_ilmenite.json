@@ -1,0 +1,14 @@
+{
+  "heat_capacity": 1.1428572,
+  "ingredient": [
+    {
+      "item": "tfcpp:ore/poor_ilmenite"
+    },
+    {
+      "item": "tfcpp:ore/normal_ilmenite"
+    },
+    {
+      "item": "tfcpp:ore/rich_ilmenite"
+    }
+  ]
+}

@@ -20,7 +20,7 @@ final class FurnaceHeatMixins
     /** A fire in a pit of straw and logs, with no draught, gets to about 900 C, where TFC has it at 1400 C. */
     private static final float PIT_KILN_TEMPERATURE = 900f;
     /** What a blast adds to burning charcoal. A real forge reaches 1400-1600 C, and TFC's 600 C on top would make melting steel easy. */
-    private static final float MOST_FROM_A_BLAST = 450f;
+    private static final float MOST_FROM_A_BLAST = 500f;
 
     @Mixin(PitKilnBlockEntity.class)
     abstract static class PitKiln

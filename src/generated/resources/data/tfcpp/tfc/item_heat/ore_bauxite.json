@@ -1,0 +1,14 @@
+{
+  "heat_capacity": 1.1428572,
+  "ingredient": [
+    {
+      "item": "tfcpp:ore/poor_bauxite"
+    },
+    {
+      "item": "tfcpp:ore/normal_bauxite"
+    },
+    {
+      "item": "tfcpp:ore/rich_bauxite"
+    }
+  ]
+}

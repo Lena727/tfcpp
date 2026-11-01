@@ -1,0 +1,10 @@
+{
+  "type": "tfc:quern",
+  "ingredient": {
+    "item": "tfcpp:ore/apatite"
+  },
+  "result": {
+    "count": 4,
+    "id": "tfcpp:powder/apatite"
+  }
+}

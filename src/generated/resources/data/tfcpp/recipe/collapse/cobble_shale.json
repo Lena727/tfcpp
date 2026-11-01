@@ -1,0 +1,10 @@
+{
+  "type": "tfc:collapse",
+  "ingredient": [
+    "tfcpp:ore/poor_bauxite/shale",
+    "tfcpp:ore/poor_pyrolusite/shale",
+    "tfcpp:ore/apatite/shale",
+    "tfcpp:ore/barite/shale"
+  ],
+  "result": "tfc:rock/cobble/shale"
+}

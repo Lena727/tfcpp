@@ -1,0 +1,11 @@
+{
+  "type": "tfc:collapse",
+  "ingredient": [
+    "tfcpp:ore/poor_galena/dolomite",
+    "tfcpp:ore/poor_bauxite/dolomite",
+    "tfcpp:ore/poor_pyrolusite/dolomite",
+    "tfcpp:ore/apatite/dolomite",
+    "tfcpp:ore/barite/dolomite"
+  ],
+  "result": "tfc:rock/cobble/dolomite"
+}

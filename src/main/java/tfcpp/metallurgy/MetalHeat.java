@@ -48,6 +48,8 @@ public final class MetalHeat
     public static final Metal COPPER = new Metal("copper", 8.96f, 0.385f, 205f, 1080f);
     public static final Metal BISMUTH = new Metal("bismuth", 9.78f, 0.122f, 52f, 270f);
     public static final Metal TIN = new Metal("tin", 7.29f, 0.227f, 59f, 230f);
+    /** Not in {@link #METALS}, as that lists what TFC has data for. */
+    public static final Metal LEAD = new Metal("lead", 11.34f, 0.129f, 23f, 327f);
     public static final Metal WROUGHT_IRON = new Metal("wrought_iron", 7.87f, 0.449f, 247f, 1535f);
 
     private static final float STEEL_DENSITY = 7.85f, STEEL_SPECIFIC_HEAT = 0.49f, STEEL_LATENT_HEAT = 250f;

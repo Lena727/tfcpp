@@ -140,6 +140,22 @@ class ChemistryTest
     }
 
     @Test
+    void leadBuildsUpFromFumeOverDaysOfWork()
+    {
+        // 20 mg/m3 of lead oxide, the air of an unventilated old smelting shed
+        final float moles = 0.02f / 223.2f;
+        float burden = 0f;
+        for (int second = 0; second < 60 * 60; second++)
+        {
+            burden = Physiology.BodyBurden.LEAD.step(burden, moles, 223.2f, 1f);
+        }
+        assertTrue(burden > 15f && burden < 30f, "An hour of real time should approach the first symptoms, got " + burden);
+        assertEquals(0, Physiology.BodyBurden.LEAD.severity(burden));
+        assertEquals(3, Physiology.BodyBurden.LEAD.severity(300f));
+        assertEquals(2, Physiology.BodyBurden.LEAD.severity(Physiology.BodyBurden.LEAD.survivable(1000f)), "Death does not cure it, but it does not kill again");
+    }
+
+    @Test
     void carbonMonoxideGivesNoWarning()
     {
         assertFalse(Physiology.isNoticeable(Gas.CARBON_MONOXIDE, 100_000));

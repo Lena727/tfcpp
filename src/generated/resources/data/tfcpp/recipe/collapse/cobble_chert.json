@@ -1,0 +1,9 @@
+{
+  "type": "tfc:collapse",
+  "ingredient": [
+    "tfcpp:ore/poor_pyrolusite/chert",
+    "tfcpp:ore/apatite/chert",
+    "tfcpp:ore/barite/chert"
+  ],
+  "result": "tfc:rock/cobble/chert"
+}

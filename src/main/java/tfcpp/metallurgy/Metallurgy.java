@@ -31,6 +31,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import tfcpp.core.TFCpp;
+import tfcpp.geology.Ores;
 import tfcpp.pneumatics.instruments.Instruments;
 import tfcpp.pneumatics.pipes.Pipes;
 
@@ -45,6 +46,9 @@ public final class Metallurgy
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, TFCpp.MOD_ID);
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, TFCpp.MOD_ID);
 
+    public static final Supplier<Item> LEAD_INGOT = ITEMS.register("metal/ingot/lead", () -> new Item(new Item.Properties()));
+    /** Raw rock phosphate. It feeds a field slowly, as little of it dissolves until it meets acid, which comes with chemistry. */
+    public static final Supplier<Item> APATITE_POWDER = ITEMS.register("powder/apatite", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> ARSENICAL_COPPER_INGOT = ITEMS.register("metal/ingot/arsenical_copper", () -> new Item(new Item.Properties()));
     /** Zinc oxide left by roasting sphalerite, one for each grade of ore, as a single piece must carry all the zinc of the ore it came from. */
     public static final Map<String, Supplier<Item>> ZINC_CALCINES = Stream.of("small", "poor", "normal", "rich").collect(Collectors.toMap(
@@ -64,6 +68,8 @@ public final class Metallurgy
 
     public static final Supplier<FluidType> ARSENICAL_COPPER_TYPE = FLUID_TYPES.register("metal/arsenical_copper", () -> new FluidType(FluidType.Properties.create()
         .descriptionId("fluid_type.tfcpp.metal.arsenical_copper").density(8000).viscosity(6000).temperature(1320).canConvertToSource(false).canDrown(false).canSwim(false).canPushEntity(false)));
+    public static final Supplier<FluidType> LEAD_TYPE = FLUID_TYPES.register("metal/lead", () -> new FluidType(FluidType.Properties.create()
+        .descriptionId("fluid_type.tfcpp.metal.lead").density(10660).viscosity(3000).temperature(600).canConvertToSource(false).canDrown(false).canSwim(false).canPushEntity(false)));
     /** Iron ore melted with nothing to reduce it. It is still an oxide: only a furnace burning carbon around it can take the oxygen away. */
     public static final Supplier<FluidType> IRON_OXIDE_TYPE = FLUID_TYPES.register("metal/iron_oxide", () -> new FluidType(FluidType.Properties.create()
         .descriptionId("fluid_type.tfcpp.metal.iron_oxide").density(5000).viscosity(6000).temperature(1838).canConvertToSource(false).canDrown(false).canSwim(false).canPushEntity(false)));
@@ -73,6 +79,8 @@ public final class Metallurgy
 
     public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> ARSENICAL_COPPER = FLUIDS.register("metal/arsenical_copper", () -> new BaseFlowingFluid.Source(arsenicalCopperProperties()));
     private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_ARSENICAL_COPPER = FLUIDS.register("metal/flowing_arsenical_copper", () -> new BaseFlowingFluid.Flowing(arsenicalCopperProperties()));
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> LEAD = FLUIDS.register("metal/lead", () -> new BaseFlowingFluid.Source(leadProperties()));
+    private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_LEAD = FLUIDS.register("metal/flowing_lead", () -> new BaseFlowingFluid.Flowing(leadProperties()));
     public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> IRON_OXIDE = FLUIDS.register("metal/iron_oxide", () -> new BaseFlowingFluid.Source(ironOxideProperties()));
     private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_IRON_OXIDE = FLUIDS.register("metal/flowing_iron_oxide", () -> new BaseFlowingFluid.Flowing(ironOxideProperties()));
     public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> MERCURY = FLUIDS.register("mercury", () -> new BaseFlowingFluid.Source(mercuryProperties()));
@@ -101,6 +109,9 @@ public final class Metallurgy
             .icon(() -> new ItemStack(RETORT_ITEM.get()))
             .displayItems((parameters, output) -> {
                 output.accept(ARSENICAL_COPPER_INGOT.get());
+                output.accept(LEAD_INGOT.get());
+                output.accept(APATITE_POWDER.get());
+                Ores.addToTab(output);
                 ZINC_CALCINES.values().forEach(calcine -> output.accept(calcine.get()));
                 output.accept(IRON_SLAG.get());
                 output.accept(FURNACE_SLAG.get());
@@ -119,6 +130,11 @@ public final class Metallurgy
     private static BaseFlowingFluid.Properties arsenicalCopperProperties()
     {
         return new BaseFlowingFluid.Properties(ARSENICAL_COPPER_TYPE, ARSENICAL_COPPER, FLOWING_ARSENICAL_COPPER);
+    }
+
+    private static BaseFlowingFluid.Properties leadProperties()
+    {
+        return new BaseFlowingFluid.Properties(LEAD_TYPE, LEAD, FLOWING_LEAD);
     }
 
     private static BaseFlowingFluid.Properties ironOxideProperties()

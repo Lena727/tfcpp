@@ -68,6 +68,7 @@ public final class Breathing
         state.swallowedMercuryMg -= fromGut;
         state.mercuryMg = BodyBurden.MERCURY.step(state.mercuryMg + fromGut, moles(air, Gas.MERCURY_VAPOR), Gas.MERCURY_VAPOR.molarMass(), SECONDS);
         state.zincOxideMg = BodyBurden.ZINC_OXIDE.step(state.zincOxideMg, moles(air, Gas.ZINC_OXIDE_FUME), Gas.ZINC_OXIDE_FUME.molarMass(), SECONDS);
+        state.leadMg = BodyBurden.LEAD.step(state.leadMg, moles(air, Gas.LEAD_OXIDE_FUME), Gas.LEAD_OXIDE_FUME.molarMass(), SECONDS);
 
         if (player.isCreative() || player.isSpectator())
         {
@@ -117,6 +118,20 @@ public final class Breathing
         if (mercury >= 3)
         {
             hurt(player, TOXIC_GAS, SERIOUS_DAMAGE * 2);
+        }
+
+        final int lead = BodyBurden.LEAD.severity(state.leadMg);
+        if (lead >= 1)
+        {
+            player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, EFFECT_TICKS, lead - 1, false, false, true)); // Colic and weakness
+        }
+        if (lead >= 2)
+        {
+            player.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, EFFECT_TICKS, 1, false, false, true)); // Palsy of the wrists
+        }
+        if (lead >= 3)
+        {
+            hurt(player, TOXIC_GAS, SERIOUS_DAMAGE);
         }
 
         final int fever = BodyBurden.ZINC_OXIDE.severity(state.zincOxideMg);

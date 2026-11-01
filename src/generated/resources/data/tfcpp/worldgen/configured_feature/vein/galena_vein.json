@@ -1,0 +1,179 @@
+{
+  "type": "tfc:cluster_vein",
+  "config": {
+    "blocks": [
+      {
+        "replace": [
+          "tfc:rock/raw/quartzite"
+        ],
+        "with": [
+          {
+            "block": "tfcpp:ore/poor_galena/quartzite",
+            "weight": 3150
+          },
+          {
+            "block": "tfcpp:ore/normal_galena/quartzite",
+            "weight": 3600
+          },
+          {
+            "block": "tfcpp:ore/rich_galena/quartzite",
+            "weight": 2250
+          },
+          {
+            "block": "tfc:ore/poor_sphalerite/quartzite",
+            "weight": 700
+          },
+          {
+            "block": "tfc:ore/normal_sphalerite/quartzite",
+            "weight": 250
+          },
+          {
+            "block": "tfc:ore/rich_sphalerite/quartzite",
+            "weight": 50
+          }
+        ]
+      },
+      {
+        "replace": [
+          "tfc:rock/raw/slate"
+        ],
+        "with": [
+          {
+            "block": "tfcpp:ore/poor_galena/slate",
+            "weight": 3150
+          },
+          {
+            "block": "tfcpp:ore/normal_galena/slate",
+            "weight": 3600
+          },
+          {
+            "block": "tfcpp:ore/rich_galena/slate",
+            "weight": 2250
+          },
+          {
+            "block": "tfc:ore/poor_sphalerite/slate",
+            "weight": 700
+          },
+          {
+            "block": "tfc:ore/normal_sphalerite/slate",
+            "weight": 250
+          },
+          {
+            "block": "tfc:ore/rich_sphalerite/slate",
+            "weight": 50
+          }
+        ]
+      },
+      {
+        "replace": [
+          "tfc:rock/raw/phyllite"
+        ],
+        "with": [
+          {
+            "block": "tfcpp:ore/poor_galena/phyllite",
+            "weight": 3150
+          },
+          {
+            "block": "tfcpp:ore/normal_galena/phyllite",
+            "weight": 3600
+          },
+          {
+            "block": "tfcpp:ore/rich_galena/phyllite",
+            "weight": 2250
+          },
+          {
+            "block": "tfc:ore/poor_sphalerite/phyllite",
+            "weight": 700
+          },
+          {
+            "block": "tfc:ore/normal_sphalerite/phyllite",
+            "weight": 250
+          },
+          {
+            "block": "tfc:ore/rich_sphalerite/phyllite",
+            "weight": 50
+          }
+        ]
+      },
+      {
+        "replace": [
+          "tfc:rock/raw/schist"
+        ],
+        "with": [
+          {
+            "block": "tfcpp:ore/poor_galena/schist",
+            "weight": 3150
+          },
+          {
+            "block": "tfcpp:ore/normal_galena/schist",
+            "weight": 3600
+          },
+          {
+            "block": "tfcpp:ore/rich_galena/schist",
+            "weight": 2250
+          },
+          {
+            "block": "tfc:ore/poor_sphalerite/schist",
+            "weight": 700
+          },
+          {
+            "block": "tfc:ore/normal_sphalerite/schist",
+            "weight": 250
+          },
+          {
+            "block": "tfc:ore/rich_sphalerite/schist",
+            "weight": 50
+          }
+        ]
+      },
+      {
+        "replace": [
+          "tfc:rock/raw/gneiss"
+        ],
+        "with": [
+          {
+            "block": "tfcpp:ore/poor_galena/gneiss",
+            "weight": 3150
+          },
+          {
+            "block": "tfcpp:ore/normal_galena/gneiss",
+            "weight": 3600
+          },
+          {
+            "block": "tfcpp:ore/rich_galena/gneiss",
+            "weight": 2250
+          },
+          {
+            "block": "tfc:ore/poor_sphalerite/gneiss",
+            "weight": 700
+          },
+          {
+            "block": "tfc:ore/normal_sphalerite/gneiss",
+            "weight": 250
+          },
+          {
+            "block": "tfc:ore/rich_sphalerite/gneiss",
+            "weight": 50
+          }
+        ]
+      }
+    ],
+    "density": 0.5,
+    "indicator": {
+      "blocks": [
+        {
+          "block": "tfcpp:ore/small_galena"
+        }
+      ],
+      "depth": 35,
+      "rarity": 25,
+      "underground_count": 0,
+      "underground_rarity": 1
+    },
+    "max_y": 40,
+    "min_y": -70,
+    "random_name": "tfcpp_galena_vein",
+    "rarity": 60,
+    "size": 25
+  }
+}

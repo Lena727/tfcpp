@@ -7,6 +7,7 @@
     "tfcpp:settling_baffle",
     "tfcpp:mine_fan",
     "tfcpp:converter",
-    "#tfcpp:pipe_pickaxe"
+    "#tfcpp:pipe_pickaxe",
+    "#tfcpp:ore_pickaxe"
   ]
 }

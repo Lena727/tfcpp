@@ -60,4 +60,14 @@ class SulfideTest
             assertEquals(mineral == Sulfide.TETRAHEDRITE, arsenic > 0, mineral.name());
         }
     }
+
+    @Test
+    void galenaGivesOneSulfurForEachLeadAndSomeFume()
+    {
+        final float lead = Sulfide.GALENA.metalMoles(25f);
+        assertEquals(25f * 11.34f / 207.2f, lead, 1e-4f);
+        final float[] gases = Sulfide.GALENA.fumes(25f);
+        assertEquals(lead, gases[tfcpp.pneumatics.gas.Gas.SULFUR_DIOXIDE.ordinal()], 1e-4f, "PbS holds one sulfur for each lead");
+        assertEquals(0.03f * lead, gases[tfcpp.pneumatics.gas.Gas.LEAD_OXIDE_FUME.ordinal()], 1e-5f, "A few percent is lost as fume");
+    }
 }

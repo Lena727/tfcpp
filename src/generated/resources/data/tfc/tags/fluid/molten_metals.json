@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "tfcpp:metal/arsenical_copper"
+    "tfcpp:metal/arsenical_copper",
+    "tfcpp:metal/lead"
   ]
 }

@@ -8,6 +8,8 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 
 import tfcpp.mechanics.WaterBodies;
+import tfcpp.geology.OreSurvey;
+import tfcpp.geology.Ores;
 import tfcpp.metallurgy.Metallurgy;
 import tfcpp.pneumatics.gas.GasAttachments;
 import tfcpp.pneumatics.gas.GasEvents;
@@ -29,11 +31,13 @@ public final class TFCpp
         container.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
 
         GasAttachments.TYPES.register(modBus);
+        Ores.load();
         Metallurgy.register(modBus);
         Instruments.register(modBus);
         Pipes.register(modBus);
 
         NeoForge.EVENT_BUS.register(GasEvents.class);
         NeoForge.EVENT_BUS.addListener(WaterBodies::onCreateFluidSource);
+        NeoForge.EVENT_BUS.addListener(OreSurvey::onServerStarted);
     }
 }

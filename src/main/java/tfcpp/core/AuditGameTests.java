@@ -110,9 +110,9 @@ public final class AuditGameTests
     public static void fireIsAsHotAsARealOne(GameTestHelper helper)
     {
         final @Nullable Fuel charcoal = Fuel.get(new ItemStack(Items.CHARCOAL));
-        helper.assertTrue(charcoal != null && charcoal.temperature() == 1190f, "Charcoal without a blast should reach 1190 C");
+        helper.assertTrue(charcoal != null && charcoal.temperature() == 1100f, "Charcoal without a blast should reach 1100 C");
         final float blown = HeatCapability.targetDeviceTemp(charcoal.temperature(), 1000, false);
-        helper.assertTrue(blown == 1640f, "Charcoal with a blast should reach 1640 C, got " + blown);
+        helper.assertTrue(blown == 1600f, "Charcoal with a blast should reach 1600 C, got " + blown);
         helper.assertTrue(blown >= 1565f, "A blast furnace must still be able to melt its charge");
         helper.assertTrue(blown >= 1535f, "and a crucible over a forge must still be able to melt wrought iron");
         helper.assertTrue(HeatCapability.targetDeviceTemp(charcoal.temperature(), 0, false) < 1300f, "Fire clay should need a blast");

@@ -58,6 +58,8 @@ neoForge {
             client()
             // Joins a saved world directly, for checking a build on a real client: -PquickPlayWorld=<folder>
             (findProperty("quickPlayWorld") as String?)?.let { programArguments.addAll("--quickPlaySingleplayer", it) }
+            // Logs what worldgen really made in new chunks far from spawn: -Psurvey=<radius in chunks>
+            (findProperty("survey") as String?)?.let { systemProperty("tfcpp.survey", it) }
         }
         register("server") {
             server()
@@ -69,7 +71,8 @@ neoForge {
                 "--mod", modId,
                 "--all",
                 "--output", file("src/generated/resources").absolutePath,
-                "--existing", file("src/main/resources").absolutePath
+                "--existing", file("src/main/resources").absolutePath,
+                "--existing-mod", "tfc"
             )
         }
         register("gameTestServer") {

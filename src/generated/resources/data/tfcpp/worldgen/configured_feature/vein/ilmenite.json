@@ -1,0 +1,62 @@
+{
+  "type": "tfc:cluster_vein",
+  "config": {
+    "blocks": [
+      {
+        "replace": [
+          "tfc:rock/raw/gabbro"
+        ],
+        "with": [
+          {
+            "block": "tfcpp:ore/poor_ilmenite/gabbro",
+            "weight": 60
+          },
+          {
+            "block": "tfcpp:ore/normal_ilmenite/gabbro",
+            "weight": 30
+          },
+          {
+            "block": "tfcpp:ore/rich_ilmenite/gabbro",
+            "weight": 10
+          }
+        ]
+      },
+      {
+        "replace": [
+          "tfc:rock/raw/diorite"
+        ],
+        "with": [
+          {
+            "block": "tfcpp:ore/poor_ilmenite/diorite",
+            "weight": 60
+          },
+          {
+            "block": "tfcpp:ore/normal_ilmenite/diorite",
+            "weight": 30
+          },
+          {
+            "block": "tfcpp:ore/rich_ilmenite/diorite",
+            "weight": 10
+          }
+        ]
+      }
+    ],
+    "density": 0.5,
+    "indicator": {
+      "blocks": [
+        {
+          "block": "tfcpp:ore/small_ilmenite"
+        }
+      ],
+      "depth": 35,
+      "rarity": 20,
+      "underground_count": 0,
+      "underground_rarity": 1
+    },
+    "max_y": 40,
+    "min_y": -70,
+    "random_name": "tfcpp_ilmenite",
+    "rarity": 40,
+    "size": 25
+  }
+}

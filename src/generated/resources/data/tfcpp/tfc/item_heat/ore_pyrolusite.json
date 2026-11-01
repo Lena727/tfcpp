@@ -1,0 +1,14 @@
+{
+  "heat_capacity": 1.1428572,
+  "ingredient": [
+    {
+      "item": "tfcpp:ore/poor_pyrolusite"
+    },
+    {
+      "item": "tfcpp:ore/normal_pyrolusite"
+    },
+    {
+      "item": "tfcpp:ore/rich_pyrolusite"
+    }
+  ]
+}

@@ -13,6 +13,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.geology.NewOre;
+import tfcpp.geology.Ores;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasEmission;
 
@@ -73,6 +75,10 @@ public final class MeltContext
             graded(map, Ore.SPHALERITE, Sulfide.SPHALERITE);
             graded(map, Ore.BISMUTHINITE, Sulfide.BISMUTHINITE);
             map.put(TFCItems.ORES.get(Ore.CINNABAR).get(), new OreFumes(Sulfide.CINNABAR, 25f));
+            map.put(Ores.PIECES.get("poor_galena").get(), new OreFumes(Sulfide.GALENA, 15f));
+            map.put(Ores.PIECES.get("normal_galena").get(), new OreFumes(Sulfide.GALENA, 25f));
+            map.put(Ores.PIECES.get("rich_galena").get(), new OreFumes(Sulfide.GALENA, 35f));
+            map.put(Ores.SMALL_ITEMS.get(NewOre.GALENA).get(), new OreFumes(Sulfide.GALENA, 10f));
             sulfides = map;
         }
         return sulfides;

@@ -1,0 +1,7 @@
+{
+  "type": "tfc:collapse",
+  "ingredient": [
+    "tfcpp:ore/rich_galena/marble"
+  ],
+  "result": "tfcpp:ore/normal_galena/marble"
+}

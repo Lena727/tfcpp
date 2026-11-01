@@ -1,0 +1,11 @@
+{
+  "type": "tfc:collapse",
+  "ingredient": [
+    "tfcpp:ore/poor_galena/limestone",
+    "tfcpp:ore/poor_bauxite/limestone",
+    "tfcpp:ore/poor_pyrolusite/limestone",
+    "tfcpp:ore/apatite/limestone",
+    "tfcpp:ore/barite/limestone"
+  ],
+  "result": "tfc:rock/cobble/limestone"
+}

@@ -1,6 +1,7 @@
 package tfcpp.pneumatics.gas;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.dries007.tfc.common.blockentities.rotation.RotatingBlockEntity;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
+import tfcpp.geology.OreSurvey;
 import tfcpp.mechanics.ShaftPhysics;
 import tfcpp.mechanics.ShaftTracker;
 
@@ -40,9 +42,18 @@ public final class GasCommand
                                 .executes(context -> add(context.getSource(), BlockPosArgument.getLoadedBlockPos(context, "pos"), StringArgumentType.getString(context, "gas"), FloatArgumentType.getFloat(context, "moles")))))))
                 .then(Commands.literal("stats")
                     .executes(context -> stats(context.getSource()))))
+            .then(Commands.literal("survey")
+                .then(Commands.argument("chunks", IntegerArgumentType.integer(1, 64))
+                    .executes(context -> survey(context.getSource(), IntegerArgumentType.getInteger(context, "chunks")))))
             .then(Commands.literal("shaft")
                 .then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(context -> shaft(context.getSource(), BlockPosArgument.getLoadedBlockPos(context, "pos"))))));
+    }
+
+    private static int survey(CommandSourceStack source, int chunks)
+    {
+        OreSurvey.run(source.getLevel(), BlockPos.containing(source.getPosition()), chunks).forEach(line -> source.sendSuccess(() -> Component.literal(line), false));
+        return 1;
     }
 
     private static int shaft(CommandSourceStack source, BlockPos pos)

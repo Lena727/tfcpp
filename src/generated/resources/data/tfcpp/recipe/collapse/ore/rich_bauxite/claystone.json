@@ -1,0 +1,7 @@
+{
+  "type": "tfc:collapse",
+  "ingredient": [
+    "tfcpp:ore/rich_bauxite/claystone"
+  ],
+  "result": "tfcpp:ore/normal_bauxite/claystone"
+}

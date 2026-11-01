@@ -23,7 +23,7 @@ Requires JDK 21 (Gradle downloads it if missing).
 | `test` | Unit tests of the physics, without Minecraft |
 | `runGameTestServer` | In-game tests on a headless server with TFC |
 | `runData` | Regenerates `src/generated/resources` |
-| `runClient` | Starts a development client with JEI. `-PquickPlayWorld=<save folder>` joins that world directly |
+| `runClient` | Starts a development client with JEI. `-PquickPlayWorld=<save folder>` joins that world directly, and `-Psurvey=<chunks>` logs what ores worldgen made in new chunks far from spawn |
 
 `runData` must run in its own Gradle invocation before anything that reads the generated files.
 
@@ -44,7 +44,7 @@ tfcpp supports one exact TFC version and changes TFC freely wherever that gives 
 | `DrinkableMixin` | `Drinkable.onDrink` | Swallowed mercury joins the same dose in the body as breathed vapour, which a drink's food and potion effects cannot express |
 | `FurnaceHeatMixins$PitKiln` | `PitKilnBlockEntity.cookContents` | A pit reaches about 900 C and not 1400 C, metal melting in it stays instead of being deleted, and a recipe with a chance of giving nothing runs once and not every tick |
 | `FurnaceHeatMixins$Firebox` | `FireboxBlockEntity.tryApplyRecipe` | Metal melting on a shelf above a firebox stays instead of being deleted |
-| `FurnaceHeatMixins$Blast` | `HeatCapability.targetDeviceTemp` | A blast adds at most 450 C and not 600 C, which is what makes melting steel hard |
+| `FurnaceHeatMixins$Blast` | `HeatCapability.targetDeviceTemp` | A blast adds at most 500 C and not 600 C, which is what makes melting steel hard |
 | `HeatingRecipeMixin` | `HeatingRecipe.assembleItem`, `assembleStacked` | The one place where every heating recipe converts an item: releases sulfide fumes at that exact moment |
 | `MeltContextMixins` | `serverTick` of crucible, forge, firepit, pit kiln, firebox | Tells `HeatingRecipeMixin` where the conversion is happening, as a vessel melting its contents has no idea where it is |
 

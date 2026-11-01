@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "tfcpp:ore/barite/limestone",
+    "tfcpp:ore/barite/dolomite",
+    "tfcpp:ore/barite/marble",
+    "tfcpp:ore/barite/shale",
+    "tfcpp:ore/barite/claystone",
+    "tfcpp:ore/barite/chert"
+  ]
+}

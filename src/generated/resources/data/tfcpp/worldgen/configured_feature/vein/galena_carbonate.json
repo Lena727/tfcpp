@@ -1,0 +1,129 @@
+{
+  "type": "tfc:cluster_vein",
+  "config": {
+    "blocks": [
+      {
+        "replace": [
+          "tfc:rock/raw/limestone"
+        ],
+        "with": [
+          {
+            "block": "tfcpp:ore/poor_galena/limestone",
+            "weight": 2100
+          },
+          {
+            "block": "tfcpp:ore/normal_galena/limestone",
+            "weight": 2400
+          },
+          {
+            "block": "tfcpp:ore/rich_galena/limestone",
+            "weight": 1500
+          },
+          {
+            "block": "tfc:ore/poor_sphalerite/limestone",
+            "weight": 2100
+          },
+          {
+            "block": "tfc:ore/normal_sphalerite/limestone",
+            "weight": 750
+          },
+          {
+            "block": "tfc:ore/rich_sphalerite/limestone",
+            "weight": 150
+          },
+          {
+            "block": "tfcpp:ore/barite/limestone",
+            "weight": 10
+          }
+        ]
+      },
+      {
+        "replace": [
+          "tfc:rock/raw/dolomite"
+        ],
+        "with": [
+          {
+            "block": "tfcpp:ore/poor_galena/dolomite",
+            "weight": 2100
+          },
+          {
+            "block": "tfcpp:ore/normal_galena/dolomite",
+            "weight": 2400
+          },
+          {
+            "block": "tfcpp:ore/rich_galena/dolomite",
+            "weight": 1500
+          },
+          {
+            "block": "tfc:ore/poor_sphalerite/dolomite",
+            "weight": 2100
+          },
+          {
+            "block": "tfc:ore/normal_sphalerite/dolomite",
+            "weight": 750
+          },
+          {
+            "block": "tfc:ore/rich_sphalerite/dolomite",
+            "weight": 150
+          },
+          {
+            "block": "tfcpp:ore/barite/dolomite",
+            "weight": 10
+          }
+        ]
+      },
+      {
+        "replace": [
+          "tfc:rock/raw/marble"
+        ],
+        "with": [
+          {
+            "block": "tfcpp:ore/poor_galena/marble",
+            "weight": 2100
+          },
+          {
+            "block": "tfcpp:ore/normal_galena/marble",
+            "weight": 2400
+          },
+          {
+            "block": "tfcpp:ore/rich_galena/marble",
+            "weight": 1500
+          },
+          {
+            "block": "tfc:ore/poor_sphalerite/marble",
+            "weight": 2100
+          },
+          {
+            "block": "tfc:ore/normal_sphalerite/marble",
+            "weight": 750
+          },
+          {
+            "block": "tfc:ore/rich_sphalerite/marble",
+            "weight": 150
+          },
+          {
+            "block": "tfcpp:ore/barite/marble",
+            "weight": 10
+          }
+        ]
+      }
+    ],
+    "density": 0.5,
+    "indicator": {
+      "blocks": [
+        {
+          "block": "tfcpp:ore/small_galena"
+        }
+      ],
+      "depth": 35,
+      "rarity": 20,
+      "underground_count": 0,
+      "underground_rarity": 1
+    },
+    "max_y": 70,
+    "min_y": -30,
+    "random_name": "tfcpp_galena_carbonate",
+    "rarity": 45,
+    "size": 30
+  }
+}

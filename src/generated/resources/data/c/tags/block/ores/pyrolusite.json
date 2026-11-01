@@ -1,0 +1,20 @@
+{
+  "replace": false,
+  "values": [
+    "tfcpp:ore/poor_pyrolusite/shale",
+    "tfcpp:ore/poor_pyrolusite/claystone",
+    "tfcpp:ore/poor_pyrolusite/limestone",
+    "tfcpp:ore/poor_pyrolusite/dolomite",
+    "tfcpp:ore/poor_pyrolusite/chert",
+    "tfcpp:ore/normal_pyrolusite/shale",
+    "tfcpp:ore/normal_pyrolusite/claystone",
+    "tfcpp:ore/normal_pyrolusite/limestone",
+    "tfcpp:ore/normal_pyrolusite/dolomite",
+    "tfcpp:ore/normal_pyrolusite/chert",
+    "tfcpp:ore/rich_pyrolusite/shale",
+    "tfcpp:ore/rich_pyrolusite/claystone",
+    "tfcpp:ore/rich_pyrolusite/limestone",
+    "tfcpp:ore/rich_pyrolusite/dolomite",
+    "tfcpp:ore/rich_pyrolusite/chert"
+  ]
+}

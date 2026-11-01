@@ -1,0 +1,20 @@
+{
+  "heat_capacity": 0.5714286,
+  "ingredient": [
+    {
+      "item": "tfcpp:ore/small_galena"
+    },
+    {
+      "item": "tfcpp:ore/small_bauxite"
+    },
+    {
+      "item": "tfcpp:ore/small_chromite"
+    },
+    {
+      "item": "tfcpp:ore/small_ilmenite"
+    },
+    {
+      "item": "tfcpp:ore/small_pyrolusite"
+    }
+  ]
+}

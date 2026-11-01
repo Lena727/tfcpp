@@ -38,6 +38,9 @@ public final class MetallurgyData implements DataProvider
     private static final float STEEL_MELT = 1500f, HIGH_CARBON_STEEL_MELT = 1450f, ORIGINAL_STEEL_MELT = 1540f;
     /** A bloomery loses a third of its iron to slag. */
     private static final int BLOOMERY_CHARGE_PER_BLOOM = 150;
+    private static final float GALENA_SMELTS = 800f;
+    /** Half of what bone meal gives, as most of it stays locked up in the soil. */
+    private static final float APATITE_PHOSPHORUS = 0.05f;
     private static final float ORIGINAL_CERAMIC_TEMPERATURE = 1399f, POTTERY_TEMPERATURE = 850f, FIRE_CLAY_TEMPERATURE = 1300f;
     private static final Set<String> FIRE_CLAY = Set.of("ceramic/fire_brick.json", "ceramic/fire_ingot_mold.json", "crucible.json", "channel.json", "mold_table.json");
     private static final float STERLING_SILVER_MELT = 890f, ORIGINAL_STERLING_SILVER_MELT = 950f;
@@ -64,6 +67,8 @@ public final class MetallurgyData implements DataProvider
             noMoreRedstone();
             ironTemperatures();
             ironAndSteel();
+            lead();
+            apatite();
             ceramics();
             fuels();
             heatCapacities();
@@ -515,6 +520,58 @@ public final class MetallurgyData implements DataProvider
         }
     }
 
+    /**
+     * Galena gives up lead readily: it needs only a fire well short of copper's, and no carbon, as part of the sulfide roasting to oxide then reacts with the rest. Real lead from it holds some silver, which comes out by cupellation once there is a way to do that.
+     */
+    private void lead()
+    {
+        final JsonObject fluidHeat = new JsonObject();
+        fluidHeat.addProperty("fluid", "tfcpp:metal/lead");
+        fluidHeat.addProperty("melt_temperature", MetalHeat.LEAD.melt());
+        fluidHeat.addProperty("specific_heat_capacity", MetalHeat.LEAD.liquidCapacity());
+        put("data/tfcpp/tfc/fluid_heat/lead.json", fluidHeat);
+
+        final JsonObject ingotHeat = new JsonObject();
+        ingotHeat.add("ingredient", item("tfcpp:metal/ingot/lead"));
+        ingotHeat.addProperty("heat_capacity", MetalHeat.LEAD.ingotCapacity());
+        put("data/tfcpp/tfc/item_heat/lead_ingot.json", ingotHeat);
+
+        put("data/tfcpp/recipe/heating/lead_ingot.json", heatingToFluid(item("tfcpp:metal/ingot/lead"), "tfcpp:metal/lead", 100, MetalHeat.LEAD.melt()));
+
+        final JsonObject casting = new JsonObject();
+        casting.addProperty("type", "tfc:casting");
+        casting.addProperty("break_chance", 0.1f);
+        casting.add("fluid", fluid("tfcpp:metal/lead", 100));
+        casting.add("mold", item("tfc:ceramic/ingot_mold"));
+        casting.add("result", stack("tfcpp:metal/ingot/lead", 1));
+        put("data/tfcpp/recipe/casting/lead_ingot.json", casting);
+
+        final String[] pieces = {"tfcpp:ore/small_galena", "tfcpp:ore/poor_galena", "tfcpp:ore/normal_galena", "tfcpp:ore/rich_galena"};
+        for (int i = 0; i < pieces.length; i++)
+        {
+            put("data/tfcpp/recipe/heating/ore/" + ORE_GRADES[i] + "_galena.json", heatingToFluid(item(pieces[i]), "tfcpp:metal/lead", ORE_MILLIBUCKETS[i], GALENA_SMELTS));
+        }
+
+        addToTag("data/c/tags/item/ingots/lead.json", "tfcpp:metal/ingot/lead");
+        addToTag("data/c/tags/fluid/lead.json", "tfcpp:metal/lead");
+        addToTag("data/c/tags/item/dusts/litharge.json", "tfcpp:powder/lead_oxide");
+    }
+
+    /** Rock phosphate is a real fertiliser, though a slow one. Superphosphate waits for sulfuric acid. */
+    private void apatite()
+    {
+        final JsonObject quern = new JsonObject();
+        quern.addProperty("type", "tfc:quern");
+        quern.add("ingredient", item("tfcpp:ore/apatite"));
+        quern.add("result", stack("tfcpp:powder/apatite", 4));
+        put("data/tfcpp/recipe/quern/apatite.json", quern);
+
+        final JsonObject fertilizer = new JsonObject();
+        fertilizer.add("ingredient", item("tfcpp:powder/apatite"));
+        fertilizer.addProperty("phosphorus", APATITE_PHOSPHORUS);
+        put("data/tfcpp/tfc/fertilizer/apatite.json", fertilizer);
+    }
+
     /** TFC copied the proportions of bronze onto brass, and left sterling silver well short of what the name means. */
     private void realAlloys() throws IOException
     {
@@ -598,8 +655,8 @@ public final class MetallurgyData implements DataProvider
     /** Without a blast, a fire of charcoal or coal stays well short of what TFC gives it. Lignite is a poor fuel with half the energy of coal. */
     private void fuels() throws IOException
     {
-        fuel("charcoal", 1190f, null); // Enough to pour copper from a vessel before it sets, and still short of pig iron and fire clay
-        fuel("coal", 1250f, null);
+        fuel("charcoal", 1100f, null);
+        fuel("coal", 1200f, null);
         fuel("ore/lignite", 1000f, 1100);
     }
 
@@ -786,7 +843,7 @@ public final class MetallurgyData implements DataProvider
 
     private void tags()
     {
-        addToTag("data/tfc/tags/fluid/molten_metals.json", "tfcpp:metal/arsenical_copper"); // Not iron oxide: this is what lets a mould take it, and nothing can be cast from it
+        addToTag("data/tfc/tags/fluid/molten_metals.json", "tfcpp:metal/arsenical_copper", "tfcpp:metal/lead"); // Not iron oxide: this is what lets a mould take it, and nothing can be cast from it
         addToTag("data/tfc/tags/fluid/usable_in_ingot_mold.json", "tfcpp:metal/arsenical_copper");
         addToTag("data/tfc/tags/fluid/usable_in_tool_head_mold.json", "tfcpp:metal/arsenical_copper");
         addToTag("data/tfc/tags/fluid/usable_in_jug.json", "tfcpp:mercury"); // Glazed pottery and glass both hold mercury, which attacks neither
@@ -844,7 +901,7 @@ public final class MetallurgyData implements DataProvider
         addToTag("data/tfcpp/tags/item/open_flames.json", "minecraft:torch", "minecraft:soul_torch", "tfc:torch");
         addToTag("data/tfcpp/tags/entity_type/sentinel_animals.json", "tfc:rat", "tfc:quail");
         addToTag("data/tfc/tags/block/lamps.json", "tfcpp:davy_lamp");
-        addToTag("data/minecraft/tags/block/mineable/pickaxe.json", "tfcpp:retort", "tfcpp:retort_condenser", "tfcpp:davy_lamp", "tfcpp:settling_baffle", "tfcpp:mine_fan", "tfcpp:converter", "#tfcpp:pipe_pickaxe");
+        addToTag("data/minecraft/tags/block/mineable/pickaxe.json", "tfcpp:retort", "tfcpp:retort_condenser", "tfcpp:davy_lamp", "tfcpp:settling_baffle", "tfcpp:mine_fan", "tfcpp:converter", "#tfcpp:pipe_pickaxe", "#tfcpp:ore_pickaxe");
         addToTag("data/c/tags/item/dusts/arsenic_trioxide.json", "tfcpp:powder/arsenic_trioxide");
         addToTag("data/c/tags/item/dusts/antimony_trioxide.json", "tfcpp:powder/antimony_trioxide");
         addToTag("data/c/tags/item/dusts/zinc_oxide.json", "tfcpp:powder/zinc_oxide");

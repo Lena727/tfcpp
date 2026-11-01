@@ -1,7 +1,9 @@
 package tfcpp.metallurgy;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.dries007.tfc.common.blocks.rock.Rock;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.item.Item;
@@ -13,6 +15,8 @@ import net.neoforged.neoforge.client.model.generators.MultiPartBlockStateBuilder
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 import tfcpp.core.TFCpp;
+import tfcpp.geology.NewOre;
+import tfcpp.geology.Ores;
 import tfcpp.pneumatics.instruments.DavyLampBlock;
 import tfcpp.pneumatics.instruments.Instruments;
 import tfcpp.pneumatics.pipes.Pipes;
@@ -34,6 +38,11 @@ public final class MetallurgyAssets
             flatItem(Metallurgy.IRON_SLAG.get());
             flatItem(Metallurgy.FURNACE_SLAG.get());
             flatItem(Metallurgy.BORAX_FLUX.get());
+            flatItem(Metallurgy.LEAD_INGOT.get());
+            flatItem(Metallurgy.APATITE_POWDER.get());
+            flatItem(Instruments.LEAD_OXIDE.get());
+            Ores.PIECES.values().forEach(piece -> flatItem(piece.get()));
+            Ores.SMALL_ITEMS.values().forEach(small -> flatItem(small.get()));
             basicItem(Metallurgy.GLASS_BULB.get());
             basicItem(Metallurgy.MERCURY_BULB.get());
             basicItem(Instruments.DAVY_LAMP_ITEM.get());
@@ -66,6 +75,36 @@ public final class MetallurgyAssets
         {
             simpleBlockWithItem(Metallurgy.RETORT.get(), models().cubeColumn("retort", modLoc("block/retort_side"), modLoc("block/retort_top")));
             simpleBlockWithItem(Metallurgy.RETORT_CONDENSER.get(), models().cubeAll("retort_condenser", modLoc("block/retort_condenser")));
+            for (NewOre ore : NewOre.values())
+            {
+                for (String kind : ore.kinds())
+                {
+                    for (Rock rock : ore.hosts())
+                    {
+                        final String id = NewOre.blockId(kind, rock);
+                        final ModelFile model = models().getBuilder("block/" + id)
+                            .parent(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath("tfc", "block/ore")))
+                            .renderType("cutout")
+                            .texture("all", ResourceLocation.fromNamespaceAndPath("tfc", "block/rock/raw/" + NewOre.rockId(rock)))
+                            .texture("overlay", modLoc("block/ore/" + kind));
+                        simpleBlock(Ores.BLOCKS.get(id).get(), model);
+                        itemModels().getBuilder("item/" + id).parent(model); // simpleBlockItem leaves out the folder for a name with a path in it
+                    }
+                }
+                if (ore.graded())
+                {
+                    final ResourceLocation texture = modLoc("item/ore/small_" + ore.id());
+                    final ModelFile model = models().getBuilder("block/groundcover/" + ore.id())
+                        .parent(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath("tfc", "block/groundcover/hematite")))
+                        .texture("0", texture)
+                        .texture("particle", texture);
+                    getVariantBuilder(Ores.SMALL_BLOCKS.get(ore).get()).partialState().setModels(
+                        new ConfiguredModel(model, 0, 0, false),
+                        new ConfiguredModel(model, 0, 90, false),
+                        new ConfiguredModel(model, 0, 180, false),
+                        new ConfiguredModel(model, 0, 270, false));
+                }
+            }
             simpleBlockWithItem(Metallurgy.CONVERTER.get(), models().cubeColumn("converter", modLoc("block/converter_side"), modLoc("block/converter_top")));
             simpleBlockWithItem(Instruments.SETTLING_BAFFLE.get(), models().cubeColumn("settling_baffle", modLoc("block/settling_baffle"), modLoc("block/retort_top")));
 

@@ -1,0 +1,69 @@
+{
+  "type": "tfc:disc_vein",
+  "config": {
+    "blocks": [
+      {
+        "replace": [
+          "tfc:rock/raw/shale"
+        ],
+        "with": [
+          {
+            "block": "tfcpp:ore/apatite/shale",
+            "weight": 1
+          }
+        ]
+      },
+      {
+        "replace": [
+          "tfc:rock/raw/claystone"
+        ],
+        "with": [
+          {
+            "block": "tfcpp:ore/apatite/claystone",
+            "weight": 1
+          }
+        ]
+      },
+      {
+        "replace": [
+          "tfc:rock/raw/limestone"
+        ],
+        "with": [
+          {
+            "block": "tfcpp:ore/apatite/limestone",
+            "weight": 1
+          }
+        ]
+      },
+      {
+        "replace": [
+          "tfc:rock/raw/dolomite"
+        ],
+        "with": [
+          {
+            "block": "tfcpp:ore/apatite/dolomite",
+            "weight": 1
+          }
+        ]
+      },
+      {
+        "replace": [
+          "tfc:rock/raw/chert"
+        ],
+        "with": [
+          {
+            "block": "tfcpp:ore/apatite/chert",
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "density": 0.35,
+    "height": 3,
+    "max_y": 90,
+    "min_y": 20,
+    "random_name": "tfcpp_apatite",
+    "rarity": 90,
+    "size": 30
+  }
+}

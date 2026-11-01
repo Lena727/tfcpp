@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "tfcpp:vein/galena_carbonate",
+    "tfcpp:vein/galena_vein",
+    "tfcpp:vein/bauxite",
+    "tfcpp:vein/chromite",
+    "tfcpp:vein/ilmenite",
+    "tfcpp:vein/pyrolusite",
+    "tfcpp:vein/apatite",
+    "tfcpp:vein/barite"
+  ]
+}

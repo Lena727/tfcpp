@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    "tfcpp:ore/poor_galena/limestone",
+    "tfcpp:ore/poor_galena/dolomite",
+    "tfcpp:ore/poor_galena/marble",
+    "tfcpp:ore/poor_galena/quartzite",
+    "tfcpp:ore/poor_galena/slate",
+    "tfcpp:ore/poor_galena/phyllite",
+    "tfcpp:ore/poor_galena/schist",
+    "tfcpp:ore/poor_galena/gneiss",
+    "tfcpp:ore/normal_galena/limestone",
+    "tfcpp:ore/normal_galena/dolomite",
+    "tfcpp:ore/normal_galena/marble",
+    "tfcpp:ore/normal_galena/quartzite",
+    "tfcpp:ore/normal_galena/slate",
+    "tfcpp:ore/normal_galena/phyllite",
+    "tfcpp:ore/normal_galena/schist",
+    "tfcpp:ore/normal_galena/gneiss",
+    "tfcpp:ore/rich_galena/limestone",
+    "tfcpp:ore/rich_galena/dolomite",
+    "tfcpp:ore/rich_galena/marble",
+    "tfcpp:ore/rich_galena/quartzite",
+    "tfcpp:ore/rich_galena/slate",
+    "tfcpp:ore/rich_galena/phyllite",
+    "tfcpp:ore/rich_galena/schist",
+    "tfcpp:ore/rich_galena/gneiss"
+  ]
+}

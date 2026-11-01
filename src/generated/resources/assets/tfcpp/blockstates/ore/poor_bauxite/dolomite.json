@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "tfcpp:block/ore/poor_bauxite/dolomite"
+    }
+  }
+}

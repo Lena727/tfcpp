@@ -1,0 +1,7 @@
+{
+  "parent": "tfc:block/groundcover/hematite",
+  "textures": {
+    "0": "tfcpp:item/ore/small_galena",
+    "particle": "tfcpp:item/ore/small_galena"
+  }
+}

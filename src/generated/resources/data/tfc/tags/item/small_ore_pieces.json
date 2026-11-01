@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "tfcpp:ore/small_galena",
+    "tfcpp:ore/small_bauxite",
+    "tfcpp:ore/small_chromite",
+    "tfcpp:ore/small_ilmenite",
+    "tfcpp:ore/small_pyrolusite"
+  ]
+}

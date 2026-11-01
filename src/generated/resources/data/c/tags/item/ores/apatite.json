@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "tfcpp:ore/apatite/shale",
+    "tfcpp:ore/apatite/claystone",
+    "tfcpp:ore/apatite/limestone",
+    "tfcpp:ore/apatite/dolomite",
+    "tfcpp:ore/apatite/chert"
+  ]
+}

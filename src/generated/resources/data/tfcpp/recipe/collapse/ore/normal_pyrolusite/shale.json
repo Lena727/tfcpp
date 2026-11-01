@@ -1,0 +1,7 @@
+{
+  "type": "tfc:collapse",
+  "ingredient": [
+    "tfcpp:ore/normal_pyrolusite/shale"
+  ],
+  "result": "tfcpp:ore/poor_pyrolusite/shale"
+}

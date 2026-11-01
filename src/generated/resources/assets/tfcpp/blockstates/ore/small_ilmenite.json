@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "tfcpp:block/groundcover/ilmenite"
+      },
+      {
+        "model": "tfcpp:block/groundcover/ilmenite",
+        "y": 90
+      },
+      {
+        "model": "tfcpp:block/groundcover/ilmenite",
+        "y": 180
+      },
+      {
+        "model": "tfcpp:block/groundcover/ilmenite",
+        "y": 270
+      }
+    ]
+  }
+}

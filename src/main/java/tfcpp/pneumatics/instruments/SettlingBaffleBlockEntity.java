@@ -37,7 +37,8 @@ public final class SettlingBaffleBlockEntity extends BlockEntity
     private static final Dust[] DUSTS = {
         new Dust(Gas.ARSENIC_TRIOXIDE, Instruments.ARSENIC_TRIOXIDE),
         new Dust(Gas.ANTIMONY_TRIOXIDE, Instruments.ANTIMONY_TRIOXIDE),
-        new Dust(Gas.ZINC_OXIDE_FUME, Instruments.ZINC_OXIDE)
+        new Dust(Gas.ZINC_OXIDE_FUME, Instruments.ZINC_OXIDE),
+        new Dust(Gas.LEAD_OXIDE_FUME, Instruments.LEAD_OXIDE)
     };
 
     private final float[] collected = new float[DUSTS.length];

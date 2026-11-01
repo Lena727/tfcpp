@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "#c:ores/galena",
+    "#c:ores/bauxite",
+    "#c:ores/chromite",
+    "#c:ores/ilmenite",
+    "#c:ores/pyrolusite",
+    "#c:ores/apatite",
+    "#c:ores/barite"
+  ]
+}

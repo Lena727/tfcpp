@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "tfcpp:block/groundcover/pyrolusite"
+      },
+      {
+        "model": "tfcpp:block/groundcover/pyrolusite",
+        "y": 90
+      },
+      {
+        "model": "tfcpp:block/groundcover/pyrolusite",
+        "y": 180
+      },
+      {
+        "model": "tfcpp:block/groundcover/pyrolusite",
+        "y": 270
+      }
+    ]
+  }
+}

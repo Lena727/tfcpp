@@ -26,7 +26,8 @@ public final class Physiology
     {
         ARSENIC(4f, 20f, 70f, 150f), // Half-life about 4 days, fatal oral dose about 70-180 mg
         MERCURY(60f, 5f, 20f, 50f), // Half-life about 60 days, chronic tremor builds slowly
-        ZINC_OXIDE(0.25f, 15f, 60f, Float.MAX_VALUE); // Metal fume fever: awful, passes within hours, not fatal
+        ZINC_OXIDE(0.25f, 15f, 60f, Float.MAX_VALUE), // Metal fume fever: awful, passes within hours, not fatal
+        LEAD(30f, 30f, 100f, 300f); // Half-life in blood about 30 days. Colic and weakness, then palsy of the wrists, and the bones keep it for years.
 
         private final float halfLifeDays, symptoms, disabled, fatal;
 

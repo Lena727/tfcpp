@@ -25,7 +25,9 @@ public enum Gas
     ARSENIC_TRIOXIDE(197.84f, 0f, 0.003f),
     ANTIMONY_TRIOXIDE(291.52f, 0f, 0.003f),
     /** Zinc vapour burns in air to a white smoke of zinc oxide. */
-    ZINC_OXIDE_FUME(81.38f, 0f, 0.003f);
+    ZINC_OXIDE_FUME(81.38f, 0f, 0.003f),
+    /** Lead boils off a smelting hearth and burns in air to a fine smoke of oxide. */
+    LEAD_OXIDE_FUME(223.2f, 0f, 0.003f);
 
     public static final Gas[] VALUES = values();
     public static final int COUNT = VALUES.length;

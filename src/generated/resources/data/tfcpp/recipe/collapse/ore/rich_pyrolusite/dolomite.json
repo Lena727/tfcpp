@@ -1,0 +1,7 @@
+{
+  "type": "tfc:collapse",
+  "ingredient": [
+    "tfcpp:ore/rich_pyrolusite/dolomite"
+  ],
+  "result": "tfcpp:ore/normal_pyrolusite/dolomite"
+}

@@ -190,6 +190,43 @@ for i in range(16):
 write_png(ROOT / 'block/pressure_vessel.png', vessel)
 
 write_png(ROOT / 'item/powder/borax.png', heap(75, (226, 226, 214)))
+write_png(ROOT / 'item/powder/lead_oxide.png', heap(76, (214, 186, 92)))
+write_png(ROOT / 'item/powder/apatite.png', heap(77, (138, 186, 170)))
+write_png(ROOT / 'item/metal/ingot/lead.png', ingot(78, (116, 120, 130)))
+
+
+def overlay(seed, base, density):
+    """Crystals of a mineral through rock, with the rock showing between them."""
+    rng = random.Random(seed)
+    pixels = [[(0, 0, 0, 0)] * 16 for _ in range(16)]
+    for _ in range(int(density * 8)):
+        x, y = rng.randint(1, 14), rng.randint(1, 14)
+        for dx, dy in ((0, 0), (1, 0), (0, 1), (-1, 0), (0, -1)):
+            if rng.random() < 0.8:
+                pixels[(y + dy) % 16][(x + dx) % 16] = shade(base, rng.randint(-22, 26))
+    return pixels
+
+
+def piece(seed, base, size):
+    """A lump of ore in the hand."""
+    rng = random.Random(seed)
+    pixels = [[(0, 0, 0, 0)] * 16 for _ in range(16)]
+    for y in range(16):
+        for x in range(16):
+            if (x - 7.5) ** 2 + (y - 8.5) ** 2 <= size * size * (0.75 + 0.25 * rng.random()):
+                pixels[y][x] = shade(base, rng.randint(-24, 24) + (10 if y < 8 else -8))
+    return pixels
+
+
+ORE_COLORS = {'galena': (120, 126, 136), 'bauxite': (162, 92, 58), 'chromite': (46, 42, 44), 'ilmenite': (66, 62, 70), 'pyrolusite': (34, 32, 38)}
+for index, (name, color) in enumerate(ORE_COLORS.items()):
+    for grade, density, size in (('poor', 2, 3.2), ('normal', 3.5, 4.2), ('rich', 5, 5.2)):
+        write_png(ROOT / f'block/ore/{grade}_{name}.png', overlay(90 + index, color, density))
+        write_png(ROOT / f'item/ore/{grade}_{name}.png', piece(100 + index, color, size))
+    write_png(ROOT / f'item/ore/small_{name}.png', piece(110 + index, color, 2.4))
+for index, (name, color) in enumerate({'apatite': (102, 172, 152), 'barite': (224, 208, 198)}.items()):
+    write_png(ROOT / f'block/ore/{name}.png', overlay(120 + index, color, 3.5))
+    write_png(ROOT / f'item/ore/{name}.png', piece(125 + index, color, 4.2))
 write_png(ROOT / 'item/slag/iron.png', heap(71, (72, 58, 54)))
 write_png(ROOT / 'item/slag/furnace.png', heap(72, (168, 168, 150)))
 

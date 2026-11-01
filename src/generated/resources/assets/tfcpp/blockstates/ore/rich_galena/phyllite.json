@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "tfcpp:block/ore/rich_galena/phyllite"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "type": "tfc:collapse",
+  "ingredient": [
+    "tfcpp:ore/poor_galena/slate"
+  ],
+  "result": "tfc:rock/cobble/slate"
+}

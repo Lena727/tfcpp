@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "tfcpp:ore/poor_ilmenite/gabbro",
+    "tfcpp:ore/poor_ilmenite/diorite",
+    "tfcpp:ore/normal_ilmenite/gabbro",
+    "tfcpp:ore/normal_ilmenite/diorite",
+    "tfcpp:ore/rich_ilmenite/gabbro",
+    "tfcpp:ore/rich_ilmenite/diorite"
+  ]
+}

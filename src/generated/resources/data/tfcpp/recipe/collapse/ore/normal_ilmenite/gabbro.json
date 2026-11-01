@@ -1,0 +1,7 @@
+{
+  "type": "tfc:collapse",
+  "ingredient": [
+    "tfcpp:ore/normal_ilmenite/gabbro"
+  ],
+  "result": "tfcpp:ore/poor_ilmenite/gabbro"
+}

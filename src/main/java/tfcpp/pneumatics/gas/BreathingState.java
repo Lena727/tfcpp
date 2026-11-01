@@ -19,6 +19,7 @@ public final class BreathingState
             state.arsenicMg = tag.getFloat("arsenic");
             state.mercuryMg = tag.getFloat("mercury");
             state.swallowedMercuryMg = tag.getFloat("swallowedMercury");
+            state.leadMg = tag.getFloat("lead");
             state.zincOxideMg = tag.getFloat("zincOxide");
             state.gauzeSeconds = tag.getFloat("gauze");
             state.lampBurnTicks = tag.getInt("lampBurn");
@@ -34,6 +35,7 @@ public final class BreathingState
             tag.putFloat("arsenic", state.arsenicMg);
             tag.putFloat("mercury", state.mercuryMg);
             tag.putFloat("swallowedMercury", state.swallowedMercuryMg);
+            tag.putFloat("lead", state.leadMg);
             tag.putFloat("zincOxide", state.zincOxideMg);
             tag.putFloat("gauze", state.gauzeSeconds);
             tag.putInt("lampBurn", state.lampBurnTicks);
@@ -49,13 +51,14 @@ public final class BreathingState
         final BreathingState state = new BreathingState();
         state.arsenicMg = Physiology.BodyBurden.ARSENIC.survivable(arsenicMg);
         state.mercuryMg = Physiology.BodyBurden.MERCURY.survivable(mercuryMg);
+        state.leadMg = Physiology.BodyBurden.LEAD.survivable(leadMg);
         return state;
     }
 
     /** Share of haemoglobin bound by CO, in percent. */
     public float carboxyhemoglobin;
     /** Body burdens in milligrams. These leave the body slowly, so small exposures add up over days. */
-    public float arsenicMg, mercuryMg, zincOxideMg;
+    public float arsenicMg, mercuryMg, zincOxideMg, leadMg;
     /** The dose of swallowed mercury still in the gut, on its way to {@link #mercuryMg}. A new body does not bring this back, or it would kill again. */
     public float swallowedMercuryMg;
     /** Game tick before which no smell message is shown again. */

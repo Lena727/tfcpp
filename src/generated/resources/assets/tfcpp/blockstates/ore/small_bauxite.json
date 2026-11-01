@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "tfcpp:block/groundcover/bauxite"
+      },
+      {
+        "model": "tfcpp:block/groundcover/bauxite",
+        "y": 90
+      },
+      {
+        "model": "tfcpp:block/groundcover/bauxite",
+        "y": 180
+      },
+      {
+        "model": "tfcpp:block/groundcover/bauxite",
+        "y": 270
+      }
+    ]
+  }
+}

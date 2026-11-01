@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "tfcpp:block/groundcover/chromite"
+      },
+      {
+        "model": "tfcpp:block/groundcover/chromite",
+        "y": 90
+      },
+      {
+        "model": "tfcpp:block/groundcover/chromite",
+        "y": 180
+      },
+      {
+        "model": "tfcpp:block/groundcover/chromite",
+        "y": 270
+      }
+    ]
+  }
+}

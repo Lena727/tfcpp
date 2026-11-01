@@ -56,6 +56,7 @@ public final class Instruments
     public static final Supplier<Item> ARSENIC_TRIOXIDE = Metallurgy.ITEMS.register("powder/arsenic_trioxide", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> ANTIMONY_TRIOXIDE = Metallurgy.ITEMS.register("powder/antimony_trioxide", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> ZINC_OXIDE = Metallurgy.ITEMS.register("powder/zinc_oxide", () -> new Item(new Item.Properties()));
+    public static final Supplier<Item> LEAD_OXIDE = Metallurgy.ITEMS.register("powder/lead_oxide", () -> new Item(new Item.Properties()));
 
     public static final Supplier<BlockEntityType<SettlingBaffleBlockEntity>> SETTLING_BAFFLE_ENTITY = Metallurgy.BLOCK_ENTITIES.register("settling_baffle", () -> BlockEntityType.Builder.of(SettlingBaffleBlockEntity::new, SETTLING_BAFFLE.get()).build(null));
 
@@ -71,6 +72,7 @@ public final class Instruments
         output.accept(ARSENIC_TRIOXIDE.get());
         output.accept(ANTIMONY_TRIOXIDE.get());
         output.accept(ZINC_OXIDE.get());
+        output.accept(LEAD_OXIDE.get());
     }
 
     public static void register(IEventBus modBus)

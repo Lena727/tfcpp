@@ -1,0 +1,10 @@
+{
+  "type": "tfc:collapse",
+  "ingredient": [
+    "tfcpp:ore/poor_bauxite/claystone",
+    "tfcpp:ore/poor_pyrolusite/claystone",
+    "tfcpp:ore/apatite/claystone",
+    "tfcpp:ore/barite/claystone"
+  ],
+  "result": "tfc:rock/cobble/claystone"
+}

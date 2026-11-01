@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "tfcpp:ore/poor_galena",
+    "tfcpp:ore/normal_galena",
+    "tfcpp:ore/rich_galena",
+    "tfcpp:ore/poor_bauxite",
+    "tfcpp:ore/normal_bauxite",
+    "tfcpp:ore/rich_bauxite",
+    "tfcpp:ore/poor_chromite",
+    "tfcpp:ore/normal_chromite",
+    "tfcpp:ore/rich_chromite",
+    "tfcpp:ore/poor_ilmenite",
+    "tfcpp:ore/normal_ilmenite",
+    "tfcpp:ore/rich_ilmenite",
+    "tfcpp:ore/poor_pyrolusite",
+    "tfcpp:ore/normal_pyrolusite",
+    "tfcpp:ore/rich_pyrolusite",
+    "tfcpp:ore/apatite",
+    "tfcpp:ore/barite"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "replace": false,
+  "values": [
+    "tfcpp:ore/poor_bauxite/limestone",
+    "tfcpp:ore/poor_bauxite/dolomite",
+    "tfcpp:ore/poor_bauxite/claystone",
+    "tfcpp:ore/poor_bauxite/shale",
+    "tfcpp:ore/poor_bauxite/basalt",
+    "tfcpp:ore/normal_bauxite/limestone",
+    "tfcpp:ore/normal_bauxite/dolomite",
+    "tfcpp:ore/normal_bauxite/claystone",
+    "tfcpp:ore/normal_bauxite/shale",
+    "tfcpp:ore/normal_bauxite/basalt",
+    "tfcpp:ore/rich_bauxite/limestone",
+    "tfcpp:ore/rich_bauxite/dolomite",
+    "tfcpp:ore/rich_bauxite/claystone",
+    "tfcpp:ore/rich_bauxite/shale",
+    "tfcpp:ore/rich_bauxite/basalt"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "type": "tfc:collapse",
+  "ingredient": [
+    "tfcpp:ore/poor_chromite/gabbro",
+    "tfcpp:ore/poor_ilmenite/gabbro"
+  ],
+  "result": "tfc:rock/cobble/gabbro"
+}

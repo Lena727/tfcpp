@@ -1,0 +1,7 @@
+{
+  "type": "tfc:collapse",
+  "ingredient": [
+    "tfcpp:ore/normal_galena/schist"
+  ],
+  "result": "tfcpp:ore/poor_galena/schist"
+}

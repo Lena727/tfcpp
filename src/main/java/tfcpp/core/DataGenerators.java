@@ -3,6 +3,9 @@ package tfcpp.core;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.Locale;
+import java.util.Map;
+import net.dries007.tfc.common.blocks.rock.Rock;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
@@ -18,6 +21,8 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
+import tfcpp.geology.NewOre;
+import tfcpp.geology.OreData;
 import tfcpp.metallurgy.MetallurgyAssets;
 import tfcpp.metallurgy.MetallurgyData;
 import tfcpp.pneumatics.gas.Breathing;
@@ -42,11 +47,23 @@ public final class DataGenerators
         event.getGenerator().addProvider(event.includeServer(), new DamageTags(output, datapack.getRegistryProvider(), event.getExistingFileHelper()));
 
         event.getGenerator().addProvider(event.includeServer(), new MetallurgyData(output));
+        event.getGenerator().addProvider(event.includeServer(), new OreData(output));
         event.getGenerator().addProvider(event.includeClient(), new MetallurgyAssets.Models(output, event.getExistingFileHelper()));
         event.getGenerator().addProvider(event.includeClient(), new MetallurgyAssets.BlockStates(output, event.getExistingFileHelper()));
 
         event.getGenerator().addProvider(event.includeClient(), new English(output));
         event.getGenerator().addProvider(event.includeClient(), new Russian(output));
+    }
+
+    private static final Map<Rock, String> RUSSIAN_ROCKS = Map.ofEntries(
+        Map.entry(Rock.GABBRO, "габбро"), Map.entry(Rock.DIORITE, "диорит"), Map.entry(Rock.SHALE, "сланец"), Map.entry(Rock.CLAYSTONE, "аргиллит"),
+        Map.entry(Rock.LIMESTONE, "известняк"), Map.entry(Rock.DOLOMITE, "доломит"), Map.entry(Rock.CHERT, "кремень"), Map.entry(Rock.BASALT, "базальт"),
+        Map.entry(Rock.QUARTZITE, "кварцит"), Map.entry(Rock.SLATE, "кровельный сланец"), Map.entry(Rock.PHYLLITE, "филлит"), Map.entry(Rock.SCHIST, "кристаллический сланец"),
+        Map.entry(Rock.GNEISS, "гнейс"), Map.entry(Rock.MARBLE, "мрамор"));
+
+    private static String capitalized(String word)
+    {
+        return word.substring(0, 1).toUpperCase(Locale.ROOT) + word.substring(1);
     }
 
     /** Gas acts on the lungs and blood, so armour does not reduce it, and it does not knock anybody back. */
@@ -99,6 +116,28 @@ public final class DataGenerators
             add("item.tfcpp.mercury_bulb", "Mercury Bulb");
             add("fluid_type.tfcpp.metal.iron_oxide", "Molten Iron Oxide");
             add("item.tfcpp.powder.borax", "Borax Flux");
+            add("fluid_type.tfcpp.metal.lead", "Molten Lead");
+            add("item.tfcpp.metal.ingot.lead", "Lead Ingot");
+            add("item.tfcpp.powder.lead_oxide", "Litharge");
+            add("item.tfcpp.powder.apatite", "Ground Apatite");
+            for (NewOre ore : NewOre.values())
+            {
+                for (String kind : ore.kinds())
+                {
+                    final String grade = ore.graded() ? kind.substring(0, 1).toUpperCase(Locale.ROOT) + kind.substring(1, kind.indexOf('_')) + " " : "";
+                    add("item.tfcpp.ore." + kind, grade + ore.english());
+                    for (Rock rock : ore.hosts())
+                    {
+                        final String key = "block.tfcpp.ore." + kind + "." + NewOre.rockId(rock);
+                        add(key, grade + capitalized(NewOre.rockId(rock)) + " " + ore.english());
+                        add(key + ".prospected", ore.english());
+                    }
+                }
+                if (ore.graded())
+                {
+                    add("block.tfcpp.ore.small_" + ore.id(), "Small " + ore.english());
+                }
+            }
             add("item.tfcpp.slag.iron", "Iron Slag");
             add("item.tfcpp.slag.furnace", "Blast Furnace Slag");
             add("block.tfcpp.converter", "Bessemer Converter");
@@ -210,6 +249,29 @@ public final class DataGenerators
             add("item.tfcpp.mercury_bulb", "Ртутная колба");
             add("fluid_type.tfcpp.metal.iron_oxide", "Расплав оксида железа");
             add("item.tfcpp.powder.borax", "Флюс из буры");
+            add("fluid_type.tfcpp.metal.lead", "Расплав свинца");
+            add("item.tfcpp.metal.ingot.lead", "Слиток свинца");
+            add("item.tfcpp.powder.lead_oxide", "Глёт");
+            add("item.tfcpp.powder.apatite", "Молотый апатит");
+            for (NewOre ore : NewOre.values())
+            {
+                for (String kind : ore.kinds())
+                {
+                    final String grade = !ore.graded() ? "" : kind.startsWith("poor") ? "Бедный " : kind.startsWith("normal") ? "Обычный " : "Богатый ";
+                    final String name = grade.isEmpty() ? capitalized(ore.russian()) : grade + ore.russian();
+                    add("item.tfcpp.ore." + kind, name);
+                    for (Rock rock : ore.hosts())
+                    {
+                        final String key = "block.tfcpp.ore." + kind + "." + NewOre.rockId(rock);
+                        add(key, name + " в породе: " + RUSSIAN_ROCKS.get(rock));
+                        add(key + ".prospected", capitalized(ore.russian()));
+                    }
+                }
+                if (ore.graded())
+                {
+                    add("block.tfcpp.ore.small_" + ore.id(), "Мелкий " + ore.russian());
+                }
+            }
             add("item.tfcpp.slag.iron", "Железистый шлак");
             add("item.tfcpp.slag.furnace", "Доменный шлак");
             add("block.tfcpp.converter", "Конвертер Бессемера");
