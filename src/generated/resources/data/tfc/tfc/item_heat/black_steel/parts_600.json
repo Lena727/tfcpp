@@ -1,0 +1,13 @@
+{
+  "forging_temperature": 891.00006,
+  "heat_capacity": 25.71615,
+  "ingredient": [
+    {
+      "item": "tfc:metal/helmet/black_steel"
+    },
+    {
+      "item": "tfc:metal/greaves/black_steel"
+    }
+  ],
+  "welding_temperature": 1188.0
+}

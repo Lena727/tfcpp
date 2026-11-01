@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 162.0,
+  "heat_capacity": 2.6672728,
+  "ingredient": {
+    "tag": "c:storage_blocks/bismuth"
+  },
+  "welding_temperature": 216.0
+}

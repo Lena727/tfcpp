@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 642.0,
+  "heat_capacity": 7.5745773,
+  "ingredient": {
+    "item": "tfc:metal/trapdoor/black_bronze"
+  },
+  "welding_temperature": 856.0
+}

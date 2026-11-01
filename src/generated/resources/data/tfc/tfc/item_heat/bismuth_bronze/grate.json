@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 591.0,
+  "heat_capacity": 3.943699,
+  "ingredient": {
+    "item": "tfc:metal/grate/bismuth_bronze"
+  },
+  "welding_temperature": 788.0
+}

@@ -189,6 +189,7 @@ for i in range(16):
             vessel[j][i] = shade((140, 140, 146), 0)  # Rivets
 write_png(ROOT / 'block/pressure_vessel.png', vessel)
 
+write_png(ROOT / 'item/powder/borax.png', heap(75, (226, 226, 214)))
 write_png(ROOT / 'item/slag/iron.png', heap(71, (72, 58, 54)))
 write_png(ROOT / 'item/slag/furnace.png', heap(72, (168, 168, 150)))
 

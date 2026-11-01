@@ -1,0 +1,19 @@
+{
+  "forging_temperature": 534.0,
+  "heat_capacity": 2.3621542,
+  "ingredient": [
+    {
+      "item": "tfc:metal/block/sterling_silver_stairs"
+    },
+    {
+      "item": "tfc:metal/exposed_block/sterling_silver_stairs"
+    },
+    {
+      "item": "tfc:metal/weathered_block/sterling_silver_stairs"
+    },
+    {
+      "item": "tfc:metal/oxidized_block/sterling_silver_stairs"
+    }
+  ],
+  "welding_temperature": 712.0
+}

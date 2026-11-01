@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 636.0,
+  "heat_capacity": 6.078334,
+  "ingredient": {
+    "tag": "c:double_ingots/gold"
+  },
+  "welding_temperature": 848.0
+}

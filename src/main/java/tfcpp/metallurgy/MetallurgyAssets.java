@@ -33,6 +33,7 @@ public final class MetallurgyAssets
             Metallurgy.ZINC_CALCINES.values().forEach(calcine -> flatItem(calcine.get()));
             flatItem(Metallurgy.IRON_SLAG.get());
             flatItem(Metallurgy.FURNACE_SLAG.get());
+            flatItem(Metallurgy.BORAX_FLUX.get());
             basicItem(Metallurgy.GLASS_BULB.get());
             basicItem(Metallurgy.MERCURY_BULB.get());
             basicItem(Instruments.DAVY_LAMP_ITEM.get());

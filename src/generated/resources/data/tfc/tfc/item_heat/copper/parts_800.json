@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 648.0,
+  "heat_capacity": 34.264,
+  "ingredient": {
+    "item": "tfc:metal/chestplate/copper"
+  },
+  "welding_temperature": 864.0
+}

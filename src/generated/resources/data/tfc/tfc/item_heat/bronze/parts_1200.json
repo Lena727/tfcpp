@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 570.0,
+  "heat_capacity": 50.055126,
+  "ingredient": {
+    "item": "tfc:metal/horse_armor/bronze"
+  },
+  "welding_temperature": 760.0
+}

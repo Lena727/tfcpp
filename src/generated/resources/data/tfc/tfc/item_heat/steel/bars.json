@@ -1,6 +1,6 @@
 {
   "forging_temperature": 900.00006,
-  "heat_capacity": 0.71428573,
+  "heat_capacity": 1.0687011,
   "ingredient": {
     "item": "tfc:metal/bars/steel"
   },

@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 642.0,
+  "heat_capacity": 15.149155,
+  "ingredient": {
+    "tag": "c:double_sheets/black_bronze"
+  },
+  "welding_temperature": 856.0
+}

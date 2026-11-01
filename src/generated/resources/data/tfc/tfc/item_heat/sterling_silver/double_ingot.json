@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 534.0,
+  "heat_capacity": 6.2990785,
+  "ingredient": {
+    "tag": "c:double_ingots/sterling_silver"
+  },
+  "welding_temperature": 712.0
+}

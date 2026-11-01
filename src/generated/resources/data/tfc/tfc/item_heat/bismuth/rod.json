@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 162.0,
+  "heat_capacity": 1.3336364,
+  "ingredient": {
+    "tag": "c:rods/bismuth"
+  },
+  "welding_temperature": 216.0
+}

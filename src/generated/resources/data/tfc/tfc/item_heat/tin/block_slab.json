@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 138.0,
+  "heat_capacity": 1.5301541,
+  "ingredient": {
+    "item": "tfc:metal/block/tin_slab"
+  },
+  "welding_temperature": 184.0
+}

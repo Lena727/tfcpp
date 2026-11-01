@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 642.0,
+  "heat_capacity": 3.7872887,
+  "ingredient": {
+    "tag": "c:ingots/black_bronze"
+  },
+  "welding_temperature": 856.0
+}

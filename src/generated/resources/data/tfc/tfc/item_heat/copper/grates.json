@@ -1,0 +1,19 @@
+{
+  "forging_temperature": 648.0,
+  "heat_capacity": 4.283,
+  "ingredient": [
+    {
+      "item": "tfc:metal/grate/copper"
+    },
+    {
+      "item": "tfc:metal/weathered_grate/copper"
+    },
+    {
+      "item": "tfc:metal/exposed_grate/copper"
+    },
+    {
+      "item": "tfc:metal/oxidized_grate/copper"
+    }
+  ],
+  "welding_temperature": 864.0
+}

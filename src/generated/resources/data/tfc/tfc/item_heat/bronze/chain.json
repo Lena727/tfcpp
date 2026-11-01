@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 570.0,
+  "heat_capacity": 0.25027564,
+  "ingredient": {
+    "item": "tfc:metal/chain/bronze"
+  },
+  "welding_temperature": 760.0
+}

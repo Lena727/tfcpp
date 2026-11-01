@@ -1,6 +1,6 @@
 {
   "forging_temperature": 630.0,
-  "heat_capacity": 2.857143,
+  "heat_capacity": 4.283,
   "ingredient": {
     "item": "tfcpp:metal/ingot/arsenical_copper"
   },

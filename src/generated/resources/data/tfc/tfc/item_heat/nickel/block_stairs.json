@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 871.80005,
+  "heat_capacity": 3.6005716,
+  "ingredient": {
+    "item": "tfc:metal/block/nickel_stairs"
+  },
+  "welding_temperature": 1162.4
+}

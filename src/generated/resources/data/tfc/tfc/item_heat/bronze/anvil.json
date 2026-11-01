@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 570.0,
+  "heat_capacity": 58.39765,
+  "ingredient": {
+    "item": "tfc:metal/anvil/bronze"
+  },
+  "welding_temperature": 760.0
+}

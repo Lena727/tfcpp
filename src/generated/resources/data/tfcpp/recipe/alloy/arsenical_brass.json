@@ -3,13 +3,13 @@
   "contents": [
     {
       "fluid": "tfcpp:metal/arsenical_copper",
-      "max": 0.92,
-      "min": 0.88
+      "max": 0.72,
+      "min": 0.62
     },
     {
       "fluid": "tfc:metal/zinc",
-      "max": 0.12,
-      "min": 0.08
+      "max": 0.38,
+      "min": 0.28
     }
   ],
   "result": "tfc:metal/brass"

@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 570.0,
+  "heat_capacity": 2.0856304,
+  "ingredient": {
+    "tag": "c:rods/bronze"
+  },
+  "welding_temperature": 760.0
+}

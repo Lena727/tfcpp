@@ -1,6 +1,6 @@
 {
   "forging_temperature": 900.00006,
-  "heat_capacity": 40.0,
+  "heat_capacity": 59.847263,
   "ingredient": {
     "item": "tfc:metal/anvil/steel"
   },

@@ -1,0 +1,5 @@
+{
+  "fluid": "tfc:metal/zinc",
+  "melt_temperature": 420.0,
+  "specific_heat_capacity": 0.011825256
+}

@@ -1,5 +1,5 @@
 {
   "fluid": "tfcpp:metal/arsenical_copper",
   "melt_temperature": 1050.0,
-  "specific_heat_capacity": 0.008571429
+  "specific_heat_capacity": 0.012849
 }

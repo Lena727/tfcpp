@@ -4,6 +4,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import net.dries007.tfc.common.blocks.TFCBlocks;
 import net.dries007.tfc.common.blocks.rock.Ore;
+import net.dries007.tfc.common.items.Powder;
 import net.dries007.tfc.common.items.TFCItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -12,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasEmission;
 
 /**
@@ -46,6 +48,13 @@ public final class MeltContext
         final @Nullable Device device = CURRENT.get();
         if (device == null)
         {
+            return;
+        }
+        if (input.getItem() == TFCItems.POWDERS.get(Powder.FLUX).asItem())
+        {
+            final float[] gases = new float[Gas.COUNT];
+            gases[Gas.CARBON_DIOXIDE.ordinal()] = IronSmelting.CARBON_DIOXIDE_PER_FLUX * input.getCount(); // CaCO3 -> CaO + CO2, which is 44% of its weight gone
+            GasEmission.release(device.level, device.pos, gases);
             return;
         }
         final @Nullable OreFumes ore = sulfides().get(input.getItem());

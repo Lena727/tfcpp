@@ -1,0 +1,19 @@
+{
+  "forging_temperature": 558.0,
+  "heat_capacity": 2.9747295,
+  "ingredient": [
+    {
+      "item": "tfc:metal/block/brass_stairs"
+    },
+    {
+      "item": "tfc:metal/exposed_block/brass_stairs"
+    },
+    {
+      "item": "tfc:metal/weathered_block/brass_stairs"
+    },
+    {
+      "item": "tfc:metal/oxidized_block/brass_stairs"
+    }
+  ],
+  "welding_temperature": 744.0
+}

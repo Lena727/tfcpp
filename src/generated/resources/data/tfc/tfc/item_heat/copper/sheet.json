@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 648.0,
+  "heat_capacity": 8.566,
+  "ingredient": {
+    "tag": "c:sheets/copper"
+  },
+  "welding_temperature": 864.0
+}

@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 558.0,
+  "heat_capacity": 1.9831532,
+  "ingredient": {
+    "item": "tfc:blowpipe"
+  },
+  "welding_temperature": 744.0
+}

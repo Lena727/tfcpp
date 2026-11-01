@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import com.google.gson.JsonArray;
@@ -18,6 +20,7 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.DyeColor;
 import net.neoforged.fml.ModList;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Generates tfcpp's recipes and data, and its overrides of TFC's own. Where a whole family of TFC's recipes changes in the same way, this reads them from the TFC jar and patches them, so nothing is listed by hand and nothing gets missed.
@@ -35,6 +38,11 @@ public final class MetallurgyData implements DataProvider
     private static final float STEEL_MELT = 1500f, HIGH_CARBON_STEEL_MELT = 1450f, ORIGINAL_STEEL_MELT = 1540f;
     /** A bloomery loses a third of its iron to slag. */
     private static final int BLOOMERY_CHARGE_PER_BLOOM = 150;
+    private static final float ORIGINAL_CERAMIC_TEMPERATURE = 1399f, POTTERY_TEMPERATURE = 850f, FIRE_CLAY_TEMPERATURE = 1300f;
+    private static final Set<String> FIRE_CLAY = Set.of("ceramic/fire_brick.json", "ceramic/fire_ingot_mold.json", "crucible.json", "channel.json", "mold_table.json");
+    private static final float STERLING_SILVER_MELT = 890f, ORIGINAL_STERLING_SILVER_MELT = 950f;
+    private static final float WATER_QUENCH = 15f, OIL_QUENCH = 5f;
+    private static final int TALLOW_MILLIBUCKETS = 400;
 
     private final Path root;
     private final Map<String, JsonElement> files = new LinkedHashMap<>();
@@ -49,12 +57,17 @@ public final class MetallurgyData implements DataProvider
     {
         try
         {
+            realAlloys();
             sulfideOres();
             arsenicalCopper();
             retort();
             noMoreRedstone();
             ironTemperatures();
             ironAndSteel();
+            ceramics();
+            fuels();
+            heatCapacities();
+            otherRecipes();
             impossibleRecipes();
             tags();
             lootTables();
@@ -110,12 +123,12 @@ public final class MetallurgyData implements DataProvider
         final JsonObject fluidHeat = new JsonObject();
         fluidHeat.addProperty("fluid", "tfcpp:metal/arsenical_copper");
         fluidHeat.addProperty("melt_temperature", 1050f); // Arsenic lowers the melting point of copper
-        fluidHeat.addProperty("specific_heat_capacity", 0.008571429f);
+        fluidHeat.addProperty("specific_heat_capacity", MetalHeat.COPPER.liquidCapacity());
         put("data/tfcpp/tfc/fluid_heat/arsenical_copper.json", fluidHeat);
 
         final JsonObject ingotHeat = new JsonObject();
         ingotHeat.add("ingredient", item("tfcpp:metal/ingot/arsenical_copper"));
-        ingotHeat.addProperty("heat_capacity", 2.857143f);
+        ingotHeat.addProperty("heat_capacity", MetalHeat.COPPER.ingotCapacity());
         ingotHeat.addProperty("forging_temperature", 630f);
         ingotHeat.addProperty("welding_temperature", 840f);
         put("data/tfcpp/tfc/item_heat/arsenical_copper_ingot.json", ingotHeat);
@@ -162,7 +175,7 @@ public final class MetallurgyData implements DataProvider
         // Bronze hides arsenic well, so it works in place of copper. Silver and gold alloys are left out, being valued for their purity.
         for (String alloy : List.of("bronze", "bismuth_bronze", "black_bronze", "brass"))
         {
-            final JsonObject recipe = read(tfcFile("data/tfc/recipe/alloy/" + alloy + ".json"));
+            final JsonObject recipe = current("data/tfc/recipe/alloy/" + alloy + ".json");
             for (JsonElement content : recipe.getAsJsonArray("contents"))
             {
                 final JsonObject range = content.getAsJsonObject();
@@ -500,6 +513,237 @@ public final class MetallurgyData implements DataProvider
             }
             default -> {}
         }
+    }
+
+    /** TFC copied the proportions of bronze onto brass, and left sterling silver well short of what the name means. */
+    private void realAlloys() throws IOException
+    {
+        alloyContents("brass", Map.of("tfc:metal/copper", new float[] {0.62f, 0.72f}, "tfc:metal/zinc", new float[] {0.28f, 0.38f}));
+        alloyContents("sterling_silver", Map.of("tfc:metal/silver", new float[] {0.9f, 0.95f}, "tfc:metal/copper", new float[] {0.05f, 0.1f}));
+
+        final float melt = STERLING_SILVER_MELT;
+        final JsonObject heat = read(tfcFile("data/tfc/tfc/fluid_heat/sterling_silver.json"));
+        heat.addProperty("melt_temperature", melt);
+        put("data/tfc/tfc/fluid_heat/sterling_silver.json", heat);
+
+        final Path recipes = tfcFile("data/tfc/recipe/heating");
+        try (Stream<Path> paths = Files.walk(recipes))
+        {
+            for (Path path : (Iterable<Path>) paths::iterator)
+            {
+                final String relative = recipes.relativize(path).toString().replace('\\', '/');
+                if (relative.endsWith(".json") && relative.contains("sterling_silver"))
+                {
+                    final JsonObject recipe = read(path);
+                    recipe.addProperty("temperature", melt);
+                    put("data/tfc/recipe/heating/" + relative, recipe);
+                }
+            }
+        }
+        final Path itemHeat = tfcFile("data/tfc/tfc/item_heat/sterling_silver");
+        try (Stream<Path> definitions = Files.list(itemHeat))
+        {
+            for (Path path : (Iterable<Path>) definitions::iterator)
+            {
+                final JsonObject definition = read(path);
+                for (String field : List.of("forging_temperature", "welding_temperature"))
+                {
+                    if (definition.has(field))
+                    {
+                        definition.addProperty(field, definition.get(field).getAsFloat() * melt / ORIGINAL_STERLING_SILVER_MELT);
+                    }
+                }
+                put("data/tfc/tfc/item_heat/sterling_silver/" + path.getFileName(), definition);
+            }
+        }
+    }
+
+    private void alloyContents(String name, Map<String, float[]> ranges) throws IOException
+    {
+        final JsonObject recipe = read(tfcFile("data/tfc/recipe/alloy/" + name + ".json"));
+        for (JsonElement content : recipe.getAsJsonArray("contents"))
+        {
+            final JsonObject range = content.getAsJsonObject();
+            final float[] share = ranges.get(range.get("fluid").getAsString());
+            range.addProperty("min", share[0]);
+            range.addProperty("max", share[1]);
+        }
+        put("data/tfc/recipe/alloy/" + name + ".json", recipe);
+    }
+
+    /**
+     * Real earthenware is fired at 800-1100 C, and a pit reaches about 900 C. Only fire clay needs TFC's 1399 C or near it, and with that it needs a blast. This makes fire bricks, crucibles and the rest of the way to iron into a real step.
+     */
+    private void ceramics() throws IOException
+    {
+        final Path heating = tfcFile("data/tfc/recipe/heating");
+        try (Stream<Path> recipes = Files.walk(heating))
+        {
+            for (Path path : (Iterable<Path>) recipes::iterator)
+            {
+                final String relative = heating.relativize(path).toString().replace('\\', '/');
+                if (relative.endsWith(".json"))
+                {
+                    final JsonObject recipe = read(path);
+                    if (recipe.has("temperature") && recipe.get("temperature").getAsFloat() == ORIGINAL_CERAMIC_TEMPERATURE)
+                    {
+                        recipe.addProperty("temperature", FIRE_CLAY.contains(relative) ? FIRE_CLAY_TEMPERATURE : POTTERY_TEMPERATURE);
+                        put("data/tfc/recipe/heating/" + relative, recipe);
+                    }
+                }
+            }
+        }
+    }
+
+    /** Without a blast, a fire of charcoal or coal stays well short of what TFC gives it. Lignite is a poor fuel with half the energy of coal. */
+    private void fuels() throws IOException
+    {
+        fuel("charcoal", 1190f, null); // Enough to pour copper from a vessel before it sets, and still short of pig iron and fire clay
+        fuel("coal", 1250f, null);
+        fuel("ore/lignite", 1000f, 1100);
+    }
+
+    private void fuel(String name, float temperature, @Nullable Integer duration) throws IOException
+    {
+        final JsonObject fuel = read(tfcFile("data/tfc/tfc/fuel/" + name + ".json"));
+        fuel.addProperty("temperature", temperature);
+        if (duration != null)
+        {
+            fuel.addProperty("duration", duration);
+        }
+        put("data/tfc/tfc/fuel/" + name + ".json", fuel);
+    }
+
+    /** Every metal on one scale of energy, with its heat of melting. See {@link MetalHeat}. */
+    private void heatCapacities() throws IOException
+    {
+        final Map<String, Float> ratios = new HashMap<>();
+        for (MetalHeat.Metal metal : MetalHeat.METALS)
+        {
+            final String directory = "data/tfc/tfc/item_heat/" + metal.id() + "/";
+            final float ratio = metal.ingotCapacity() / current(directory + "ingot.json").get("heat_capacity").getAsFloat();
+            ratios.put("tfc:metal/" + metal.id(), ratio);
+            try (Stream<Path> definitions = Files.list(tfcFile(directory)))
+            {
+                for (Path path : (Iterable<Path>) definitions::iterator)
+                {
+                    final String file = directory + path.getFileName();
+                    final JsonObject definition = current(file);
+                    definition.addProperty("heat_capacity", definition.get("heat_capacity").getAsFloat() * ratio);
+                    put(file, definition);
+                }
+            }
+
+            final String fluid = "data/tfc/tfc/fluid_heat/" + metal.id() + ".json";
+            final JsonObject heat = current(fluid);
+            heat.addProperty("specific_heat_capacity", metal.liquidCapacity());
+            put(fluid, heat);
+        }
+
+        // Blooms, bells, doors and the rest that are listed on their own follow the metal they melt to
+        final Map<String, String> meltsTo = new HashMap<>();
+        final Path heating = tfcFile("data/tfc/recipe/heating");
+        try (Stream<Path> recipes = Files.walk(heating))
+        {
+            for (Path path : (Iterable<Path>) recipes::iterator)
+            {
+                final String relative = heating.relativize(path).toString().replace('\\', '/');
+                if (relative.endsWith(".json"))
+                {
+                    final JsonObject recipe = current("data/tfc/recipe/heating/" + relative);
+                    if (recipe.has("result_fluid"))
+                    {
+                        meltsTo.put(recipe.get("ingredient").toString(), recipe.getAsJsonObject("result_fluid").get("id").getAsString());
+                    }
+                }
+            }
+        }
+        try (Stream<Path> definitions = Files.list(tfcFile("data/tfc/tfc/item_heat")))
+        {
+            for (Path path : (Iterable<Path>) definitions::iterator)
+            {
+                final String name = path.getFileName().toString();
+                if (name.endsWith(".json"))
+                {
+                    final String file = "data/tfc/tfc/item_heat/" + name;
+                    final JsonObject definition = current(file);
+                    final @Nullable Float ratio = ratios.get(meltsTo.get(definition.get("ingredient").toString()));
+                    if (ratio != null)
+                    {
+                        definition.addProperty("heat_capacity", definition.get("heat_capacity").getAsFloat() * ratio);
+                        put(file, definition);
+                    }
+                }
+            }
+        }
+    }
+
+    private void otherRecipes() throws IOException
+    {
+        // 75/15/10 is the classic mix by weight, and 6:1:1 of equal powders is the nearest that fits. Graphite only coats the grains, so it adds its own weight and no more.
+        final String saltpeter = "tfc:powder/saltpeter", sulfur = "tfc:powder/sulfur", charcoal = "tfc:powder/charcoal";
+        put("data/tfc/recipe/crafting/gunpowder.json", shapeless("minecraft:gunpowder", 8, saltpeter, saltpeter, saltpeter, saltpeter, saltpeter, saltpeter, sulfur, charcoal));
+        put("data/tfc/recipe/crafting/gunpowder_with_graphite.json", shapeless("minecraft:gunpowder", 9, saltpeter, saltpeter, saltpeter, saltpeter, saltpeter, saltpeter, sulfur, charcoal, "tfc:powder/graphite"));
+
+        // Boron does not turn into calcium. Borax is a flux for welding, and limestone is what burns to lime.
+        final JsonObject borax = read(tfcFile("data/tfc/recipe/quern/powder/flux_from_borax.json"));
+        borax.add("result", stack("tfcpp:powder/borax", borax.getAsJsonObject("result").get("count").getAsInt()));
+        put("data/tfc/recipe/quern/powder/flux_from_borax.json", borax);
+        addToTag("data/tfc/tags/item/welding_flux.json", "tfcpp:powder/borax");
+        addToTag("data/c/tags/item/dusts/borax.json", "tfcpp:powder/borax");
+
+        // Chalk hardly dissolves at all. Lime water is made from burned lime.
+        final JsonObject limewater = read(tfcFile("data/tfc/recipe/barrel/limewater.json"));
+        final JsonObject lime = item("tfc:powder/lime");
+        lime.addProperty("count", 1);
+        limewater.add("input_item", lime);
+        put("data/tfc/recipe/barrel/limewater.json", limewater);
+
+        // Water takes heat away faster than oil, which is why oil makes a gentler quench. TFC has them the other way around.
+        quench("water_cooling", WATER_QUENCH);
+        quench("salt_water_cooling", WATER_QUENCH);
+        quench("olive_oil_cooling", OIL_QUENCH);
+        quench("canola_oil_cooling", OIL_QUENCH);
+
+        // Water does not turn into fat. Blubber gives what fat it holds, and the water boils off.
+        final JsonObject tallow = read(tfcFile("data/tfc/recipe/pot/tallow.json"));
+        tallow.getAsJsonObject("fluid_output").addProperty("amount", TALLOW_MILLIBUCKETS);
+        put("data/tfc/recipe/pot/tallow.json", tallow);
+    }
+
+    private void quench(String name, float degrees) throws IOException
+    {
+        final JsonObject recipe = read(tfcFile("data/tfc/recipe/barrel/" + name + ".json"));
+        for (JsonElement modifier : recipe.getAsJsonObject("output_item").getAsJsonArray("modifiers"))
+        {
+            if (modifier.getAsJsonObject().get("type").getAsString().equals("tfc:add_heat"))
+            {
+                modifier.getAsJsonObject().addProperty("temperature", -degrees);
+            }
+        }
+        put("data/tfc/recipe/barrel/" + name + ".json", recipe);
+    }
+
+    private static JsonObject shapeless(String result, int count, String... ingredients)
+    {
+        final JsonArray list = new JsonArray();
+        for (String ingredient : ingredients)
+        {
+            list.add(item(ingredient));
+        }
+        final JsonObject recipe = new JsonObject();
+        recipe.addProperty("type", "minecraft:crafting_shapeless");
+        recipe.addProperty("category", "misc");
+        recipe.add("ingredients", list);
+        recipe.add("result", stack(result, count));
+        return recipe;
+    }
+
+    /** @return what this file holds so far, from this data if something here has already changed it, or else from TFC */
+    private JsonObject current(String path) throws IOException
+    {
+        final @Nullable JsonElement changed = files.get(path);
+        return changed != null ? changed.deepCopy().getAsJsonObject() : read(tfcFile(path));
     }
 
     /** Recipes that break the conservation of elements. */

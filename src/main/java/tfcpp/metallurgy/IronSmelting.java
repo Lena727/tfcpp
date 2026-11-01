@@ -29,7 +29,7 @@ public final class IronSmelting
     /** Fe2O3 + 3 CO -> 2 Fe + 3 CO2: one and a half moles of CO2 for every mole of iron. */
     private static final float CARBON_DIOXIDE_PER_IRON = 1.5f;
     /** A flux powder of 0.75 kg of limestone: CaCO3 -> CaO + CO2. */
-    private static final float CARBON_DIOXIDE_PER_FLUX = 7.5f;
+    public static final float CARBON_DIOXIDE_PER_FLUX = 7.5f;
 
     /** @return pieces of slag left by a bloomery charge holding this much iron, for what did not go into blooms */
     public static int bloomerySlag(int chargeMillibuckets, int bloomMillibuckets)

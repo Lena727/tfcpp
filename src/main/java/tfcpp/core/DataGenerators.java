@@ -98,6 +98,7 @@ public final class DataGenerators
             add("item.tfcpp.glass_bulb", "Glass Bulb");
             add("item.tfcpp.mercury_bulb", "Mercury Bulb");
             add("fluid_type.tfcpp.metal.iron_oxide", "Molten Iron Oxide");
+            add("item.tfcpp.powder.borax", "Borax Flux");
             add("item.tfcpp.slag.iron", "Iron Slag");
             add("item.tfcpp.slag.furnace", "Blast Furnace Slag");
             add("block.tfcpp.converter", "Bessemer Converter");
@@ -208,6 +209,7 @@ public final class DataGenerators
             add("item.tfcpp.glass_bulb", "Стеклянная колба");
             add("item.tfcpp.mercury_bulb", "Ртутная колба");
             add("fluid_type.tfcpp.metal.iron_oxide", "Расплав оксида железа");
+            add("item.tfcpp.powder.borax", "Флюс из буры");
             add("item.tfcpp.slag.iron", "Железистый шлак");
             add("item.tfcpp.slag.furnace", "Доменный шлак");
             add("block.tfcpp.converter", "Конвертер Бессемера");

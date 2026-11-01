@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 570.0,
+  "heat_capacity": 1.0428152,
+  "ingredient": {
+    "item": "tfc:metal/bars/bronze"
+  },
+  "welding_temperature": 760.0
+}

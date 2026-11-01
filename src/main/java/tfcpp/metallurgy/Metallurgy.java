@@ -57,6 +57,8 @@ public final class Metallurgy
     public static final Supplier<Item> IRON_SLAG = ITEMS.register("slag/iron", () -> new Item(new Item.Properties()));
     /** Calcium silicate from a blast furnace, with almost no iron in it. */
     public static final Supplier<Item> FURNACE_SLAG = ITEMS.register("slag/furnace", () -> new Item(new Item.Properties()));
+    /** Ground borax. Melts onto iron and keeps air from a weld, and later makes glass that stands heat, but it is not limestone and cannot be burned to lime. */
+    public static final Supplier<Item> BORAX_FLUX = ITEMS.register("powder/borax", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> GLASS_BULB = ITEMS.register("glass_bulb", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> MERCURY_BULB = ITEMS.register("mercury_bulb", () -> new Item(new Item.Properties()));
 
@@ -102,6 +104,7 @@ public final class Metallurgy
                 ZINC_CALCINES.values().forEach(calcine -> output.accept(calcine.get()));
                 output.accept(IRON_SLAG.get());
                 output.accept(FURNACE_SLAG.get());
+                output.accept(BORAX_FLUX.get());
                 output.accept(GLASS_BULB.get());
                 output.accept(MERCURY_BULB.get());
                 output.accept(RETORT_ITEM.get());

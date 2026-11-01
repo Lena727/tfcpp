@@ -1,0 +1,19 @@
+{
+  "forging_temperature": 570.0,
+  "heat_capacity": 4.171261,
+  "ingredient": [
+    {
+      "item": "tfc:metal/grate/bronze"
+    },
+    {
+      "item": "tfc:metal/weathered_grate/bronze"
+    },
+    {
+      "item": "tfc:metal/exposed_grate/bronze"
+    },
+    {
+      "item": "tfc:metal/oxidized_grate/bronze"
+    }
+  ],
+  "welding_temperature": 760.0
+}

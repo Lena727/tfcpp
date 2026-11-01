@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 558.0,
+  "heat_capacity": 9.915767,
+  "ingredient": {
+    "item": "tfc:crankshaft"
+  },
+  "welding_temperature": 744.0
+}

@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 534.0,
+  "heat_capacity": 12.598157,
+  "ingredient": {
+    "tag": "c:double_sheets/sterling_silver"
+  },
+  "welding_temperature": 712.0
+}

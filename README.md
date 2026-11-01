@@ -42,6 +42,9 @@ tfcpp supports one exact TFC version and changes TFC freely wherever that gives 
 | `IronSmeltingMixins$Bloomery` | `BloomeryBlockEntity.completeRecipe` | Leaves the slag that holds the iron a bloomery could not reduce, and the CO2 that took the oxygen off the ore |
 | `IronSmeltingMixins$BlastFurnace` | `BlastFurnaceBlockEntity.serverTick`, at `HeatingRecipe.assembleFluid` | The same for a blast furnace: calcium silicate slag for each piece of flux, and CO2 from the ore and the limestone |
 | `DrinkableMixin` | `Drinkable.onDrink` | Swallowed mercury joins the same dose in the body as breathed vapour, which a drink's food and potion effects cannot express |
+| `FurnaceHeatMixins$PitKiln` | `PitKilnBlockEntity.cookContents` | A pit reaches about 900 C and not 1400 C, metal melting in it stays instead of being deleted, and a recipe with a chance of giving nothing runs once and not every tick |
+| `FurnaceHeatMixins$Firebox` | `FireboxBlockEntity.tryApplyRecipe` | Metal melting on a shelf above a firebox stays instead of being deleted |
+| `FurnaceHeatMixins$Blast` | `HeatCapability.targetDeviceTemp` | A blast adds at most 450 C and not 600 C, which is what makes melting steel hard |
 | `HeatingRecipeMixin` | `HeatingRecipe.assembleItem`, `assembleStacked` | The one place where every heating recipe converts an item: releases sulfide fumes at that exact moment |
 | `MeltContextMixins` | `serverTick` of crucible, forge, firepit, pit kiln, firebox | Tells `HeatingRecipeMixin` where the conversion is happening, as a vessel melting its contents has no idea where it is |
 
