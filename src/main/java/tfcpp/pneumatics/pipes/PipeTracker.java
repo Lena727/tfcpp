@@ -37,6 +37,7 @@ public final class PipeTracker
     private final ReferenceOpenHashSet<PipeNetwork> networks = new ReferenceOpenHashSet<>();
     private final LongOpenHashSet dirty = new LongOpenHashSet();
     private final List<BlockPos> toBreak = new ArrayList<>();
+    private final List<Runnable> afterWalk = new ArrayList<>();
     /** A player's block is removed before its drops are worked out, so this remembers it until the end of the tick. */
     private final LongOpenHashSet wornOutJustNow = new LongOpenHashSet();
 
@@ -49,6 +50,12 @@ public final class PipeTracker
     public void breakLater(BlockPos pos)
     {
         toBreak.add(pos);
+    }
+
+    /** Runs this once no networks are being walked. Anything that breaks a block has to wait for that, as it can end any number of networks. */
+    public void later(Runnable action)
+    {
+        afterWalk.add(action);
     }
 
     public int networkCount()
@@ -217,6 +224,12 @@ public final class PipeTracker
             {
                 level.destroyBlock(pos, false); // A burst block leaves nothing worth picking up
             }
+        }
+        if (!afterWalk.isEmpty())
+        {
+            final List<Runnable> actions = List.copyOf(afterWalk);
+            afterWalk.clear();
+            actions.forEach(Runnable::run);
         }
     }
 

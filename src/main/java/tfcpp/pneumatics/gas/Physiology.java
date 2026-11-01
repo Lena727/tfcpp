@@ -1,5 +1,7 @@
 package tfcpp.pneumatics.gas;
 
+import tfcpp.core.LocalTime;
+
 /**
  * What breathing a gas does to a player, based on occupational exposure data. Thresholds are in parts per million of air. Severity 2 starts at the NIOSH IDLH level, which is survivable for long enough to escape, and severity 3 at the level that drops a person within a few breaths.
  */
@@ -10,28 +12,27 @@ public final class Physiology
     /** Empirical uptake at light work: %COHb per second per ppm. Gives about 100 s to 50% at 12800 ppm, matching the 1-3 minute fatality data. */
     private static final float UPTAKE = 0.16f / 3600f;
     /**
-     * Half-time of washout in clean air, in real seconds. Real blood takes about 5 hours, which here means five hours of TFC's calendar (300 s).
+     * Half-time of washout in clean air, in days of slow time: real blood takes about 5 hours.
      * Uptake stays in real seconds, as that is the time a player has to react in.
      */
-    private static final float WASHOUT_HALF_TIME = 300f;
+    private static final float WASHOUT_HALF_TIME_DAYS = 5f / 24f;
 
     /** Air breathed at light work, 20 litres per minute, in cubic metres per second. */
     private static final float BREATHING_RATE = 0.00033f;
     private static final float RETAINED_FRACTION = 0.8f;
-    private static final float CALENDAR_DAY_SECONDS = 24f * 60f;
 
-    /** A poison the body clears slowly. Half-lives count against the TFC calendar, where a day takes 24 minutes. */
+    /** A poison the body clears slowly. Half-lives are in days of slow time, as a body is one place. */
     public enum BodyBurden
     {
-        ARSENIC(4f * CALENDAR_DAY_SECONDS, 20f, 70f, 150f), // Half-life about 4 days, fatal oral dose about 70-180 mg
-        MERCURY(60f * CALENDAR_DAY_SECONDS, 5f, 20f, 50f), // Half-life about 60 days, chronic tremor builds slowly
-        ZINC_OXIDE(0.25f * CALENDAR_DAY_SECONDS, 15f, 60f, Float.MAX_VALUE); // Metal fume fever: awful, passes within hours, not fatal
+        ARSENIC(4f, 20f, 70f, 150f), // Half-life about 4 days, fatal oral dose about 70-180 mg
+        MERCURY(60f, 5f, 20f, 50f), // Half-life about 60 days, chronic tremor builds slowly
+        ZINC_OXIDE(0.25f, 15f, 60f, Float.MAX_VALUE); // Metal fume fever: awful, passes within hours, not fatal
 
-        private final float halfLife, symptoms, disabled, fatal;
+        private final float halfLifeDays, symptoms, disabled, fatal;
 
-        BodyBurden(float halfLife, float symptoms, float disabled, float fatal)
+        BodyBurden(float halfLifeDays, float symptoms, float disabled, float fatal)
         {
-            this.halfLife = halfLife;
+            this.halfLifeDays = halfLifeDays;
             this.symptoms = symptoms;
             this.disabled = disabled;
             this.fatal = fatal;
@@ -41,7 +42,7 @@ public final class Physiology
         public float step(float burden, float molesPerCubicMetre, float molarMass, float seconds)
         {
             final float inhaled = molesPerCubicMetre * molarMass * 1000f * BREATHING_RATE * RETAINED_FRACTION * seconds;
-            return burden * (float) Math.pow(0.5, seconds / halfLife) + inhaled;
+            return burden * (float) Math.pow(0.5, seconds / (halfLifeDays * LocalTime.SECONDS_PER_DAY)) + inhaled;
         }
 
         /** @return the burden, limited to below the fatal level */
@@ -55,6 +56,26 @@ public final class Physiology
         {
             return Physiology.severity(burden, symptoms, disabled, fatal);
         }
+    }
+
+    /**
+     * Mercury is 13.5 g/mL, and the gut takes in about 0.01% of liquid mercury. That is why a swallowed drop from a thermometer usually passes harmlessly, and also why a mouthful, at more than a kilogram of metal, does not.
+     *
+     * @return the dose in mg that the body takes up from swallowing this many mL of mercury
+     */
+    public static float swallowedMercury(float millilitres)
+    {
+        return millilitres * 13.5f * 1000f * 1e-4f;
+    }
+
+    /**
+     * What has been swallowed is not in the blood yet. It is taken up on its way through the gut, over about a day of slow time, so a fatal mouthful feels like nothing at first and then gets steadily worse.
+     *
+     * @return how much of the dose waiting in the gut reaches the body in this time
+     */
+    public static float takenUpFromGut(float inGut, float seconds)
+    {
+        return inGut * (1f - (float) Math.exp(-seconds / LocalTime.SECONDS_PER_DAY));
     }
 
     public static final float COHB_SYMPTOMS = 20f;
@@ -76,7 +97,7 @@ public final class Physiology
             final float next = current + UPTAKE * carbonMonoxidePpm * (1 - current / equilibrium) * seconds;
             return Math.min(next, equilibrium);
         }
-        final float next = current * (float) Math.pow(0.5, seconds / WASHOUT_HALF_TIME);
+        final float next = current * (float) Math.pow(0.5, seconds / (WASHOUT_HALF_TIME_DAYS * LocalTime.SECONDS_PER_DAY));
         return Math.max(next, equilibrium);
     }
 

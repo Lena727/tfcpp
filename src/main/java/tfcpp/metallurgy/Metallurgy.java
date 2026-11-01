@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
@@ -52,26 +53,40 @@ public final class Metallurgy
         (a, b) -> a,
         LinkedHashMap::new
     ));
+    /** Iron silicate from a bloomery or a converter, rich enough to smelt again. */
+    public static final Supplier<Item> IRON_SLAG = ITEMS.register("slag/iron", () -> new Item(new Item.Properties()));
+    /** Calcium silicate from a blast furnace, with almost no iron in it. */
+    public static final Supplier<Item> FURNACE_SLAG = ITEMS.register("slag/furnace", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> GLASS_BULB = ITEMS.register("glass_bulb", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> MERCURY_BULB = ITEMS.register("mercury_bulb", () -> new Item(new Item.Properties()));
 
     public static final Supplier<FluidType> ARSENICAL_COPPER_TYPE = FLUID_TYPES.register("metal/arsenical_copper", () -> new FluidType(FluidType.Properties.create()
         .descriptionId("fluid_type.tfcpp.metal.arsenical_copper").density(8000).viscosity(6000).temperature(1320).canConvertToSource(false).canDrown(false).canSwim(false).canPushEntity(false)));
+    /** Iron ore melted with nothing to reduce it. It is still an oxide: only a furnace burning carbon around it can take the oxygen away. */
+    public static final Supplier<FluidType> IRON_OXIDE_TYPE = FLUID_TYPES.register("metal/iron_oxide", () -> new FluidType(FluidType.Properties.create()
+        .descriptionId("fluid_type.tfcpp.metal.iron_oxide").density(5000).viscosity(6000).temperature(1838).canConvertToSource(false).canDrown(false).canSwim(false).canPushEntity(false)));
     /** Mercury is liquid at room temperature, and dense enough that a person floats on it. */
     public static final Supplier<FluidType> MERCURY_TYPE = FLUID_TYPES.register("mercury", () -> new FluidType(FluidType.Properties.create()
         .descriptionId("fluid_type.tfcpp.mercury").density(13530).viscosity(1500).temperature(293).canConvertToSource(false).canDrown(false).canSwim(false)));
 
     public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> ARSENICAL_COPPER = FLUIDS.register("metal/arsenical_copper", () -> new BaseFlowingFluid.Source(arsenicalCopperProperties()));
     private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_ARSENICAL_COPPER = FLUIDS.register("metal/flowing_arsenical_copper", () -> new BaseFlowingFluid.Flowing(arsenicalCopperProperties()));
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> IRON_OXIDE = FLUIDS.register("metal/iron_oxide", () -> new BaseFlowingFluid.Source(ironOxideProperties()));
+    private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_IRON_OXIDE = FLUIDS.register("metal/flowing_iron_oxide", () -> new BaseFlowingFluid.Flowing(ironOxideProperties()));
     public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> MERCURY = FLUIDS.register("mercury", () -> new BaseFlowingFluid.Source(mercuryProperties()));
     private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_MERCURY = FLUIDS.register("flowing_mercury", () -> new BaseFlowingFluid.Flowing(mercuryProperties()));
 
     public static final Supplier<Block> RETORT = BLOCKS.register("retort", () -> new RetortBlock(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_ORANGE).strength(2f, 6f).sound(SoundType.STONE).requiresCorrectToolForDrops()));
     public static final Supplier<Block> RETORT_CONDENSER = BLOCKS.register("retort_condenser", () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_ORANGE).strength(2f, 6f).sound(SoundType.STONE).requiresCorrectToolForDrops()));
 
+    public static final Supplier<Block> CONVERTER = BLOCKS.register("converter", () -> new ConverterBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(4f, 8f).sound(SoundType.METAL).requiresCorrectToolForDrops().pushReaction(PushReaction.BLOCK)));
+
     public static final Supplier<Item> RETORT_ITEM = ITEMS.register("retort", () -> new BlockItem(RETORT.get(), new Item.Properties()));
     public static final Supplier<Item> RETORT_CONDENSER_ITEM = ITEMS.register("retort_condenser", () -> new BlockItem(RETORT_CONDENSER.get(), new Item.Properties()));
 
+    public static final Supplier<Item> CONVERTER_ITEM = ITEMS.register("converter", () -> new BlockItem(CONVERTER.get(), new Item.Properties()));
+
+    public static final Supplier<BlockEntityType<ConverterBlockEntity>> CONVERTER_ENTITY = BLOCK_ENTITIES.register("converter", () -> BlockEntityType.Builder.of(ConverterBlockEntity::new, CONVERTER.get()).build(null));
     public static final Supplier<BlockEntityType<RetortBlockEntity>> RETORT_ENTITY = BLOCK_ENTITIES.register("retort", () -> BlockEntityType.Builder.of(RetortBlockEntity::new, RETORT.get()).build(null));
 
     public static final Supplier<RecipeType<RetortRecipe>> RETORT_RECIPE = RECIPE_TYPES.register("retort", () -> RecipeType.simple(TFCpp.id("retort")));
@@ -85,10 +100,13 @@ public final class Metallurgy
             .displayItems((parameters, output) -> {
                 output.accept(ARSENICAL_COPPER_INGOT.get());
                 ZINC_CALCINES.values().forEach(calcine -> output.accept(calcine.get()));
+                output.accept(IRON_SLAG.get());
+                output.accept(FURNACE_SLAG.get());
                 output.accept(GLASS_BULB.get());
                 output.accept(MERCURY_BULB.get());
                 output.accept(RETORT_ITEM.get());
                 output.accept(RETORT_CONDENSER_ITEM.get());
+                output.accept(CONVERTER_ITEM.get());
                 Instruments.addToTab(output);
                 Pipes.addToTab(output);
             })
@@ -98,6 +116,11 @@ public final class Metallurgy
     private static BaseFlowingFluid.Properties arsenicalCopperProperties()
     {
         return new BaseFlowingFluid.Properties(ARSENICAL_COPPER_TYPE, ARSENICAL_COPPER, FLOWING_ARSENICAL_COPPER);
+    }
+
+    private static BaseFlowingFluid.Properties ironOxideProperties()
+    {
+        return new BaseFlowingFluid.Properties(IRON_OXIDE_TYPE, IRON_OXIDE, FLOWING_IRON_OXIDE);
     }
 
     private static BaseFlowingFluid.Properties mercuryProperties()
@@ -122,6 +145,8 @@ public final class Metallurgy
     {
         event.registerBlockEntity(BlockCapabilities.HEAT, RETORT_ENTITY.get(), (entity, side) -> entity);
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, RETORT_ENTITY.get(), (entity, side) -> entity.tank());
+        event.registerBlockEntity(BlockCapabilities.HEAT, CONVERTER_ENTITY.get(), (entity, side) -> entity);
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, CONVERTER_ENTITY.get(), (entity, side) -> entity.tank());
     }
 
     private Metallurgy() {}

@@ -10,6 +10,8 @@ public final class PipeSegment
     public final float volume;
     /** Share of the wall left, which corrosion eats away. */
     public float integrity = 1f;
+    /** Tick of TFC's clock that corrosion has been counted up to, or -1 if it never has. A network can be rebuilt at any moment, and an unloaded pipe goes on rusting, so this stays with the wall. */
+    public long corrodedUntil = -1L;
     public PipeContents stored;
     @Nullable public PipeNetwork network;
 

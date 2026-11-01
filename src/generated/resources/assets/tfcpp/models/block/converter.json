@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "tfcpp:block/converter_top",
+    "side": "tfcpp:block/converter_side"
+  }
+}

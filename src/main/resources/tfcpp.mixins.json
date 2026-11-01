@@ -5,7 +5,10 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "CharcoalForgeBlockMixin",
+    "DrinkableMixin",
     "HeatingRecipeMixin",
+    "IronSmeltingMixins$BlastFurnace",
+    "IronSmeltingMixins$Bloomery",
     "MeltContextMixins$Crucible",
     "MeltContextMixins$Firebox",
     "MeltContextMixins$Firepit",

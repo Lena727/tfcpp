@@ -3,6 +3,7 @@ package tfcpp.pneumatics.pipes;
 import java.util.ArrayList;
 import java.util.List;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.climate.Climate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,6 +21,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.core.LocalTime;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasMath;
 import tfcpp.pneumatics.gas.GasTracker;
@@ -28,13 +30,10 @@ import tfcpp.pneumatics.gas.LevelGasVolume;
 /**
  * A connected run of pipe, treated as one volume at one pressure. Sound crosses a real pipe within a fraction of a second, and this runs once per second, so a pressure that differs along a pipe would not be seen anyway. What a pipe's length does change is how fast anything can get through it, which is worked out at each port.
  * <p>
- * Costs nothing per block of pipe from one second to the next: only its ports are visited, and the walls once a calendar hour.
+ * Costs nothing per block of pipe from one second to the next: only its ports are visited, and the walls once a minute.
  */
 public final class PipeNetwork
 {
-    /** The fuel of TFC burns on its own compressed calendar, so the heat it gives does too. */
-    private static final float HEAT_TIME_SCALE = 60f;
-    private static final float SECONDS_PER_CALENDAR_DAY = 24f * 60f;
     private static final int CORROSION_INTERVAL_SECONDS = 60;
     private static final float WALL_HEAT_CAPACITY_PER_SEGMENT = 4f;
     /** A wall takes heat from a fire about like this: 30 kW across about 1000 K. */
@@ -59,6 +58,7 @@ public final class PipeNetwork
     private float heatLoss;
     private float lowestY = Float.MAX_VALUE, highestY = -Float.MAX_VALUE;
     private int secondsToCorrosion = CORROSION_INTERVAL_SECONDS;
+    private long corrodedUntil;
     /** The first to give way, found again only when the walls have changed. Looking through every wall each second would make a long pressurised main expensive. */
     @Nullable private PipeSegment weakest;
     private float weakestRating = -1f;
@@ -73,9 +73,14 @@ public final class PipeNetwork
         this.contents = new PipeContents();
 
         float total = 0;
+        long oldest = Calendars.SERVER.getTicks();
         for (PipeSegment segment : segments)
         {
             total += segment.volume;
+            if (segment.corrodedUntil >= 0L)
+            {
+                oldest = Math.min(oldest, segment.corrodedUntil);
+            }
             contents.add(segment.stored);
             segment.stored = null;
             segment.network = this;
@@ -94,6 +99,7 @@ public final class PipeNetwork
             highestY = Math.max(highestY, segment.pos.getY());
         }
         this.volume = total;
+        this.corrodedUntil = oldest;
         markUnsaved(level); // What each chunk holds has just changed: it now shares in the whole
     }
 
@@ -166,7 +172,13 @@ public final class PipeNetwork
         if (--secondsToCorrosion <= 0)
         {
             secondsToCorrosion = CORROSION_INTERVAL_SECONDS;
-            corrode(level, CORROSION_INTERVAL_SECONDS / SECONDS_PER_CALENDAR_DAY);
+            final long now = Calendars.SERVER.getTicks();
+            corrode(level, (float) (now - corrodedUntil) / LocalTime.TICKS_PER_DAY);
+            corrodedUntil = now;
+            for (PipeSegment segment : segments)
+            {
+                segment.corrodedUntil = now;
+            }
             weakestRating = -1f;
             markUnsaved(level);
         }
@@ -183,18 +195,23 @@ public final class PipeNetwork
         final BlockPos first = segments.getFirst().pos;
         final float ambient = Climate.get(level).getInstantTemperature(level, first) + 273.15f;
 
-        float power = heatLoss * (ambient - contents.temperature);
+        // TFC's fuel burns out in a fixed number of ticks: a log that would last an hour lasts about two minutes. The same energy reaches the pipe in that time, so heat moves at that same scale.
+        float conductance = heatLoss * LocalTime.TIME_SCALE;
+        float power = conductance * (ambient - contents.temperature);
         for (BlockPos port : ports)
         {
             if (level.getBlockEntity(port) instanceof PressureVesselBlockEntity vessel && vessel.getTemperature() > 0f)
             {
-                power += HEATING_KILOWATTS_PER_KELVIN * (vessel.getTemperature() + 273.15f - contents.temperature);
+                power += HEATING_KILOWATTS_PER_KELVIN * LocalTime.TIME_SCALE * (vessel.getTemperature() + 273.15f - contents.temperature);
+                conductance += HEATING_KILOWATTS_PER_KELVIN * LocalTime.TIME_SCALE;
             }
         }
-        final float capacity = contents.heatCapacity() + WALL_HEAT_CAPACITY_PER_SEGMENT * segments.size();
-        final float change = power * seconds * HEAT_TIME_SCALE / capacity;
-        final float limit = Math.abs(power) / (heatLoss + HEATING_KILOWATTS_PER_KELVIN);
-        contents.temperature += Math.clamp(change, -limit, limit); // A step can only go as far as the temperature it is heading to
+        if (conductance > 0f)
+        {
+            final float capacity = contents.heatCapacity() + WALL_HEAT_CAPACITY_PER_SEGMENT * segments.size();
+            final float limit = Math.abs(power) / conductance;
+            contents.temperature += Math.clamp(power * seconds / capacity, -limit, limit); // A step can only go as far as the temperature it is heading to
+        }
     }
 
     private void corrode(ServerLevel level, float days)
@@ -253,6 +270,29 @@ public final class PipeNetwork
 
         final float gauge = pressure() - 1f;
         return gauge > weakestRating || weakestRating <= 0f ? weakest : null;
+    }
+
+    /**
+     * Lets gas out through an opening under a head of liquid, into something that takes all of it, as a tuyere does under molten iron.
+     *
+     * @param backPressure pressure in atm on the far side of the opening
+     * @param areaShare share of the bore that the opening leaves clear
+     * @return what came through, or {@code null} if the pressure in the pipe cannot lift the liquid
+     */
+    @Nullable
+    public PipeContents blowInto(float backPressure, float areaShare, float seconds)
+    {
+        final float drive = contents.pressure(volume) - backPressure;
+        final float moles = contents.gasMoles();
+        if (drive <= 0f || moles <= 0f)
+        {
+            return null;
+        }
+        final float density = contents.gasDensity(volume);
+        final float speed = PipePhysics.flowSpeed(drive * PipePhysics.PASCALS_PER_ATM, density, pathLength());
+        final float flow = speed * PipePhysics.BORE_AREA * areaShare * density * 1000f / contents.molarMass() * seconds;
+        final float toEven = PipePhysics.moles(drive, contents.temperature, contents.freeVolume(volume));
+        return contents.takeGas(Math.min(Math.min(flow, toEven) / moles, 1f));
     }
 
     /** Lets gas through a vent, either way, according to the pressure on each side. */

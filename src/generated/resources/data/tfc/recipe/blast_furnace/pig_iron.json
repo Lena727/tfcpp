@@ -1,0 +1,14 @@
+{
+  "type": "tfc:blast_furnace",
+  "catalyst": {
+    "item": "tfc:powder/flux"
+  },
+  "fluid": {
+    "amount": 1,
+    "fluid": "tfcpp:metal/iron_oxide"
+  },
+  "result": {
+    "amount": 1,
+    "id": "tfc:metal/pig_iron"
+  }
+}

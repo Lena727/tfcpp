@@ -58,6 +58,8 @@ public final class TFCppJeiPlugin implements IModPlugin
         info(registration, new ItemStack(Instruments.SENTINEL_CAGE.get()), "tfcpp.info.sentinel_cage");
         info(registration, new ItemStack(Instruments.SETTLING_BAFFLE_ITEM.get()), "tfcpp.info.settling_baffle");
         info(registration, new ItemStack(Instruments.MINE_FAN_ITEM.get()), "tfcpp.info.mine_fan");
+        info(registration, new ItemStack(Metallurgy.CONVERTER_ITEM.get()), "tfcpp.info.converter");
+        info(registration, new ItemStack(Metallurgy.IRON_SLAG.get()), "tfcpp.info.iron_slag");
         Pipes.PIPE_ITEMS.values().forEach(pipe -> info(registration, new ItemStack(pipe.get()), "tfcpp.info.pipes"));
         info(registration, new ItemStack(Pipes.PRESSURE_VESSEL.get()), "tfcpp.info.pressure_vessel");
         info(registration, new ItemStack(Pipes.PISTON_PUMP.get()), "tfcpp.info.piston_pump");

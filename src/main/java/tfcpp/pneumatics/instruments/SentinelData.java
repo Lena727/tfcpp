@@ -9,7 +9,7 @@ import net.minecraft.network.codec.StreamCodec;
  * The animal in a cage.
  *
  * @param carboxyhemoglobin share of its haemoglobin bound by CO, in percent
- * @param fedUntil          calendar tick at which it starves
+ * @param fedUntil          tick of TFC's clock at which it starves
  */
 public record SentinelData(float carboxyhemoglobin, long fedUntil)
 {

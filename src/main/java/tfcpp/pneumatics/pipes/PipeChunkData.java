@@ -64,6 +64,7 @@ public final class PipeChunkData
             tag.putLong("pos", segment.pos.asLong());
             tag.putFloat("volume", segment.volume);
             tag.putFloat("integrity", segment.integrity);
+            tag.putLong("corrodedUntil", segment.corrodedUntil);
             tag.put("contents", segment.contents().save());
             list.add(tag);
         }
@@ -81,6 +82,7 @@ public final class PipeChunkData
             final CompoundTag tag = list.getCompound(i);
             final PipeSegment segment = new PipeSegment(BlockPos.of(tag.getLong("pos")), tag.getFloat("volume"), PipeContents.load(tag.getCompound("contents")));
             segment.integrity = tag.getFloat("integrity");
+            segment.corrodedUntil = tag.contains("corrodedUntil") ? tag.getLong("corrodedUntil") : -1L;
             put(segment);
         }
     }

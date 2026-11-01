@@ -15,6 +15,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.core.LocalTime;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasAttachments;
 import tfcpp.pneumatics.gas.GasChunkData;
@@ -55,8 +56,6 @@ public final class SeamGas
     /** Hydrostatic pressure in the seam, about 10 kPa per metre of depth. */
     private static final float MEGAPASCALS_PER_METRE = 0.01f;
     private static final float FAST_FRACTION = 0.1f;
-    /** Time constant of a face bleeding its fast fraction, one calendar day. */
-    private static final float FACE_TIME_CONSTANT_SECONDS = 24f * 60f;
     private static final float FACE_DONE_MOLES = 0.01f;
 
     /** One in this many 4 x 4 x 4 regions of rock next to a seam holds a pocket. */
@@ -302,7 +301,8 @@ public final class SeamGas
             final int nx = x + side.getStepX(), ny = y + side.getStepY(), nz = z + side.getStepZ();
             if (volume.isPassable(nx, ny, nz))
             {
-                final float bled = moles <= FACE_DONE_MOLES ? moles : moles * (1 - (float) Math.exp(-seconds / FACE_TIME_CONSTANT_SECONDS));
+                // A face bleeds its fast fraction with a time constant of one day of slow time
+                final float bled = moles <= FACE_DONE_MOLES ? moles : moles * (1 - (float) Math.exp(-seconds / LocalTime.SECONDS_PER_DAY));
                 final @Nullable float[] cell = volume.cellForEmission(nx, ny, nz);
                 if (cell != null)
                 {

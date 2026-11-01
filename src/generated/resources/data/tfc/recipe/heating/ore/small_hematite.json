@@ -1,0 +1,11 @@
+{
+  "type": "tfc:heating",
+  "ingredient": {
+    "item": "tfc:ore/small_hematite"
+  },
+  "result_fluid": {
+    "amount": 10,
+    "id": "tfcpp:metal/iron_oxide"
+  },
+  "temperature": 1565.0
+}

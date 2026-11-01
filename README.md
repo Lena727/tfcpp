@@ -39,6 +39,9 @@ tfcpp supports one exact TFC version and changes TFC freely wherever that gives 
 | `ShaftSourceMixins$Pump` | `PumpBlockEntity.serverTick`, `onRemoved` | Replaces a pump that made water from nothing with `MassPump`, which moves it |
 | `ShaftSourceMixins$Bellows` | `BellowsBlockEntity.tickBoth` | A shaft can now stop, and dividing by its speed would disable the bellows for good |
 | `ShaftSourceMixins$Aqueduct` | `AqueductBlock.pickupBlock` | A bucket from an aqueduct refilled for free, which made water from nothing |
+| `IronSmeltingMixins$Bloomery` | `BloomeryBlockEntity.completeRecipe` | Leaves the slag that holds the iron a bloomery could not reduce, and the CO2 that took the oxygen off the ore |
+| `IronSmeltingMixins$BlastFurnace` | `BlastFurnaceBlockEntity.serverTick`, at `HeatingRecipe.assembleFluid` | The same for a blast furnace: calcium silicate slag for each piece of flux, and CO2 from the ore and the limestone |
+| `DrinkableMixin` | `Drinkable.onDrink` | Swallowed mercury joins the same dose in the body as breathed vapour, which a drink's food and potion effects cannot express |
 | `HeatingRecipeMixin` | `HeatingRecipe.assembleItem`, `assembleStacked` | The one place where every heating recipe converts an item: releases sulfide fumes at that exact moment |
 | `MeltContextMixins` | `serverTick` of crucible, forge, firepit, pit kiln, firebox | Tells `HeatingRecipeMixin` where the conversion is happening, as a vessel melting its contents has no idea where it is |
 

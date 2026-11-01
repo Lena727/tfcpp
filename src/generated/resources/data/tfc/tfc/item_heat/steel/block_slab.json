@@ -1,0 +1,19 @@
+{
+  "forging_temperature": 900.00006,
+  "heat_capacity": 1.4285715,
+  "ingredient": [
+    {
+      "item": "tfc:metal/block/steel_slab"
+    },
+    {
+      "item": "tfc:metal/exposed_block/steel_slab"
+    },
+    {
+      "item": "tfc:metal/weathered_block/steel_slab"
+    },
+    {
+      "item": "tfc:metal/oxidized_block/steel_slab"
+    }
+  ],
+  "welding_temperature": 1200.0
+}

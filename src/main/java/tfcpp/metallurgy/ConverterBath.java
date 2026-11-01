@@ -1,0 +1,242 @@
+package tfcpp.metallurgy;
+
+import org.jetbrains.annotations.Nullable;
+
+/**
+ * The molten charge of a Bessemer converter. Air blown up through the iron burns what is dissolved in it, in the order that real blows showed: silicon first, then carbon, and iron itself once the carbon runs short.
+ * <p>
+ * No fuel is burned. Those reactions are the only source of heat, against the heat that the blast carries off and what the vessel loses. Bessemer's discovery was that this comes out ahead, which is what let steel stay liquid without a furnace able to reach 1500 C, but it only does so with a strong enough blast.
+ */
+public final class ConverterBath
+{
+    /**
+     * What iron is called according to how much carbon it holds, with the point in weight percent where each kind ends.
+     * An ingot does not remember how much it holds, so each kind counts as the least it can hold. Pouring iron back can then lose carbon, as it does in reality to the air, but never gain it.
+     */
+    public enum Grade
+    {
+        WROUGHT_IRON("tfc:metal/wrought_iron", 0.2f, 0.03f, 0f),
+        STEEL("tfc:metal/steel", 1.0f, 0.2f, 0f),
+        HIGH_CARBON_STEEL("tfc:metal/high_carbon_steel", 2.1f, 1.0f, 0f),
+        CAST_IRON("tfc:metal/cast_iron", 4.0f, 2.1f, 0f),
+        PIG_IRON("tfc:metal/pig_iron", Float.MAX_VALUE, 4.0f, 1.0f);
+
+        private static final Grade[] VALUES = values();
+
+        private final String fluid;
+        private final float upTo, carbon, silicon;
+
+        Grade(String fluid, float upTo, float carbon, float silicon)
+        {
+            this.fluid = fluid;
+            this.upTo = upTo;
+            this.carbon = carbon;
+            this.silicon = silicon;
+        }
+
+        public String fluid()
+        {
+            return fluid;
+        }
+
+        public float carbon()
+        {
+            return carbon;
+        }
+
+        public float silicon()
+        {
+            return silicon;
+        }
+
+        public static Grade ofCarbon(float carbon)
+        {
+            for (Grade grade : VALUES)
+            {
+                if (carbon + ROUNDING < grade.upTo) // Iron of 4% poured in by the drop should not come to just under it
+                {
+                    return grade;
+                }
+            }
+            return PIG_IRON;
+        }
+
+        @Nullable
+        public static Grade ofFluid(String fluid)
+        {
+            for (Grade grade : VALUES)
+            {
+                if (grade.fluid.equals(fluid))
+                {
+                    return grade;
+                }
+            }
+            return null;
+        }
+    }
+
+    /** What a blower can read from the flame at the mouth, which is how a blow was judged before anything could measure the metal. */
+    public enum Flame
+    {
+        /** Silicon burns to slag, leaving no gas: sparks, and hardly a flame. */
+        SPARKS,
+        /** Carbon boils out as CO, which burns above the mouth in a long white flame. */
+        BOILING,
+        /** Carbon is running short. */
+        SHORTENING,
+        /** The carbon is gone. The flame falls away and brown smoke of burning iron takes its place. */
+        DROPPED
+    }
+
+    /** The heat and the gas that came out of one step of a blow. */
+    public record Blow(float carbonBurned, float oxygenUsed, float ironBurned)
+    {
+        public static final Blow NONE = new Blow(0f, 0f, 0f);
+    }
+
+    private static final float ROUNDING = 1e-3f;
+    public static final float MILLIBUCKETS = 2000f;
+    public static final float KG_PER_MILLIBUCKET = 0.0079f;
+    public static final float AMBIENT = 20f;
+
+    private static final float GRAMS_PER_MOL_CARBON = 12.011f, GRAMS_PER_MOL_SILICON = 28.086f, GRAMS_PER_MOL_IRON = 55.845f;
+    /** Heats of Si + O2 -> SiO2, C + 1/2 O2 -> CO and Fe + 1/2 O2 -> FeO, in kJ per mole of the element. */
+    private static final float SILICON_HEAT = 911f, CARBON_HEAT = 110.5f, IRON_HEAT = 272f;
+    /** Below this much carbon, a bubble of air meets iron more often than it meets carbon. */
+    private static final float CARBON_RACE_PERCENT = 0.3f;
+    /** The least carbon air can take out of iron, where it stands in balance with the oxygen dissolved in the iron. */
+    private static final float CARBON_FLOOR_PERCENT = 0.03f;
+    /** Iron blown out of the mouth in sparks and fume, for each mole of carbon burned. Together with what burns, this gives the usual 5-10% lost in a blow. */
+    private static final float IRON_THROWN_PER_CARBON = 0.3f;
+    /** Molar heat of the nitrogen and CO that leave, in kJ/mol/K. */
+    private static final float GAS_HEAT_CAPACITY = 0.030f;
+    private static final float IRON_HEAT_CAPACITY = 0.82f;
+    /** A small vessel with its mouth open, far larger against its charge than a five tonne one: 3 kW at the temperature of steel. */
+    private static final float LOSS_KILOWATTS_PER_KELVIN = 0.002f;
+    private static final float LINING_HEAT_CAPACITY = 5f;
+    private static final float LIQUIDUS_PURE_IRON = 1538f;
+    /** The iron-carbon liquidus, from 1538 C for pure iron to the eutectic of 1147 C at 4.3% carbon, which is nearly straight. */
+    private static final float LIQUIDUS_PER_CARBON_PERCENT = 91f;
+    private static final float EUTECTIC = 1147f;
+
+    /** The liquid iron in millibuckets. */
+    public float metal;
+    /** Carbon and silicon in weight percent. */
+    public float carbon, silicon;
+    public float temperature;
+    /** What has gone from the metal to slag, in millibuckets of iron. */
+    public float slag;
+
+    /** @return the temperature in C at which iron of this much carbon starts to set */
+    public static float liquidus(float carbonPercent)
+    {
+        return Math.max(LIQUIDUS_PURE_IRON - LIQUIDUS_PER_CARBON_PERCENT * carbonPercent, EUTECTIC);
+    }
+
+    public boolean isMolten()
+    {
+        return metal > 0f && temperature >= liquidus(carbon);
+    }
+
+    public Grade grade()
+    {
+        return Grade.ofCarbon(carbon);
+    }
+
+    public Flame flame()
+    {
+        if (silicon > 0.02f) return Flame.SPARKS;
+        if (carbon > 1f) return Flame.BOILING;
+        if (carbon > Grade.WROUGHT_IRON.upTo) return Flame.SHORTENING;
+        return Flame.DROPPED;
+    }
+
+    /** @return the kilojoules needed to heat the charge and its lining by one kelvin */
+    private float heatCapacity()
+    {
+        return metal * KG_PER_MILLIBUCKET * IRON_HEAT_CAPACITY + LINING_HEAT_CAPACITY;
+    }
+
+    /** Pours in more iron. Carbon, silicon and heat all mix by weight. */
+    public void add(float amount, Grade grade, float sourceTemperature)
+    {
+        final float total = metal + amount;
+        if (total > 0f)
+        {
+            carbon = (carbon * metal + grade.carbon() * amount) / total;
+            silicon = (silicon * metal + grade.silicon() * amount) / total;
+            temperature = (temperature * metal + sourceTemperature * amount) / total;
+            metal = total;
+        }
+    }
+
+    /**
+     * Blows air through the bath. All the oxygen is used up, as it has a long way to rise through hot iron.
+     *
+     * @param oxygen moles of oxygen in the blast
+     * @param gasThrough moles of all the gas in the blast, which comes out at the temperature of the iron
+     * @param blastTemperature in C
+     */
+    public Blow blow(float oxygen, float gasThrough, float blastTemperature)
+    {
+        if (metal <= 0f || oxygen <= 0f)
+        {
+            return Blow.NONE;
+        }
+
+        final float grams = metal * KG_PER_MILLIBUCKET * 1000f;
+        float left = oxygen;
+
+        final float siliconBurned = Math.min(grams * silicon / 100f / GRAMS_PER_MOL_SILICON, left);
+        left -= siliconBurned;
+
+        final float carbonAvailable = Math.max(grams * (carbon - CARBON_FLOOR_PERCENT) / 100f / GRAMS_PER_MOL_CARBON, 0f);
+        final float race = Math.clamp((carbon - CARBON_FLOOR_PERCENT) / CARBON_RACE_PERCENT, 0f, 1f);
+        final float carbonBurned = Math.min(left * race * 2f, carbonAvailable);
+        left -= carbonBurned / 2f;
+
+        final float thrown = carbonBurned * IRON_THROWN_PER_CARBON;
+        final float ironAvailable = grams / GRAMS_PER_MOL_IRON - thrown;
+        final float ironBurned = Math.clamp(left * 2f, 0f, Math.max(ironAvailable, 0f));
+        final float used = oxygen - left + ironBurned / 2f;
+
+        final float heat = siliconBurned * SILICON_HEAT + carbonBurned * CARBON_HEAT + ironBurned * IRON_HEAT - gasThrough * GAS_HEAT_CAPACITY * (temperature - blastTemperature);
+        temperature += heat / heatCapacity();
+
+        final float ironLost = (ironBurned + thrown) * GRAMS_PER_MOL_IRON / (KG_PER_MILLIBUCKET * 1000f);
+        final float remaining = Math.max(grams - siliconBurned * GRAMS_PER_MOL_SILICON - carbonBurned * GRAMS_PER_MOL_CARBON - (ironBurned + thrown) * GRAMS_PER_MOL_IRON, 0f);
+        if (remaining > 0f)
+        {
+            silicon = Math.max((grams * silicon / 100f - siliconBurned * GRAMS_PER_MOL_SILICON) / remaining * 100f, 0f);
+            carbon = Math.max((grams * carbon / 100f - carbonBurned * GRAMS_PER_MOL_CARBON) / remaining * 100f, 0f);
+        }
+        slag += ironLost;
+        metal = remaining / (KG_PER_MILLIBUCKET * 1000f); // The carbon and silicon burned have gone as well, as gas and into the slag
+        return new Blow(carbonBurned, used, ironBurned);
+    }
+
+    /** Lets the vessel lose heat to the air. */
+    public void cool(float seconds)
+    {
+        if (temperature > AMBIENT)
+        {
+            temperature = AMBIENT + (temperature - AMBIENT) * (float) Math.exp(-LOSS_KILOWATTS_PER_KELVIN * seconds / heatCapacity());
+        }
+    }
+
+    /** Takes up to this much metal out, and whatever is too little to pour goes with the slag. @return how much came out, in whole millibuckets */
+    public int tap(int amount)
+    {
+        final int tapped = Math.min(amount, (int) metal);
+        metal -= tapped;
+        if (metal < 1f)
+        {
+            // Too little to pour, and it stays behind on the lining
+            slag += metal;
+            metal = 0f;
+            carbon = 0f;
+            silicon = 0f;
+        }
+        return tapped;
+    }
+}

@@ -18,6 +18,7 @@ public final class BreathingState
             state.carboxyhemoglobin = tag.getFloat("coHb");
             state.arsenicMg = tag.getFloat("arsenic");
             state.mercuryMg = tag.getFloat("mercury");
+            state.swallowedMercuryMg = tag.getFloat("swallowedMercury");
             state.zincOxideMg = tag.getFloat("zincOxide");
             state.gauzeSeconds = tag.getFloat("gauze");
             state.lampBurnTicks = tag.getInt("lampBurn");
@@ -32,6 +33,7 @@ public final class BreathingState
             tag.putFloat("coHb", state.carboxyhemoglobin);
             tag.putFloat("arsenic", state.arsenicMg);
             tag.putFloat("mercury", state.mercuryMg);
+            tag.putFloat("swallowedMercury", state.swallowedMercuryMg);
             tag.putFloat("zincOxide", state.zincOxideMg);
             tag.putFloat("gauze", state.gauzeSeconds);
             tag.putInt("lampBurn", state.lampBurnTicks);
@@ -54,6 +56,8 @@ public final class BreathingState
     public float carboxyhemoglobin;
     /** Body burdens in milligrams. These leave the body slowly, so small exposures add up over days. */
     public float arsenicMg, mercuryMg, zincOxideMg;
+    /** The dose of swallowed mercury still in the gut, on its way to {@link #mercuryMg}. A new body does not bring this back, or it would kill again. */
+    public float swallowedMercuryMg;
     /** Game tick before which no smell message is shown again. */
     public long nextSmellMessageTick;
     /** Seconds the gauze of a carried lamp has spent with gas burning inside it. */

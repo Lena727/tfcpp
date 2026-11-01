@@ -1,0 +1,16 @@
+{
+  "type": "tfc:alloy",
+  "contents": [
+    {
+      "fluid": "tfc:metal/pig_iron",
+      "max": 0.24433249,
+      "min": 0.042821158
+    },
+    {
+      "fluid": "tfc:metal/wrought_iron",
+      "max": 0.95717883,
+      "min": 0.7556675
+    }
+  ],
+  "result": "tfc:metal/steel"
+}

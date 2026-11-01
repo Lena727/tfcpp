@@ -20,6 +20,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.core.LocalTime;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasMath;
 import tfcpp.pneumatics.gas.GasTracker;
@@ -35,8 +36,7 @@ public final class SentinelCageItem extends Item
     /** Ratio of the blood turnover of a small animal to that of a person. */
     public static final float METABOLIC_RATIO = 20f;
     private static final float UNEASY = 10f;
-    private static final long FED_DAYS = 3;
-    private static final long TICKS_PER_DAY = 24 * 60 * 20;
+    private static final long FED_TICKS = 3L * LocalTime.TICKS_PER_DAY;
 
     /** @return the level of CO in the animal's blood after a second of breathing this air */
     public static float stepCarboxyhemoglobin(float carboxyhemoglobin, float carbonMonoxidePpm, float oxygenFraction)
@@ -52,7 +52,7 @@ public final class SentinelCageItem extends Item
     public static ItemStack withAnimal()
     {
         final ItemStack stack = new ItemStack(Instruments.SENTINEL_CAGE.get());
-        stack.set(Instruments.SENTINEL.get(), new SentinelData(0f, Calendars.SERVER.getTicks() + FED_DAYS * TICKS_PER_DAY));
+        stack.set(Instruments.SENTINEL.get(), new SentinelData(0f, Calendars.SERVER.getTicks() + FED_TICKS));
         return stack;
     }
 
@@ -95,7 +95,7 @@ public final class SentinelCageItem extends Item
         if (!level.isClientSide)
         {
             food.shrink(1);
-            cage.set(Instruments.SENTINEL.get(), new SentinelData(data.carboxyhemoglobin(), Calendars.SERVER.getTicks() + FED_DAYS * TICKS_PER_DAY));
+            cage.set(Instruments.SENTINEL.get(), new SentinelData(data.carboxyhemoglobin(), Calendars.SERVER.getTicks() + FED_TICKS));
         }
         return InteractionResultHolder.sidedSuccess(cage, level.isClientSide);
     }
@@ -122,9 +122,9 @@ public final class SentinelCageItem extends Item
         final float carbonMonoxide = air == null ? 0 : GasMath.ppm(air[Gas.CARBON_MONOXIDE.ordinal()]);
         final float next = stepCarboxyhemoglobin(data.carboxyhemoglobin(), carbonMonoxide, oxygen);
 
-        if (next >= Physiology.COHB_FATAL || Physiology.hypoxiaSeverity(oxygen) >= 2 || breathesPoison(air) || Calendars.SERVER.getTicks() > data.fedUntil())
+        final boolean starved = Calendars.SERVER.getTicks() > data.fedUntil();
+        if (next >= Physiology.COHB_FATAL || Physiology.hypoxiaSeverity(oxygen) >= 2 || breathesPoison(air) || starved)
         {
-            final boolean starved = Calendars.SERVER.getTicks() > data.fedUntil();
             // The slot passed to an inventory tick is only an index within one part of the inventory, so it cannot be used to put anything back
             stack.shrink(1);
             final ItemStack empty = new ItemStack(Instruments.ANIMAL_CAGE.get());

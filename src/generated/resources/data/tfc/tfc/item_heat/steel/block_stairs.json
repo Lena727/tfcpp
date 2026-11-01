@@ -1,0 +1,19 @@
+{
+  "forging_temperature": 900.00006,
+  "heat_capacity": 2.142857,
+  "ingredient": [
+    {
+      "item": "tfc:metal/block/steel_stairs"
+    },
+    {
+      "item": "tfc:metal/exposed_block/steel_stairs"
+    },
+    {
+      "item": "tfc:metal/weathered_block/steel_stairs"
+    },
+    {
+      "item": "tfc:metal/oxidized_block/steel_stairs"
+    }
+  ],
+  "welding_temperature": 1200.0
+}

@@ -31,6 +31,8 @@ public final class MetallurgyAssets
         {
             flatItem(Metallurgy.ARSENICAL_COPPER_INGOT.get());
             Metallurgy.ZINC_CALCINES.values().forEach(calcine -> flatItem(calcine.get()));
+            flatItem(Metallurgy.IRON_SLAG.get());
+            flatItem(Metallurgy.FURNACE_SLAG.get());
             basicItem(Metallurgy.GLASS_BULB.get());
             basicItem(Metallurgy.MERCURY_BULB.get());
             basicItem(Instruments.DAVY_LAMP_ITEM.get());
@@ -63,6 +65,7 @@ public final class MetallurgyAssets
         {
             simpleBlockWithItem(Metallurgy.RETORT.get(), models().cubeColumn("retort", modLoc("block/retort_side"), modLoc("block/retort_top")));
             simpleBlockWithItem(Metallurgy.RETORT_CONDENSER.get(), models().cubeAll("retort_condenser", modLoc("block/retort_condenser")));
+            simpleBlockWithItem(Metallurgy.CONVERTER.get(), models().cubeColumn("converter", modLoc("block/converter_side"), modLoc("block/converter_top")));
             simpleBlockWithItem(Instruments.SETTLING_BAFFLE.get(), models().cubeColumn("settling_baffle", modLoc("block/settling_baffle"), modLoc("block/retort_top")));
 
             horizontalBlock(Instruments.MINE_FAN.get(), models().orientable("mine_fan", modLoc("block/mine_fan_side"), modLoc("block/mine_fan_front"), modLoc("block/mine_fan_side")));

@@ -189,6 +189,25 @@ for i in range(16):
             vessel[j][i] = shade((140, 140, 146), 0)  # Rivets
 write_png(ROOT / 'block/pressure_vessel.png', vessel)
 
+write_png(ROOT / 'item/slag/iron.png', heap(71, (72, 58, 54)))
+write_png(ROOT / 'item/slag/furnace.png', heap(72, (168, 168, 150)))
+
+converter_side = noise(73, (84, 82, 86), 6)
+for x in range(16):
+    for y in (3, 12):
+        converter_side[y][x] = shade((58, 56, 60), 0)  # The bands of the shell
+        if x % 3 == 0:
+            converter_side[y][x] = shade((132, 130, 136), 0)  # Rivets
+write_png(ROOT / 'block/converter_side.png', converter_side)
+
+converter_top = bricks(74, (170, 118, 84))
+for y in range(16):
+    for x in range(16):
+        distance = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+        if distance < 5:
+            converter_top[y][x] = shade((230, 120, 40), int(distance * 6) - 12)  # The mouth, with the glow of the iron in it
+write_png(ROOT / 'block/converter_top.png', converter_top)
+
 side = bricks(3, (170, 118, 84))
 for y in range(9, 12):
     for x in range(5, 11):

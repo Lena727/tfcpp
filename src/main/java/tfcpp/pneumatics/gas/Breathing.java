@@ -5,13 +5,17 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.dries007.tfc.util.data.Drinkable;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import org.jetbrains.annotations.Nullable;
 
 import tfcpp.core.TFCpp;
+import tfcpp.metallurgy.Metallurgy;
 import tfcpp.pneumatics.gas.Physiology.BodyBurden;
 
 /**
@@ -33,6 +37,16 @@ public final class Breathing
     /** Fraction of health per second. About three minutes to escape from a dangerous level, about ten seconds at a fatal one. */
     private static final float SERIOUS_DAMAGE = 0.005f, FATAL_DAMAGE = 0.1f;
 
+    /** A drink of mercury does nothing at first. It is taken up into the body over the next day, and it does not count as water. */
+    public static void onDrink(Player player, Drinkable drink, int millibuckets)
+    {
+        if (drink.ingredient().test(new FluidStack(Metallurgy.MERCURY.get(), 1)))
+        {
+            final BreathingState state = player.getData(GasAttachments.BREATHING);
+            state.swallowedMercuryMg += Physiology.swallowedMercury(millibuckets);
+        }
+    }
+
     public static void tick(ServerPlayer player)
     {
         final ServerLevel level = player.serverLevel();
@@ -50,7 +64,9 @@ public final class Breathing
 
         state.carboxyhemoglobin = Physiology.stepCarboxyhemoglobin(state.carboxyhemoglobin, carbonMonoxide, oxygen, SECONDS);
         state.arsenicMg = BodyBurden.ARSENIC.step(state.arsenicMg, moles(air, Gas.ARSENIC_TRIOXIDE) + ANTIMONY_RELATIVE_TOXICITY * moles(air, Gas.ANTIMONY_TRIOXIDE), Gas.ARSENIC_TRIOXIDE.molarMass(), SECONDS);
-        state.mercuryMg = BodyBurden.MERCURY.step(state.mercuryMg, moles(air, Gas.MERCURY_VAPOR), Gas.MERCURY_VAPOR.molarMass(), SECONDS);
+        final float fromGut = Physiology.takenUpFromGut(state.swallowedMercuryMg, SECONDS);
+        state.swallowedMercuryMg -= fromGut;
+        state.mercuryMg = BodyBurden.MERCURY.step(state.mercuryMg + fromGut, moles(air, Gas.MERCURY_VAPOR), Gas.MERCURY_VAPOR.molarMass(), SECONDS);
         state.zincOxideMg = BodyBurden.ZINC_OXIDE.step(state.zincOxideMg, moles(air, Gas.ZINC_OXIDE_FUME), Gas.ZINC_OXIDE_FUME.molarMass(), SECONDS);
 
         if (player.isCreative() || player.isSpectator())

@@ -162,13 +162,15 @@ public final class GasGameTests
     public static void gasStaysInASealedRoomAndSinks(GameTestHelper helper)
     {
         sealedBox(helper, 3, 4, Blocks.STONE);
-        addGas(helper, 2, 4, 2, Gas.SULFUR_DIOXIDE, 20f);
+        addGas(helper, 2, 4, 2, Gas.SULFUR_DIOXIDE, 200f); // Enough to lie in layers: a trace of it just mixes evenly through a room, as it does in reality
 
         helper.runAfterDelay(300, () -> {
-            helper.assertTrue(Math.abs(totalInBox(helper, 3, 4, Gas.SULFUR_DIOXIDE) - 20f) < 0.1f, "SO2 must be conserved in a sealed room");
+            helper.assertTrue(Math.abs(totalInBox(helper, 3, 4, Gas.SULFUR_DIOXIDE) - 200f) < 1f, "SO2 must be conserved in a sealed room");
 
             final float[] floor = cell(helper, 2, 1, 2), roof = cell(helper, 2, 4, 2);
-            helper.assertTrue(floor != null && roof != null && floor[Gas.SULFUR_DIOXIDE.ordinal()] > roof[Gas.SULFUR_DIOXIDE.ordinal()], "SO2 must collect at the floor");
+            // A cell with nothing left in it is freed, so a roof with no cell at all is the clearest result of everything having sunk
+            final float atFloor = floor == null ? 0f : floor[Gas.SULFUR_DIOXIDE.ordinal()], atRoof = roof == null ? 0f : roof[Gas.SULFUR_DIOXIDE.ordinal()];
+            helper.assertTrue(atFloor > atRoof, "SO2 must collect at the floor, got " + atFloor + " there and " + atRoof + " at the roof");
             helper.succeed();
         });
     }
@@ -986,14 +988,18 @@ public final class GasGameTests
             final PipeNetwork network = networkAt(helper, 1, 1, 1);
             network.contents().gases[Gas.METHANE.ordinal()] = 3f;
 
-            final LevelChunk chunk = helper.getLevel().getChunkAt(helper.absolutePos(new BlockPos(1, 1, 1)));
-            final PipeChunkData loaded = new PipeChunkData();
-            loaded.load(chunk.getData(GasAttachments.PIPE_CHUNK).save());
-
+            // The two pipes can fall on either side of a chunk border, wherever the test happens to be placed
+            final LevelChunk first = helper.getLevel().getChunkAt(helper.absolutePos(new BlockPos(1, 1, 1)));
+            final LevelChunk second = helper.getLevel().getChunkAt(helper.absolutePos(new BlockPos(2, 1, 1)));
             float total = 0f;
-            for (PipeSegment segment : loaded.segments())
+            for (LevelChunk chunk : first == second ? List.of(first) : List.of(first, second))
             {
-                total += segment.stored.gases[Gas.METHANE.ordinal()];
+                final PipeChunkData loaded = new PipeChunkData();
+                loaded.load(chunk.getData(GasAttachments.PIPE_CHUNK).save());
+                for (PipeSegment segment : loaded.segments())
+                {
+                    total += segment.stored.gases[Gas.METHANE.ordinal()];
+                }
             }
             helper.assertTrue(Math.abs(total - 3f) < 0.01f, "The saved segments should hold all of it, not more or less, got " + total);
             helper.succeed();

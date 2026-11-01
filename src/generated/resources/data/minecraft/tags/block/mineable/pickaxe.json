@@ -6,6 +6,7 @@
     "tfcpp:davy_lamp",
     "tfcpp:settling_baffle",
     "tfcpp:mine_fan",
+    "tfcpp:converter",
     "#tfcpp:pipe_pickaxe"
   ]
 }

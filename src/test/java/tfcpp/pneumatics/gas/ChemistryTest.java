@@ -3,6 +3,7 @@ package tfcpp.pneumatics.gas;
 import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.Test;
 
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ChemistryTest
@@ -97,6 +98,45 @@ class ChemistryTest
             blood = Physiology.stepCarboxyhemoglobin(blood, 0, 0.2095f, 1f);
         }
         assertEquals(20f, blood, 1f);
+    }
+
+    @Test
+    void swallowedMercuryIsADoseByTheAmount()
+    {
+        assertEquals(1.35f, Physiology.swallowedMercury(1f), 0.01f, "A millilitre is 13.5 g, of which 0.01% is taken up");
+    }
+
+    /** How long until a swallowed dose reaches this level in the blood, breathing clean air. */
+    private static int secondsUntil(int severity, float dose)
+    {
+        float gut = dose, blood = 0f;
+        for (int second = 0; second < 100_000; second++)
+        {
+            final float taken = Physiology.takenUpFromGut(gut, 1f);
+            gut -= taken;
+            blood = Physiology.BodyBurden.MERCURY.step(blood + taken, 0f, 200.59f, 1f);
+            if (Physiology.BodyBurden.MERCURY.severity(blood) >= severity)
+            {
+                return second;
+            }
+        }
+        return -1;
+    }
+
+    @Test
+    void aFatalMouthfulGetsWorseOverTime()
+    {
+        final float jug = Physiology.swallowedMercury(100f);
+        final int symptoms = secondsUntil(1, jug), disabled = secondsUntil(2, jug), fatal = secondsUntil(3, jug);
+        assertTrue(symptoms > 30 && symptoms < 120, "A tremor after a minute or so, got " + symptoms);
+        assertTrue(disabled > symptoms * 2, "Then worse, got " + disabled);
+        assertTrue(fatal > disabled * 2 && fatal < 1200, "And fatal after some minutes, got " + fatal);
+    }
+
+    @Test
+    void aDropNeverReachesAHarmfulLevel()
+    {
+        assertEquals(-1, secondsUntil(1, Physiology.swallowedMercury(1f)));
     }
 
     @Test

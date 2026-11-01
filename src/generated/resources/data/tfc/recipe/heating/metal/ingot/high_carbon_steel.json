@@ -1,0 +1,11 @@
+{
+  "type": "tfc:heating",
+  "ingredient": {
+    "tag": "c:ingots/high_carbon_steel"
+  },
+  "result_fluid": {
+    "amount": 100,
+    "id": "tfc:metal/high_carbon_steel"
+  },
+  "temperature": 1450.0
+}
