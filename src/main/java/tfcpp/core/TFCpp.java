@@ -7,6 +7,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 
+import tfcpp.chemistry.Chemistry;
 import tfcpp.mechanics.WaterBodies;
 import tfcpp.geology.OreSurvey;
 import tfcpp.geology.Ores;
@@ -35,6 +36,7 @@ public final class TFCpp
         Metallurgy.register(modBus);
         Instruments.register(modBus);
         Pipes.register(modBus);
+        Chemistry.register(modBus);
 
         NeoForge.EVENT_BUS.register(GasEvents.class);
         NeoForge.EVENT_BUS.addListener(WaterBodies::onCreateFluidSource);

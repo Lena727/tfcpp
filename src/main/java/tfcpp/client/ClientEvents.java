@@ -7,6 +7,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
+import tfcpp.chemistry.Chemistry;
 import tfcpp.core.TFCpp;
 import tfcpp.metallurgy.Metallurgy;
 
@@ -25,6 +26,7 @@ public final class ClientEvents
         event.registerFluidType(fluid(STILL, FLOWING, 0xFF6E3B2A), Metallurgy.IRON_OXIDE_TYPE.get());
         event.registerFluidType(fluid(WATER_STILL, WATER_FLOWING, 0xFF8F939C), Metallurgy.LEAD_TYPE.get());
         event.registerFluidType(fluid(WATER_STILL, WATER_FLOWING, 0xFFC9CDD2), Metallurgy.MERCURY_TYPE.get());
+        Chemistry.LIQUIDS.forEach((liquid, chemical) -> event.registerFluidType(fluid(WATER_STILL, WATER_FLOWING, liquid.tint()), chemical.type.get()));
     }
 
     private static IClientFluidTypeExtensions fluid(ResourceLocation still, ResourceLocation flowing, int tint)

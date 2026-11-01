@@ -6,6 +6,10 @@
   "mixins": [
     "CharcoalForgeBlockMixin",
     "DrinkableMixin",
+    "FuelSulfurMixins$BlastFurnace",
+    "FuelSulfurMixins$Firebox",
+    "FuelSulfurMixins$Firepit",
+    "FuelSulfurMixins$Forge",
     "FurnaceHeatMixins$Blast",
     "FurnaceHeatMixins$Firebox",
     "FurnaceHeatMixins$PitKiln",

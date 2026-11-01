@@ -1,0 +1,85 @@
+{
+  "type": "tfcpp:carbonization",
+  "gas": {
+    "carbon_dioxide": 16.5,
+    "carbon_monoxide": 10.0,
+    "hydrogen": 0.6,
+    "methane": 3.0
+  },
+  "input": [
+    {
+      "tag": "tfc:acacia_logs"
+    },
+    {
+      "tag": "tfc:ash_logs"
+    },
+    {
+      "tag": "tfc:aspen_logs"
+    },
+    {
+      "tag": "tfc:birch_logs"
+    },
+    {
+      "tag": "tfc:blackwood_logs"
+    },
+    {
+      "tag": "tfc:chestnut_logs"
+    },
+    {
+      "tag": "tfc:douglas_fir_logs"
+    },
+    {
+      "tag": "tfc:hickory_logs"
+    },
+    {
+      "tag": "tfc:kapok_logs"
+    },
+    {
+      "tag": "tfc:mangrove_logs"
+    },
+    {
+      "tag": "tfc:maple_logs"
+    },
+    {
+      "tag": "tfc:oak_logs"
+    },
+    {
+      "tag": "tfc:palm_logs"
+    },
+    {
+      "tag": "tfc:pine_logs"
+    },
+    {
+      "tag": "tfc:rosewood_logs"
+    },
+    {
+      "tag": "tfc:sequoia_logs"
+    },
+    {
+      "tag": "tfc:spruce_logs"
+    },
+    {
+      "tag": "tfc:sycamore_logs"
+    },
+    {
+      "tag": "tfc:white_cedar_logs"
+    },
+    {
+      "tag": "tfc:willow_logs"
+    }
+  ],
+  "liquor": {
+    "fluid": "tfcpp:pyroligneous_liquor",
+    "litres": 2.0
+  },
+  "seconds": 720.0,
+  "solid": {
+    "item": "minecraft:charcoal",
+    "per_piece": 0.5
+  },
+  "tar": {
+    "fluid": "tfcpp:wood_tar",
+    "litres": 0.25
+  },
+  "temperature": 400.0
+}

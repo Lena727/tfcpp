@@ -112,7 +112,8 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
         }
 
         final BlockPos inletPos = worldPosition.relative(facing.getOpposite());
-        final @Nullable PipeNetwork input = pipes.networkAt(inletPos);
+        // A device such as an oven is a block of a network too, but its tanks are the only thing open toward the pump
+        final @Nullable PipeNetwork input = opensToward(level, inletPos, facing) ? pipes.networkAt(inletPos) : null;
         final float inletPressure = input == null ? 1f : input.pressure();
         final float torque = FRICTION_TORQUE + PipePhysics.pistonTorque(SWEPT_VOLUME, output.pressure() - inletPressure);
 
@@ -126,6 +127,13 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
             fromAir(level, inletPos, output, swept);
         }
         return torque;
+    }
+
+    /** @return {@code true} if the block at this position is a part of a pipe network that opens on this side, which is the side that faces the pump */
+    private static boolean opensToward(ServerLevel level, BlockPos pos, Direction side)
+    {
+        final BlockState state = level.getBlockState(pos);
+        return state.getBlock() instanceof PipeMember member && member.connects(state, side);
     }
 
     private static void fromNetwork(PipeNetwork input, PipeNetwork output, float swept, float litres)
@@ -158,7 +166,11 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
         final @Nullable IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, inlet, facing);
         if (handler != null)
         {
-            final FluidStack contained = handler.getFluidInTank(0);
+            FluidStack contained = FluidStack.EMPTY; // The first tank that holds anything, as some devices have more than one
+            for (int tank = 0; tank < handler.getTanks() && contained.isEmpty(); tank++)
+            {
+                contained = handler.getFluidInTank(tank);
+            }
             if (!contained.isEmpty() && !contained.getFluid().is(TFCTags.Fluids.MOLTEN_METALS) && accepts(to, contained.getFluid()))
             {
                 final FluidStack drained = handler.drain(contained.copyWithAmount((int) Math.ceil(litres)), IFluidHandler.FluidAction.EXECUTE);

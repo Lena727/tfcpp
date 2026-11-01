@@ -263,3 +263,42 @@ for y in range(16):
     for x in (3, 4, 11, 12):
         condenser[y][x] = shade((182, 104, 70), (y % 4) * 4)  # Copper cooling plates
 write_png(ROOT / 'block/retort_condenser.png', condenser)
+
+
+# Coal chemistry: coke is grey and porous, lignite char is dull brown-black and crumbling
+write_png(ROOT / 'item/coke.png', piece(130, (122, 120, 126), 5.0))
+write_png(ROOT / 'item/lignite_char.png', piece(131, (72, 60, 52), 4.6))
+
+oven_side = bricks(132, (160, 110, 80))
+for y in range(8, 13):
+    for x in range(4, 12):
+        oven_side[y][x] = shade((46, 40, 38), (x + y) % 3 - 1)  # The charging door
+for x in range(3, 13):
+    oven_side[7][x] = oven_side[13][x] = shade((92, 88, 90), 0)  # Its iron frame
+write_png(ROOT / 'block/coke_oven_side.png', oven_side)
+
+oven_top = bricks(133, (146, 100, 74))
+for y in range(6, 10):
+    for x in range(6, 10):
+        oven_top[y][x] = shade((96, 94, 98), (x + y) % 2 * 6)  # The standpipe the gas leaves by
+write_png(ROOT / 'block/coke_oven_top.png', oven_top)
+
+burner_side = noise(134, (96, 96, 100), 6)
+for y in range(16):
+    burner_side[y][0] = burner_side[y][15] = shade((70, 70, 74), 0)
+for y in (5, 6):
+    for x in range(2, 14):
+        burner_side[y][x] = shade((176, 60, 44), (x % 3) * 4)  # The hand wheel
+write_png(ROOT / 'block/gas_burner_side.png', burner_side)
+write_png(ROOT / 'block/gas_burner_bottom.png', noise(135, (80, 80, 84), 6))
+
+for name, ring, core in (('gas_burner_top', (70, 66, 64), (36, 34, 34)), ('gas_burner_top_lit', (70, 66, 64), (96, 150, 240))):
+    burner_top = noise(136, (96, 96, 100), 5)
+    for y in range(16):
+        for x in range(16):
+            distance = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+            if distance < 6:
+                burner_top[y][x] = shade(ring, 0)
+            if distance < 4:
+                burner_top[y][x] = shade(core, int(distance * 8) if name.endswith('lit') else 0)  # The nozzle, with its flame when lit
+    write_png(ROOT / f'block/{name}.png', burner_top)

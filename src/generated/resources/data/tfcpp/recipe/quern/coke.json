@@ -1,0 +1,10 @@
+{
+  "type": "tfc:quern",
+  "ingredient": {
+    "item": "tfcpp:coke"
+  },
+  "result": {
+    "count": 4,
+    "id": "tfc:powder/coke"
+  }
+}

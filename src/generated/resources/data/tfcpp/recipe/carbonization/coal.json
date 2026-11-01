@@ -1,0 +1,34 @@
+{
+  "type": "tfcpp:carbonization",
+  "gas": {
+    "ammonia": 0.3,
+    "carbon_dioxide": 1.0,
+    "carbon_monoxide": 3.0,
+    "flue_nitrogen": 2.0,
+    "hydrogen": 21.0,
+    "hydrogen_sulfide": 0.2,
+    "methane": 14.0
+  },
+  "input": [
+    {
+      "item": "minecraft:coal"
+    },
+    {
+      "item": "tfc:ore/bituminous_coal"
+    }
+  ],
+  "liquor": {
+    "fluid": "tfcpp:ammonia_liquor",
+    "litres": 0.3
+  },
+  "seconds": 1080.0,
+  "solid": {
+    "item": "tfcpp:coke",
+    "per_piece": 0.7
+  },
+  "tar": {
+    "fluid": "tfcpp:coal_tar",
+    "litres": 0.1
+  },
+  "temperature": 950.0
+}

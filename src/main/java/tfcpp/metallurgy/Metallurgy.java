@@ -30,6 +30,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
+import tfcpp.chemistry.Chemistry;
 import tfcpp.core.TFCpp;
 import tfcpp.geology.Ores;
 import tfcpp.pneumatics.instruments.Instruments;
@@ -123,6 +124,7 @@ public final class Metallurgy
                 output.accept(CONVERTER_ITEM.get());
                 Instruments.addToTab(output);
                 Pipes.addToTab(output);
+                Chemistry.addToTab(output);
             })
             .build());
     }

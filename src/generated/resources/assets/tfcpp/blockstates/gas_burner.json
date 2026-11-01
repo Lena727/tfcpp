@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "lit=false,open=false": {
+      "model": "tfcpp:block/gas_burner"
+    },
+    "lit=false,open=true": {
+      "model": "tfcpp:block/gas_burner"
+    },
+    "lit=true,open=false": {
+      "model": "tfcpp:block/gas_burner_lit"
+    },
+    "lit=true,open=true": {
+      "model": "tfcpp:block/gas_burner_lit"
+    }
+  }
+}

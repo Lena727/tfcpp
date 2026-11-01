@@ -25,6 +25,7 @@
     "tfc:blast_furnace",
     "tfc:candle",
     "tfc:jack_o_lantern",
-    "#tfc:lamps"
+    "#tfc:lamps",
+    "tfcpp:gas_burner"
   ]
 }

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "tfcpp:block/coke_oven_top",
+    "side": "tfcpp:block/coke_oven_side"
+  }
+}

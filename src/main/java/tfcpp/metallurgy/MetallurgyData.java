@@ -871,7 +871,7 @@ public final class MetallurgyData implements DataProvider
 
     private void lootTables()
     {
-        for (String block : List.of("retort", "retort_condenser", "converter"))
+        for (String block : List.of("retort", "retort_condenser", "converter", "coke_oven", "gas_burner"))
         {
             final JsonObject entry = new JsonObject();
             entry.addProperty("type", "minecraft:item");
@@ -904,11 +904,11 @@ public final class MetallurgyData implements DataProvider
         addToTag("data/tfcpp/tags/block/open_flames_tfc.json", flames.toArray(String[]::new));
         addToTag("data/tfcpp/tags/block/open_flames.json",
             "#tfcpp:open_flames_tfc", "minecraft:torch", "minecraft:wall_torch", "minecraft:soul_torch", "minecraft:soul_wall_torch", "minecraft:fire", "minecraft:soul_fire", "minecraft:lava", "minecraft:campfire", "minecraft:soul_campfire", "#minecraft:candles",
-            "tfc:torch", "tfc:wall_torch", "tfc:firepit", "tfc:grill", "tfc:pot", "tfc:stove", "tfc:stove_pot", "tfc:charcoal_forge", "tfc:burning_log_pile", "tfc:bloomery", "tfc:blast_furnace", "tfc:candle", "tfc:jack_o_lantern", "#tfc:lamps");
+            "tfc:torch", "tfc:wall_torch", "tfc:firepit", "tfc:grill", "tfc:pot", "tfc:stove", "tfc:stove_pot", "tfc:charcoal_forge", "tfc:burning_log_pile", "tfc:bloomery", "tfc:blast_furnace", "tfc:candle", "tfc:jack_o_lantern", "#tfc:lamps", "tfcpp:gas_burner");
         addToTag("data/tfcpp/tags/item/open_flames.json", "minecraft:torch", "minecraft:soul_torch", "tfc:torch");
         addToTag("data/tfcpp/tags/entity_type/sentinel_animals.json", "tfc:rat", "tfc:quail");
         addToTag("data/tfc/tags/block/lamps.json", "tfcpp:davy_lamp");
-        addToTag("data/minecraft/tags/block/mineable/pickaxe.json", "tfcpp:retort", "tfcpp:retort_condenser", "tfcpp:davy_lamp", "tfcpp:settling_baffle", "tfcpp:mine_fan", "tfcpp:converter", "#tfcpp:pipe_pickaxe", "#tfcpp:ore_pickaxe");
+        addToTag("data/minecraft/tags/block/mineable/pickaxe.json", "tfcpp:retort", "tfcpp:retort_condenser", "tfcpp:davy_lamp", "tfcpp:settling_baffle", "tfcpp:mine_fan", "tfcpp:converter", "tfcpp:coke_oven", "tfcpp:gas_burner", "#tfcpp:pipe_pickaxe", "#tfcpp:ore_pickaxe");
         addToTag("data/c/tags/item/dusts/arsenic_trioxide.json", "tfcpp:powder/arsenic_trioxide");
         addToTag("data/c/tags/item/dusts/antimony_trioxide.json", "tfcpp:powder/antimony_trioxide");
         addToTag("data/c/tags/item/dusts/zinc_oxide.json", "tfcpp:powder/zinc_oxide");
@@ -1023,7 +1023,7 @@ public final class MetallurgyData implements DataProvider
         }
         addToTag("data/tfcpp/tags/block/pipe_pickaxe.json", pickaxe.toArray(String[]::new));
         addToTag("data/minecraft/tags/block/mineable/axe.json", "tfcpp:pipe/wood");
-        addToTag("data/tfc/tags/block/charcoal_forge_invisible.json", "tfcpp:retort", "tfcpp:pressure_vessel", "tfcpp:converter");
+        addToTag("data/tfc/tags/block/charcoal_forge_invisible.json", "tfcpp:retort", "tfcpp:pressure_vessel", "tfcpp:converter", "tfcpp:coke_oven");
 
         for (String block : blocks)
         {

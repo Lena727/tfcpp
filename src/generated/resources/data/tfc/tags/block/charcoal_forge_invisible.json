@@ -3,6 +3,7 @@
   "values": [
     "tfcpp:retort",
     "tfcpp:pressure_vessel",
-    "tfcpp:converter"
+    "tfcpp:converter",
+    "tfcpp:coke_oven"
   ]
 }

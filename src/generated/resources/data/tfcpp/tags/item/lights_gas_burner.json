@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:flint_and_steel",
+    "tfc:firestarter",
+    "tfc:flint_and_pyrite"
+  ]
+}

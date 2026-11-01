@@ -1,0 +1,28 @@
+{
+  "type": "tfcpp:carbonization",
+  "gas": {
+    "carbon_dioxide": 7.0,
+    "carbon_monoxide": 3.0,
+    "hydrogen": 2.0,
+    "methane": 3.0
+  },
+  "input": [
+    {
+      "item": "tfc:ore/lignite"
+    }
+  ],
+  "liquor": {
+    "fluid": "tfcpp:ammonia_liquor",
+    "litres": 1.0
+  },
+  "seconds": 1080.0,
+  "solid": {
+    "item": "tfcpp:lignite_char",
+    "per_piece": 0.4
+  },
+  "tar": {
+    "fluid": "tfcpp:coal_tar",
+    "litres": 0.24
+  },
+  "temperature": 700.0
+}

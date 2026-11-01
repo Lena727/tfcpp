@@ -7,6 +7,8 @@
     "tfcpp:settling_baffle",
     "tfcpp:mine_fan",
     "tfcpp:converter",
+    "tfcpp:coke_oven",
+    "tfcpp:gas_burner",
     "#tfcpp:pipe_pickaxe",
     "#tfcpp:ore_pickaxe"
   ]

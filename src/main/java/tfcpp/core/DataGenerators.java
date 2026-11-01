@@ -21,6 +21,8 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
+import tfcpp.chemistry.ChemistryAssets;
+import tfcpp.chemistry.ChemistryData;
 import tfcpp.geology.NewOre;
 import tfcpp.geology.OreData;
 import tfcpp.metallurgy.MetallurgyAssets;
@@ -47,9 +49,12 @@ public final class DataGenerators
         event.getGenerator().addProvider(event.includeServer(), new DamageTags(output, datapack.getRegistryProvider(), event.getExistingFileHelper()));
 
         event.getGenerator().addProvider(event.includeServer(), new MetallurgyData(output));
+        event.getGenerator().addProvider(event.includeServer(), new ChemistryData(output));
         event.getGenerator().addProvider(event.includeServer(), new OreData(output));
         event.getGenerator().addProvider(event.includeClient(), new MetallurgyAssets.Models(output, event.getExistingFileHelper()));
         event.getGenerator().addProvider(event.includeClient(), new MetallurgyAssets.BlockStates(output, event.getExistingFileHelper()));
+        event.getGenerator().addProvider(event.includeClient(), new ChemistryAssets.Models(output, event.getExistingFileHelper()));
+        event.getGenerator().addProvider(event.includeClient(), new ChemistryAssets.BlockStates(output, event.getExistingFileHelper()));
 
         event.getGenerator().addProvider(event.includeClient(), new English(output));
         event.getGenerator().addProvider(event.includeClient(), new Russian(output));
@@ -216,6 +221,28 @@ public final class DataGenerators
             add("tfcpp.info.mine_fan", "Driven by a shaft at its back, it blows out of its front and draws air in through its other sides, along the open spaces leading to it. Air moves quickly along a narrow drift and hardly at all across a large chamber. The fan loads the shaft more the faster it turns.");
             add("tfcpp.info.shaft_load", "Every machine on a shaft takes torque from its source. The more it has to drive, the slower it turns, and past what the source can start against it stops. A water wheel gives its best power at half of its free speed. Pumps take more torque the higher they lift. Water itself no longer multiplies, and a pump moves it from its intake to its outlet.");
             add("tfcpp.info.coal", "Coal seams hold methane, more of it the deeper they lie, and some rock next to them holds gas under pressure. Mining lets it out. A flame lights air holding 5% to 15% of it, and the blast is followed by afterdamp full of carbon monoxide.");
+
+            add("fluid_type.tfcpp.coal_tar", "Coal Tar");
+            add("fluid_type.tfcpp.wood_tar", "Wood Tar");
+            add("fluid_type.tfcpp.ammonia_liquor", "Ammoniacal Liquor");
+            add("fluid_type.tfcpp.pyroligneous_liquor", "Pyroligneous Liquor");
+            add("item.tfcpp.coke", "Coke");
+            add("item.tfcpp.lignite_char", "Lignite Char");
+            add("block.tfcpp.coke_oven", "Coke Oven");
+            add("block.tfcpp.gas_burner", "Gas Burner");
+            add("tfcpp.coke_oven.status", "%1$s C, charge: %2$s, %3$s%% done, tar: %4$s mB, liquor: %5$s mB");
+            add("tfcpp.coke_oven.status.empty", "empty");
+            add("tfcpp.coke_oven.too_cold", "Nothing changes below %1$s C");
+            add("tfcpp.coke_oven.tanks_full", "A tank is full or holds another liquid: the batch waits until it is emptied");
+            add("tfcpp.coke_oven.ready", "Ready to take out: %1$s x %2$s (crouch and use an empty hand)");
+            add("tfcpp.coke_oven.no_condenser", "No condenser beside the oven: the tar and liquor will be lost as vapour");
+            add("tfcpp.coke_oven.locked", "The charge has begun to change and cannot be added to");
+            add("tfcpp.coke_oven.take_first", "Take out the finished batch first");
+            add("tfcpp.coke_oven.one_kind", "An oven takes one kind of charge at a time");
+            add("tfcpp.coke_oven.full", "The oven is full: 64 pieces at most");
+            add("tfcpp.coke_oven.loaded", "%1$s x %2$s in the oven");
+            add("tfcpp.coke_oven.nothing", "Nothing to take out");
+            add("tfcpp.gas_burner.shut", "Open the gas first");
         }
     }
 
@@ -350,6 +377,28 @@ public final class DataGenerators
             add("tfcpp.info.mine_fan", "Приводится валом с задней стороны, выдувает вперёд, а воздух тянет через остальные стороны по ведущим к нему выработкам. По узкому штреку воздух идёт быстро, а через большую полость почти незаметно. Чем быстрее вентилятор вращается, тем сильнее он нагружает вал.");
             add("tfcpp.info.shaft_load", "Каждая машина на валу отбирает момент у источника. Чем больше нагрузка, тем медленнее вал, а сверх предела источник останавливается. Водяное колесо даёт наибольшую мощность на половине свободной скорости. Насос нагружает вал тем сильнее, чем выше поднимает воду. Вода больше не размножается сама, а насос перемещает её от входа к выходу.");
             add("tfcpp.info.coal", "Угольные пласты содержат метан, и чем глубже, тем больше, а порода рядом с ними может держать газ под давлением. При добыче он выходит наружу. Пламя поджигает воздух с 5–15% метана, а после взрыва остаётся смесь с большим количеством угарного газа.");
+
+            add("fluid_type.tfcpp.coal_tar", "Каменноугольная смола");
+            add("fluid_type.tfcpp.wood_tar", "Древесный дёготь");
+            add("fluid_type.tfcpp.ammonia_liquor", "Надсмольная аммиачная вода");
+            add("fluid_type.tfcpp.pyroligneous_liquor", "Подсмольная вода");
+            add("item.tfcpp.coke", "Кокс");
+            add("item.tfcpp.lignite_char", "Буроугольный полукокс");
+            add("block.tfcpp.coke_oven", "Коксовая печь");
+            add("block.tfcpp.gas_burner", "Газовая горелка");
+            add("tfcpp.coke_oven.status", "%1$s °C, загрузка: %2$s, готово %3$s%%, смола: %4$s мБ, вода: %5$s мБ");
+            add("tfcpp.coke_oven.status.empty", "пусто");
+            add("tfcpp.coke_oven.too_cold", "Ниже %1$s °C ничего не происходит");
+            add("tfcpp.coke_oven.tanks_full", "Бак полон или в нём другая жидкость: партия ждёт, пока его опорожнят");
+            add("tfcpp.coke_oven.ready", "Можно выгружать: %1$s × %2$s (присядьте и кликните пустой рукой)");
+            add("tfcpp.coke_oven.no_condenser", "Рядом с печью нет конденсатора: смола и вода уйдут паром");
+            add("tfcpp.coke_oven.locked", "Загрузка уже начала меняться, догрузить нельзя");
+            add("tfcpp.coke_oven.take_first", "Сначала выгрузите готовую партию");
+            add("tfcpp.coke_oven.one_kind", "В печь грузят только один вид сырья за раз");
+            add("tfcpp.coke_oven.full", "Печь полна: не больше 64 кусков");
+            add("tfcpp.coke_oven.loaded", "В печи: %1$s × %2$s");
+            add("tfcpp.coke_oven.nothing", "Выгружать нечего");
+            add("tfcpp.gas_burner.shut", "Сначала откройте газ");
         }
     }
 

@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "tfcpp:coal_tar",
+    "tfcpp:wood_tar",
+    "tfcpp:ammonia_liquor",
+    "tfcpp:pyroligneous_liquor"
+  ]
+}
