@@ -17,13 +17,13 @@ import org.slf4j.Logger;
 /**
  * Counts what lies in a square of the world, for judging how common ores are: this is the only way to see what worldgen really made. An operator can run it with {@code /tfcpp survey}, or a build can start with {@code -Dtfcpp.survey=<chunks>} to log one at a place no player has been.
  * <p>
- * It generates every chunk in the square on the server thread, so it stops the server for as long as that takes.
+ * It generates every chunk in the square on the server thread, so it stops the server for as long as that takes. Worldgen takes about 80 ms a chunk and the watchdog stops a server after a 60 s tick, so the command is limited to a radius of 8 and the start-up survey runs only on an integrated server.
  */
 public final class OreSurvey
 {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final int FAR_FROM_SPAWN = 16384;
-    private static final int SITES = 8;
+    private static final int SITES = 16;
 
     private static final class Tally
     {
@@ -36,6 +36,12 @@ public final class OreSurvey
         final String radius = System.getProperty("tfcpp.survey");
         if (radius != null)
         {
+            if (event.getServer().isDedicatedServer())
+            {
+                LOGGER.warn("The ore survey runs only on an integrated server: on a dedicated one it would stop the server for longer than the watchdog allows");
+                return;
+            }
+
             // Rock types cover whole regions, so one square says little about how common an ore is
             final ServerLevel level = event.getServer().overworld();
             for (int site = 0; site < SITES; site++)

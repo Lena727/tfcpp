@@ -2,8 +2,12 @@ package tfcpp.core;
 
 import java.util.List;
 import net.dries007.tfc.common.TFCTags;
+import net.dries007.tfc.common.blockentities.FarmlandBlockEntity;
 import net.dries007.tfc.common.blocks.rock.Rock;
+import net.dries007.tfc.common.component.size.ItemSizeManager;
+import net.dries007.tfc.common.component.size.Size;
 import net.dries007.tfc.common.recipes.HeatingRecipe;
+import net.dries007.tfc.util.data.Fertilizer;
 import net.dries007.tfc.util.data.FluidHeat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -68,7 +72,7 @@ public final class OreGameTests
     }
 
     @GameTest(template = TEMPLATE)
-    public static void everyVeinLoadsAndOnlyUsesRealRocks(GameTestHelper helper)
+    public static void everyVeinLoads(GameTestHelper helper)
     {
         final var configured = helper.getLevel().registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE);
         final var placed = helper.getLevel().registryAccess().registryOrThrow(Registries.PLACED_FEATURE);
@@ -88,6 +92,8 @@ public final class OreGameTests
         helper.assertTrue(recipes.byKey(TFCpp.id("collapse/ore/rich_galena/limestone")).isPresent(), "Rich galena should collapse to normal");
         helper.assertTrue(recipes.byKey(TFCpp.id("collapse/cobble_limestone")).isPresent(), "Poor ore should collapse to rubble");
         helper.assertTrue(recipes.byKey(TFCpp.id("quern/apatite")).isPresent(), "Apatite should grind");
+        final Fertilizer apatite = Fertilizer.get(new ItemStack(Metallurgy.APATITE_POWDER.get()));
+        helper.assertTrue(apatite != null && apatite.getNutrient(FarmlandBlockEntity.NutrientType.PHOSPHOROUS) > 0f, "Ground apatite should be a phosphorus fertiliser");
         for (var piece : Ores.PIECES.values())
         {
             helper.assertTrue(net.dries007.tfc.common.component.heat.HeatCapability.get(new ItemStack(piece.get())) != null, piece.get() + " should hold heat");
@@ -109,6 +115,9 @@ public final class OreGameTests
         helper.assertTrue(lead != null && lead.meltTemperature() == 327f, "Lead should melt at 327 C");
         helper.assertTrue(HeatingRecipe.getRecipe(new ItemStack(Metallurgy.LEAD_INGOT.get())) != null, "A lead ingot should melt");
         helper.assertTrue(helper.getLevel().getRecipeManager().byKey(TFCpp.id("casting/lead_ingot")).isPresent(), "Lead should cast");
+        helper.assertTrue(helper.getLevel().getRecipeManager().byKey(TFCpp.id("casting/lead_fire_ingot")).isPresent(), "Lead should cast in a fire ingot mold");
+        final Size size = ItemSizeManager.get(new ItemStack(Metallurgy.LEAD_INGOT.get())).getSize(new ItemStack(Metallurgy.LEAD_INGOT.get()));
+        helper.assertTrue(size == Size.LARGE, "A lead ingot should be as large as any other ingot, got " + size);
 
         final BlockPos pos = helper.absolutePos(new BlockPos(4, 1, 4));
         MeltContext.enter(helper.getLevel(), pos);

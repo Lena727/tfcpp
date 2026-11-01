@@ -67,12 +67,12 @@ public final class OreData implements DataProvider
         }), NewOre.GALENA));
 
         // A blanket under the soil, and not at any depth
-        placed.add(disc("bauxite", 90, 0.7f, 50, 100, 30, 4, 20, gradedVein(NewOre.BAUXITE, COMMON_GRADES), NewOre.BAUXITE));
+        placed.add(disc("bauxite", 40, 0.7f, 50, 100, 40, 4, 20, gradedVein(NewOre.BAUXITE, COMMON_GRADES), NewOre.BAUXITE));
         placed.add(cluster("chromite", 30, 0.6f, -80, 20, 25, 12, gradedVein(NewOre.CHROMITE, COMMON_GRADES), NewOre.CHROMITE));
-        placed.add(cluster("ilmenite", 40, 0.5f, -70, 40, 25, 20, gradedVein(NewOre.ILMENITE, POOR_GRADES), NewOre.ILMENITE));
+        placed.add(cluster("ilmenite", 70, 0.5f, -70, 40, 25, 20, gradedVein(NewOre.ILMENITE, POOR_GRADES), NewOre.ILMENITE));
         placed.add(disc("pyrolusite", 80, 0.5f, 20, 90, 30, 3, 20, gradedVein(NewOre.PYROLUSITE, COMMON_GRADES), NewOre.PYROLUSITE));
         placed.add(disc("apatite", 90, 0.35f, 20, 90, 30, 3, 0, plainVein(NewOre.APATITE), null));
-        placed.add(cluster("barite", 50, 0.4f, -40, 70, 20, 0, plainVein(NewOre.BARITE), null));
+        placed.add(cluster("barite", 30, 0.4f, -40, 70, 20, 0, plainVein(NewOre.BARITE), null));
     }
 
     private interface RockParts

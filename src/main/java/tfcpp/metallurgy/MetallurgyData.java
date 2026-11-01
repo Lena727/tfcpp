@@ -523,7 +523,7 @@ public final class MetallurgyData implements DataProvider
     /**
      * Galena gives up lead readily: it needs only a fire well short of copper's, and no carbon, as part of the sulfide roasting to oxide then reacts with the rest. Real lead from it holds some silver, which comes out by cupellation once there is a way to do that.
      */
-    private void lead()
+    private void lead() throws IOException
     {
         final JsonObject fluidHeat = new JsonObject();
         fluidHeat.addProperty("fluid", "tfcpp:metal/lead");
@@ -545,6 +545,12 @@ public final class MetallurgyData implements DataProvider
         casting.add("mold", item("tfc:ceramic/ingot_mold"));
         casting.add("result", stack("tfcpp:metal/ingot/lead", 1));
         put("data/tfcpp/recipe/casting/lead_ingot.json", casting);
+
+        // The fire ingot mold takes the same amount as the ceramic one, and TFC's own recipe for copper says how much to break
+        final JsonObject fireIngot = read(tfcFile("data/tfc/recipe/casting/copper_fire_ingot.json"));
+        fireIngot.add("fluid", fluid("tfcpp:metal/lead", fireIngot.getAsJsonObject("fluid").get("amount").getAsInt()));
+        fireIngot.add("result", stack("tfcpp:metal/ingot/lead", 1));
+        put("data/tfcpp/recipe/casting/lead_fire_ingot.json", fireIngot);
 
         final String[] pieces = {"tfcpp:ore/small_galena", "tfcpp:ore/poor_galena", "tfcpp:ore/normal_galena", "tfcpp:ore/rich_galena"};
         for (int i = 0; i < pieces.length; i++)
@@ -860,6 +866,7 @@ public final class MetallurgyData implements DataProvider
         addToTag("data/tfcpp/tags/fluid/castable_copper.json", "tfc:metal/copper", "tfcpp:metal/arsenical_copper");
         addToTag("data/c/tags/fluid/mercury.json", "tfcpp:mercury");
         addToTag("data/c/tags/item/ingots/arsenical_copper.json", "tfcpp:metal/ingot/arsenical_copper");
+        addToTag("data/c/tags/item/ingots.json", "#c:ingots/lead", "#c:ingots/arsenical_copper"); // TFC sizes ingots by this parent tag, and without it they would count as tiny items that stack to 64
     }
 
     private void lootTables()

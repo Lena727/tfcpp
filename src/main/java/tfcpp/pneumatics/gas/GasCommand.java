@@ -43,7 +43,8 @@ public final class GasCommand
                 .then(Commands.literal("stats")
                     .executes(context -> stats(context.getSource()))))
             .then(Commands.literal("survey")
-                .then(Commands.argument("chunks", IntegerArgumentType.integer(1, 64))
+                // Worldgen takes about 80 ms a chunk on the server thread, and the watchdog stops the server after a 60 s tick: 289 chunks is about 25 s
+                .then(Commands.argument("chunks", IntegerArgumentType.integer(1, 8))
                     .executes(context -> survey(context.getSource(), IntegerArgumentType.getInteger(context, "chunks")))))
             .then(Commands.literal("shaft")
                 .then(Commands.argument("pos", BlockPosArgument.blockPos())
