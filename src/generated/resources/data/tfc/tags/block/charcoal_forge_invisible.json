@@ -5,6 +5,8 @@
     "tfcpp:pressure_vessel",
     "tfcpp:converter",
     "tfcpp:cupel_hearth",
-    "tfcpp:coke_oven"
+    "tfcpp:coke_oven",
+    "tfcpp:sand_bath",
+    "tfcpp:glass_retort"
   ]
 }

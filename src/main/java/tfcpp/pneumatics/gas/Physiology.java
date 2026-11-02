@@ -117,6 +117,8 @@ public final class Physiology
             case AMMONIA -> severity(ppm, 100, 300, 5000); // IDLH 300 ppm
             // NIOSH IDLH for NO2 is 20 ppm. Hours later the lungs fill with fluid, so there is little warning.
             case NITROGEN_OXIDES -> severity(ppm, 5, 20, 200);
+            // NIOSH IDLH for hydrogen chloride is 50 ppm; 1300 ppm for 30 minutes kills half of rats, and it is fatal within minutes by laryngeal and pulmonary oedema. It is noticed at 1 to 5 ppm.
+            case HYDROGEN_CHLORIDE -> severity(ppm, 5, 50, 1300);
             default -> 0;
         };
     }
@@ -140,6 +142,7 @@ public final class Physiology
             case AMMONIA -> ppm >= 5;
             case CHLORINE -> ppm >= 0.5f;
             case NITROGEN_OXIDES -> ppm >= 1;
+            case HYDROGEN_CHLORIDE -> ppm >= 1;
             default -> false;
         };
     }

@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "tfc:metal/sheet/wrought_iron"
+    },
+    "S": {
+      "tag": "c:sands"
+    }
+  },
+  "pattern": [
+    "ISI",
+    "III"
+  ],
+  "result": {
+    "count": 1,
+    "id": "tfcpp:sand_bath"
+  }
+}

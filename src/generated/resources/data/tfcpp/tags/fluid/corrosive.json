@@ -1,6 +1,9 @@
 {
   "replace": false,
   "values": [
-    "tfcpp:chamber_acid"
+    "tfcpp:chamber_acid",
+    "tfcpp:sulfuric_acid",
+    "tfcpp:nitric_acid",
+    "tfcpp:hydrochloric_acid"
   ]
 }

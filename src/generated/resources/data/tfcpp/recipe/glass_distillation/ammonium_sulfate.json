@@ -1,0 +1,19 @@
+{
+  "type": "tfcpp:glass_distillation",
+  "byproduct": {
+    "count": 1,
+    "item": "tfcpp:powder/ammonium_sulfate"
+  },
+  "fluid": {
+    "fluid": "tfcpp:ammonia_liquor",
+    "litres": 1.0
+  },
+  "gas": {},
+  "max_temperature": 100.0,
+  "min_temperature": 0.0,
+  "reagent": {
+    "fluid": "tfcpp:sulfuric_acid",
+    "litres": 0.02
+  },
+  "seconds": 30.0
+}

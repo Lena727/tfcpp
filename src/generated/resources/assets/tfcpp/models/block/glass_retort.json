@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "tfcpp:block/glass_retort_top",
+    "side": "tfcpp:block/glass_retort_side"
+  }
+}

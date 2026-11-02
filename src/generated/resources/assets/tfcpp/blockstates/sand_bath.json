@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "depth=1": {
+      "model": "tfcpp:block/sand_bath"
+    },
+    "depth=2": {
+      "model": "tfcpp:block/sand_bath"
+    },
+    "depth=3": {
+      "model": "tfcpp:block/sand_bath"
+    },
+    "depth=4": {
+      "model": "tfcpp:block/sand_bath"
+    },
+    "depth=5": {
+      "model": "tfcpp:block/sand_bath"
+    },
+    "depth=6": {
+      "model": "tfcpp:block/sand_bath"
+    },
+    "depth=7": {
+      "model": "tfcpp:block/sand_bath"
+    },
+    "depth=8": {
+      "model": "tfcpp:block/sand_bath"
+    }
+  }
+}

@@ -13,6 +13,8 @@
     "tfcpp:gas_burner",
     "tfcpp:lead_chamber",
     "tfcpp:sulfur_burner",
+    "tfcpp:glass_retort",
+    "tfcpp:sand_bath",
     "#tfcpp:pipe_pickaxe",
     "#tfcpp:ore_pickaxe"
   ]

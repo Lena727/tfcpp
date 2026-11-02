@@ -452,6 +452,10 @@
 | CHAMBER_ACID: плотность (`density`) | `1550` | кг/м³ | About 65% sulfuric acid, 1.55 kg/L. |
 | CHAMBER_ACID: вязкость (`viscosity`) | `10f` | мПа·с | About 10 cP on the scale of the other liquids. |
 | CHAMBER_ACID: едкость (`corrosive`) | `true` | — | Eats wood, so it never goes into a barrel or a wooden bucket (тег `tfcpp:corrosive`). |
+| SULFURIC_ACID: плотность, вязкость, едкость | `1830`, `22f`, `true` | кг/м³, мПа·с | Oil of vitriol, about 93%: 1.83 kg/L, about 22 cP at 20 C. Value of the design (density); viscosity from the references. |
+| NITRIC_ACID: плотность, вязкость, едкость | `1480`, `1.1f`, `true` | кг/м³, мПа·с | Aqua fortis, about 90%: 1.48 kg/L, about 1.1 cP. Value of the design (density); viscosity from the references. |
+| HYDROCHLORIC_ACID: плотность, вязкость, едкость | `1160`, `1.9f`, `true` | кг/м³, мПа·с | Spirit of salt, 32%: 1.16 kg/L, about 1.9 cP. Value of the design (density); viscosity from the references. |
+| WOOD_SPIRIT: плотность, вязкость, едкость | `790`, `0.6f`, `false` | кг/м³, мПа·с | Crude methanol and acetone with some water. It burns but does not eat wood, so it goes into barrels. Value of the design (density); viscosity from the references. |
 
 ## chemistry/LeadChamberBlock
 | Величина | Значение | Единицы | Источник из комментария |
@@ -490,3 +494,65 @@
 | Доля максимального здоровья (`SHARE_OF_MAX_HEALTH`) | `0.3f` | доля | A few hits of a splash are a bad burn. A game figure, not measured. |
 | Тип урона (`tfcpp:corrosive`, усталость) | `0f` | — | Its own death message, so that the death says acid, not a blow. Armour gives some protection, as against a splash. |
 | Точки вызова | разлив камеры, разрыв трубы в `PipeTracker.blowDown`, перелив в `PipeNetwork.overflow` | — | Only when the liquid is in `tfcpp:corrosive`. A chamber splashes whether or not its tank was full. |
+
+## pneumatics/gas/Gas, Physiology, PipeMaterial: HYDROGEN_CHLORIDE
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Молярная масса | `36.46f` | г/моль | Value of the design. |
+| Острая тяжесть (`Physiology.acuteSeverity`) | `severity(ppm, 5, 50, 1300)` | ppm | Values of the design: 5, 50 and 1300 ppm. 50 ppm is the NIOSH IDLH; the 1300 ppm figure is the design's own mark for a death within minutes, and was not checked against the toxicology tables. |
+| Запах (`Physiology.isNoticeable`) | от `1` | ppm | Noticed at 1 to 5 ppm. Value of the design. |
+| Коррозия труб (`PipeMaterial.corrosion(Gas)`) | дерево `0`, керамика `0`, медь `0.1f`, железо и сталь `0.3f`, свинец `0.05f` | доля стенки в сутки | Value of the design. With the damp of the air it is hydrochloric acid, and chloride keeps iron from passivating. |
+
+## chemistry/Distillation
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Температура растрескивания (`CRACK_TEMPERATURE`) | `550f` | °C | Value of the design. Borosilicate glass in a thin vessel cracks under the gradient above it. Cracks when strictly above. |
+| Допуск остатка (`EPSILON`) | `1e-4` | л | Float noise, not liquid: 0.23 L of stock is not refused 0.23 L. |
+| Ход партии | пропорционален времени в диапазоне; сырьё берётся один раз в начале | — | A batch outside its range keeps its place, as a coke oven charge does. Output, gas and residue arrive in proportion to progress, the powder when the batch ends. |
+| Приёмник | перед шагом нужна ёмкость на выход, остаток и порошок | — | A batch that cannot put its next stretch anywhere does not run, and does not take its inputs. |
+
+## chemistry/DistillationTable
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Концентрирование: 1 л `chamber_acid`, 280–350, 60 с | 0.59 л `sulfuric_acid` | л, °C, с | Value of the design. 1 L at 1.55 kg/L and 65% is 1.01 kg of acid, which is 0.59 L at 93%, 1.83 kg/L. |
+| Азотная кислота: 8 селитры + 0.23 л `sulfuric_acid`, 120–200, 60 с | 0.175 л `nitric_acid`, 8 `potassium_bisulfate`, NOx 0.2 моль | л, моль | Value of the design. |
+| Соляная кислота: 8 соли + 0.39 л `sulfuric_acid`, вода приёмника 0.53 л, 150–300, 60 с | 0.67 л `hydrochloric_acid`, 8 `sodium_bisulfate` | л | Value of the design. The 0.53 L of water is taken by the batch and ends up in the acid (0.67 L at 1.16 kg/L and 32%). |
+| Древесный спирт: 1 л `pyroligneous_liquor`, 70–100, 30 с | 0.02 л `wood_spirit` в приёмнике, 0.9 л `tfc:vinegar` остаётся в колбе | л | Value of the design. Two liquids from one batch: the vinegar is a residue and needs a tank of its own (a decision of the implementation). |
+| Суперфосфат: 8 апатита + 0.16 л `chamber_acid`, 0–100, 30 с | 8 `powder/superphosphate` | шт | Value of the design. |
+| Сульфат аммония: 1 л `ammonia_liquor` + 0.02 л `sulfuric_acid`, 0–100, 30 с | 1 `powder/ammonium_sulfate` | шт | Value of the design. Two liquids go in, so the retort has two flask tanks (a decision of the implementation). |
+| Удобрения | суперфосфат фосфор `0.2f`, сульфат аммония азот `0.1f` | доля, шкала удобрений TFC | Value of the design. Raw apatite is 0.05 and Thomas meal 0.15. |
+
+## chemistry/AcidVapour
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| NOx на литр азотной кислоты (`NITROGEN_OXIDES_PER_LITRE`) | `5f` | моль/л | Value of the design. A litre holds 21 mol of acid, and a quarter of it escapes in the time a flask takes to empty. A game figure. |
+| HCl на литр соляной кислоты (`HYDROGEN_CHLORIDE_PER_LITRE`) | `10f` | моль/л | Value of the design. 32% by mass at 1.16 kg/L is 10.2 mol/L. The design table gives 6.8 mol for the batch without water, which is 10.1 mol/L of 0.67 L; the code gives 6.7. |
+| Серная и камерная кислота | только пар | — | Sulfuric acid hardly boils off at room temperature. Value of the design. |
+
+## chemistry/SandBath
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Температура вверх (`passedUp`) | `20 + (T − 20) / (1 + глубина)` | °C | Value of the design: 1100 C at depth 1 gives 560 C, at depth 8 about 140 C. A fire no hotter than 20 C gives what it has. |
+| Окружающая температура (`AMBIENT`) | `20f` | °C | The room. |
+| Глубина | от `1` до `8`, по умолчанию `4` | слоёв | Value of the design (1 to 8); 4 is the implementation's own start. |
+| Один слой песка не стоит предметов | — | — | A decision of the implementation: the depth is a setting by hand, nothing is taken for it. |
+
+## chemistry/GlassRetortBlockEntity
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Баки колбы (`FLASK_MILLIBUCKETS`) | `25` (два бака входа, бак остатка) | мБ = л | Value of the design for the input tank (25). The second input tank and the residue tank are the implementation's. |
+| Приёмник (`RECEIVER_MILLIBUCKETS`) | `25` | мБ = л | Value of the design. |
+| Вода приёмника (`WATER_MILLIBUCKETS`) | `5` | мБ = л | Value of the design. |
+| Ячейка порошка (`STACK_LIMIT`) | `64` | шт | One stack; the finished powder lies in its own slot with the same limit. |
+| Шаг | `20` тактов календаря TFC, не более `5` с за раз | — | As the coke oven: `Calendars.SERVER.getTicks()`, not game time. |
+| Радиус сообщения о трещине (`CRACK_HEARD`) | `12.0` | блоки | The message goes to players within this reach. A game figure. |
+| Растрескивание | проверка каждый такт, `temperature > 550` | °C | In its own tick, with no `PipeTracker`: the block is destroyed without a drop. |
+| Разлив при разрушении | едкая жидкость → `CorrosiveSpill.at`; жидкости как пары по `AcidVapour`; порошок на землю | — | Same on a crack and on breaking by hand. The unreacted share of a running batch goes back as powder and fume; the reacted share has already come out. |
+| Нет воды или нет конденсатора для рецепта с водой приёмника | вся HCl в воздух, вода не расходуется | — | `DistillationRecipe.unabsorbed()`: output 0, gas HCl `10` mol per litre of the output it would have had. |
+
+## chemistry/GlassCarboyItem
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Ёмкость (`CAPACITY_MILLIBUCKETS`) | `25` | мБ = л | Value of the design. |
+| Стек | `1` | шт | A carboy does not stack. |
+| Допустимые жидкости | тег `tfcpp:usable_in_carboy` | — | Every `Liquid`, `tfc:vinegar`, `#tfc:any_fresh_water`. Nothing else. |

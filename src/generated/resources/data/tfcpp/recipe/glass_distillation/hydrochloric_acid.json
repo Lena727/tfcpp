@@ -1,0 +1,24 @@
+{
+  "type": "tfcpp:glass_distillation",
+  "byproduct": {
+    "count": 8,
+    "item": "tfcpp:powder/sodium_bisulfate"
+  },
+  "fluid": {
+    "fluid": "tfcpp:sulfuric_acid",
+    "litres": 0.39
+  },
+  "gas": {},
+  "item": {
+    "item": "tfc:powder/salt"
+  },
+  "items": 8,
+  "max_temperature": 300.0,
+  "min_temperature": 150.0,
+  "output": {
+    "fluid": "tfcpp:hydrochloric_acid",
+    "litres": 0.67
+  },
+  "receiver_water": 0.53,
+  "seconds": 60.0
+}

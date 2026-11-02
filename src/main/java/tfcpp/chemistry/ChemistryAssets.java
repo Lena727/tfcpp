@@ -26,6 +26,12 @@ public final class ChemistryAssets
         {
             flatItem(Chemistry.COKE.get());
             flatItem(Chemistry.LIGNITE_CHAR.get());
+            flatItem(Chemistry.BOROSILICATE_GLASS_BATCH.get());
+            flatItem(Chemistry.GLASS_CARBOY.get());
+            flatItem(Chemistry.POTASSIUM_BISULFATE.get());
+            flatItem(Chemistry.SODIUM_BISULFATE.get());
+            flatItem(Chemistry.SUPERPHOSPHATE.get());
+            flatItem(Chemistry.AMMONIUM_SULFATE.get());
         }
 
         /** The name has to differ from that of the other providers of models, or the data run refuses both. */
@@ -67,6 +73,11 @@ public final class ChemistryAssets
 
             simpleBlockWithItem(Chemistry.LEAD_CHAMBER.get(), models().cubeAll("lead_chamber", modLoc("block/lead_chamber")));
             simpleBlockWithItem(Chemistry.SULFUR_BURNER.get(), models().cubeAll("sulfur_burner", modLoc("block/sulfur_burner")));
+            simpleBlockWithItem(Chemistry.GLASS_RETORT.get(), models().cubeColumn("glass_retort", modLoc("block/glass_retort_side"), modLoc("block/glass_retort_top")));
+            // One model for every depth; each state is named in the block state file, as a block state with a property needs
+            final ModelFile bath = models().cubeBottomTop("sand_bath", modLoc("block/sand_bath_side"), modLoc("block/sand_bath_side"), modLoc("block/sand_bath_top"));
+            getVariantBuilder(Chemistry.SAND_BATH.get()).forAllStates(state -> ConfiguredModel.builder().modelFile(bath).build());
+            simpleBlockItem(Chemistry.SAND_BATH.get(), bath);
         }
     }
 

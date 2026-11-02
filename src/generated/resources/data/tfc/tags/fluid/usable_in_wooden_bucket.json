@@ -4,6 +4,7 @@
     "tfcpp:coal_tar",
     "tfcpp:wood_tar",
     "tfcpp:ammonia_liquor",
-    "tfcpp:pyroligneous_liquor"
+    "tfcpp:pyroligneous_liquor",
+    "tfcpp:wood_spirit"
   ]
 }

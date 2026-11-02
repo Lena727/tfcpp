@@ -1,0 +1,19 @@
+{
+  "type": "tfcpp:glass_distillation",
+  "fluid": {
+    "fluid": "tfcpp:pyroligneous_liquor",
+    "litres": 1.0
+  },
+  "gas": {},
+  "max_temperature": 100.0,
+  "min_temperature": 70.0,
+  "output": {
+    "fluid": "tfcpp:wood_spirit",
+    "litres": 0.02
+  },
+  "residue": {
+    "fluid": "tfc:vinegar",
+    "litres": 0.9
+  },
+  "seconds": 30.0
+}

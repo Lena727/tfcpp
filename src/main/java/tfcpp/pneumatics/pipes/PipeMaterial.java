@@ -66,6 +66,7 @@ public enum PipeMaterial
                 case CHLORINE -> 0.3f;
                 case SULFUR_DIOXIDE -> 0.05f;
                 case NITROGEN_OXIDES -> 0.1f; // Wet oxides make nitric acid, which dissolves copper
+                case HYDROGEN_CHLORIDE -> 0.1f; // Dry hydrogen chloride hardly touches copper: it is the moist gas that does
                 default -> 0f;
             };
             case WROUGHT_IRON, STEEL -> switch (gas)
@@ -75,6 +76,7 @@ public enum PipeMaterial
                 case HYDROGEN_SULFIDE -> 0.1f;
                 case CARBON_DIOXIDE -> 0.005f;
                 case NITROGEN_OXIDES -> 0.05f; // Nitric acid passivates iron, so the wet oxides attack it far less than copper
+                case HYDROGEN_CHLORIDE -> 0.3f; // With the damp of the air it is hydrochloric acid, and chloride keeps iron from passivating
                 default -> 0f;
             };
             // Sulfur dioxide takes nothing from lead, as the film of lead sulfate it makes protects the metal, and so the chamber process ran in lead. The oxides of the chamber take nothing either.
@@ -82,6 +84,7 @@ public enum PipeMaterial
             {
                 case CHLORINE -> 0.1f;
                 case HYDROGEN_SULFIDE -> 0.05f;
+                case HYDROGEN_CHLORIDE -> 0.05f; // Lead chloride is a poor film, but a thin one
                 default -> 0f;
             };
         };

@@ -23,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
+import tfcpp.chemistry.Chemistry;
 import tfcpp.core.TFCpp;
 import tfcpp.metallurgy.Metallurgy;
 import tfcpp.metallurgy.RetortRecipe;
@@ -60,6 +61,10 @@ public final class TFCppJeiPlugin implements IModPlugin
         info(registration, new ItemStack(Instruments.MINE_FAN_ITEM.get()), "tfcpp.info.mine_fan");
         info(registration, new ItemStack(Metallurgy.CONVERTER_ITEM.get()), "tfcpp.info.converter");
         info(registration, new ItemStack(Metallurgy.CONDENSATION_TOWER_ITEM.get()), "tfcpp.info.condensation_tower");
+        info(registration, new ItemStack(Chemistry.GLASS_RETORT_ITEM.get()), "tfcpp.info.glass_retort");
+        info(registration, new ItemStack(Chemistry.SAND_BATH_ITEM.get()), "tfcpp.info.sand_bath");
+        info(registration, new ItemStack(Chemistry.GLASS_CARBOY.get()), "tfcpp.info.glass_carboy");
+        info(registration, new ItemStack(Chemistry.BOROSILICATE_GLASS_BATCH.get()), "tfcpp.info.borosilicate_glass_batch");
         info(registration, new ItemStack(Metallurgy.IRON_SLAG.get()), "tfcpp.info.iron_slag");
         info(registration, new ItemStack(Metallurgy.PHOSPHORIC_IRON_SLAG.get()), "tfcpp.info.phosphoric_iron_slag");
         info(registration, new ItemStack(Metallurgy.THOMAS_SLAG.get()), "tfcpp.info.thomas_slag");

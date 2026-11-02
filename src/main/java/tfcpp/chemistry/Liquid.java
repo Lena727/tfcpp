@@ -18,7 +18,15 @@ public enum Liquid
     /**
      * Chamber acid: about 65% sulfuric acid, made in a lead chamber. It is heavier than water at 1.55 kg/L and about as thick as a light oil. It eats wood, iron and copper, and lead holds it only while it is cool, under its film of lead sulfate. Corrosive, so it never goes into a barrel or a wooden bucket.
      */
-    CHAMBER_ACID(1550, 10f, 0xFFC9B187, false, true);
+    CHAMBER_ACID(1550, 10f, 0xFFC9B187, false, true),
+    /** Oil of vitriol, about 93% sulfuric acid: 1.83 kg/L and as thick as a light oil (about 22 cP at 20 C). Strong, it passivates iron, and it chars wood and eats lead only when hot. */
+    SULFURIC_ACID(1830, 22f, 0xFFE2DCC4, false, true),
+    /** Aqua fortis, about 90% nitric acid: 1.48 kg/L and thinner than water (about 1.1 cP). It dissolves copper and lead, passivates iron, and fumes yellow in air. */
+    NITRIC_ACID(1480, 1.1f, 0xFFE9D77A, false, true),
+    /** Spirit of salt, about 32% hydrogen chloride in water: 1.16 kg/L and about 1.9 cP. Chloride keeps iron from passivating, so it eats iron and steel fastest. */
+    HYDROCHLORIC_ACID(1160, 1.9f, 0xFFD6E39A, false, true),
+    /** Crude wood spirit: methanol and acetone with some water, 0.79 kg/L and thinner than water (about 0.6 cP). It burns, but it does not eat wood. */
+    WOOD_SPIRIT(790, 0.6f, 0xFFB9CBD6, false, false);
 
     private final int density;
     private final float viscosity;

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "tfc:powder/lime"
+    },
+    {
+      "item": "tfcpp:powder/borax"
+    },
+    {
+      "tag": "c:sands/silica"
+    }
+  ],
+  "result": {
+    "count": 4,
+    "id": "tfcpp:borosilicate_glass_batch"
+  }
+}

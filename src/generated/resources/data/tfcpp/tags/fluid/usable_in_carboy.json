@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "tfcpp:coal_tar",
+    "tfcpp:wood_tar",
+    "tfcpp:ammonia_liquor",
+    "tfcpp:pyroligneous_liquor",
+    "tfcpp:chamber_acid",
+    "tfcpp:sulfuric_acid",
+    "tfcpp:nitric_acid",
+    "tfcpp:hydrochloric_acid",
+    "tfcpp:wood_spirit",
+    "tfc:vinegar",
+    "#tfc:any_fresh_water"
+  ]
+}

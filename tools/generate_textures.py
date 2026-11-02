@@ -365,3 +365,64 @@ write_png(ROOT / 'block/lead_chamber.png', chamber)
 
 # The sulfur burner: fire brick with a yellow crust of sulfur on it
 write_png(ROOT / 'block/sulfur_burner.png', bricks(162, (196, 170, 84)))
+
+
+# Stage F: borosilicate glass, the carboy, the glass retort, the sand bath, and the salts that distillation leaves
+write_png(ROOT / 'item/borosilicate_glass_batch.png', heap(170, (204, 224, 232)))  # Pale: sand, lime and borax
+write_png(ROOT / 'item/powder/potassium_bisulfate.png', heap(171, (232, 230, 220)))
+write_png(ROOT / 'item/powder/sodium_bisulfate.png', heap(172, (242, 238, 226)))
+write_png(ROOT / 'item/powder/superphosphate.png', heap(173, (170, 160, 142)))  # Grey-brown, as the rock it is made of
+write_png(ROOT / 'item/powder/ammonium_sulfate.png', heap(174, (224, 230, 238)))
+
+
+def carboy(seed):
+    """A big round bottle of glass with a narrow neck, in a wicker basket."""
+    rng = random.Random(seed)
+    pixels = [[(0, 0, 0, 0)] * 16 for _ in range(16)]
+    for y in range(1, 5):
+        for x in range(6, 10):
+            pixels[y][x] = shade((190, 222, 214), rng.randint(-8, 8))[:3] + (200,)  # The neck
+    for y in range(5, 15):
+        for x in range(16):
+            if ((x - 7.5) / 6.0) ** 2 + ((y - 9.5) / 5.2) ** 2 <= 1.0:
+                glass = shade((176, 216, 206), rng.randint(-10, 10))[:3] + (200,)
+                pixels[y][x] = glass
+                if y >= 10:
+                    pixels[y][x] = shade((158, 112, 70), ((x + y) % 2) * 14 - 8 + rng.randint(-5, 5))  # The wicker basket
+    pixels[6][5] = pixels[7][4] = shade((236, 250, 244), 0)[:3] + (230,)  # A glint
+    return pixels
+
+
+write_png(ROOT / 'item/glass_carboy.png', carboy(175))
+
+glass_side = noise(176, (170, 212, 196), 7)
+for i in range(16):
+    glass_side[0][i] = glass_side[15][i] = glass_side[i][0] = glass_side[i][15] = shade((110, 158, 142), 0)  # The frame of the case
+for y in range(2, 14):
+    for x in range(2, 14):
+        if (x + y) % 7 == 0:
+            glass_side[y][x] = shade((226, 246, 238), 0)  # Streaks of light on the glass
+for y in range(9, 13):
+    for x in range(5, 11):
+        glass_side[y][x] = shade((150, 190, 176), (x + y) % 3)  # The belly of the flask
+write_png(ROOT / 'block/glass_retort_side.png', glass_side)
+
+glass_top = noise(177, (160, 204, 188), 6)
+for y in range(16):
+    for x in range(16):
+        distance = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+        if distance < 5.5:
+            glass_top[y][x] = shade((200, 232, 222), int(distance * 3))  # The neck of the flask
+        if distance < 3:
+            glass_top[y][x] = shade((84, 110, 104), 0)  # And its mouth
+write_png(ROOT / 'block/glass_retort_top.png', glass_top)
+
+bath_side = noise(178, (96, 94, 98), 6)
+for y in range(16):
+    for x in range(16):
+        if y < 3:
+            bath_side[y][x] = shade((196, 176, 120), (x * 3 + y) % 7 - 3)  # Sand heaped over the rim
+        elif y in (3, 15):
+            bath_side[y][x] = shade((62, 60, 64), 0)  # The edge of the iron tray
+write_png(ROOT / 'block/sand_bath_side.png', bath_side)
+write_png(ROOT / 'block/sand_bath_top.png', noise(179, (206, 186, 128), 12))

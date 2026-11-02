@@ -1,0 +1,15 @@
+{
+  "type": "tfcpp:glass_distillation",
+  "fluid": {
+    "fluid": "tfcpp:chamber_acid",
+    "litres": 1.0
+  },
+  "gas": {},
+  "max_temperature": 350.0,
+  "min_temperature": 280.0,
+  "output": {
+    "fluid": "tfcpp:sulfuric_acid",
+    "litres": 0.59
+  },
+  "seconds": 60.0
+}

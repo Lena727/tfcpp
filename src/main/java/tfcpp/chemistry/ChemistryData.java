@@ -24,6 +24,8 @@ public final class ChemistryData implements DataProvider
     /** Coke and char are porous carbon: the specific heat of coke over its working range is close to 1.3 J/g/K, which is more than graphite has at room temperature. */
     private static final float COKE_SPECIFIC_HEAT = 1.3f, CHAR_SPECIFIC_HEAT = 1.2f;
     private static final float PIECE_GRAMS = 3000f;
+    /** Fertiliser values on the scale of TFC's: apatite 0.05 and Thomas meal 0.15 are the raw and the slag. */
+    private static final float SUPERPHOSPHATE_PHOSPHORUS = 0.2f, AMMONIUM_SULFATE_NITROGEN = 0.1f;
 
     private final Path root;
     private final Map<String, JsonElement> files = new LinkedHashMap<>();
@@ -40,6 +42,8 @@ public final class ChemistryData implements DataProvider
         fuels();
         tags();
         crafting();
+        distillation();
+        glass();
 
         final List<CompletableFuture<?>> saves = new java.util.ArrayList<>();
         files.forEach((path, json) -> saves.add(DataProvider.saveStable(cache, json, root.resolve(path))));
@@ -77,6 +81,123 @@ public final class ChemistryData implements DataProvider
         }
     }
 
+    /** The recipes of the glass retort, from {@link DistillationTable}. */
+    private void distillation()
+    {
+        for (DistillationTable.Row row : DistillationTable.ROWS)
+        {
+            final JsonObject recipe = new JsonObject();
+            recipe.addProperty("type", "tfcpp:glass_distillation");
+            if (row.item() != null)
+            {
+                recipe.add("item", item(row.item()));
+                recipe.addProperty("items", row.items());
+            }
+            recipe.add("fluid", condensate(row.fluid(), row.litres()));
+            if (row.reagent() != null)
+            {
+                recipe.add("reagent", condensate(row.reagent(), row.reagentLitres()));
+            }
+            recipe.addProperty("min_temperature", row.minTemperature());
+            recipe.addProperty("max_temperature", row.maxTemperature());
+            recipe.addProperty("seconds", row.seconds());
+            if (row.output() != null)
+            {
+                recipe.add("output", condensate(row.output(), row.outputLitres()));
+            }
+            if (row.residue() != null)
+            {
+                recipe.add("residue", condensate(row.residue(), row.residueLitres()));
+            }
+            if (row.receiverWater() > 0f)
+            {
+                recipe.addProperty("receiver_water", row.receiverWater());
+            }
+            final JsonObject gas = new JsonObject();
+            for (Gas species : Gas.VALUES)
+            {
+                final Float moles = row.gas().get(species);
+                if (moles != null)
+                {
+                    gas.addProperty(species.id(), moles);
+                }
+            }
+            recipe.add("gas", gas);
+            if (row.byproduct() != null)
+            {
+                final JsonObject byproduct = new JsonObject();
+                byproduct.addProperty("item", row.byproduct());
+                byproduct.addProperty("count", row.byproducts());
+                recipe.add("byproduct", byproduct);
+            }
+            put("data/tfcpp/recipe/glass_distillation/" + row.name() + ".json", recipe);
+        }
+
+        // Superphosphate is rock phosphate made soluble, so it feeds a field at four times the rate of raw apatite; ammonium sulfate is ammonia in a form that does not blow away
+        fertilizer("superphosphate", "tfcpp:powder/superphosphate", "phosphorus", SUPERPHOSPHATE_PHOSPHORUS);
+        fertilizer("ammonium_sulfate", "tfcpp:powder/ammonium_sulfate", "nitrogen", AMMONIUM_SULFATE_NITROGEN);
+    }
+
+    private void fertilizer(String name, String ingredient, String nutrient, float amount)
+    {
+        final JsonObject fertilizer = new JsonObject();
+        fertilizer.add("ingredient", item(ingredient));
+        fertilizer.addProperty(nutrient, amount);
+        put("data/tfcpp/tfc/fertilizer/" + name + ".json", fertilizer);
+    }
+
+    /** The batch of borosilicate glass, and what is blown from it. */
+    private void glass()
+    {
+        // Made as TFC makes its silica batch, with borax in the place of potash as the flux: four batches from one of each
+        final JsonObject batch = new JsonObject();
+        batch.addProperty("type", "minecraft:crafting_shapeless");
+        batch.addProperty("category", "misc");
+        final JsonArray ingredients = new JsonArray();
+        ingredients.add(item("tfc:powder/lime"));
+        ingredients.add(item("tfcpp:powder/borax"));
+        final JsonObject sand = new JsonObject();
+        sand.addProperty("tag", "c:sands/silica");
+        ingredients.add(sand);
+        batch.add("ingredients", ingredients);
+        batch.add("result", stack("tfcpp:borosilicate_glass_batch", 4));
+        put("data/tfcpp/recipe/crafting/borosilicate_glass_batch.json", batch);
+
+        glassworking("glass_carboy", "tfcpp:glass_carboy", "tfc:blow", "tfc:blow", "tfc:roll", "tfc:saw");
+        glassworking("glass_retort", "tfcpp:glass_retort", "tfc:blow", "tfc:stretch", "tfc:pinch", "tfc:saw");
+
+        // The batch is a glass of the highest tier, like volcanic glass: it goes on a blowpipe, and into the recipes that take any batch or any but the first tier
+        addToTag("data/tfc/tags/item/glass_batches.json", "tfcpp:borosilicate_glass_batch");
+        addToTag("data/tfc/tags/item/glass_batches_not_tier_1.json", "tfcpp:borosilicate_glass_batch");
+
+        final JsonObject bath = shaped("tfcpp:sand_bath", "ISI", "III");
+        bath.getAsJsonObject("key").add("I", item("tfc:metal/sheet/wrought_iron"));
+        final JsonObject sandKey = new JsonObject();
+        sandKey.addProperty("tag", "c:sands");
+        bath.getAsJsonObject("key").add("S", sandKey);
+        put("data/tfcpp/recipe/crafting/sand_bath.json", bath);
+
+        for (String powder : List.of("potassium_bisulfate", "sodium_bisulfate", "superphosphate", "ammonium_sulfate"))
+        {
+            addToTag("data/c/tags/item/dusts/" + powder + ".json", "tfcpp:powder/" + powder);
+        }
+    }
+
+    private void glassworking(String name, String result, String... operations)
+    {
+        final JsonObject recipe = new JsonObject();
+        recipe.addProperty("type", "tfc:glassworking");
+        recipe.add("batch", item("tfcpp:borosilicate_glass_batch"));
+        final JsonArray steps = new JsonArray();
+        for (String operation : operations)
+        {
+            steps.add(operation);
+        }
+        recipe.add("operations", steps);
+        recipe.add("result", stack(result, 1));
+        put("data/tfcpp/recipe/glassworking/" + name + ".json", recipe);
+    }
+
     private static JsonElement input(String name)
     {
         final JsonArray list = new JsonArray();
@@ -98,8 +219,13 @@ public final class ChemistryData implements DataProvider
 
     private static JsonObject condensate(Liquid liquid, float litres)
     {
+        return condensate("tfcpp:" + liquid.id(), litres);
+    }
+
+    private static JsonObject condensate(String fluid, float litres)
+    {
         final JsonObject json = new JsonObject();
-        json.addProperty("fluid", "tfcpp:" + liquid.id());
+        json.addProperty("fluid", fluid);
         json.addProperty("litres", litres);
         return json;
     }
@@ -148,6 +274,11 @@ public final class ChemistryData implements DataProvider
         {
             addToTag("data/c/tags/fluid/" + liquid.id() + ".json", "tfcpp:" + liquid.id());
         }
+        // A carboy of glass holds every chemical liquid of the mod, vinegar for the acetic acid of the pyroligneous distillation, and fresh water for the receiver
+        final java.util.List<String> carboy = new java.util.ArrayList<>(java.util.Arrays.stream(Liquid.values()).map(liquid -> "tfcpp:" + liquid.id()).toList());
+        carboy.add("tfc:vinegar");
+        carboy.add("#tfc:any_fresh_water");
+        addToTag("data/tfcpp/tags/fluid/usable_in_carboy.json", carboy.toArray(String[]::new));
     }
 
     private void crafting()

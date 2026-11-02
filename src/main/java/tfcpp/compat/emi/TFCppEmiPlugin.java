@@ -18,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
+import tfcpp.chemistry.Chemistry;
 import tfcpp.core.TFCpp;
 import tfcpp.metallurgy.Metallurgy;
 import tfcpp.metallurgy.RetortRecipe;
@@ -48,6 +49,10 @@ public final class TFCppEmiPlugin implements EmiPlugin
         info(registry, "mine_fan", "tfcpp.info.mine_fan", Instruments.MINE_FAN_ITEM.get());
         info(registry, "converter", "tfcpp.info.converter", Metallurgy.CONVERTER_ITEM.get());
         info(registry, "condensation_tower", "tfcpp.info.condensation_tower", Metallurgy.CONDENSATION_TOWER_ITEM.get());
+        info(registry, "glass_retort", "tfcpp.info.glass_retort", Chemistry.GLASS_RETORT_ITEM.get());
+        info(registry, "sand_bath", "tfcpp.info.sand_bath", Chemistry.SAND_BATH_ITEM.get());
+        info(registry, "glass_carboy", "tfcpp.info.glass_carboy", Chemistry.GLASS_CARBOY.get());
+        info(registry, "borosilicate_glass_batch", "tfcpp.info.borosilicate_glass_batch", Chemistry.BOROSILICATE_GLASS_BATCH.get());
         info(registry, "iron_slag", "tfcpp.info.iron_slag", Metallurgy.IRON_SLAG.get());
         info(registry, "phosphoric_iron_slag", "tfcpp.info.phosphoric_iron_slag", Metallurgy.PHOSPHORIC_IRON_SLAG.get());
         info(registry, "thomas_slag", "tfcpp.info.thomas_slag", Metallurgy.THOMAS_SLAG.get());

@@ -1,0 +1,19 @@
+{
+  "type": "tfcpp:glass_distillation",
+  "byproduct": {
+    "count": 8,
+    "item": "tfcpp:powder/superphosphate"
+  },
+  "fluid": {
+    "fluid": "tfcpp:chamber_acid",
+    "litres": 0.16
+  },
+  "gas": {},
+  "item": {
+    "item": "tfcpp:powder/apatite"
+  },
+  "items": 8,
+  "max_temperature": 100.0,
+  "min_temperature": 0.0,
+  "seconds": 30.0
+}

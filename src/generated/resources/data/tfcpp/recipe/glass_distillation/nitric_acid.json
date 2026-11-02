@@ -1,0 +1,25 @@
+{
+  "type": "tfcpp:glass_distillation",
+  "byproduct": {
+    "count": 8,
+    "item": "tfcpp:powder/potassium_bisulfate"
+  },
+  "fluid": {
+    "fluid": "tfcpp:sulfuric_acid",
+    "litres": 0.23
+  },
+  "gas": {
+    "nitrogen_oxides": 0.2
+  },
+  "item": {
+    "item": "tfc:powder/saltpeter"
+  },
+  "items": 8,
+  "max_temperature": 200.0,
+  "min_temperature": 120.0,
+  "output": {
+    "fluid": "tfcpp:nitric_acid",
+    "litres": 0.175
+  },
+  "seconds": 60.0
+}

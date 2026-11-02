@@ -112,6 +112,7 @@ public final class DataGenerators
             add("tfcpp.gas.smell.ammonia", "A pungent smell of ammonia stings your eyes");
             add("tfcpp.gas.smell.chlorine", "A sharp bleach-like smell burns your nose");
             add("tfcpp.gas.smell.nitrogen_oxides", "A sharp, acrid smell of nitrous fumes stings your eyes");
+            add("tfcpp.gas.smell.hydrogen_chloride", "A sharp, choking sourness of hydrochloric fumes burns your throat");
 
             add("itemGroup.tfcpp", "TFC++");
             add("fluid_type.tfcpp.metal.arsenical_copper", "Molten Arsenical Copper");
@@ -309,6 +310,48 @@ public final class DataGenerators
             add("tfcpp.condensation_tower.no_network", "Not joined to a pipe: no gas passes through it");
             add("tfcpp.condensation_tower.too_hot", "The gas at %1$s C is too hot: dust settles only below %2$s C and mercury only below %3$s C");
             add("tfcpp.condensation_tower.tank_full", "The mercury tank is full, and more stays in the gas");
+            add("fluid_type.tfcpp.sulfuric_acid", "Oil of Vitriol");
+            add("fluid_type.tfcpp.nitric_acid", "Aqua Fortis");
+            add("fluid_type.tfcpp.hydrochloric_acid", "Spirit of Salt");
+            add("fluid_type.tfcpp.wood_spirit", "Wood Spirit");
+            add("item.tfcpp.powder.potassium_bisulfate", "Potassium Bisulfate");
+            add("item.tfcpp.powder.sodium_bisulfate", "Sodium Bisulfate");
+            add("item.tfcpp.powder.superphosphate", "Superphosphate");
+            add("item.tfcpp.powder.ammonium_sulfate", "Ammonium Sulfate");
+            add("item.tfcpp.borosilicate_glass_batch", "Borosilicate Glass Batch");
+            add("item.tfcpp.glass_carboy", "Glass Carboy");
+            add("item.tfcpp.glass_carboy.filled", "Carboy of %s");
+            add("block.tfcpp.glass_retort", "Glass Retort");
+            add("block.tfcpp.sand_bath", "Sand Bath");
+            add("tfcpp.sand_bath.status", "Sand %1$s of %2$s deep, %3$s C, passing up %4$s C to the vessel on it");
+            add("tfcpp.glass_retort.cracked", "The flask cracks at %1$s C and its contents spill");
+            add("tfcpp.glass_retort.status", "Glass retort: %1$s C (it cracks above %2$s C), %3$s");
+            add("tfcpp.glass_retort.stage.idle", "idle");
+            add("tfcpp.glass_retort.stage.running", "running, %1$s%% done");
+            add("tfcpp.glass_retort.contents", "Flask: %1$s. Second liquid: %2$s. Powder: %3$s");
+            add("tfcpp.glass_retort.receiver", "Receiver: %1$s. Left in the flask: %2$s. Receiver water: %3$s");
+            add("tfcpp.glass_retort.tank", "%1$s L of %2$s");
+            add("tfcpp.glass_retort.empty", "nothing");
+            add("tfcpp.glass_retort.ready", "Ready to take out: %1$s x %2$s (crouch and use an empty hand)");
+            add("tfcpp.glass_retort.nothing", "Nothing to take out");
+            add("tfcpp.glass_retort.no_condenser", "No condenser beside the retort: what boils off will escape into the room");
+            add("tfcpp.glass_retort.no_recipe", "This charge makes nothing: check the liquids and the powder");
+            add("tfcpp.glass_retort.dry", "The receiver does not hold %1$s L of water to take up the hydrogen chloride: it will go into the air");
+            add("tfcpp.glass_retort.need_items", "A batch needs %1$s powders in the slot");
+            add("tfcpp.glass_retort.need_liquid", "A batch needs %1$s L of the liquid in the flask");
+            add("tfcpp.glass_retort.need_reagent", "A batch needs %1$s L of the second liquid");
+            add("tfcpp.glass_retort.too_cold", "Nothing comes over below %1$s C");
+            add("tfcpp.glass_retort.too_hot", "Nothing comes over properly above %1$s C: the charge is held");
+            add("tfcpp.glass_retort.output_full", "The receiver is full or holds another liquid: the batch waits until it is emptied");
+            add("tfcpp.glass_retort.refused", "The flask takes no such liquid, or both its tanks hold others");
+            add("tfcpp.glass_retort.nothing_to_tap", "Nothing to run into the container");
+            add("tfcpp.glass_retort.one_kind", "The slot takes one kind of powder at a time");
+            add("tfcpp.glass_retort.full", "The slot is full");
+            add("tfcpp.glass_retort.loaded", "%1$s x %2$s in the slot");
+            add("tfcpp.info.glass_retort", "Set it over a sand bath, with a retort condenser beside it. Right-click with a carboy to pour in the liquids (a recipe takes one or two) and water for the receiver, or powder into the slot. Heat it only to the working range of the charge: nothing comes over below it, and glass cracks above 550 C, spilling everything. Without a condenser the acids escape as fumes, and without water in the receiver hydrogen chloride goes into the air. Crouch with an empty carboy to draw off the flask's own liquids.");
+            add("tfcpp.info.sand_bath", "A tray of sand between a fire and glass. It passes up only 20 C plus a share of the fire's excess over that, one part in the depth plus one, so deeper sand gives a cooler vessel. Empty hand adds a layer, crouching removes one.");
+            add("tfcpp.info.glass_carboy", "Holds 25 L of acids, the chemical liquids of the mod, vinegar and fresh water, and nothing else. Right-click a tank or a retort to pour or draw.");
+            add("tfcpp.info.borosilicate_glass_batch", "Sand, lime and borax. Load it into a blowpipe and work it as any batch: this is the glass that stands heat and acid. Makes the glass carboy and the glass retort.");
         }
     }
 
@@ -331,6 +374,7 @@ public final class DataGenerators
             add("tfcpp.gas.smell.ammonia", "Едкий запах нашатыря щиплет глаза");
             add("tfcpp.gas.smell.chlorine", "Резкий запах хлорки обжигает нос");
             add("tfcpp.gas.smell.nitrogen_oxides", "Едкий запах окислов азота режет глаза");
+            add("tfcpp.gas.smell.hydrogen_chloride", "Едкая кислота соляных паров обжигает горло");
 
             add("itemGroup.tfcpp", "TFC++");
             add("fluid_type.tfcpp.metal.arsenical_copper", "Расплав мышьяковистой меди");
@@ -529,6 +573,48 @@ public final class DataGenerators
             add("tfcpp.condensation_tower.no_network", "Не соединена с трубой: газ через неё не идёт");
             add("tfcpp.condensation_tower.too_hot", "Газ при %1$s °C слишком горяч: пыль оседает только ниже %2$s °C, ртуть только ниже %3$s °C");
             add("tfcpp.condensation_tower.tank_full", "Бак ртути полон, остальная остаётся в газе");
+            add("fluid_type.tfcpp.sulfuric_acid", "Купоросное масло");
+            add("fluid_type.tfcpp.nitric_acid", "Крепкая водка");
+            add("fluid_type.tfcpp.hydrochloric_acid", "Соляная кислота");
+            add("fluid_type.tfcpp.wood_spirit", "Древесный спирт");
+            add("item.tfcpp.powder.potassium_bisulfate", "Гидросульфат калия");
+            add("item.tfcpp.powder.sodium_bisulfate", "Гидросульфат натрия");
+            add("item.tfcpp.powder.superphosphate", "Суперфосфат");
+            add("item.tfcpp.powder.ammonium_sulfate", "Сульфат аммония");
+            add("item.tfcpp.borosilicate_glass_batch", "Шихта боросиликатного стекла");
+            add("item.tfcpp.glass_carboy", "Стеклянная бутыль");
+            add("item.tfcpp.glass_carboy.filled", "Бутыль: %s");
+            add("block.tfcpp.glass_retort", "Стеклянная реторта");
+            add("block.tfcpp.sand_bath", "Песчаная баня");
+            add("tfcpp.sand_bath.status", "Песка %1$s из %2$s, %3$s °C, к сосуду сверху идёт %4$s °C");
+            add("tfcpp.glass_retort.cracked", "Колба лопнула при %1$s °C, содержимое разлилось");
+            add("tfcpp.glass_retort.status", "Стеклянная реторта: %1$s °C (трескается выше %2$s °C), %3$s");
+            add("tfcpp.glass_retort.stage.idle", "простаивает");
+            add("tfcpp.glass_retort.stage.running", "идёт, готово %1$s%%");
+            add("tfcpp.glass_retort.contents", "Колба: %1$s. Вторая жидкость: %2$s. Порошок: %3$s");
+            add("tfcpp.glass_retort.receiver", "Приёмник: %1$s. Осталось в колбе: %2$s. Вода приёмника: %3$s");
+            add("tfcpp.glass_retort.tank", "%1$s л: %2$s");
+            add("tfcpp.glass_retort.empty", "ничего");
+            add("tfcpp.glass_retort.ready", "Можно выгружать: %1$s × %2$s (присядьте и кликните пустой рукой)");
+            add("tfcpp.glass_retort.nothing", "Выгружать нечего");
+            add("tfcpp.glass_retort.no_condenser", "Рядом с ретортой нет конденсатора: то, что выкипит, уйдёт в помещение");
+            add("tfcpp.glass_retort.no_recipe", "Из этой загрузки ничего не получится: проверьте жидкости и порошок");
+            add("tfcpp.glass_retort.dry", "В приёмнике нет %1$s л воды, чтобы поглотить хлороводород: он уйдёт в воздух");
+            add("tfcpp.glass_retort.need_items", "Для партии нужно %1$s порошков в ячейке");
+            add("tfcpp.glass_retort.need_liquid", "Для партии нужно %1$s л жидкости в колбе");
+            add("tfcpp.glass_retort.need_reagent", "Для партии нужно %1$s л второй жидкости");
+            add("tfcpp.glass_retort.too_cold", "Ниже %1$s °C ничего не перегоняется");
+            add("tfcpp.glass_retort.too_hot", "Выше %1$s °C перегонка идёт неправильно: загрузка стоит");
+            add("tfcpp.glass_retort.output_full", "Приёмник полон или в нём другая жидкость: партия ждёт, пока его опорожнят");
+            add("tfcpp.glass_retort.refused", "Колба не принимает такую жидкость, или оба её бака заняты другими");
+            add("tfcpp.glass_retort.nothing_to_tap", "Сливать в ёмкость нечего");
+            add("tfcpp.glass_retort.one_kind", "В ячейку кладут один вид порошка за раз");
+            add("tfcpp.glass_retort.full", "Ячейка полна");
+            add("tfcpp.glass_retort.loaded", "В ячейке: %1$s × %2$s");
+            add("tfcpp.info.glass_retort", "Ставится на песчаную баню, рядом нужен конденсатор реторты. Правый клик бутылью заливает жидкости (рецепт берёт одну или две) и воду для приёмника, а порошок кладётся в ячейку. Грейте только в рабочем диапазоне загрузки: ниже него ничего не перегоняется, а стекло выше 550 °C трескается, и всё содержимое разливается. Без конденсатора кислоты уходят парами, а без воды в приёмнике хлороводород уходит в воздух. Присядьте с пустой бутылью, чтобы слить и собственные жидкости колбы.");
+            add("tfcpp.info.sand_bath", "Поддон с песком между огнём и стеклом. Наверх он отдаёт 20 °C плюс долю избытка тепла огня, одну часть на глубину плюс один: чем глубже песок, тем прохладнее сосуд. Пустая рука добавляет слой, с приседанием убирает.");
+            add("tfcpp.info.glass_carboy", "Вмещает 25 л кислот, химических жидкостей мода, уксуса и пресной воды, и ничего больше. Правый клик по баку или реторте наливает или набирает.");
+            add("tfcpp.info.borosilicate_glass_batch", "Песок, известь и бура. Загрузите в трубку стеклодува и работайте, как с любой шихтой: это стекло, которое держит жар и кислоту. Из неё делают стеклянную бутыль и стеклянную реторту.");
         }
     }
 

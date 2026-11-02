@@ -1,0 +1,16 @@
+{
+  "type": "tfc:glassworking",
+  "batch": {
+    "item": "tfcpp:borosilicate_glass_batch"
+  },
+  "operations": [
+    "tfc:blow",
+    "tfc:blow",
+    "tfc:roll",
+    "tfc:saw"
+  ],
+  "result": {
+    "count": 1,
+    "id": "tfcpp:glass_carboy"
+  }
+}

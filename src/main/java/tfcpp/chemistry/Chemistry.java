@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import net.dries007.tfc.common.capabilities.BlockCapabilities;
+import net.dries007.tfc.common.component.fluid.FluidContainerHandler;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BlockItem;
@@ -40,6 +41,9 @@ public final class Chemistry
 
     /** Liquids that eat wood and iron, and splash anyone who is by them when they run out of a pipe or a chamber. */
     public static final TagKey<Fluid> CORROSIVE = TagKey.create(Registries.FLUID, TFCpp.id("corrosive"));
+
+    /** Liquids that a glass carboy holds: the chemical liquids of the mod, vinegar and fresh water. Nothing else, and no liquid of TFC's blocks that is not named here. */
+    public static final TagKey<Fluid> USABLE_IN_CARBOY = TagKey.create(Registries.FLUID, TFCpp.id("usable_in_carboy"));
 
     /**
      * One chemical liquid: its fluid type and both fluids, with no block and no bucket, as these are only ever handled in tanks.
@@ -117,6 +121,29 @@ public final class Chemistry
     public static final Supplier<Item> LEAD_CHAMBER_ITEM = Metallurgy.ITEMS.register("lead_chamber", () -> new BlockItem(LEAD_CHAMBER.get(), new Item.Properties()));
     public static final Supplier<Item> SULFUR_BURNER_ITEM = Metallurgy.ITEMS.register("sulfur_burner", () -> new BlockItem(SULFUR_BURNER.get(), new Item.Properties()));
 
+    /** Potassium hydrogen sulfate, the cake that is left in the flask when nitre is distilled with oil of vitriol. */
+    public static final Supplier<Item> POTASSIUM_BISULFATE = Metallurgy.ITEMS.register("powder/potassium_bisulfate", () -> new Item(new Item.Properties()));
+    /** Sodium hydrogen sulfate, the salt cake that is left when salt is distilled with oil of vitriol. */
+    public static final Supplier<Item> SODIUM_BISULFATE = Metallurgy.ITEMS.register("powder/sodium_bisulfate", () -> new Item(new Item.Properties()));
+    /** Rock phosphate treated with sulfuric acid, which is soluble, and so feeds a field in a season where raw apatite takes years. */
+    public static final Supplier<Item> SUPERPHOSPHATE = Metallurgy.ITEMS.register("powder/superphosphate", () -> new Item(new Item.Properties()));
+    /** Ammonia of the gas liquor taken up by sulfuric acid: the first synthetic nitrogen fertiliser from a coke oven. */
+    public static final Supplier<Item> AMMONIUM_SULFATE = Metallurgy.ITEMS.register("powder/ammonium_sulfate", () -> new Item(new Item.Properties()));
+    /** Sand, lime and borax, the charge of a glass that stands heat and acid. It is worked on a blowpipe as the batches of TFC are. */
+    public static final Supplier<Item> BOROSILICATE_GLASS_BATCH = Metallurgy.ITEMS.register("borosilicate_glass_batch", () -> new Item(new Item.Properties()));
+    public static final Supplier<Item> GLASS_CARBOY = Metallurgy.ITEMS.register("glass_carboy", () -> new GlassCarboyItem(new Item.Properties()));
+
+    /** A retort and receiver of borosilicate glass, in which acids are distilled. It cracks when it is too hot. */
+    public static final Supplier<Block> GLASS_RETORT = Metallurgy.BLOCKS.register("glass_retort", () -> new GlassRetortBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GREEN).strength(0.5f).sound(SoundType.GLASS)));
+    /** An iron tray of sand under a glass vessel, that holds back part of the fire's heat. */
+    public static final Supplier<Block> SAND_BATH = Metallurgy.BLOCKS.register("sand_bath", () -> new SandBathBlock(BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(1.5f, 4f).sound(SoundType.METAL).requiresCorrectToolForDrops()));
+
+    public static final Supplier<Item> GLASS_RETORT_ITEM = Metallurgy.ITEMS.register("glass_retort", () -> new BlockItem(GLASS_RETORT.get(), new Item.Properties()));
+    public static final Supplier<Item> SAND_BATH_ITEM = Metallurgy.ITEMS.register("sand_bath", () -> new BlockItem(SAND_BATH.get(), new Item.Properties()));
+
+    public static final Supplier<BlockEntityType<GlassRetortBlockEntity>> GLASS_RETORT_ENTITY = Metallurgy.BLOCK_ENTITIES.register("glass_retort", () -> BlockEntityType.Builder.of(GlassRetortBlockEntity::new, GLASS_RETORT.get()).build(null));
+    public static final Supplier<BlockEntityType<SandBathBlockEntity>> SAND_BATH_ENTITY = Metallurgy.BLOCK_ENTITIES.register("sand_bath", () -> BlockEntityType.Builder.of(SandBathBlockEntity::new, SAND_BATH.get()).build(null));
+
     public static final Supplier<BlockEntityType<CokeOvenBlockEntity>> COKE_OVEN_ENTITY = Metallurgy.BLOCK_ENTITIES.register("coke_oven", () -> BlockEntityType.Builder.of(CokeOvenBlockEntity::new, COKE_OVEN.get()).build(null));
     public static final Supplier<BlockEntityType<GasBurnerBlockEntity>> GAS_BURNER_ENTITY = Metallurgy.BLOCK_ENTITIES.register("gas_burner", () -> BlockEntityType.Builder.of(GasBurnerBlockEntity::new, GAS_BURNER.get()).build(null));
     public static final Supplier<BlockEntityType<LeadChamberBlockEntity>> LEAD_CHAMBER_ENTITY = Metallurgy.BLOCK_ENTITIES.register("lead_chamber", () -> BlockEntityType.Builder.of(LeadChamberBlockEntity::new, LEAD_CHAMBER.get()).build(null));
@@ -124,6 +151,9 @@ public final class Chemistry
 
     public static final Supplier<RecipeType<CarbonizationRecipe>> CARBONIZATION_RECIPE = Metallurgy.RECIPE_TYPES.register("carbonization", () -> RecipeType.simple(TFCpp.id("carbonization")));
     public static final Supplier<RecipeSerializer<CarbonizationRecipe>> CARBONIZATION_SERIALIZER = Metallurgy.RECIPE_SERIALIZERS.register("carbonization", CarbonizationRecipe.Serializer::new);
+
+    public static final Supplier<RecipeType<DistillationRecipe>> DISTILLATION_RECIPE = Metallurgy.RECIPE_TYPES.register("glass_distillation", () -> RecipeType.simple(TFCpp.id("glass_distillation")));
+    public static final Supplier<RecipeSerializer<DistillationRecipe>> DISTILLATION_SERIALIZER = Metallurgy.RECIPE_SERIALIZERS.register("glass_distillation", DistillationRecipe.Serializer::new);
 
     public static void addToTab(CreativeModeTab.Output output)
     {
@@ -133,6 +163,14 @@ public final class Chemistry
         output.accept(GAS_BURNER_ITEM.get());
         output.accept(LEAD_CHAMBER_ITEM.get());
         output.accept(SULFUR_BURNER_ITEM.get());
+        output.accept(BOROSILICATE_GLASS_BATCH.get());
+        output.accept(GLASS_CARBOY.get());
+        output.accept(GLASS_RETORT_ITEM.get());
+        output.accept(SAND_BATH_ITEM.get());
+        output.accept(POTASSIUM_BISULFATE.get());
+        output.accept(SODIUM_BISULFATE.get());
+        output.accept(SUPERPHOSPHATE.get());
+        output.accept(AMMONIUM_SULFATE.get());
     }
 
     public static void register(IEventBus modBus)
@@ -145,6 +183,11 @@ public final class Chemistry
         event.registerBlockEntity(BlockCapabilities.HEAT, COKE_OVEN_ENTITY.get(), (entity, side) -> entity);
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, COKE_OVEN_ENTITY.get(), (entity, side) -> entity.tanks());
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, LEAD_CHAMBER_ENTITY.get(), (entity, side) -> entity.outlet());
+        event.registerBlockEntity(BlockCapabilities.HEAT, GLASS_RETORT_ENTITY.get(), (entity, side) -> entity);
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, GLASS_RETORT_ENTITY.get(), (entity, side) -> entity.fluids(side));
+        event.registerBlockEntity(BlockCapabilities.HEAT, SAND_BATH_ENTITY.get(), (entity, side) -> entity);
+        // The carboy keeps its contents in TFC's fluid component, and is handled as TFC's own containers are
+        event.registerItem(Capabilities.FluidHandler.ITEM, (stack, context) -> new FluidContainerHandler(stack, ((GlassCarboyItem) stack.getItem()).containerInfo()), GLASS_CARBOY.get());
     }
 
     private Chemistry() {}

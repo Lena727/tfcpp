@@ -22,6 +22,8 @@ public enum Gas
     CHLORINE(70.90f),
     /** Nitrogen dioxide, the brown fume of the chamber, taken as NO2. It carries the oxygen to the sulfur dioxide in a lead chamber, and it is a dangerous gas in its own right. */
     NITROGEN_OXIDES(46.01f),
+    /** Hydrogen chloride from the distillation of salt with acid. It fumes white as it takes up the moisture of the air and dissolves in water at once, to hydrochloric acid in the lungs. */
+    HYDROGEN_CHLORIDE(36.46f),
     /** Air at 20 C can only hold about 13 mg/m3 of mercury vapour, or 1.6 ppm. Beyond that it condenses into droplets. */
     MERCURY_VAPOR(200.59f, 6.6e-5f, 0.05f),
     /** Arsenic and antimony oxides sublime in a furnace and condense to a fine white dust as soon as the fumes cool. */
