@@ -7,6 +7,7 @@ import java.util.Queue;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import net.dries007.tfc.util.calendar.Calendars;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -42,6 +43,7 @@ public final class PipeTracker
     private final List<Runnable> afterWalk = new ArrayList<>();
     /** A player's block is removed before its drops are worked out, so this remembers it until the end of the tick. */
     private final LongOpenHashSet wornOutJustNow = new LongOpenHashSet();
+    private long lastCalendarTick = Long.MIN_VALUE;
 
     public static PipeTracker get(ServerLevel level)
     {
@@ -197,6 +199,10 @@ public final class PipeTracker
     public void tick(ServerLevel level)
     {
         wornOutJustNow.clear();
+        // On the ticks of TFC's calendar, which stop on an empty server: boilers do not go on heating, nor chambers on working, in chunks that a server keeps loaded while the fires under them stand still. A jump of the calendar, as in sleep, is still one step of a second.
+        final long tick = Calendars.SERVER.getTicks();
+        final boolean calendarMoved = tick != lastCalendarTick;
+        lastCalendarTick = tick;
         if (!dirty.isEmpty())
         {
             rebuild(level);
@@ -206,8 +212,7 @@ public final class PipeTracker
             return;
         }
 
-        final long tick = level.getGameTime();
-        for (PipeNetwork network : networks)
+        for (PipeNetwork network : calendarMoved ? networks : List.<PipeNetwork>of())
         {
             if (Math.floorMod(tick + network.segments().getFirst().pos.hashCode(), INTERVAL_TICKS) == 0)
             {

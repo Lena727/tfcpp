@@ -2,6 +2,7 @@ package tfcpp.mechanics;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.dries007.tfc.common.blockentities.TFCBlockEntity;
 import net.dries007.tfc.common.blockentities.rotation.RotationSinkBlockEntity;
@@ -70,10 +71,10 @@ public final class MineFanBlockEntity extends TFCBlockEntity implements Rotation
     }
 
     /**
-     * @param mayWalk {@code false} if this tick's budget is spent, in which case the air waits for the next turn
+     * @param requestWalk asked only when this fan means to walk, and says {@code false} if the budget of the tick is spent, in which case the fan is served at an early tick and the air waits
      * @return the torque this takes from the shaft
      */
-    public float tickFan(ServerLevel level, float seconds, boolean mayWalk)
+    public float tickFan(ServerLevel level, float seconds, BooleanSupplier requestWalk)
     {
         final @Nullable Rotation rotation = node.rotation();
         final float speed = rotation == null ? 0 : rotation.speed() * ShaftPhysics.TICKS_PER_SECOND;
@@ -83,7 +84,7 @@ public final class MineFanBlockEntity extends TFCBlockEntity implements Rotation
             {
                 idleSeconds -= (int) seconds;
             }
-            else if (mayWalk)
+            else if (requestWalk.getAsBoolean())
             {
                 idleSeconds = moveAir(level, speed, seconds) ? 0 : IDLE_INTERVAL_SECONDS; // Nothing is walked while the air is clean
             }

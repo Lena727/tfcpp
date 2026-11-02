@@ -1,5 +1,6 @@
 package tfcpp.pneumatics.instruments;
 
+import net.dries007.tfc.util.calendar.Calendars;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -12,6 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.core.TickClock;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasTracker;
 import tfcpp.pneumatics.gas.LevelGasVolume;
@@ -25,7 +27,11 @@ public final class SettlingBaffleBlockEntity extends BlockEntity
 {
     private static final float CAPTURE_PER_SECOND = 0.05f;
 
+    private static final int STEP_TICKS = 20;
+    private static final long MAX_STEP_TICKS = 100L;
+
     private final DustStore dust = new DustStore();
+    private final TickClock clock = new TickClock();
 
     public SettlingBaffleBlockEntity(BlockPos pos, BlockState state)
     {
@@ -34,14 +40,17 @@ public final class SettlingBaffleBlockEntity extends BlockEntity
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, SettlingBaffleBlockEntity baffle)
     {
-        if ((level.getGameTime() + pos.asLong()) % 20 == 0)
+        // On the ticks of TFC's calendar, which stop on an empty server along with the gas the plates take from. Each plate keeps its own place in the second.
+        final long elapsed = baffle.clock.due(Calendars.SERVER.getTicks(), STEP_TICKS, MAX_STEP_TICKS, (int) Math.floorMod(pos.asLong(), (long) STEP_TICKS));
+        if (elapsed > 0L)
         {
-            baffle.capture((ServerLevel) level);
+            baffle.capture((ServerLevel) level, elapsed / 20f);
         }
     }
 
-    private void capture(ServerLevel level)
+    private void capture(ServerLevel level, float seconds)
     {
+        final float share = 1f - (float) Math.pow(1f - CAPTURE_PER_SECOND, seconds);
         final LevelGasVolume volume = GasTracker.get(level).volume(level);
         for (Direction side : Direction.values())
         {
@@ -54,7 +63,7 @@ public final class SettlingBaffleBlockEntity extends BlockEntity
                     final int index = gas.ordinal();
                     if (cell[index] > 0)
                     {
-                        final float caught = cell[index] * CAPTURE_PER_SECOND;
+                        final float caught = cell[index] * share;
                         cell[index] -= caught;
                         dust.add(gas, caught);
                         volume.markChanged(near.getX(), near.getY(), near.getZ());

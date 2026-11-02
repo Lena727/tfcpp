@@ -88,13 +88,26 @@ public final class GasSimulator
         exchange(volume, cell, x, y, z, x, y, z + 1, false, seconds);
         exchange(volume, cell, x, y, z, x, y + 1, z, true, seconds);
         if (volume.cell(x - 1, y, z) == null) exchange(volume, cell, x, y, z, x - 1, y, z, false, seconds);
+        else wakeLowerNeighbour(volume, cell, x, y, z, x - 1, z);
         if (volume.cell(x, y, z - 1) == null) exchange(volume, cell, x, y, z, x, y, z - 1, false, seconds);
+        else wakeLowerNeighbour(volume, cell, x, y, z, x, z - 1);
         if (volume.cell(x, y - 1, z) == null) exchange(volume, cell, x, y, z, x, y - 1, z, true, seconds);
 
         // A cell is kept for as long as it holds anything: dust that has settled stays on its surfaces after the air above it is clean
         if (GasMath.mobileContent(cell) < REMOVE_CELL_MOLES && GasMath.settledContent(cell) < REMOVE_CELL_MOLES)
         {
             volume.removeCell(x, y, z);
+        }
+    }
+
+    /**
+     * The pair of cells is exchanged by the one that is lower in x and z, so this cell leaves it to the neighbour. If the neighbour is in another chunk that is asleep because it holds only settled dust, nobody would ever exchange it: this cell would treat it as a wall. So its chunk is woken, which costs nothing while the gas here is too thin to matter.
+     */
+    private static void wakeLowerNeighbour(GasVolume volume, float[] cell, int x, int y, int z, int nx, int nz)
+    {
+        if ((nx >> 4 != x >> 4 || nz >> 4 != z >> 4) && GasMath.mobileContent(cell) >= REMOVE_CELL_MOLES && volume.isPassable(nx, y, nz))
+        {
+            volume.markChanged(nx, y, nz);
         }
     }
 
@@ -180,7 +193,8 @@ public final class GasSimulator
                 ? pressureFlow * from[i] / totalFrom
                 : (totalTo > 0 ? pressureFlow * there / totalTo : 0);
 
-            flux[i] = Math.clamp(flow, -there, from[i]);
+            // A cell that holds a rounding error below zero must not make the bounds cross: Math.clamp throws when its minimum is above its maximum
+            flux[i] = Math.clamp(flow, -Math.max(there, 0f), Math.max(from[i], 0f));
             outgoing += flux[i];
             largestFlow = Math.max(largestFlow, Math.abs(flux[i]));
         }

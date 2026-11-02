@@ -5,6 +5,8 @@ import net.dries007.tfc.common.blocks.TFCBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,17 +33,23 @@ public final class GasEmission
      */
     public static int outletHeight(ServerLevel level, LevelGasVolume volume, BlockPos pos)
     {
+        // Asked of the chunk that is loaded and not of the level: the level would load a chunk that is not ready, and a device left in a demoted chunk would keep bringing it back up
+        final @Nullable LevelChunk chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+        if (chunk == null)
+        {
+            return SMOTHERED;
+        }
         final BlockPos.MutableBlockPos cursor = pos.mutable();
         boolean usedCover = false;
         for (int rise = 0; rise < MAX_CHARGE_HEIGHT; rise++)
         {
             cursor.setY(pos.getY() + rise);
             final boolean passable = volume.isPassable(cursor.getX(), cursor.getY(), cursor.getZ());
-            if (passable && !level.getBlockState(cursor.above()).is(TFCTags.Blocks.CHARCOAL_FORGE_INVISIBLE))
+            if (passable && !stateAt(level, chunk, cursor.getX(), cursor.getY() + 1, cursor.getZ()).is(TFCTags.Blocks.CHARCOAL_FORGE_INVISIBLE))
             {
                 return cursor.getY();
             }
-            final BlockState state = level.getBlockState(cursor);
+            final BlockState state = stateAt(level, chunk, cursor.getX(), cursor.getY(), cursor.getZ());
             final Block block = state.getBlock();
             if (!passable && block != TFCBlocks.MOLTEN.get() && block != TFCBlocks.BURNING_LOG_PILE.get() && !state.is(TFCTags.Blocks.CHARCOAL_FORGE_INVISIBLE) && rise > 0)
             {
@@ -53,6 +61,12 @@ public final class GasEmission
             }
         }
         return SMOTHERED;
+    }
+
+    /** The block at a height in the column of a chunk. Out of the world it is air, as it is for the level. */
+    private static BlockState stateAt(ServerLevel level, LevelChunk chunk, int x, int y, int z)
+    {
+        return y < level.getMinBuildHeight() || y >= level.getMaxBuildHeight() ? Blocks.AIR.defaultBlockState() : chunk.getBlockState(new BlockPos(x, y, z));
     }
 
     public static void addToPlume(LevelGasVolume volume, int x, int fromY, int z, float[] gases)

@@ -98,7 +98,13 @@ public final class FireSource
         final long now = Calendars.SERVER.getTicks();
         final long previous = lastCalendarTick;
         lastCalendarTick = now;
-        if (entity.isRemoved() || previous < 0 || !isBurning(entity.getBlockState()))
+        if (entity.isRemoved() || previous < 0)
+        {
+            return;
+        }
+        // A border chunk, or one that has been demoted since its player left, keeps its block entities but runs none of them: the fuel is not burning, and looking at the blocks there could bring the chunk back up to full status
+        final BlockPos pos = entity.getBlockPos();
+        if (!level.shouldTickBlocksAt(pos) || level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4) == null || !isBurning(entity.getBlockState()))
         {
             return;
         }
@@ -109,7 +115,6 @@ public final class FireSource
             return;
         }
 
-        final BlockPos pos = entity.getBlockPos();
         final int intakeY = GasEmission.outletHeight(level, volume, entity instanceof BloomeryBlockEntity bloomery ? bloomery.getInternalBlockPos() : pos);
         if (intakeY == Integer.MIN_VALUE)
         {

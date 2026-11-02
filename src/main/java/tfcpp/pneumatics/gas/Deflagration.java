@@ -43,6 +43,14 @@ public final class Deflagration
 
     public record Result(int burnedCells, float kilojoules, List<Shock> shocks) {}
 
+    /**
+     * @return how much of a fuel a step may burn: what is there or what the oxygen left reaches, whichever is less, and never below zero. Dividing by a share and multiplying back can leave the oxygen one rounding step below zero, and a negative amount would burn the other way and make some gas out of nothing.
+     */
+    private static float take(float available, float reachedByOxygen)
+    {
+        return Math.max(0f, Math.min(available, reachedByOxygen));
+    }
+
     /** Burns one cell, leaving the products in it. @return the heat released in kJ */
     public static float burn(float[] cell)
     {
@@ -51,49 +59,54 @@ public final class Deflagration
         float heat = 0;
 
         // 2 H2 + O2 -> 2 H2O. Hydrogen has by far the fastest flame, so it takes its oxygen first.
-        final float hydrogen = Math.min(cell[Gas.HYDROGEN.ordinal()], oxygen / 0.5f);
+        final float hydrogen = take(cell[Gas.HYDROGEN.ordinal()], oxygen / 0.5f);
         cell[Gas.HYDROGEN.ordinal()] -= hydrogen;
         oxygen -= hydrogen * 0.5f;
+        oxygen = Math.max(oxygen, 0f);
         heat += hydrogen * HYDROGEN_KJ;
 
         // 2 H2S + 3 O2 -> 2 SO2 + 2 H2O
-        final float sulfide = Math.min(cell[Gas.HYDROGEN_SULFIDE.ordinal()], oxygen / 1.5f);
+        final float sulfide = take(cell[Gas.HYDROGEN_SULFIDE.ordinal()], oxygen / 1.5f);
         cell[Gas.HYDROGEN_SULFIDE.ordinal()] -= sulfide;
         cell[Gas.SULFUR_DIOXIDE.ordinal()] += sulfide;
         oxygen -= sulfide * 1.5f;
+        oxygen = Math.max(oxygen, 0f);
         heat += sulfide * HYDROGEN_SULFIDE_KJ;
 
         // 4 NH3 + 3 O2 -> 2 N2 + 6 H2O
-        final float ammonia = Math.min(cell[Gas.AMMONIA.ordinal()], oxygen / 0.75f);
+        final float ammonia = take(cell[Gas.AMMONIA.ordinal()], oxygen / 0.75f);
         cell[Gas.AMMONIA.ordinal()] -= ammonia;
         cell[Gas.FLUE_NITROGEN.ordinal()] += ammonia * 0.5f;
         oxygen -= ammonia * 0.75f;
+        oxygen = Math.max(oxygen, 0f);
         heat += ammonia * AMMONIA_KJ;
 
         // 2 CH4 + 3 O2 -> 2 CO + 4 H2O comes first in a real flame, and CO only burns out if there is oxygen left for it
-        final float methane = Math.min(cell[Gas.METHANE.ordinal()], oxygen / 1.5f);
+        final float methane = take(cell[Gas.METHANE.ordinal()], oxygen / 1.5f);
         cell[Gas.METHANE.ordinal()] -= methane;
         cell[Gas.CARBON_MONOXIDE.ordinal()] += methane;
         oxygen -= methane * 1.5f;
+        oxygen = Math.max(oxygen, 0f);
         heat += methane * METHANE_TO_CO_KJ;
 
         // 2 CO + O2 -> 2 CO2
-        final float carbonMonoxide = Math.max(0, Math.min(cell[Gas.CARBON_MONOXIDE.ordinal()] - FROZEN_CARBON_MONOXIDE * methane, oxygen / 0.5f));
+        final float carbonMonoxide = take(cell[Gas.CARBON_MONOXIDE.ordinal()] - FROZEN_CARBON_MONOXIDE * methane, oxygen / 0.5f);
         cell[Gas.CARBON_MONOXIDE.ordinal()] -= carbonMonoxide;
         cell[Gas.CARBON_DIOXIDE.ordinal()] += carbonMonoxide;
         oxygen -= carbonMonoxide * 0.5f;
+        oxygen = Math.max(oxygen, 0f);
         heat += carbonMonoxide * CO_TO_CO2_KJ;
 
         // Coal dust burns last, with the oxygen the gases left. Carbon goes half to CO and half to CO2, and the CO is not burned out: in a dust explosion there is rarely oxygen left to do it, and this is why the afterdamp of one is deadly. What the oxygen does not reach stays in the air as dust.
         final float dust = cell[Gas.COAL_DUST.ordinal()];
         if (dust > 0 && oxygen > 0)
         {
-            final float carbon = Math.min(dust * CARBON_PER_DUST_UNIT, oxygen / OXYGEN_PER_DUST_CARBON);
+            final float carbon = take(dust * CARBON_PER_DUST_UNIT, oxygen / OXYGEN_PER_DUST_CARBON);
             final float burnedDust = carbon >= dust * CARBON_PER_DUST_UNIT ? dust : carbon / CARBON_PER_DUST_UNIT;
             cell[Gas.COAL_DUST.ordinal()] -= burnedDust;
             cell[Gas.CARBON_MONOXIDE.ordinal()] += carbon * 0.5f;
             cell[Gas.CARBON_DIOXIDE.ordinal()] += carbon * 0.5f;
-            oxygen -= carbon * OXYGEN_PER_DUST_CARBON;
+            oxygen = Math.max(oxygen - carbon * OXYGEN_PER_DUST_CARBON, 0f);
             heat += carbon * DUST_KJ_PER_CARBON_MOLE;
         }
 

@@ -298,4 +298,114 @@ class GasSimulatorTest
         assertNull(room.cell(1, 0, 0));
         assertEquals(5f, room.total(Gas.CARBON_DIOXIDE), 1e-3f);
     }
+
+    @Test
+    void aRoundingErrorBelowZeroInACellDoesNotBreakTheStep()
+    {
+        // A negative amount saved by an older version, or left by a rounding step: Math.clamp throws when its minimum is above its maximum
+        final Room room = new Room(2, 1, 1);
+        room.createCell(0, 0, 0)[Gas.METHANE.ordinal()] = -1e-9f;
+        room.createCell(0, 0, 0)[Gas.CARBON_DIOXIDE.ordinal()] = 3f;
+
+        final GasSimulator simulator = new GasSimulator();
+        assertDoesNotThrow(() -> simulator.stepCell(room, 0, 0, 0, 1f));
+        assertDoesNotThrow(() -> simulator.stepCell(room, 0, 0, 0, 1f));
+    }
+
+    /** Two chunks side by side, the way the tracker steps them: a chunk that is asleep is not stepped at all, and markChanged wakes it. */
+    private static final class TwoChunks implements GasVolume
+    {
+        final Map<List<Integer>, float[]> cells = new HashMap<>();
+        boolean westAwake;
+        int wakeCalls;
+
+        @Override
+        public float[] cell(int x, int y, int z)
+        {
+            return cells.get(List.of(x, y, z));
+        }
+
+        @Override
+        public float[] createCell(int x, int y, int z)
+        {
+            return cells.computeIfAbsent(List.of(x, y, z), k -> new float[Gas.COUNT]);
+        }
+
+        @Override
+        public void removeCell(int x, int y, int z)
+        {
+            cells.remove(List.of(x, y, z));
+        }
+
+        @Override
+        public boolean isPassable(int x, int y, int z)
+        {
+            return y == 0 && z == 0 && x >= -16 && x < 16;
+        }
+
+        @Override
+        public float atmosphereExchangeRate(int x, int y, int z)
+        {
+            return 0;
+        }
+
+        @Override
+        public void markChanged(int x, int y, int z)
+        {
+            if (x < 0)
+            {
+                westAwake = true;
+                wakeCalls++;
+            }
+        }
+
+        /** One second: the east chunk (x from 0) is always awake, the west one (x below 0) only when something has woken it. */
+        void second(GasSimulator simulator)
+        {
+            for (List<Integer> pos : List.copyOf(cells.keySet()))
+            {
+                if (pos.get(0) >= 0 || westAwake)
+                {
+                    simulator.stepCell(this, pos.get(0), pos.get(1), pos.get(2), 1f);
+                }
+            }
+        }
+    }
+
+    @Test
+    void gasCrossesIntoTheExistingCellOfAChunkThatIsAsleep()
+    {
+        final TwoChunks world = new TwoChunks();
+        world.createCell(-1, 0, 0)[Gas.SETTLED_COAL_DUST.ordinal()] = 2f; // The west chunk holds nothing but settled dust, so it sleeps
+        world.createCell(0, 0, 0)[Gas.CARBON_DIOXIDE.ordinal()] = 20f;
+
+        final GasSimulator simulator = new GasSimulator();
+        for (int second = 0; second < 30; second++)
+        {
+            world.second(simulator);
+        }
+
+        final float[] across = world.cell(-1, 0, 0);
+        assertNotNull(across);
+        assertTrue(across[Gas.CARBON_DIOXIDE.ordinal()] > 0.5f, "The cell across the chunk line must take its share of the gas: " + across[Gas.CARBON_DIOXIDE.ordinal()]);
+        assertTrue(world.westAwake, "The sleeping chunk must have been woken");
+        final float total = (float) world.cells.values().stream().mapToDouble(c -> c[Gas.CARBON_DIOXIDE.ordinal()]).sum();
+        assertEquals(20f, total, 1e-3f, "Nothing is made or lost on the way");
+        assertEquals(2f, across[Gas.SETTLED_COAL_DUST.ordinal()], 1e-6f, "The dust that lay there stays");
+    }
+
+    @Test
+    void thinGasDoesNotKeepWakingTheChunkAcross()
+    {
+        final TwoChunks world = new TwoChunks();
+        world.createCell(-1, 0, 0)[Gas.SETTLED_COAL_DUST.ordinal()] = 2f;
+        world.createCell(0, 0, 0)[Gas.CARBON_DIOXIDE.ordinal()] = GasSimulator.REMOVE_CELL_MOLES / 10f;
+
+        final GasSimulator simulator = new GasSimulator();
+        for (int second = 0; second < 5; second++)
+        {
+            world.second(simulator);
+        }
+        assertEquals(0, world.wakeCalls, "A trace that would be dropped from the cell anyway is not worth waking a chunk for");
+    }
 }

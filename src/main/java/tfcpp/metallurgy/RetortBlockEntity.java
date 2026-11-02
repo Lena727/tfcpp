@@ -7,6 +7,7 @@ import net.dries007.tfc.common.component.heat.IHeatConsumer;
 import net.dries007.tfc.common.fluids.TFCFluids;
 import net.dries007.tfc.common.items.TFCItems;
 import net.dries007.tfc.util.Metal;
+import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.data.FluidHeat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -35,6 +36,7 @@ import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.core.TickClock;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasEmission;
 
@@ -70,7 +72,8 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
             retort.setChanged();
         }
 
-        if (level.getGameTime() % REACTION_INTERVAL_TICKS == 0 && level instanceof ServerLevel server)
+        // On the ticks of TFC's calendar, which stop on an empty server as the fuel of the fire under it does: game time would go on working the charge over a fire that burns nothing
+        if (level instanceof ServerLevel server && retort.clock.due(Calendars.SERVER.getTicks(), REACTION_INTERVAL_TICKS, REACTION_INTERVAL_TICKS, 0) > 0L)
         {
             retort.react(server);
         }
@@ -90,6 +93,7 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
     private float targetTemperature;
     private int heatStabilityTicks;
     private float carbon;
+    private final TickClock clock = new TickClock();
 
     public RetortBlockEntity(BlockPos pos, BlockState state)
     {

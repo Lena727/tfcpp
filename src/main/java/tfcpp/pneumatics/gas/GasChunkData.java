@@ -275,6 +275,12 @@ public final class GasChunkData
         return tag;
     }
 
+    /** A negative or not-a-number amount of gas can only be an error that an older version saved: it is stored as nothing, so it cannot go on breaking every step. */
+    private static float sanitized(float amount)
+    {
+        return amount > 0f ? amount : 0f;
+    }
+
     /** Species are stored by name, so that adding a gas in a later version does not corrupt saved chunks. */
     public void load(CompoundTag tag)
     {
@@ -308,7 +314,7 @@ public final class GasChunkData
         {
             if (order[i] != null)
             {
-                deposits[order[i].ordinal()] = Float.intBitsToFloat(depositBits[i]);
+                deposits[order[i].ordinal()] = sanitized(Float.intBitsToFloat(depositBits[i]));
             }
         }
 
@@ -319,7 +325,7 @@ public final class GasChunkData
             {
                 if (order[i] != null)
                 {
-                    cell[order[i].ordinal()] = Float.intBitsToFloat(amounts[index * width + i]);
+                    cell[order[i].ordinal()] = sanitized(Float.intBitsToFloat(amounts[index * width + i]));
                 }
             }
             cells.put(keys[index], cell);

@@ -52,6 +52,7 @@ bash tools/verify.sh --client   # то же, плюс настоящий кли�
 | Пары из жидкости, если её не держит конденсатор или колба | `chemistry/AcidVapour` |
 | Текстуры | `tools/generate_textures.py` |
 | Игровые тесты | `core/PhosphorusGameTests` (свежий образец: домна, конвертер, футеровка, сохранение), `ChemistryGameTests`, `GasGameTests`, `IronGameTests` |
+| Время устройства и трекера (календарь TFC), очередь чанков газа, очередь обходов вентиляторов | `core/TickClock` (шаг устройства, JUnit `TickClockTest`), `pneumatics/gas/ChunkRotation` (очередь, чанки в ожидании), `mechanics/WalkTurns` (бюджет обходов); тест остановленного календаря `core/CalendarGameTests` (batch `tfcpp_calendar_still`) |
 | Перечень миксинов | таблица в `README.md`, каждый новый добавляется туда и в `tfcpp.mixins.json` |
 
 ## Факты о TFC, которые стоили времени
@@ -76,6 +77,9 @@ bash tools/verify.sh --client   # то же, плюс настоящий кли�
 - **Ёмкость для жидкостей TFC**: `FluidContainerItem` (защищённый конструктор: вместимость, тег жидкостей, можно ли ставить блоки), содержимое в компоненте `TFCComponents.FLUID`, способность предмета `new FluidContainerHandler(stack, item.containerInfo())` регистрируется своей строкой `event.registerItem(Capabilities.FluidHandler.ITEM, ...)`. Подсказка, имя `...filled` и стек 1 с жидкостью даёт сам базовый класс.
 - Блок, который обрабатывает пустую руку в `useWithoutItem`, перехватывает и руку с предметом (ванильный порядок: `useItemOn` вернул `PASS_TO_DEFAULT_BLOCK_INTERACTION`, затем зовётся `useWithoutItem`). Если блок не должен мешать ставить блоки рядом, в начале проверь `player.getMainHandItem().isEmpty()` и верни `PASS`.
 - Для блока с `IntegerProperty` в файле состояний варианты писать явно на каждое значение (`getVariantBuilder(...).forAllStates`, как у горелки): `simpleBlock` пишет единственный ключ `""`, и работает ли он при свойствах, на клиенте не проверялось.
+
+- **Понижённый чанк.** Когда игрок уходит, чанк с уровнем билета выше 33 остаётся в памяти (`LevelChunk`, блок-сущности, данные), но `getChunkNow` отдаёт `null`, события `Unload` нет, а при возвращении нет и `Load` (полный статус не пересчитывается). Не снимай такой чанк с учёта по `getChunkNow == null`: ставь в ожидание и проверяй раз в секунду (`ChunkRotation`). `level.getBlockState` в таком чанке вернёт его к полному статусу, поэтому устройства, которые опрашиваются из трекера (`FireSource`), сначала проверяют `shouldTickBlocksAt` и `getChunkNow`.
+- **Календарь стоит, а игровые такты идут.** Всё, что считает шаг по `Calendars.SERVER.getTicks()`, на пустом сервере не двигается; но тест `(gameTime + pos) % 20 == 0` на замершем календаре истинен каждый такт или ни одного. Устройствам даём `TickClock.due`, трекерам выход, если календарь не сдвинулся. `level.getGameTime()` остаётся только для окон живости (`PressureVesselBlockEntity`, пока огонь сообщает тепло), кэша `WaterBodies` и задержки сообщения о запахе у игрока.
 
 ## Ловушки игровых тестов
 

@@ -257,4 +257,59 @@ class DeflagrationTest
         assertTrue(seconds < 120, "At 800 ppm the animal collapses within two minutes, took " + seconds);
         assertTrue(person < 5f, "while the person has barely started: " + person);
     }
+
+    /**
+     * Oxygen that runs out exactly at the hydrogen sulfide step, or at the ammonia step. The oxygen a fuel takes is a division by a share and a multiplication back, and it can be left one rounding step below zero, from which the next fuel burns the other way and makes a negative amount of gas. The sweep varies the oxygen in fine steps, and counts the cells where the naive arithmetic really does go below zero, so that it cannot pass by never reaching the case.
+     */
+    @Test
+    void oxygenThatRunsOutAtASulfideOrAmmoniaStepNeverMakesGasNegative()
+    {
+        int sulfideStep = 0, ammoniaStep = 0;
+        for (int sulfide = 0; sulfide < 200; sulfide++)
+        {
+            for (int filler = 0; filler < 100; filler++)
+            {
+                final float[] cell = new float[Gas.COUNT];
+                cell[Gas.HYDROGEN_SULFIDE.ordinal()] = 1f + sulfide * 0.0431f; // From less to more than the oxygen can burn
+                cell[Gas.AMMONIA.ordinal()] = 15f; // Always more than is left, so that the oxygen runs out at this step
+                // No methane, CO or nitrogen to start with: a negative amount of burning takes from them, and leaves them below zero
+                cell[Gas.CARBON_DIOXIDE.ordinal()] = filler * 0.05f;
+
+                // The same arithmetic as the burning, to see whether the rounding goes below zero in this cell
+                final float oxygen = GasMath.oxygenFraction(cell) * GasMath.CELL_MOLES;
+                final float burnedSulfide = Math.min(cell[Gas.HYDROGEN_SULFIDE.ordinal()], oxygen / 1.5f);
+                final float afterSulfide = oxygen - burnedSulfide * 1.5f;
+                final float afterAmmonia = afterSulfide - Math.min(cell[Gas.AMMONIA.ordinal()], afterSulfide / 0.75f) * 0.75f;
+                if (afterSulfide < 0f) sulfideStep++;
+                if (afterAmmonia < 0f) ammoniaStep++;
+
+                Deflagration.burn(cell);
+
+                for (Gas gas : Gas.VALUES)
+                {
+                    assertTrue(cell[gas.ordinal()] >= 0f, gas + " went below zero: " + cell[gas.ordinal()] + " with " + oxygen + " mol of oxygen");
+                }
+            }
+        }
+        assertTrue(sulfideStep > 0 && ammoniaStep > 0, "The sweep must reach cells where the oxygen is left below zero by the sulfide step and by the ammonia step: " + sulfideStep + " and " + ammoniaStep);
+    }
+
+    @Test
+    void aSulfideAndAmmoniaWithJustEnoughOxygenBurnClean()
+    {
+        // 1.5 mol of oxygen per mol of H2S and 0.75 per mol of NH3: pick amounts that use the oxygen up to the last mole
+        final float oxygen = GasMath.OXYGEN_IN_AIR * GasMath.CELL_MOLES * (1 - 0.1f);
+        final float[] cell = new float[Gas.COUNT];
+        cell[Gas.HYDROGEN_SULFIDE.ordinal()] = oxygen / 3f / 1.5f; // A third of the oxygen
+        cell[Gas.AMMONIA.ordinal()] = oxygen / 3f / 0.75f * 3f; // Wants more than all that is left
+        cell[Gas.FLUE_NITROGEN.ordinal()] = 0f;
+
+        final float heat = Deflagration.burn(cell);
+
+        assertTrue(heat > 0f);
+        for (Gas gas : Gas.VALUES)
+        {
+            assertTrue(cell[gas.ordinal()] >= 0f, gas + " went below zero: " + cell[gas.ordinal()]);
+        }
+    }
 }

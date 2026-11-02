@@ -9,6 +9,7 @@ import net.dries007.tfc.common.items.Powder;
 import net.dries007.tfc.common.items.TFCItems;
 import net.dries007.tfc.util.Helpers;
 import net.dries007.tfc.util.Metal;
+import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.data.FluidHeat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -106,15 +107,17 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
             }
         }
 
-        if (converter.nextStepTick < 0)
+        // On the ticks of TFC's calendar, which stop on an empty server and jump forward when players sleep
+        final long now = Calendars.SERVER.getTicks();
+        if (now < converter.lastStepTick)
         {
-            converter.nextStepTick = level.getGameTime();
+            converter.lastStepTick = now; // A calendar that was set back
         }
-        if (level.getGameTime() >= converter.nextStepTick)
+        else if (converter.lastStepTick < 0L || now - converter.lastStepTick >= STEP_TICKS)
         {
-            // Measured from the last step, so that a charge left in an unloaded chunk comes back cold, and not as it was left
-            final float seconds = (level.getGameTime() - converter.nextStepTick + STEP_TICKS) / (float) STEP_TICKS;
-            converter.nextStepTick = level.getGameTime() + STEP_TICKS;
+            // The first tick of a new block is a step of one second, so that slag put in it is skimmed at once. Otherwise measured from the last step, so that a charge left in an unloaded chunk, or over a night of sleep, comes back cold and not as it was left. The cooling is an exponential and safe for any length, so no cap is put on it.
+            final float seconds = converter.lastStepTick < 0L ? 1f : (now - converter.lastStepTick) / (float) STEP_TICKS;
+            converter.lastStepTick = now;
             if (converter.bath.metal > 0f)
             {
                 converter.bath.cool(seconds);
@@ -132,7 +135,8 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
     private int basicBricks;
     private float heatFromOutside;
     private int heatStabilityTicks;
-    private long nextStepTick = -1L;
+    /** The calendar tick of the last step, kept through a save so that time spent unloaded is counted. */
+    private long lastStepTick = -1L;
     /** Iron that has arrived from a block, before the source has said how hot it is. It is taken as cold if it never says. */
     private float awaitingHeat;
 
@@ -630,7 +634,7 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
         tag.putFloat("slag", bath.slag);
         tag.putFloat("lining", liningWorn);
         tag.putFloat("awaitingHeat", awaitingHeat);
-        tag.putLong("nextStep", nextStepTick);
+        tag.putLong("lastStep", lastStepTick);
     }
 
     @Override
@@ -650,7 +654,7 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
         bath.slag = tag.getFloat("slag");
         liningWorn = tag.getFloat("lining");
         awaitingHeat = tag.getFloat("awaitingHeat");
-        nextStepTick = tag.contains("nextStep") ? tag.getLong("nextStep") : -1L;
+        lastStepTick = tag.contains("lastStep") ? tag.getLong("lastStep") : -1L;
     }
 
     /** What pours into the vessel from above, as a blast furnace does, and out through a tap. */

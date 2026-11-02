@@ -877,7 +877,7 @@ public final class LoadTest
          */
         private void watchBudget()
         {
-            final long now = level.getGameTime();
+            final long now = Calendars.SERVER.getTicks(); // The tracker counts the calendar's ticks
             int overdue = 0, steppedCells = 0, steppedChunks = 0;
             for (long key : watched)
             {

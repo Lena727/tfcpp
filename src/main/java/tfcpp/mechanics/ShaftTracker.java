@@ -14,6 +14,7 @@ import net.dries007.tfc.common.blockentities.rotation.PumpBlockEntity;
 import net.dries007.tfc.common.blockentities.rotation.RotatingBlockEntity;
 import net.dries007.tfc.common.blockentities.rotation.TripHammerBlockEntity;
 import net.dries007.tfc.common.recipes.LoomRecipe;
+import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.rotation.Node;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -39,6 +40,8 @@ public final class ShaftTracker
     private final ReferenceOpenHashSet<BlockEntity> workers = new ReferenceOpenHashSet<>();
     private final Reference2FloatOpenHashMap<BlockEntity> workerTorque = new Reference2FloatOpenHashMap<>();
     private final Long2FloatOpenHashMap torque = new Long2FloatOpenHashMap();
+    private final WalkTurns<BlockEntity> turns = new WalkTurns<>();
+    private long lastCalendarTick = Long.MIN_VALUE;
 
     public static ShaftTracker get(ServerLevel level)
     {
@@ -72,6 +75,7 @@ public final class ShaftTracker
             consumers.remove(entity);
             workers.remove(entity);
             workerTorque.removeFloat(entity);
+            turns.forget(entity);
         }
     }
 
@@ -81,13 +85,23 @@ public final class ShaftTracker
         return torque.get(network);
     }
 
+    /**
+     * Runs on the ticks of TFC's calendar, which stop on an empty server: shafts do not go on turning pumps and fans in chunks that a server keeps loaded, while the fire and the water that drive them stand still. A second is 20 ticks of the calendar, and each worker keeps its own place in it.
+     */
     public void tick(ServerLevel level)
     {
+        final long now = Calendars.SERVER.getTicks();
+        if (now == lastCalendarTick)
+        {
+            return;
+        }
+        lastCalendarTick = now;
+
         if (!workers.isEmpty())
         {
-            tickWorkers(level);
+            tickWorkers(level, now);
         }
-        if (level.getGameTime() % INTERVAL_TICKS != 0 || (consumers.isEmpty() && sources.isEmpty()))
+        if (Math.floorMod(now, INTERVAL_TICKS) != 0 || (consumers.isEmpty() && sources.isEmpty()))
         {
             return;
         }
@@ -106,34 +120,47 @@ public final class ShaftTracker
         }
     }
 
-    private void tickWorkers(ServerLevel level)
+    private void tickWorkers(ServerLevel level, long now)
     {
-        int cellsLeft = ServerConfig.GAS_FAN_CELLS_PER_TICK.getAsInt();
+        turns.startTick(ServerConfig.GAS_FAN_CELLS_PER_TICK.getAsInt());
+
+        // Fans that were refused a walk by an earlier tick go first, so that others whose second has just come cannot keep taking their place
+        final List<BlockEntity> refused = turns.takeWaiting();
+        final ReferenceOpenHashSet<BlockEntity> served = new ReferenceOpenHashSet<>(refused);
+        for (BlockEntity worker : refused)
+        {
+            work(level, worker);
+        }
+
         for (BlockEntity worker : List.copyOf(workers)) // Pumps change blocks, which can unload what is being walked
         {
-            final BlockPos pos = worker.getBlockPos();
-            if (Math.floorMod(level.getGameTime() + pos.hashCode(), INTERVAL_TICKS) != 0 || worker.isRemoved() || !canRun(level, pos))
+            if (Math.floorMod(now + worker.getBlockPos().hashCode(), INTERVAL_TICKS) == 0 && !served.contains(worker))
             {
-                continue;
+                work(level, worker);
             }
-            if (worker instanceof MineFanBlockEntity fan)
-            {
-                final boolean mayWalk = cellsLeft >= MineFanBlockEntity.REACH_CELLS;
-                if (mayWalk)
-                {
-                    cellsLeft -= MineFanBlockEntity.REACH_CELLS;
-                }
-                workerTorque.put(worker, fan.tickFan(level, SECONDS, mayWalk));
-            }
-            else if (worker instanceof PistonPumpBlockEntity piston)
-            {
-                workerTorque.put(worker, piston.tickPump(level, SECONDS));
-            }
-            else if (worker instanceof PumpBlockEntity pump)
-            {
-                final @Nullable Node crank = MassPump.crankNode(level, pump);
-                workerTorque.put(worker, crank == null ? 0 : MassPump.tick(level, pump, crank, SECONDS));
-            }
+        }
+    }
+
+    private void work(ServerLevel level, BlockEntity worker)
+    {
+        final BlockPos pos = worker.getBlockPos();
+        if (worker.isRemoved() || !workers.contains(worker) || !canRun(level, pos))
+        {
+            return;
+        }
+        if (worker instanceof MineFanBlockEntity fan)
+        {
+            // Cells of the budget are spent only if the fan really walks: it does not while the air is clean, nor while it stands still
+            workerTorque.put(worker, fan.tickFan(level, SECONDS, () -> turns.request(fan, MineFanBlockEntity.REACH_CELLS)));
+        }
+        else if (worker instanceof PistonPumpBlockEntity piston)
+        {
+            workerTorque.put(worker, piston.tickPump(level, SECONDS));
+        }
+        else if (worker instanceof PumpBlockEntity pump)
+        {
+            final @Nullable Node crank = MassPump.crankNode(level, pump);
+            workerTorque.put(worker, crank == null ? 0 : MassPump.tick(level, pump, crank, SECONDS));
         }
     }
 

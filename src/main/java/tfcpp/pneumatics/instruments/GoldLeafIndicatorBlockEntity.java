@@ -1,6 +1,7 @@
 package tfcpp.pneumatics.instruments;
 
 import org.jetbrains.annotations.Nullable;
+import net.dries007.tfc.util.calendar.Calendars;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import tfcpp.chemistry.PoisonTests;
+import tfcpp.core.TickClock;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasTracker;
 
@@ -24,6 +26,10 @@ public final class GoldLeafIndicatorBlockEntity extends BlockEntity
     /** (mg/m3)&middot;h. A change smaller than this is not worth a write to the chunk. */
     public static final float SAVE_THRESHOLD = 0.01f;
 
+    private static final int STEP_TICKS = 20;
+    private static final long MAX_STEP_TICKS = 100L;
+
+    private final TickClock clock = new TickClock();
     private float dose;
     private float savedDose;
 
@@ -35,14 +41,22 @@ public final class GoldLeafIndicatorBlockEntity extends BlockEntity
     /** Runs once a second in total, each leaf in its own tick: the offset by its position spreads the work out over the second. */
     public static void serverTick(Level level, BlockPos pos, BlockState state, GoldLeafIndicatorBlockEntity leaf)
     {
-        if ((level.getGameTime() + pos.asLong()) % 20 == 0)
+        // On the ticks of TFC's calendar, which stop on an empty server along with the air the leaf breathes. Each leaf keeps its own place in the second.
+        final long elapsed = leaf.clock.due(Calendars.SERVER.getTicks(), STEP_TICKS, MAX_STEP_TICKS, (int) Math.floorMod(pos.asLong(), (long) STEP_TICKS));
+        if (elapsed > 0L)
         {
-            leaf.breathe((ServerLevel) level);
+            leaf.breathe((ServerLevel) level, elapsed / 20f);
         }
     }
 
-    /** Takes one second of the air in this block's own cell. Air with no cell in it has no mercury, and the dose stays where it is. */
+    /** Takes one second of the air in this block's own cell. */
     public void breathe(ServerLevel level)
+    {
+        breathe(level, 1f);
+    }
+
+    /** Takes this many seconds of the air in this block's own cell. Air with no cell in it has no mercury, and the dose stays where it is. */
+    public void breathe(ServerLevel level, float seconds)
     {
         final BlockState state = getBlockState();
         final int stage = state.getValue(GoldLeafIndicatorBlock.STAGE);
@@ -56,7 +70,7 @@ public final class GoldLeafIndicatorBlockEntity extends BlockEntity
         {
             return;
         }
-        dose = PoisonTests.addDose(dose, PoisonTests.mercuryMilligrams(cell[Gas.MERCURY_VAPOR.ordinal()]), 1f);
+        dose = PoisonTests.addDose(dose, PoisonTests.mercuryMilligrams(cell[Gas.MERCURY_VAPOR.ordinal()]), seconds);
         final int next = PoisonTests.leafStage(dose);
         if (next != stage)
         {
