@@ -392,6 +392,10 @@ public final class PipeNetwork
             final float total = Math.max(GasMath.total(cell), GasMath.CELL_MOLES);
             for (int i = 0; i < Gas.COUNT; i++)
             {
+                if (Gas.VALUES[i].isParticulate())
+                {
+                    continue; // The intake of a pipe is not a dust collector: dust, lying or flying, stays in the room
+                }
                 final float amount = Math.min(cell[i], moles * cell[i] / total);
                 cell[i] -= amount;
                 contents.gases[i] += amount;

@@ -75,6 +75,35 @@ public final class GasChunkData
     /** Cleared while every face with gas left is sealed behind other blocks, so that those do not keep a chunk active forever. */
     private boolean facesAwake = true;
 
+    /**
+     * Cleared when a full pass finds nothing that can move: a chunk holding only settled dust is saved and kept, but is not stepped any more. Set again whenever anything is added to it. Not saved, so a loaded chunk is looked at once.
+     */
+    private boolean mobileContent = true;
+
+    /** Something that can move may have entered this chunk. */
+    public void wake()
+    {
+        mobileContent = true;
+    }
+
+    public void setMobileContent(boolean mobile)
+    {
+        mobileContent = mobile;
+    }
+
+    /** @return {@code true} if any cell holds enough of something that can move to be worth stepping */
+    public boolean holdsMobileContent()
+    {
+        for (float[] cell : cells.values())
+        {
+            if (GasMath.mobileContent(cell) >= GasSimulator.REMOVE_CELL_MOLES)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void addSeamFace(int key, float moles)
     {
         seamFaces.putIfAbsent(key, moles);
@@ -133,7 +162,7 @@ public final class GasChunkData
     /** @return {@code true} if this chunk has anything to simulate */
     public boolean isActive()
     {
-        return !cells.isEmpty() || (facesAwake && hasBleedingFace());
+        return (!cells.isEmpty() && mobileContent) || (facesAwake && hasBleedingFace());
     }
 
     public void addDeposit(Gas gas, float moles)
@@ -182,6 +211,7 @@ public final class GasChunkData
             cell = new float[Gas.COUNT];
             cells.put(key, cell);
         }
+        mobileContent = true; // Whoever asks for a cell this way is about to put something in it
         return cell;
     }
 

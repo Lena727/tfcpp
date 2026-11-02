@@ -310,5 +310,6 @@
   "tfcpp.sentinel.state.lively": "Lively",
   "tfcpp.sentinel.state.uneasy": "Uneasy",
   "tfcpp.sentinel.uneasy": "The animal in the cage is uneasy and breathing fast",
-  "tfcpp.settling_baffle.nothing": "Too little dust on the plates to scrape off"
+  "tfcpp.settling_baffle.nothing": "Too little dust on the plates to scrape off",
+  "tfcpp.stone_dust.sample": "Sample from the floor here: %s%% of the dust cannot burn (at least %s%% is needed)"
 }

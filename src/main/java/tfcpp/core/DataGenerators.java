@@ -211,6 +211,7 @@ public final class DataGenerators
             add("tfcpp.sentinel.state.uneasy", "Uneasy");
             add("tfcpp.sentinel.state.collapsed", "Collapsed");
             add("tfcpp.settling_baffle.nothing", "Too little dust on the plates to scrape off");
+            add("tfcpp.stone_dust.sample", "Sample from the floor here: %s%% of the dust cannot burn (at least %s%% is needed)");
             add("tfcpp.jei.retort", "Retort");
             add("tfcpp.jei.retort.temperature", "%s °C");
             add("tfcpp.jei.retort.carbon", "Carbon: %s mol");
@@ -388,6 +389,7 @@ public final class DataGenerators
             add("tfcpp.sentinel.state.uneasy", "Беспокоится");
             add("tfcpp.sentinel.state.collapsed", "Лежит без сил");
             add("tfcpp.settling_baffle.nothing", "На пластинах слишком мало пыли, соскрести нечего");
+            add("tfcpp.stone_dust.sample", "Проба с пола здесь: %s%% пыли не горит (нужно не менее %s%%)");
             add("tfcpp.jei.retort", "Реторта");
             add("tfcpp.jei.retort.temperature", "%s °C");
             add("tfcpp.jei.retort.carbon", "Углерод: %s моль");

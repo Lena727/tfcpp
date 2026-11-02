@@ -96,6 +96,12 @@ public final class LevelGasVolume implements GasVolume
         if (chunk != null)
         {
             chunk.setUnsaved(true);
+            if (chunk.hasData(GasAttachments.CHUNK))
+            {
+                // Gas may have come into a chunk that was asleep because it held only settled dust
+                chunk.getData(GasAttachments.CHUNK).wake();
+                tracker.activate(chunk.getPos().toLong());
+            }
         }
     }
 
@@ -242,6 +248,7 @@ public final class LevelGasVolume implements GasVolume
         {
             chunk.setUnsaved(true);
         }
+        data.setMobileContent(data.holdsMobileContent()); // Over the cells as they are now: a step creates cells as well as removing them
         return keys.length + faces;
     }
 }

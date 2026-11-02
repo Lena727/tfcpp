@@ -96,6 +96,19 @@ public final class GasEvents
         }
     }
 
+    /**
+     * Stone dusting: a powder of ground limestone or dolomite used on a block is spread over the gallery around it. Run after other mods, and not at all on a block that takes the item itself.
+     */
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event)
+    {
+        if (event.getLevel() instanceof ServerLevel level && StoneDusting.use(level, event.getEntity(), event.getHand(), event.getPos(), event.getFace()))
+        {
+            event.setCancellationResult(InteractionResult.SUCCESS);
+            event.setCanceled(true);
+        }
+    }
+
     @SubscribeEvent
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event)
     {

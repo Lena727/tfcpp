@@ -16,6 +16,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import org.jetbrains.annotations.Nullable;
 
 import tfcpp.core.LocalTime;
+import tfcpp.pneumatics.gas.DustSources;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasAttachments;
 import tfcpp.pneumatics.gas.GasChunkData;
@@ -119,6 +120,7 @@ public final class SeamGas
         if (rank != null)
         {
             breakCoal(level, pos, rank);
+            DustSources.onCoalMined(level, pos);
         }
         if (rank != null || state.is(TFCTags.Blocks.CAN_COLLAPSE))
         {

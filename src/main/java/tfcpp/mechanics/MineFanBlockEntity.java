@@ -152,7 +152,7 @@ public final class MineFanBlockEntity extends TFCBlockEntity implements Rotation
             for (Cell cell : shells.get(i))
             {
                 final @Nullable float[] from = volume.cell(cell.pos.getX(), cell.pos.getY(), cell.pos.getZ());
-                if (from == null || GasMath.total(from) <= 0)
+                if (from == null || GasMath.mobileContent(from) <= 0)
                 {
                     continue;
                 }
@@ -161,7 +161,7 @@ public final class MineFanBlockEntity extends TFCBlockEntity implements Rotation
                 {
                     for (int gas = 0; gas < Gas.COUNT; gas++)
                     {
-                        moved[gas] = from[gas] * share;
+                        moved[gas] = Gas.VALUES[gas].mobile() ? from[gas] * share : 0f; // A fan does not lift settled dust
                         from[gas] -= moved[gas];
                     }
                     GasEmission.addToPlume(volume, outlet.getX(), outlet.getY(), outlet.getZ(), moved);
@@ -174,7 +174,7 @@ public final class MineFanBlockEntity extends TFCBlockEntity implements Rotation
                     {
                         for (int gas = 0; gas < Gas.COUNT; gas++)
                         {
-                            final float amount = from[gas] * share;
+                            final float amount = Gas.VALUES[gas].mobile() ? from[gas] * share : 0f;
                             from[gas] -= amount;
                             to[gas] += amount;
                         }

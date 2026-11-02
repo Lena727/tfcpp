@@ -23,6 +23,7 @@
     "MeltContextMixins$Firepit",
     "MeltContextMixins$Forge",
     "MeltContextMixins$PitKiln",
+    "QuernMixin",
     "ShaftSourceMixins$Aqueduct",
     "ShaftSourceMixins$Bellows",
     "ShaftSourceMixins$Pump",

@@ -35,6 +35,7 @@ bash tools/verify.sh --client   # то же, плюс настоящий кли�
 | Новая руда и обзор генерации | `geology/Ores`, `OreData`, `/tfcpp survey` |
 | Вид газа, токсичность, горение | `pneumatics/gas/Gas`, `Physiology`, `Flammability`, `Deflagration` |
 | Выброс газа в комнату | `GasEmission.release` |
+| Угольная и каменная пыль: источники, осланцевание | `pneumatics/gas/DustSources`, `StoneDusting`, `QuernMixin` |
 | Поверхность с осевшей пылью, выгребание | `pneumatics/instruments/SettlingBaffleBlockEntity` |
 | Конвертер и его продувка | `metallurgy/ConverterBath` (чистая физика), `ConverterBlockEntity` |
 | Смешанная загрузка домны, фосфористое железо | `metallurgy/IronBlend`, миксины `IronBlendMixins`, данные в `MetallurgyData.ironAndSteel`, `castableIngot`, `thomasProcess` |
@@ -54,6 +55,9 @@ bash tools/verify.sh --client   # то же, плюс настоящий кли�
 - Сплав тигля (`FluidAlloy`) требует, чтобы каждая жидкость в нём была названа в рецепте: лишний металл даёт `Metal.UNKNOWN`, не сталь. Отдельный перечень «запрещено» не нужен.
 - Рецепты домны, сыродутной печи, бочки принимают `{"tag": ...}` и `{"type":"neoforge:compound","ingredients":[...]}` в `fluid`/`input_fluid`.
 - Руды: `tfc:prospectable` = `#c:ores`, `tfc:collapse`. Больше rarity значит реже. Жила: `tfc:cluster_vein` или `tfc:disc_vein` с `blocks` и `indicator`, подключается тегом `tfc:in_biome/veins`.
+
+- **Виды-пылинки в `Gas`.** `COAL_DUST`, `SETTLED_COAL_DUST`, `SETTLED_ROCK_DUST` лежат в той же `float[]` ячейки, но их единица 1 кг, а не моль. `Gas.isParticulate()`: пыль не входит в `GasMath.total`, давление, кислород и плотность (`relativeDensity`), поэтому в цикле по видам, где важны моли, её надо пропускать. `Gas.mobile()` ложно у осевшей пыли: симулятор её не двигает и не выдувает, трубы, вентилятор, дыхание её не берут. Каждый цикл по `Gas.VALUES`/`Gas.COUNT`, который переносит вещество между ячейками или в трубу, обязан пропускать `!mobile()` (вентилятор) или `isParticulate()` (труба). Ячейка с одной осевшей пылью живёт и сохраняется (`GasMath.mobileContent`, `settledContent`), но чанк, где двигаться нечему, засыпает (`GasChunkData.isActive`): будить его надо через `cellForEmission` или `markChanged`, а запись прямо в чужую ячейку чанк не разбудит.
+- **Горение пыли идёт по Ле Шателье** (`Flammability`): нижние пределы газа и пыли складываются, и 2,5% метана с 25 г/м³ пыли горят вместе. `relativeToLowerLimit` считает только газы (его читает лампа), `relativeToLowerLimitWithDust` и `isFlammable` с пылью.
 
 ## Ловушки игровых тестов
 

@@ -29,6 +29,16 @@ public final class GasSimulator
     private static final float MAX_PRESSURE = 0.24f;
 
     private static final Gas[] CONDENSING = Arrays.stream(Gas.VALUES).filter(gas -> gas.depositionRate() > 0).toArray(Gas[]::new);
+    private static final boolean[] MOBILE = new boolean[Gas.COUNT];
+
+    static
+    {
+        for (Gas gas : Gas.VALUES)
+        {
+            MOBILE[gas.ordinal()] = gas.mobile();
+        }
+    }
+
     private static final int[][] SIDES = {{0, 1, 0}, {1, 0, 0}, {-1, 0, 0}, {0, 0, 1}, {0, 0, -1}, {0, -1, 0}};
 
     private final float[] flux = new float[Gas.COUNT];
@@ -65,7 +75,10 @@ public final class GasSimulator
             final float remaining = (float) Math.exp(-exchange * seconds);
             for (int i = 0; i < Gas.COUNT; i++)
             {
-                cell[i] *= remaining;
+                if (MOBILE[i]) // Wind carries off airborne dust with the air, but not what has settled
+                {
+                    cell[i] *= remaining;
+                }
             }
         }
 
@@ -78,7 +91,8 @@ public final class GasSimulator
         if (volume.cell(x, y, z - 1) == null) exchange(volume, cell, x, y, z, x, y, z - 1, false, seconds);
         if (volume.cell(x, y - 1, z) == null) exchange(volume, cell, x, y, z, x, y - 1, z, true, seconds);
 
-        if (GasMath.total(cell) < REMOVE_CELL_MOLES)
+        // A cell is kept for as long as it holds anything: dust that has settled stays on its surfaces after the air above it is clean
+        if (GasMath.mobileContent(cell) < REMOVE_CELL_MOLES && GasMath.settledContent(cell) < REMOVE_CELL_MOLES)
         {
             volume.removeCell(x, y, z);
         }
@@ -93,7 +107,15 @@ public final class GasSimulator
             {
                 final float settled = excess * Math.min(gas.depositionRate() * seconds, 1f);
                 cell[gas.ordinal()] -= settled;
-                volume.deposit(x, y, z, gas, settled);
+                final Gas lands = gas.settlesInto();
+                if (lands != null)
+                {
+                    cell[lands.ordinal()] += settled; // Dust is not lost from the cell, it lies down in it
+                }
+                else
+                {
+                    volume.deposit(x, y, z, gas, settled);
+                }
             }
         }
     }
@@ -147,7 +169,7 @@ public final class GasSimulator
         for (int i = 0; i < Gas.COUNT; i++)
         {
             final float there = to == null ? 0 : to[i];
-            if (from[i] == 0 && there == 0)
+            if (!MOBILE[i] || (from[i] == 0 && there == 0))
             {
                 flux[i] = 0;
                 continue;

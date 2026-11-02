@@ -94,7 +94,10 @@ public final class GasCommand
             {
                 if (cell[gas.ordinal()] > 0)
                 {
-                    text.append(", %s %.0f ppm".formatted(gas.id(), GasMath.ppm(cell[gas.ordinal()])));
+                    // Dust is counted in kilograms per cell, which is also kilograms per cubic metre: a ppm of it would mean nothing
+                    text.append(gas.isParticulate()
+                        ? ", %s %.1f g/m3".formatted(gas.id(), cell[gas.ordinal()] * 1000f)
+                        : ", %s %.0f ppm".formatted(gas.id(), GasMath.ppm(cell[gas.ordinal()])));
                 }
             }
         }

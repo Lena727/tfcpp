@@ -11,12 +11,56 @@ public final class GasMath
     public static final float AIR_MOLAR_MASS = 28.97f;
     public static final float OXYGEN_IN_AIR = 0.2095f;
 
+    private static final boolean[] PARTICULATE = new boolean[Gas.COUNT];
+    private static final boolean[] MOBILE = new boolean[Gas.COUNT];
+
+    static
+    {
+        for (Gas gas : Gas.VALUES)
+        {
+            PARTICULATE[gas.ordinal()] = gas.isParticulate();
+            MOBILE[gas.ordinal()] = gas.mobile();
+        }
+    }
+
+    /** @return moles of gas in a cell. Dust is not gas: it takes no room from the air, and does not push on a wall. */
     public static float total(float[] cell)
     {
         float total = 0;
-        for (float amount : cell)
+        for (int i = 0; i < cell.length; i++)
         {
-            total += amount;
+            if (!PARTICULATE[i])
+            {
+                total += cell[i];
+            }
+        }
+        return total;
+    }
+
+    /** @return the amounts of everything in a cell that can move, in moles and kilograms of airborne dust together. Only used to decide whether a cell is worth keeping. */
+    public static float mobileContent(float[] cell)
+    {
+        float total = 0;
+        for (int i = 0; i < cell.length; i++)
+        {
+            if (MOBILE[i])
+            {
+                total += cell[i];
+            }
+        }
+        return total;
+    }
+
+    /** @return the kilograms of settled dust in a cell */
+    public static float settledContent(float[] cell)
+    {
+        float total = 0;
+        for (int i = 0; i < cell.length; i++)
+        {
+            if (!MOBILE[i])
+            {
+                total += cell[i];
+            }
         }
         return total;
     }
@@ -48,7 +92,11 @@ public final class GasMath
         float excess = 0;
         for (int i = 0; i < cell.length; i++)
         {
-            excess += cell[i] * (Gas.VALUES[i].molarMass() - AIR_MOLAR_MASS);
+            // Dust, lying or flying, makes no current: a particle falls through the air by itself, and the cloud does not sink as a body
+            if (MOBILE[i] && !PARTICULATE[i])
+            {
+                excess += cell[i] * (Gas.VALUES[i].molarMass() - AIR_MOLAR_MASS);
+            }
         }
         return excess / (CELL_MOLES * AIR_MOLAR_MASS);
     }

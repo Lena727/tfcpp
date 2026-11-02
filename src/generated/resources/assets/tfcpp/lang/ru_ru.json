@@ -310,5 +310,6 @@
   "tfcpp.sentinel.state.lively": "Бодрое",
   "tfcpp.sentinel.state.uneasy": "Беспокоится",
   "tfcpp.sentinel.uneasy": "Животное в клетке беспокоится и часто дышит",
-  "tfcpp.settling_baffle.nothing": "На пластинах слишком мало пыли, соскрести нечего"
+  "tfcpp.settling_baffle.nothing": "На пластинах слишком мало пыли, соскрести нечего",
+  "tfcpp.stone_dust.sample": "Проба с пола здесь: %s%% пыли не горит (нужно не менее %s%%)"
 }

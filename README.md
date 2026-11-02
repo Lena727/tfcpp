@@ -50,6 +50,7 @@ tfcpp supports one exact TFC version and changes TFC freely wherever that gives 
 | `HeatingRecipeMixin` | `HeatingRecipe.assembleItem`, `assembleStacked` | The one place where every heating recipe converts an item: releases sulfide fumes at that exact moment |
 | `FuelSulfurMixins$Firepit`, `$Firebox`, `$Forge`, `$BlastFurnace` | `consumeFuel` of `AbstractFirepitBlockEntity`, `FireboxBlockEntity`, `CharcoalForgeBlockEntity` and `BlastFurnaceBlockEntity`, each at `Fuel.get` | Sulfur in a piece of coal, lignite or coke goes up the flue as sulfur dioxide at the moment the fire takes the piece to burn it. A blast furnace lets only a tenth of it out, as its lime slag takes the rest |
 | `MeltContextMixins` | `serverTick` of crucible, forge, firepit, pit kiln, firebox | Tells `HeatingRecipeMixin` where the conversion is happening, as a vessel melting its contents has no idea where it is |
+| `QuernMixin` | `QuernBlockEntity.finishGrinding`, at `ItemStack.shrink` | A quern lets no event out when it finishes a grind. Grinding coal, charcoal or coke raises 2 g of coal dust into the air of the cell the quern stands in, at the moment the input is used up |
 
 ## Documentation
 
