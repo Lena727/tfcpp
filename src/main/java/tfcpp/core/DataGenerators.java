@@ -212,6 +212,18 @@ public final class DataGenerators
             add("tfcpp.davy_lamp.tall_cap", "A tall blue cap reaches up the gauze: get out soon");
             add("tfcpp.davy_lamp.filled", "Flame fills the whole gauze: the air is explosive, get out now");
             add("tfcpp.davy_lamp.out", "The flame has died: this air cannot keep a flame going, and soon not a person either");
+            add("tfcpp.davy_lamp.went_out", "The flame has gone out in this air, and will stay out: light it again with flint and steel in your other hand, in air where a flame can burn");
+            add("tfcpp.davy_lamp.lit", "The lamp is lit");
+            add("tfcpp.davy_lamp.wont_light", "No flame will take in this air");
+            add("tfcpp.davy_lamp.no_oil", "The lamp has no oil to burn");
+            add("tfcpp.davy_lamp.no_oil_out", "The lamp has burned its oil dry and the flame is out");
+            add("tfcpp.davy_lamp.block_unlit", "The lamp is out. Light it with flint and steel");
+            add("tfcpp.davy_lamp.item_lit", "Lit");
+            add("tfcpp.davy_lamp.item_unlit", "Out: light it with flint and steel held in the other hand");
+            add("tfcpp.mine_fan.unknown", "The fan has not yet looked at the air it draws on");
+            add("tfcpp.mine_fan.drawing", "The fan draws air along the open spaces to open air");
+            add("tfcpp.mine_fan.no_intake", "The fan turns in a closed space: nothing brings it air, and it only stirs what is there. Open a second way to the air");
+            add("tfcpp.mine_fan.blocked", "The fan has nowhere to blow to");
             add("tfcpp.sentinel.uneasy", "The animal in the cage is uneasy and breathing fast");
             add("tfcpp.sentinel.collapsed", "The animal in the cage has collapsed: leave, the air is poisoned");
             add("tfcpp.sentinel.dead", "The animal in the cage is dead");
@@ -225,7 +237,7 @@ public final class DataGenerators
             add("tfcpp.jei.retort.temperature", "%s °C");
             add("tfcpp.jei.retort.carbon", "Carbon: %s mol");
             add("tfcpp.jei.retort.condenser", "Needs a condenser beside it");
-            add("tfcpp.info.davy_lamp", "A lamp whose gauze keeps its flame from lighting the air around it. Carried in hand with oil in it, it shows firedamp as a blue cap above the flame, and goes out when oxygen runs low. It does not show carbon monoxide, and a gauze with gas burning in it for minutes gets hot enough to light the gas outside.");
+            add("tfcpp.info.davy_lamp", "A lamp whose gauze keeps its flame from lighting the air around it. Carried in hand with oil in it, it shows firedamp as a blue cap above the flame, and goes out when oxygen runs low, or when the firedamp is thick enough to starve it. A flame that has gone out stays out until you light it again with flint and steel from the other hand (or with a lighter, if the lamp is standing). It does not show carbon monoxide, and a gauze with gas burning in it for minutes gets hot enough to light the gas outside.");
             add("tfcpp.info.sentinel_cage", "Right-click a rat or a quail with an empty cage. The animal takes in carbon monoxide twenty times as fast as a person, so it collapses long before you feel anything. Feed it grain from the other hand at least every three days.");
             add("tfcpp.info.settling_baffle", "Place these in a closed chamber that furnace fumes pass through. Arsenic, antimony and zinc oxide dust settles on the plates, and is scraped off by right-clicking with an empty hand. Scraping stirs up some of the dust, so do not breathe it.");
             add("tfcpp.info.condensation_tower", "Put it in a run of pipe that carries furnace fumes. While the gas is below 250 C, arsenic, antimony, zinc and lead oxide settle on its walls as dust, and mercury runs down as a liquid when the gas is below 100 C. Sulfur dioxide goes on through. Scrape the dust off with an empty hand while crouching, which stirs some of it into the air, and tap the mercury into a container. Several towers in a row catch proportionally more.");
@@ -251,7 +263,7 @@ public final class DataGenerators
             add("tfcpp.info.piston_pump", "Driven by a shaft from the side. It takes in from the back, from a pipe, a barrel, standing water or the air, and delivers into a pipe at the front. Every turn sweeps the same volume, and the shaft pays for the difference in pressure.");
             add("tfcpp.info.safety_valve", "Lifts at 8 atm above the air outside and seats again at 7, with a loud hiss. It cannot be held shut.");
             add("tfcpp.info.manometer", "Right-click to read the pressure. Above 3 atm over the air outside the mercury is blown out of the tube, into the room.");
-            add("tfcpp.info.mine_fan", "Driven by a shaft at its back, it blows out of its front and draws air in through its other sides, along the open spaces leading to it. Air moves quickly along a narrow drift and hardly at all across a large chamber. The fan loads the shaft more the faster it turns.");
+            add("tfcpp.info.mine_fan", "Driven by a shaft at its back, it blows out of its front and draws air in through its other sides, along the open spaces leading to it. Air moves quickly along a narrow drift and hardly at all across a large chamber. It only moves air that has somewhere to come from: in a dead end or a room with no other opening to the sky it does nothing but stir, and the second shaft is what makes a working ventilable. Right-click it to see what it found. The fan loads the shaft more the faster it turns.");
             add("tfcpp.info.shaft_load", "Every machine on a shaft takes torque from its source. The more it has to drive, the slower it turns, and past what the source can start against it stops. A water wheel gives its best power at half of its free speed. Pumps take more torque the higher they lift. Water itself no longer multiplies, and a pump moves it from its intake to its outlet.");
             add("tfcpp.info.coal", "Coal seams hold methane, more of it the deeper they lie, and some rock next to them holds gas under pressure. Mining lets it out. A flame lights air holding 5% to 15% of it, and the blast is followed by afterdamp full of carbon monoxide.");
 
@@ -494,6 +506,18 @@ public final class DataGenerators
             add("tfcpp.davy_lamp.tall_cap", "Высокий голубой ореол тянется вверх по сетке: скоро пора уходить");
             add("tfcpp.davy_lamp.filled", "Пламя заполнило всю сетку: воздух взрывоопасен, уходите немедленно");
             add("tfcpp.davy_lamp.out", "Пламя погасло: в этом воздухе огонь не горит, а вскоре не выживет и человек");
+            add("tfcpp.davy_lamp.went_out", "Пламя погасло в этом воздухе и само не загорится: зажгите лампу снова кресалом из другой руки там, где пламя может гореть");
+            add("tfcpp.davy_lamp.lit", "Лампа зажжена");
+            add("tfcpp.davy_lamp.wont_light", "В этом воздухе пламя не примется");
+            add("tfcpp.davy_lamp.no_oil", "В лампе нет масла для горения");
+            add("tfcpp.davy_lamp.no_oil_out", "Масло в лампе выгорело, пламя погасло");
+            add("tfcpp.davy_lamp.block_unlit", "Лампа погашена. Зажгите её кресалом");
+            add("tfcpp.davy_lamp.item_lit", "Горит");
+            add("tfcpp.davy_lamp.item_unlit", "Погашена: зажгите кресалом из другой руки");
+            add("tfcpp.mine_fan.unknown", "Вентилятор ещё не осмотрел воздух, который тянет");
+            add("tfcpp.mine_fan.drawing", "Вентилятор тянет воздух по открытым выработкам с поверхности");
+            add("tfcpp.mine_fan.no_intake", "Вентилятор крутится в замкнутом пространстве: воздуху неоткуда прийти, и он лишь перемешивает то, что есть. Откройте второй ход к воздуху");
+            add("tfcpp.mine_fan.blocked", "Вентилятору некуда дуть");
             add("tfcpp.sentinel.uneasy", "Животное в клетке беспокоится и часто дышит");
             add("tfcpp.sentinel.collapsed", "Животное в клетке упало: уходите, воздух отравлен");
             add("tfcpp.sentinel.dead", "Животное в клетке погибло");
@@ -507,7 +531,7 @@ public final class DataGenerators
             add("tfcpp.jei.retort.temperature", "%s °C");
             add("tfcpp.jei.retort.carbon", "Углерод: %s моль");
             add("tfcpp.jei.retort.condenser", "Нужен конденсатор рядом");
-            add("tfcpp.info.davy_lamp", "Лампа, сетка которой не даёт пламени поджечь окружающий воздух. В руке и с маслом показывает рудничный газ голубым ореолом над пламенем и гаснет, когда не хватает кислорода. Угарный газ она не показывает, а сетка с горящим внутри газом за несколько минут раскаляется настолько, что поджигает газ снаружи.");
+            add("tfcpp.info.davy_lamp", "Лампа, сетка которой не даёт пламени поджечь окружающий воздух. В руке и с маслом показывает рудничный газ голубым ореолом над пламенем и гаснет, когда не хватает кислорода или рудничного газа слишком много. Погасшая лампа сама не загорится: зажгите её кресалом из другой руки (стоящую — любым зажигалом). Угарный газ она не показывает, а сетка с горящим внутри газом за несколько минут раскаляется настолько, что поджигает газ снаружи.");
             add("tfcpp.info.sentinel_cage", "Правым кликом пустой клеткой поймайте крысу или перепела. Животное набирает угарный газ в двадцать раз быстрее человека и падает задолго до того, как вы что-то почувствуете. Кормите его зерном из другой руки хотя бы раз в три дня.");
             add("tfcpp.info.settling_baffle", "Ставятся в закрытой камере, через которую идут печные газы. Пыль мышьяка, сурьмы и оксида цинка оседает на пластинах, её соскребают правым кликом пустой рукой. При этом часть пыли снова поднимается в воздух, так что дышать ею нельзя.");
             add("tfcpp.info.condensation_tower", "Ставится в трубу, по которой идут печные газы. Пока газ холоднее 250 °C, оксиды мышьяка, сурьмы, цинка и свинца оседают на стенках пылью, а при газе холоднее 100 °C стекает жидкая ртуть. Диоксид серы проходит дальше. Пыль соскребают пустой рукой с приседанием, при этом часть её поднимается в воздух, ртуть сливают в ёмкость. Несколько башен подряд ловят пропорционально больше.");
@@ -533,7 +557,7 @@ public final class DataGenerators
             add("tfcpp.info.piston_pump", "Вал подводится сбоку. Насос берёт сзади, из трубы, бочки, стоячей воды или воздуха, и подаёт в трубу спереди. Каждый оборот вытесняет один и тот же объём, а вал оплачивает разность давлений.");
             add("tfcpp.info.safety_valve", "Открывается при 8 атм сверх наружного давления и садится обратно при 7, с громким шипением. Удержать его закрытым нельзя.");
             add("tfcpp.info.manometer", "Правый клик показывает давление. При 3 атм сверх наружного ртуть выбрасывает из трубки прямо в помещение.");
-            add("tfcpp.info.mine_fan", "Приводится валом с задней стороны, выдувает вперёд, а воздух тянет через остальные стороны по ведущим к нему выработкам. По узкому штреку воздух идёт быстро, а через большую полость почти незаметно. Чем быстрее вентилятор вращается, тем сильнее он нагружает вал.");
+            add("tfcpp.info.mine_fan", "Приводится валом с задней стороны, выдувает вперёд, а воздух тянет через остальные стороны по ведущим к нему выработкам. По узкому штреку воздух идёт быстро, а через большую полость почти незаметно. Воздух движется, только если ему есть откуда прийти: в тупике или в комнате без другого выхода к поверхности вентилятор лишь перемешивает его, а второй ствол и делает выработку проветриваемой. Правый клик покажет, что он нашёл. Чем быстрее вентилятор вращается, тем сильнее он нагружает вал.");
             add("tfcpp.info.shaft_load", "Каждая машина на валу отбирает момент у источника. Чем больше нагрузка, тем медленнее вал, а сверх предела источник останавливается. Водяное колесо даёт наибольшую мощность на половине свободной скорости. Насос нагружает вал тем сильнее, чем выше поднимает воду. Вода больше не размножается сама, а насос перемещает её от входа к выходу.");
             add("tfcpp.info.coal", "Угольные пласты содержат метан, и чем глубже, тем больше, а порода рядом с ними может держать газ под давлением. При добыче он выходит наружу. Пламя поджигает воздух с 5–15% метана, а после взрыва остаётся смесь с большим количеством угарного газа.");
 

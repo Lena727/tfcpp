@@ -16,6 +16,16 @@ public final class Combustion
     public static final float CLEAN_BURN_OXYGEN = 0.19f;
     /** Below this oxygen fraction embers can no longer sustain a fire. */
     public static final float EXTINCTION_OXYGEN = 0.12f;
+    /**
+     * The share of the carbon of a blast furnace that leaves as CO. The charge is reduced by CO, and the top gas of a real furnace is 20 to 28% CO by volume: with this share the flue gas, its nitrogen included, comes to about 22%.
+     */
+    public static final float BLAST_FURNACE_CARBON_MONOXIDE_SHARE = 0.75f;
+
+    /** @return {@code true} if air with this oxygen fraction can still keep a fire burning, and so put anything into it */
+    public static boolean sustainsFlame(float oxygenFraction)
+    {
+        return oxygenFraction >= EXTINCTION_OXYGEN;
+    }
 
     /**
      * @param kilowatts thermal power of the fire

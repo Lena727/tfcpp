@@ -2,15 +2,16 @@ package tfcpp.pneumatics.instruments;
 
 import java.util.Locale;
 import net.dries007.tfc.common.capabilities.ItemCapabilities;
-import net.dries007.tfc.common.fluids.FluidHelpers;
 import net.dries007.tfc.util.data.LampFuel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import org.jetbrains.annotations.Nullable;
@@ -70,6 +71,23 @@ public final class DavyLamp
         return oxygen < DIM_OXYGEN ? Reading.DIM : Reading.STEADY;
     }
 
+    /** @return whether a flame can burn in air that reads like this. One that cannot goes out, and stays out until it is lit again. */
+    public static boolean burns(Reading reading)
+    {
+        return reading != Reading.OUT;
+    }
+
+    /** @return whether a flame struck where this player stands would burn, so that lighting the lamp there is worth a try */
+    public static boolean canLightIn(Player player)
+    {
+        if (!(player.level() instanceof ServerLevel level))
+        {
+            return true;
+        }
+        final BlockPos eye = BlockPos.containing(player.getEyePosition());
+        return burns(read(GasTracker.get(level).volume(level).cell(eye.getX(), eye.getY(), eye.getZ())));
+    }
+
     /** @return the gauze temperature after this long in this reading. It heats while gas burns inside it, and cools at the same rate otherwise. */
     public static float stepGauze(float seconds, Reading reading, float step)
     {
@@ -81,19 +99,25 @@ public final class DavyLamp
         return seconds >= GAUZE_FAILS_SECONDS;
     }
 
-    /** A lamp in the hand counts as lit whenever it has fuel: it burns its oil, and shows the air around the one carrying it. Called once per second. */
+    /**
+     * A lamp in the hand burns its oil while it is lit, and shows the air around the one carrying it. It is lit only if it has been lit: a lamp whose oil has run out, or whose flame the air has put out, is out, and stays so until it is lit again. Called once per second.
+     */
     public static void tickHeld(ServerPlayer player)
     {
         final InteractionHand hand = heldIn(player);
         final ItemStack lamp = hand == null ? ItemStack.EMPTY : player.getItemInHand(hand);
-        final FluidStack fuel = FluidHelpers.getContainedFluid(lamp);
-        final @Nullable LampFuel definition = fuel.isEmpty() ? null : LampFuel.get(fuel.getFluid(), Instruments.DAVY_LAMP.get().defaultBlockState());
-        if (definition == null)
+        final @Nullable LampFuel definition = lamp.isEmpty() ? null : DavyLampItem.fuelOf(lamp);
+        if (definition == null || !DavyLampItem.isLit(lamp))
         {
+            if (!lamp.isEmpty() && DavyLampItem.isLit(lamp))
+            {
+                DavyLampItem.setLit(lamp, false); // No oil, no flame
+                player.displayClientMessage(Component.translatable("tfcpp.davy_lamp.no_oil_out"), true);
+            }
             if (player.hasData(GasAttachments.BREATHING))
             {
                 final BreathingState state = player.getData(GasAttachments.BREATHING);
-                state.gauzeSeconds = stepGauze(state.gauzeSeconds, Reading.STEADY, 1f); // Put away, it cools
+                state.gauzeSeconds = stepGauze(state.gauzeSeconds, Reading.STEADY, 1f); // Put away or out, it cools
             }
             return;
         }
@@ -104,6 +128,14 @@ public final class DavyLamp
         final Reading reading = read(air);
 
         final BreathingState state = player.getData(GasAttachments.BREATHING);
+        if (!burns(reading))
+        {
+            DavyLampItem.setLit(lamp, false);
+            state.gauzeSeconds = stepGauze(state.gauzeSeconds, Reading.STEADY, 1f);
+            level.playSound(null, eye, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.6f, 1f);
+            player.displayClientMessage(Component.translatable("tfcpp.davy_lamp.went_out"), true);
+            return;
+        }
         burnFuel(lamp, definition, state, reading);
 
         state.gauzeSeconds = stepGauze(state.gauzeSeconds, reading, 1f);
@@ -121,7 +153,7 @@ public final class DavyLamp
 
     private static void burnFuel(ItemStack lamp, LampFuel definition, BreathingState state, Reading reading)
     {
-        if (reading == Reading.OUT || definition.burnRate() <= 0)
+        if (definition.burnRate() <= 0)
         {
             return;
         }

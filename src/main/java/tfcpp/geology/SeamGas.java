@@ -114,6 +114,20 @@ public final class SeamGas
         return surface - pos.getY();
     }
 
+    /** The same as {@link #depth}, but from the columns that are loaded: a face is visited every second, and must not be the reason that a chunk at the edge of the loaded world is loaded. */
+    private static int depthLoaded(LevelGasVolume volume, int x, int y, int z)
+    {
+        int surface = y;
+        for (int dx = -8; dx <= 8; dx += 8)
+        {
+            for (int dz = -8; dz <= 8; dz += 8)
+            {
+                surface = Math.max(surface, volume.surfaceHeight(x + dx, z + dz));
+            }
+        }
+        return surface - y;
+    }
+
     public static void onBlockBroken(ServerLevel level, BlockPos pos, BlockState state, Player player)
     {
         final @Nullable Rank rank = rankOf(state);
@@ -183,6 +197,28 @@ public final class SeamGas
         final @Nullable float[] cell = volume.cellForEmission(pos.getX(), pos.getY(), pos.getZ());
         if (cell != null)
         {
+            addAdsorbed(cell, rank, depth(level, pos), moles);
+        }
+    }
+
+    /** Adds blackdamp, in the shares that a pocket of it is found in. */
+    static void addBlackdamp(float[] cell, float moles)
+    {
+        cell[Gas.CARBON_DIOXIDE.ordinal()] += moles * BLACKDAMP_CARBON_DIOXIDE;
+        cell[Gas.FLUE_NITROGEN.ordinal()] += moles * (1 - BLACKDAMP_CARBON_DIOXIDE);
+    }
+
+    /**
+     * Gas that came out of the coal itself. Where air has reached the seam, above {@link #BLACKDAMP_DEPTH}, the coal has been oxidising for as long as it has lain there and what it gives up is blackdamp, as in the pockets: its methane has gone out through the same cracks that the air came in by.
+     */
+    static void addAdsorbed(float[] cell, Rank rank, float depth, float moles)
+    {
+        if (depth < BLACKDAMP_DEPTH)
+        {
+            addBlackdamp(cell, moles);
+        }
+        else
+        {
             cell[Gas.METHANE.ordinal()] += moles * rank.methaneShare;
             cell[Gas.CARBON_DIOXIDE.ordinal()] += moles * (1 - rank.methaneShare);
         }
@@ -216,8 +252,7 @@ public final class SeamGas
         {
             if (depth < BLACKDAMP_DEPTH || seam == Rank.LIGNITE)
             {
-                cell[Gas.CARBON_DIOXIDE.ordinal()] += moles * BLACKDAMP_CARBON_DIOXIDE;
-                cell[Gas.FLUE_NITROGEN.ordinal()] += moles * (1 - BLACKDAMP_CARBON_DIOXIDE);
+                addBlackdamp(cell, moles);
             }
             else
             {
@@ -308,8 +343,7 @@ public final class SeamGas
                 final @Nullable float[] cell = volume.cellForEmission(nx, ny, nz);
                 if (cell != null)
                 {
-                    cell[Gas.METHANE.ordinal()] += bled * rank.methaneShare;
-                    cell[Gas.CARBON_DIOXIDE.ordinal()] += bled * (1 - rank.methaneShare);
+                    addAdsorbed(cell, rank, depthLoaded(volume, x, y, z), bled);
                     return moles - bled;
                 }
             }

@@ -1,8 +1,11 @@
 package tfcpp.pneumatics.gas;
 
+import it.unimi.dsi.fastutil.longs.Long2LongMap;
+import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -22,11 +25,15 @@ public final class GasTracker
     /** Air that has settled needs far fewer updates, so a chunk backs off to this interval while nothing is moving. */
     private static final int MAX_STEP_INTERVAL_TICKS = 100;
     private static final float SETTLED_FLOW_MOLES = 1e-3f;
+    /** A chunk of gas at rest is looked at again after this long, in ticks of the calendar. Nothing tells the gas when a door is opened or a wall broken, so a resting chunk cannot stay blind to them for good. */
+    private static final long RESTING_RECHECK_TICKS = 200;
 
     private final ChunkRotation rotation = new ChunkRotation();
     private final Long2ObjectMap<FireSource> fires = new Long2ObjectOpenHashMap<>();
     private final GasSimulator simulator = new GasSimulator();
     private final LongArrayFIFOQueue ignitions = new LongArrayFIFOQueue();
+    /** The chunks that sleep holding gas, and the calendar tick when each fell asleep. */
+    private final Long2LongOpenHashMap resting = new Long2LongOpenHashMap();
 
     private LevelGasVolume volume;
     private long firesLastPolled;
@@ -49,12 +56,20 @@ public final class GasTracker
 
     public void activate(long chunkPos)
     {
+        resting.remove(chunkPos);
         rotation.activate(chunkPos);
     }
 
     public void deactivate(long chunkPos)
     {
+        resting.remove(chunkPos);
         rotation.deactivate(chunkPos);
+    }
+
+    /** @return how many chunks sleep holding gas that is not changing */
+    public int restingChunkCount()
+    {
+        return resting.size();
     }
 
     /** Lights the gas here at the end of this tick, once no cells are being walked. */
@@ -140,6 +155,7 @@ public final class GasTracker
         if (recheckParked)
         {
             parkedLastChecked = now;
+            wakeRested(level, now);
         }
 
         final int[] cellsLeft = {ServerConfig.GAS_CELLS_PER_TICK.getAsInt()};
@@ -150,6 +166,32 @@ public final class GasTracker
             () -> cellsLeft[0] > 0,
             chunkPos -> stepChunk(level, volume, now, chunkPos, cellsLeft)
         );
+    }
+
+    /** Looks again at the chunks that have been at rest for long enough. They step once, and go back to sleep if nothing has changed. */
+    private void wakeRested(ServerLevel level, long now)
+    {
+        if (resting.isEmpty())
+        {
+            return;
+        }
+        final LongArrayList due = new LongArrayList();
+        for (Long2LongMap.Entry entry : resting.long2LongEntrySet())
+        {
+            if (now < entry.getLongValue() || now - entry.getLongValue() >= RESTING_RECHECK_TICKS)
+            {
+                due.add(entry.getLongKey());
+            }
+        }
+        for (long chunkPos : due)
+        {
+            final LevelChunk chunk = level.getChunkSource().getChunkNow(ChunkPos.getX(chunkPos), ChunkPos.getZ(chunkPos));
+            if (chunk != null && chunk.hasData(GasAttachments.CHUNK))
+            {
+                chunk.getData(GasAttachments.CHUNK).wake();
+            }
+            activate(chunkPos); // A chunk that is not there is a parked one, and looked at when it comes back
+        }
     }
 
     /** @return whether the chunk is loaded as a full chunk now. One that has been demoted is not, though it has not been unloaded. */
@@ -188,6 +230,14 @@ public final class GasTracker
             ? Math.min(data.stepIntervalTicks * 2, MAX_STEP_INTERVAL_TICKS)
             : STEP_INTERVAL_TICKS;
 
-        return data.isActive() ? ChunkRotation.Outcome.KEEP : ChunkRotation.Outcome.DROP;
+        if (data.isActive())
+        {
+            return ChunkRotation.Outcome.KEEP;
+        }
+        if (data.isResting())
+        {
+            resting.put(chunkPos, now);
+        }
+        return ChunkRotation.Outcome.DROP;
     }
 }

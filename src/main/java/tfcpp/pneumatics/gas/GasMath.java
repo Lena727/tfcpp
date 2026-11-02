@@ -11,8 +11,15 @@ public final class GasMath
     public static final float AIR_MOLAR_MASS = 28.97f;
     public static final float OXYGEN_IN_AIR = 0.2095f;
 
+    /** Fraction of the gas at a position carried off each second by the wind right at the top of an open column, which is the surface of the ground. */
+    public static final float OPEN_AIR_EXCHANGE_RATE = 0.3f;
+    /** The depth in an open column over which the exchange with the atmosphere falls to 1/e. Air in a shaft is still, and only what diffuses and what the wind sucks out of the mouth moves it. */
+    public static final float OPEN_AIR_DEPTH_SCALE = 3f;
+
     private static final boolean[] PARTICULATE = new boolean[Gas.COUNT];
     private static final boolean[] MOBILE = new boolean[Gas.COUNT];
+    /** Below this a gas with a saturation of its own is not worth a cell, and the sum over every gas is not what decides. */
+    private static final float[] OWN_REMOVE_FLOOR = new float[Gas.COUNT];
 
     static
     {
@@ -20,7 +27,17 @@ public final class GasMath
         {
             PARTICULATE[gas.ordinal()] = gas.isParticulate();
             MOBILE[gas.ordinal()] = gas.mobile();
+            OWN_REMOVE_FLOOR[gas.ordinal()] = gas.isSaturating() ? gas.removeCellMoles() : Float.MAX_VALUE;
         }
+    }
+
+    /**
+     * @param depth metres below the top of the open column the position is in, that is below the surface around it
+     * @return the fraction of the gas at the position that the atmosphere carries off each second: 0.3 at the surface, and a third of that three metres down. A well or a bell pit holds a heavy gas for the same reason a still cave does, and a shaft is not a chimney.
+     */
+    public static float openAirExchange(float depth)
+    {
+        return OPEN_AIR_EXCHANGE_RATE * (float) Math.exp(-Math.max(depth, 0f) / OPEN_AIR_DEPTH_SCALE);
     }
 
     /** @return moles of gas in a cell. Dust is not gas: it takes no room from the air, and does not push on a wall. */
@@ -49,6 +66,26 @@ public final class GasMath
             }
         }
         return total;
+    }
+
+    /**
+     * @return {@code true} if a cell holds enough that can move to be kept: the sum over every species reaches the ordinary floor, or one vapour with a saturation of its own reaches the floor that is scaled to that
+     */
+    public static boolean holdsMobileContent(float[] cell)
+    {
+        float total = 0;
+        for (int i = 0; i < cell.length; i++)
+        {
+            if (MOBILE[i])
+            {
+                if (cell[i] >= OWN_REMOVE_FLOOR[i])
+                {
+                    return true;
+                }
+                total += cell[i];
+            }
+        }
+        return total >= GasSimulator.REMOVE_CELL_MOLES;
     }
 
     /** @return the kilograms of settled dust in a cell */

@@ -281,6 +281,233 @@ class GasSimulatorTest
         assertEquals(Gas.MERCURY_VAPOR.saturationMoles(), room.total(Gas.MERCURY_VAPOR), 1e-5f);
     }
 
+    // G6: the exchange with the atmosphere falls off down an open shaft
+
+    @Test
+    void openAirExchangeFallsWithDepthBelowTheSurface()
+    {
+        assertEquals(0.3f, GasMath.openAirExchange(0f), 1e-6f, "At the surface the wind carries off 30% a second");
+        assertEquals(0.3f / (float) Math.E, GasMath.openAirExchange(3f), 1e-6f, "Three metres down it is a third of that");
+        assertEquals(0.3f * (float) Math.exp(-4), GasMath.openAirExchange(12f), 1e-6f);
+        assertEquals(0.3f, GasMath.openAirExchange(-2f), 1e-6f, "Above the surface is the surface");
+        assertTrue(GasMath.openAirExchange(12f) < 0.01f);
+    }
+
+    @Test
+    void heavyGasCollectsAtTheBottomOfAnOpenShaftAndKills()
+    {
+        final int blocks = 13;
+        final Room shaft = new Room(1, blocks, 1)
+        {
+            @Override
+            public float atmosphereExchangeRate(int x, int y, int z)
+            {
+                return GasMath.openAirExchange(blocks - 1 - y); // The top cell is at the surface
+            }
+        };
+        shaft.add(0, 0, 0, Gas.CARBON_DIOXIDE, 12f); // A well with the damp of a cellar at the bottom of it
+        shaft.run(60);
+
+        final float[] bottom = shaft.cell(0, 0, 0);
+        assertNotNull(bottom);
+        final float fraction = bottom[Gas.CARBON_DIOXIDE.ordinal()] / GasMath.CELL_MOLES;
+        assertTrue(fraction * 1e6f > 170_000f, "It must still be a gas that drops a man in a few breaths after a minute, got " + fraction * 100f + "%");
+        assertTrue(shaft.total(Gas.CARBON_DIOXIDE) > 8f, "and most of it is still there");
+    }
+
+    @Test
+    void theSameGasOnTheSurfaceIsCarriedAwayAtOnce()
+    {
+        final Room surface = new Room(1, 1, 1)
+        {
+            @Override
+            public float atmosphereExchangeRate(int x, int y, int z)
+            {
+                return GasMath.openAirExchange(0f);
+            }
+        };
+        surface.add(0, 0, 0, Gas.CARBON_DIOXIDE, 12f);
+        surface.run(60);
+
+        assertTrue(surface.total(Gas.CARBON_DIOXIDE) < 1e-3f, "The wind clears a surface in a minute");
+    }
+
+    // G7: a vapour with a saturation spreads at that scale
+
+    @Test
+    void mercuryAtSaturationReachesTheNeighbouringCell()
+    {
+        final Room room = new Room(3, 1, 1);
+        room.add(0, 0, 0, Gas.MERCURY_VAPOR, Gas.MERCURY_VAPOR.saturationMoles());
+        final GasSimulator simulator = new GasSimulator();
+        simulator.stepCell(room, 0, 0, 0, 1f);
+
+        final float[] next = room.cell(1, 0, 0);
+        assertNotNull(next, "Mercury at saturation, 1.6 ppm, must be able to spread into empty air");
+        assertTrue(next[Gas.MERCURY_VAPOR.ordinal()] > 0);
+
+        simulator.stepCell(room, 1, 0, 0, 1f);
+        assertNotNull(room.cell(1, 0, 0), "and the cell it opened is not thrown away on its next step");
+    }
+
+    @Test
+    void anOrdinaryTraceStillStopsAtTheOrdinaryFloor()
+    {
+        final Room room = new Room(3, 1, 1);
+        room.add(0, 0, 0, Gas.CARBON_MONOXIDE, 1.5e-5f); // A tenth of it is under the floor of 2e-5 for opening a cell
+        final GasSimulator simulator = new GasSimulator();
+        simulator.stepCell(room, 0, 0, 0, 1f);
+
+        assertNull(room.cell(1, 0, 0), "The floor for gases without a saturation of their own is unchanged");
+    }
+
+    @Test
+    void createAndRemoveFloorsFollowTheSaturation()
+    {
+        assertEquals(Gas.MERCURY_VAPOR.saturationMoles() * 0.01f, Gas.MERCURY_VAPOR.createCellMoles(), 0f);
+        assertEquals(Gas.MERCURY_VAPOR.createCellMoles() / 2f, Gas.MERCURY_VAPOR.removeCellMoles(), 0f);
+        assertEquals(GasSimulator.CREATE_CELL_MOLES, Gas.CARBON_MONOXIDE.createCellMoles(), 0f);
+        assertEquals(GasSimulator.REMOVE_CELL_MOLES, Gas.CARBON_MONOXIDE.removeCellMoles(), 0f);
+        assertEquals(GasSimulator.CREATE_CELL_MOLES, Gas.ARSENIC_TRIOXIDE.createCellMoles(), 0f, "A fume that condenses at once has no saturation to scale by");
+        assertTrue(Gas.MERCURY_VAPOR.isSaturating() && !Gas.ARSENIC_TRIOXIDE.isSaturating() && !Gas.METHANE.isSaturating());
+    }
+
+    @Test
+    void aCellOfMercuryAtItsFloorIsKeptAndOneBelowItIsNot()
+    {
+        final float[] kept = new float[Gas.COUNT];
+        kept[Gas.MERCURY_VAPOR.ordinal()] = Gas.MERCURY_VAPOR.removeCellMoles() * 1.01f;
+        assertTrue(GasMath.holdsMobileContent(kept), "More than a twentieth of saturation is worth a cell");
+        assertTrue(GasMath.mobileContent(kept) < GasSimulator.REMOVE_CELL_MOLES, "though that is under the ordinary floor");
+
+        final float[] dilute = new float[Gas.COUNT];
+        dilute[Gas.MERCURY_VAPOR.ordinal()] = Gas.MERCURY_VAPOR.removeCellMoles() * 0.9f;
+        assertFalse(GasMath.holdsMobileContent(dilute));
+    }
+
+    // G9: a film of mercury gives its vapour off again
+
+    @Test
+    void aFlushedRoomOfMercuryRefillsFromTheFilmOnTheFloor()
+    {
+        final float saturation = Gas.MERCURY_VAPOR.saturationMoles();
+        final FilmRoom room = new FilmRoom(3, 1, 1);
+        room.add(1, 0, 0, Gas.MERCURY_VAPOR, 0.01f);
+        room.run(900);
+        final float film = room.film(Gas.MERCURY_VAPOR);
+        assertTrue(film > 0.005f, "The excess lay down on the floor: " + film);
+        assertEquals(0.01f, film + room.total(Gas.MERCURY_VAPOR), 1e-4f, "and nothing was lost doing so");
+
+        room.cells.clear(); // A fan, a draught from a door: the air is clean
+        assertEquals(0f, room.total(Gas.MERCURY_VAPOR));
+        room.keepFilmCellsAlive(); // What the step of a chunk does for the places where something lies
+        room.run(400);
+
+        final float refilled = room.total(Gas.MERCURY_VAPOR);
+        assertFalse(room.sites.isEmpty());
+        assertTrue(refilled > 0.9f * room.sites.size() * saturation, "Every place where it lay must come back to near saturation, " + room.sites.size() + " cells of " + saturation + " each, got " + refilled);
+        assertEquals(film, room.film(Gas.MERCURY_VAPOR) + refilled, 1e-5f, "and every mole of it came out of the film");
+    }
+
+    @Test
+    void theFilmKeepsTheRoomNearSaturationForAsLongAsItLasts()
+    {
+        final float saturation = Gas.MERCURY_VAPOR.saturationMoles();
+        final FilmRoom room = new FilmRoom(1, 1, 1);
+        room.depositFilm(0, 0, 0, Gas.MERCURY_VAPOR, 0.01f);
+        room.keepFilmCellsAlive();
+        room.run(300);
+        assertEquals(saturation, room.total(Gas.MERCURY_VAPOR), saturation * 0.01f, "A closed room with a film in it is at saturation");
+
+        room.cells.get(List.of(0, 0, 0))[Gas.MERCURY_VAPOR.ordinal()] = 0f; // Cleared again
+        room.run(300);
+        assertEquals(saturation, room.total(Gas.MERCURY_VAPOR), saturation * 0.01f);
+        assertTrue(room.film(Gas.MERCURY_VAPOR) < 0.01f);
+    }
+
+    @Test
+    void aFilmThatIsUsedUpStopsGivingOffVapour()
+    {
+        final FilmRoom room = new FilmRoom(1, 1, 1);
+        room.depositFilm(0, 0, 0, Gas.MERCURY_VAPOR, 2e-5f); // Under a third of what a cell can hold
+        room.keepFilmCellsAlive();
+        room.run(600);
+
+        assertEquals(0f, room.film(Gas.MERCURY_VAPOR), 1e-9f, "There was not enough to saturate the room, and all of it went into the air");
+        assertEquals(2e-5f, room.total(Gas.MERCURY_VAPOR), 1e-7f);
+        assertFalse(room.holdsFilm(0, 0, 0));
+    }
+
+    @Test
+    void theDustOfAnOxideFumeStaysWhereItFell()
+    {
+        final FilmRoom room = new FilmRoom(3, 3, 3);
+        room.add(1, 1, 1, Gas.ARSENIC_TRIOXIDE, 2f);
+        room.run(300);
+        final float settled = room.film(Gas.ARSENIC_TRIOXIDE);
+        assertTrue(settled > 0.5f, "The fume settled");
+
+        room.cells.clear();
+        room.run(300);
+        assertEquals(0f, room.total(Gas.ARSENIC_TRIOXIDE), "Dust does not give its fume off again when the air is clear");
+        assertEquals(settled, room.film(Gas.ARSENIC_TRIOXIDE), 0f);
+        assertTrue(Gas.MERCURY_VAPOR.evaporatesFromDeposit() && !Gas.ARSENIC_TRIOXIDE.evaporatesFromDeposit() && !Gas.LEAD_OXIDE_FUME.evaporatesFromDeposit());
+    }
+
+    // G11: what counts as a change
+
+    @Test
+    void aRoomAtEquilibriumChangesNothing()
+    {
+        final Room room = new Room(3, 1, 3);
+        for (int x = 0; x < 3; x++)
+        {
+            for (int z = 0; z < 3; z++)
+            {
+                room.add(x, 0, z, Gas.CARBON_DIOXIDE, 2f);
+            }
+        }
+        final GasSimulator simulator = new GasSimulator();
+        for (List<Integer> pos : List.copyOf(room.cells.keySet()))
+        {
+            simulator.stepCell(room, pos.get(0), pos.get(1), pos.get(2), 1f);
+        }
+        assertTrue(simulator.takeLargestChange() < GasSimulator.CHANGE_THRESHOLD_MOLES, "An even room is at rest: " + simulator.takeLargestChange());
+    }
+
+    @Test
+    void aRoomWhereGasIsMovingIsNotAtRest()
+    {
+        final Room room = new Room(3, 1, 1);
+        room.add(0, 0, 0, Gas.CARBON_DIOXIDE, 5f);
+        final GasSimulator simulator = new GasSimulator();
+        simulator.stepCell(room, 0, 0, 0, 1f);
+        assertTrue(simulator.takeLargestChange() > GasSimulator.CHANGE_THRESHOLD_MOLES);
+        assertEquals(0f, simulator.takeLargestChange(), "and the count starts again once it is read");
+    }
+
+    @Test
+    void gasCarriedOffByTheAtmosphereCountsAsAChange()
+    {
+        final Room room = new Room(1, 1, 1);
+        room.roofExchange = 0.3f;
+        room.add(0, 0, 0, Gas.CARBON_DIOXIDE, 1f);
+        final GasSimulator simulator = new GasSimulator();
+        simulator.stepCell(room, 0, 0, 0, 1f);
+
+        assertTrue(simulator.takeLargestChange() > 0.2f, "A cell that is only losing gas through its roof is not at rest, though nothing moved to a neighbour");
+    }
+
+    @Test
+    void condensingCountsAsAChange()
+    {
+        final Room room = new Room(1, 1, 1);
+        room.add(0, 0, 0, Gas.MERCURY_VAPOR, 0.01f);
+        final GasSimulator simulator = new GasSimulator();
+        simulator.stepCell(room, 0, 0, 0, 1f);
+        assertTrue(simulator.takeLargestChange() > GasSimulator.CHANGE_THRESHOLD_MOLES);
+    }
+
     @Test
     void wallsStopGas()
     {
@@ -310,6 +537,65 @@ class GasSimulatorTest
         final GasSimulator simulator = new GasSimulator();
         assertDoesNotThrow(() -> simulator.stepCell(room, 0, 0, 0, 1f));
         assertDoesNotThrow(() -> simulator.stepCell(room, 0, 0, 0, 1f));
+    }
+
+    /** A room that keeps what condenses in it, and where, the way the data of a chunk does. */
+    private static class FilmRoom extends Room
+    {
+        final float[] film = new float[Gas.COUNT];
+        final java.util.Set<List<Integer>> sites = new java.util.HashSet<>();
+
+        FilmRoom(int width, int height, int depth)
+        {
+            super(width, height, depth);
+        }
+
+        float film(Gas gas)
+        {
+            return film[gas.ordinal()];
+        }
+
+        void depositFilm(int x, int y, int z, Gas gas, float moles)
+        {
+            deposit(x, y, z, gas, moles);
+        }
+
+        @Override
+        public void deposit(int x, int y, int z, Gas gas, float moles)
+        {
+            film[gas.ordinal()] += moles;
+            if (gas.evaporatesFromDeposit())
+            {
+                sites.add(List.of(x, y, z));
+            }
+        }
+
+        @Override
+        public float evaporate(int x, int y, int z, Gas gas, float wanted)
+        {
+            if (!sites.contains(List.of(x, y, z)))
+            {
+                return 0;
+            }
+            final float taken = Math.min(wanted, film[gas.ordinal()]);
+            film[gas.ordinal()] -= taken;
+            return taken;
+        }
+
+        @Override
+        public boolean holdsFilm(int x, int y, int z)
+        {
+            return sites.contains(List.of(x, y, z)) && film[Gas.MERCURY_VAPOR.ordinal()] > 0;
+        }
+
+        /** The pass that a chunk makes before its cells, for the places where a film lies. */
+        void keepFilmCellsAlive()
+        {
+            for (List<Integer> site : sites)
+            {
+                createCell(site.get(0), site.get(1), site.get(2));
+            }
+        }
     }
 
     /** Two chunks side by side, the way the tracker steps them: a chunk that is asleep is not stepped at all, and markChanged wakes it. */

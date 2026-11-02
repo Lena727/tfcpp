@@ -16,6 +16,8 @@ import org.jetbrains.annotations.Nullable;
 public final class GasEmission
 {
     public static final int SMOTHERED = Integer.MIN_VALUE;
+    /** The share of a smothered device's gas that gets through its cover. The turf on a charcoal pit is not airtight, which is why a pit stinks of smoke for its whole burn, and why pits have killed people who slept beside them. */
+    public static final float LEAK_SHARE = 0.1f;
 
     private static final int MAX_PLUME_RISE = 48;
     private static final int MAX_CHARGE_HEIGHT = 16;
@@ -25,13 +27,47 @@ public final class GasEmission
     {
         final LevelGasVolume volume = GasTracker.get(level).volume(level);
         final int outlet = outletHeight(level, volume, device);
-        addToPlume(volume, device.getX(), outlet == SMOTHERED ? device.getY() : outlet, device.getZ(), gases);
+        if (outlet != SMOTHERED)
+        {
+            addToPlume(volume, device.getX(), outlet, device.getZ(), gases);
+            return;
+        }
+
+        // Under a cover that is too thick, most of it stays where it is, and what leaks through comes out above the cover
+        final int leak = leakHeight(level, volume, device);
+        if (leak == SMOTHERED)
+        {
+            addToPlume(volume, device.getX(), device.getY(), device.getZ(), gases);
+            return;
+        }
+        final float[] leaked = new float[Gas.COUNT];
+        final float[] kept = new float[Gas.COUNT];
+        for (int i = 0; i < Gas.COUNT; i++)
+        {
+            leaked[i] = gases[i] * LEAK_SHARE;
+            kept[i] = gases[i] - leaked[i];
+        }
+        addToPlume(volume, device.getX(), leak, device.getZ(), leaked);
+        addToPlume(volume, device.getX(), device.getY(), device.getZ(), kept);
     }
 
     /**
-     * @return the height where a device's gas comes out: up through its own burning charge and around any crucible or retort sitting on it, and at most one covering block, which is how a charcoal pit vents through its earth. Anything thicker counts as {@link #SMOTHERED}, so a device can never leak into a separate room above it.
+     * @return the height where a device's gas comes out: up through its own burning charge and around any crucible or retort sitting on it, and at most one covering block, which is how a charcoal pit vents through its earth. Anything thicker counts as {@link #SMOTHERED}, so a device can never send all of its gas into a separate room above it. For what leaks through such a cover see {@link #leakHeight}.
      */
     public static int outletHeight(ServerLevel level, LevelGasVolume volume, BlockPos pos)
+    {
+        return scan(level, volume, pos, false);
+    }
+
+    /**
+     * @return the height of the first open position above a cover that is too thick for {@link #outletHeight}, within the same reach, or {@link #SMOTHERED} if there is none. {@link #LEAK_SHARE} of the gas of a smothered device comes out there: a charcoal pit's turf leaks. Nothing comes out if there is no open position to come out into.
+     */
+    public static int leakHeight(ServerLevel level, LevelGasVolume volume, BlockPos pos)
+    {
+        return scan(level, volume, pos, true);
+    }
+
+    private static int scan(ServerLevel level, LevelGasVolume volume, BlockPos pos, boolean pastCover)
     {
         // Asked of the chunk that is loaded and not of the level: the level would load a chunk that is not ready, and a device left in a demoted chunk would keep bringing it back up
         final @Nullable LevelChunk chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
@@ -40,14 +76,18 @@ public final class GasEmission
             return SMOTHERED;
         }
         final BlockPos.MutableBlockPos cursor = pos.mutable();
-        boolean usedCover = false;
+        boolean usedCover = false, smothered = false;
         for (int rise = 0; rise < MAX_CHARGE_HEIGHT; rise++)
         {
             cursor.setY(pos.getY() + rise);
             final boolean passable = volume.isPassable(cursor.getX(), cursor.getY(), cursor.getZ());
             if (passable && !stateAt(level, chunk, cursor.getX(), cursor.getY() + 1, cursor.getZ()).is(TFCTags.Blocks.CHARCOAL_FORGE_INVISIBLE))
             {
-                return cursor.getY();
+                return pastCover == smothered ? cursor.getY() : SMOTHERED;
+            }
+            if (smothered)
+            {
+                continue; // Already under too much cover: all that matters now is the first open position above it
             }
             final BlockState state = stateAt(level, chunk, cursor.getX(), cursor.getY(), cursor.getZ());
             final Block block = state.getBlock();
@@ -55,7 +95,11 @@ public final class GasEmission
             {
                 if (usedCover)
                 {
-                    return SMOTHERED;
+                    if (!pastCover)
+                    {
+                        return SMOTHERED;
+                    }
+                    smothered = true;
                 }
                 usedCover = true;
             }

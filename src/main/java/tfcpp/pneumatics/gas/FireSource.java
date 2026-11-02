@@ -24,8 +24,9 @@ import org.jetbrains.annotations.Nullable;
  * <ul>
  *     <li>Open fires get plenty of air and burn nearly clean.</li>
  *     <li>A charcoal pit is a smouldering, air-starved burn, and also drives methane out of the wood.</li>
- *     <li>A bloomery and blast furnace work by making CO on purpose, since CO is what reduces the ore. Real blast furnace top gas is roughly a quarter CO.</li>
+ *     <li>A bloomery and blast furnace work by making CO on purpose, since CO is what reduces the ore. Real blast furnace top gas is 20 to 28% CO.</li>
  * </ul>
+ * A fire in air with less than {@link Combustion#EXTINCTION_OXYGEN} of oxygen puts nothing into it, whatever kind it is: there is nothing burning, and the air a fire that cannot be starved sits in is not made worse by it.
  */
 public final class FireSource
 {
@@ -37,7 +38,7 @@ public final class FireSource
         PIT_KILN(15f, 0.15f, 0f),
         CHARCOAL_PIT(2f, 0.30f, 0.05f),
         BLOOMERY(60f, 0.35f, 0f),
-        BLAST_FURNACE(200f, 0.40f, 0f);
+        BLAST_FURNACE(200f, Combustion.BLAST_FURNACE_CARBON_MONOXIDE_SHARE, 0f);
 
         final float kilowatts, carbonMonoxideShare, methanePerCarbon;
 
@@ -115,16 +116,25 @@ public final class FireSource
             return;
         }
 
-        final int intakeY = GasEmission.outletHeight(level, volume, entity instanceof BloomeryBlockEntity bloomery ? bloomery.getInternalBlockPos() : pos);
-        if (intakeY == Integer.MIN_VALUE)
+        final BlockPos device = entity instanceof BloomeryBlockEntity bloomery ? bloomery.getInternalBlockPos() : pos;
+        int intakeY = GasEmission.outletHeight(level, volume, device);
+        float share = 1f;
+        if (intakeY == GasEmission.SMOTHERED)
+        {
+            // Buried too deep to vent, as a charcoal pit under two layers of earth: a tenth of it still gets through the cover, if there is any open place above it for that to come out into
+            intakeY = GasEmission.leakHeight(level, volume, device);
+            share = GasEmission.LEAK_SHARE;
+        }
+        if (intakeY == GasEmission.SMOTHERED)
         {
             return;
         }
 
         final @Nullable float[] intake = volume.cell(pos.getX(), intakeY, pos.getZ());
         final float oxygen = intake == null ? GasMath.OXYGEN_IN_AIR : GasMath.oxygenFraction(intake);
-        if (oxygen < Combustion.EXTINCTION_OXYGEN && extinguish())
+        if (!Combustion.sustainsFlame(oxygen))
         {
+            extinguish(); // A device that can be starved goes out. One that cannot (a bloomery, a firebox, a pit) burns on, but produces nothing in air like this
             return;
         }
 
@@ -132,8 +142,8 @@ public final class FireSource
         final float carbon = Combustion.carbonRate(kind.kilowatts * bellowsFactor(), carbonMonoxideShare) * seconds;
 
         final float[] flue = new float[Gas.COUNT];
-        Combustion.addFlueGas(flue, carbon, carbonMonoxideShare);
-        flue[Gas.METHANE.ordinal()] += carbon * kind.methanePerCarbon;
+        Combustion.addFlueGas(flue, carbon * share, carbonMonoxideShare);
+        flue[Gas.METHANE.ordinal()] += carbon * share * kind.methanePerCarbon;
         GasEmission.addToPlume(volume, pos.getX(), intakeY, pos.getZ(), flue);
     }
 

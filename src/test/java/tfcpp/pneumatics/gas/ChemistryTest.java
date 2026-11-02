@@ -58,9 +58,47 @@ class ChemistryTest
     @Test
     void equilibriumCarboxyhemoglobinFollowsHaldane()
     {
-        // Known values: about 10% at 100 ppm, about half of haemoglobin bound near 800-1000 ppm
-        assertEquals(10.5f, Physiology.equilibriumCarboxyhemoglobin(100, 0.2095f), 1f);
-        assertEquals(54f, Physiology.equilibriumCarboxyhemoglobin(1000, 0.2095f), 2f);
+        // Measured at equilibrium, with the oxygen of the alveoli and not that of the air breathed: about 14 to 16% at 100 ppm, 40 to 45% at 400 ppm
+        final float at100 = Physiology.equilibriumCarboxyhemoglobin(100, 0.2095f);
+        final float at400 = Physiology.equilibriumCarboxyhemoglobin(400, 0.2095f);
+        assertTrue(at100 >= 14f && at100 <= 16f, "100 ppm should come to 14-16% COHb, got " + at100);
+        assertTrue(at400 >= 40f && at400 <= 45f, "400 ppm should come to 40-45% COHb, got " + at400);
+    }
+
+    @Test
+    void thinnerAirBindsMoreCarbonMonoxide()
+    {
+        assertTrue(Physiology.equilibriumCarboxyhemoglobin(100, 0.15f) > Physiology.equilibriumCarboxyhemoglobin(100, 0.2095f));
+    }
+
+    @Test
+    void hydrogenSulfideIsSmeltFromTheFirstTracesAndNotWhereItParalysesTheSenseOfSmell()
+    {
+        assertFalse(Physiology.isNoticeable(Gas.HYDROGEN_SULFIDE, 0.01f), "Below the odour threshold");
+        assertTrue(Physiology.isNoticeable(Gas.HYDROGEN_SULFIDE, 0.05f), "A few hundredths of a ppm stinks");
+        assertTrue(Physiology.isNoticeable(Gas.HYDROGEN_SULFIDE, 10f));
+        assertTrue(Physiology.isNoticeable(Gas.HYDROGEN_SULFIDE, 100f));
+        assertFalse(Physiology.isNoticeable(Gas.HYDROGEN_SULFIDE, 101f), "Above 100 ppm the nerve of smell is paralysed and the worst air gives no warning");
+        assertFalse(Physiology.isNoticeable(Gas.HYDROGEN_SULFIDE, 700f), "which is how the gas kills");
+        assertEquals(3, Physiology.acuteSeverity(Gas.HYDROGEN_SULFIDE, 700f), "and 700 ppm still collapses a person in one breath");
+    }
+
+    @Test
+    void aBlastFurnaceMakesTopGasOfTwentyToTwentyEightPercentCarbonMonoxide()
+    {
+        final float[] flue = new float[Gas.COUNT];
+        Combustion.addFlueGas(flue, 1f, Combustion.BLAST_FURNACE_CARBON_MONOXIDE_SHARE);
+        final float fraction = flue[Gas.CARBON_MONOXIDE.ordinal()] / GasMath.total(flue);
+        assertTrue(fraction >= 0.20f && fraction <= 0.28f, "Real top gas is 20 to 28% CO, got " + fraction);
+        assertEquals(0.75f, Combustion.BLAST_FURNACE_CARBON_MONOXIDE_SHARE);
+    }
+
+    @Test
+    void aFireOnlyBurnsWhereThereIsOxygenForIt()
+    {
+        assertTrue(Combustion.sustainsFlame(GasMath.OXYGEN_IN_AIR));
+        assertTrue(Combustion.sustainsFlame(Combustion.EXTINCTION_OXYGEN));
+        assertFalse(Combustion.sustainsFlame(Combustion.EXTINCTION_OXYGEN - 0.001f), "Under 12% embers go out, and a fire that cannot go out has nothing to put into the air");
     }
 
     @Test

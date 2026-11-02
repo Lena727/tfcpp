@@ -83,9 +83,17 @@ public final class Physiology
     public static final float COHB_DISABLED = 35f;
     public static final float COHB_FATAL = 50f;
 
+    /**
+     * The oxygen the blood meets in the alveoli is not that of the air breathed in. Water vapour and the CO2 coming out of the blood take their share of the gas there, and the partial pressure of oxygen in the alveoli is about 100 mmHg against 160 in dry air breathed, 0.65 of it.
+     */
+    private static final float ALVEOLAR_OXYGEN_SHARE = 0.65f;
+
+    /**
+     * Haldane's relation, COHb / O2Hb = M * pCO / pO2, with the oxygen at the alveoli. Gives about 15% at 100 ppm and about 42% at 400 ppm in the end, the values measured in smokers and in exposed workers after many hours.
+     */
     public static float equilibriumCarboxyhemoglobin(float carbonMonoxidePpm, float oxygenFraction)
     {
-        final float ratio = HALDANE * carbonMonoxidePpm * 1e-6f / Math.max(oxygenFraction, 0.01f);
+        final float ratio = HALDANE * carbonMonoxidePpm * 1e-6f / Math.max(oxygenFraction * ALVEOLAR_OXYGEN_SHARE, 0.01f);
         return 100f * ratio / (1 + ratio);
     }
 
@@ -138,7 +146,8 @@ public final class Physiology
         return switch (gas)
         {
             case SULFUR_DIOXIDE -> ppm >= 1;
-            case HYDROGEN_SULFIDE -> ppm >= 0.5f;
+            // The nose notices it from a few hundredths of a ppm, and from about 100 ppm it paralyses the nerve of smell: the worst air gives no warning at all, which is how it kills the people who go in to get a man out
+            case HYDROGEN_SULFIDE -> ppm >= 0.05f && ppm <= 100f;
             case AMMONIA -> ppm >= 5;
             case CHLORINE -> ppm >= 0.5f;
             case NITROGEN_OXIDES -> ppm >= 1;

@@ -13,9 +13,13 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class GasSimulator
 {
-    /** Smallest transfer that may open a new cell. At 10% mixing, gas keeps spreading into empty space down to about 5 ppm. */
-    public static final float CREATE_CELL_MOLES = 2e-5f;
+    /** Smallest transfer that may open a new cell, for a gas with no saturation of its own. At 10% mixing, gas keeps spreading into empty space down to about 5 ppm. A vapour with a saturation has a threshold of its own, see {@link Gas#createCellMoles()}. */
+    public static final float CREATE_CELL_MOLES = Gas.ORDINARY_CREATE_CELL_MOLES;
     public static final float REMOVE_CELL_MOLES = 1e-5f;
+    /**
+     * The least amount of any species that moving, condensing, evaporating or being carried off by the atmosphere has to shift in a step for a chunk to count as still changing. Below it the chunk is not marked for saving, and one that holds nothing else goes to sleep. It is 0.024 ppm of a cell, below anything a person can be hurt by and below the rounding step of a cell holding a whole atmosphere (a cell of 40 mol has a step of 4e-6 mol, and an exchange at 24% of that is still under this).
+     */
+    public static final float CHANGE_THRESHOLD_MOLES = 1e-6f;
 
     private static final float MIXING_PER_SECOND = 0.1f;
     private static final float MAX_MIXING = 0.16f;
@@ -30,12 +34,17 @@ public final class GasSimulator
 
     private static final Gas[] CONDENSING = Arrays.stream(Gas.VALUES).filter(gas -> gas.depositionRate() > 0).toArray(Gas[]::new);
     private static final boolean[] MOBILE = new boolean[Gas.COUNT];
+    /** Whether a gas has a threshold for opening a cell of its own, and what it is. */
+    private static final boolean[] OWN_THRESHOLD = new boolean[Gas.COUNT];
+    private static final float[] CREATE_MOLES = new float[Gas.COUNT];
 
     static
     {
         for (Gas gas : Gas.VALUES)
         {
             MOBILE[gas.ordinal()] = gas.mobile();
+            OWN_THRESHOLD[gas.ordinal()] = gas.isSaturating();
+            CREATE_MOLES[gas.ordinal()] = gas.createCellMoles();
         }
     }
 
@@ -43,6 +52,7 @@ public final class GasSimulator
 
     private final float[] flux = new float[Gas.COUNT];
     private float largestFlow;
+    private float largestChange;
 
     /** @return the largest transfer since this was last called, which tells whether anything is still happening */
     public float takeLargestFlow()
@@ -50,6 +60,16 @@ public final class GasSimulator
         final float flow = largestFlow;
         largestFlow = 0;
         return flow;
+    }
+
+    /**
+     * @return the largest amount of any species that moved between two cells, was carried off by the atmosphere, or settled or evaporated, since this was last called. Unlike {@link #takeLargestFlow()} it includes the last three: a chunk is only at rest if none of them is going on.
+     */
+    public float takeLargestChange()
+    {
+        final float change = largestChange;
+        largestChange = 0;
+        return change;
     }
 
     /**
@@ -77,6 +97,7 @@ public final class GasSimulator
             {
                 if (MOBILE[i]) // Wind carries off airborne dust with the air, but not what has settled
                 {
+                    largestChange = Math.max(largestChange, cell[i] * (1f - remaining));
                     cell[i] *= remaining;
                 }
             }
@@ -93,33 +114,52 @@ public final class GasSimulator
         else wakeLowerNeighbour(volume, cell, x, y, z, x, z - 1);
         if (volume.cell(x, y - 1, z) == null) exchange(volume, cell, x, y, z, x, y - 1, z, true, seconds);
 
-        // A cell is kept for as long as it holds anything: dust that has settled stays on its surfaces after the air above it is clean
-        if (GasMath.mobileContent(cell) < REMOVE_CELL_MOLES && GasMath.settledContent(cell) < REMOVE_CELL_MOLES)
+        // A cell is kept for as long as it holds anything: dust that has settled stays on its surfaces after the air above it is clean, and so does a film of liquid that is still giving off vapour
+        if (!GasMath.holdsMobileContent(cell) && GasMath.settledContent(cell) < REMOVE_CELL_MOLES && !volume.holdsFilm(x, y, z))
         {
             volume.removeCell(x, y, z);
         }
     }
 
     /**
-     * The pair of cells is exchanged by the one that is lower in x and z, so this cell leaves it to the neighbour. If the neighbour is in another chunk that is asleep because it holds only settled dust, nobody would ever exchange it: this cell would treat it as a wall. So its chunk is woken, which costs nothing while the gas here is too thin to matter.
+     * The pair of cells is exchanged by the one that is lower in x and z, so this cell leaves it to the neighbour. If the neighbour is in another chunk that is asleep, because it holds only settled dust or because nothing in it is changing, nobody would ever exchange it: this cell would treat it as a wall. So its chunk is woken, but only if the two differ by enough for the exchange to move something: waking a chunk also marks it for saving, and a pair at equilibrium would otherwise keep both of them saved every second.
      */
     private static void wakeLowerNeighbour(GasVolume volume, float[] cell, int x, int y, int z, int nx, int nz)
     {
-        if ((nx >> 4 != x >> 4 || nz >> 4 != z >> 4) && GasMath.mobileContent(cell) >= REMOVE_CELL_MOLES && volume.isPassable(nx, y, nz))
+        if ((nx >> 4 != x >> 4 || nz >> 4 != z >> 4) && GasMath.holdsMobileContent(cell) && volume.isPassable(nx, y, nz) && differsFrom(cell, volume.cell(nx, y, nz)))
         {
             volume.markChanged(nx, y, nz);
         }
     }
 
-    private static void condense(GasVolume volume, float[] cell, int x, int y, int z, float seconds)
+    /** @return {@code true} if an exchange between these two at the rate of mixing would move {@link #CHANGE_THRESHOLD_MOLES} or more of something */
+    private static boolean differsFrom(float[] cell, @Nullable float[] other)
+    {
+        for (int i = 0; i < Gas.COUNT; i++)
+        {
+            if (MOBILE[i] && Math.abs(cell[i] - (other == null ? 0f : other[i])) * MIXING_PER_SECOND >= CHANGE_THRESHOLD_MOLES)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * What is above saturation settles out. What is below it is made up from a film on the surfaces, if this kind of deposit gives its vapour off again, at the same rate that the excess would settle. So a room of mercury that has been cleared by ventilation fills up again to 1.6 ppm for as long as any is left on its floor. An oxide fume settles to a dust that stays.
+     */
+    private void condense(GasVolume volume, float[] cell, int x, int y, int z, float seconds)
     {
         for (Gas gas : CONDENSING)
         {
-            final float excess = cell[gas.ordinal()] - gas.saturationMoles();
+            final int i = gas.ordinal();
+            final float excess = cell[i] - gas.saturationMoles();
+            final float rate = Math.min(gas.depositionRate() * seconds, 1f);
             if (excess > 0)
             {
-                final float settled = excess * Math.min(gas.depositionRate() * seconds, 1f);
-                cell[gas.ordinal()] -= settled;
+                final float settled = excess * rate;
+                cell[i] -= settled;
+                largestChange = Math.max(largestChange, settled);
                 final Gas lands = gas.settlesInto();
                 if (lands != null)
                 {
@@ -128,6 +168,15 @@ public final class GasSimulator
                 else
                 {
                     volume.deposit(x, y, z, gas, settled);
+                }
+            }
+            else if (gas.evaporatesFromDeposit() && excess < 0)
+            {
+                final float taken = volume.evaporate(x, y, z, gas, -excess * rate);
+                if (taken > 0)
+                {
+                    cell[i] += taken;
+                    largestChange = Math.max(largestChange, taken);
                 }
             }
         }
@@ -155,6 +204,7 @@ public final class GasSimulator
                     volume.markChanged(nx, ny, nz);
                     volume.removeCell(x, y, z);
                     largestFlow = Float.MAX_VALUE;
+                    largestChange = Float.MAX_VALUE;
                     return;
                 }
             }
@@ -179,6 +229,8 @@ public final class GasSimulator
             * (Math.max(0, totalFrom - GasMath.CELL_MOLES) - Math.max(0, totalTo - GasMath.CELL_MOLES));
 
         float outgoing = 0;
+        boolean opensOwnCell = false;
+        float pairFlow = 0;
         for (int i = 0; i < Gas.COUNT; i++)
         {
             final float there = to == null ? 0 : to[i];
@@ -195,13 +247,23 @@ public final class GasSimulator
 
             // A cell that holds a rounding error below zero must not make the bounds cross: Math.clamp throws when its minimum is above its maximum
             flux[i] = Math.clamp(flow, -Math.max(there, 0f), Math.max(from[i], 0f));
-            outgoing += flux[i];
+            if (OWN_THRESHOLD[i])
+            {
+                // A vapour with a saturation opens a cell at a tenth of that, which for mercury is thousands of times less than the ordinary floor
+                opensOwnCell |= flux[i] >= CREATE_MOLES[i];
+            }
+            else
+            {
+                outgoing += flux[i];
+            }
             largestFlow = Math.max(largestFlow, Math.abs(flux[i]));
+            largestChange = Math.max(largestChange, Math.abs(flux[i]));
+            pairFlow = Math.max(pairFlow, Math.abs(flux[i]));
         }
 
         if (to == null)
         {
-            if (outgoing < CREATE_CELL_MOLES)
+            if (outgoing < CREATE_CELL_MOLES && !opensOwnCell)
             {
                 return;
             }
@@ -217,9 +279,9 @@ public final class GasSimulator
             from[i] -= flux[i];
             to[i] += flux[i];
         }
-        if (nx >> 4 != x >> 4 || nz >> 4 != z >> 4)
+        if ((nx >> 4 != x >> 4 || nz >> 4 != z >> 4) && pairFlow >= CHANGE_THRESHOLD_MOLES)
         {
-            volume.markChanged(nx, ny, nz);
+            volume.markChanged(nx, ny, nz); // Not for a pair at rest: that would save and wake the chunk across every second
         }
     }
 

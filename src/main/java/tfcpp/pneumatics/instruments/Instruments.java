@@ -1,12 +1,13 @@
 package tfcpp.pneumatics.instruments;
 
 import java.util.function.Supplier;
+import com.mojang.serialization.Codec;
 import net.dries007.tfc.common.blockentities.TFCBlockEntities;
 import net.dries007.tfc.common.blocks.ExtendedProperties;
 import net.dries007.tfc.common.capabilities.ItemCapabilities;
-import net.dries007.tfc.common.items.LampBlockItem;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockItem;
@@ -36,6 +37,9 @@ public final class Instruments
 
     public static final Supplier<DataComponentType<SentinelData>> SENTINEL = COMPONENTS.register("sentinel", () -> DataComponentType.<SentinelData>builder().persistent(SentinelData.CODEC).networkSynchronized(SentinelData.STREAM_CODEC).build());
 
+    /** Set on a Davy lamp in the hand while its flame is alight. A lamp put out by bad air stays out until it is lit again; the block keeps the same in its {@code lit} property. */
+    public static final Supplier<DataComponentType<Boolean>> LAMP_LIT = COMPONENTS.register("lamp_lit", () -> DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
+
     /** Dimmer than an open lamp, as the gauze blocks about a third of the light. Miners complained about this from the start. */
     private static final int DAVY_LAMP_LIGHT = 9;
 
@@ -50,7 +54,7 @@ public final class Instruments
 
     public static final Supplier<Block> MINE_FAN = Metallurgy.BLOCKS.register("mine_fan", () -> new MineFanBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3f, 6f).sound(SoundType.METAL).requiresCorrectToolForDrops()));
 
-    public static final Supplier<Item> DAVY_LAMP_ITEM = Metallurgy.ITEMS.register("davy_lamp", () -> new LampBlockItem(DAVY_LAMP.get(), new Item.Properties().stacksTo(1)));
+    public static final Supplier<Item> DAVY_LAMP_ITEM = Metallurgy.ITEMS.register("davy_lamp", () -> new DavyLampItem(DAVY_LAMP.get(), new Item.Properties().stacksTo(1)));
     public static final Supplier<Item> MINE_FAN_ITEM = Metallurgy.ITEMS.register("mine_fan", () -> new BlockItem(MINE_FAN.get(), new Item.Properties()));
     public static final Supplier<Item> WIRE_GAUZE = Metallurgy.ITEMS.register("wire_gauze", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> ANIMAL_CAGE = Metallurgy.ITEMS.register("animal_cage", () -> new Item(new Item.Properties()));

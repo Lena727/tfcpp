@@ -23,9 +23,6 @@ import tfcpp.geology.SeamGas;
  */
 public final class LevelGasVolume implements GasVolume
 {
-    /** Fraction of the gas at an open position carried off by the atmosphere each second. */
-    private static final float OPEN_AIR_EXCHANGE_RATE = 0.3f;
-
     private static final TagKey<Block> GLASS_PANES = Tags.Blocks.GLASS_PANES;
 
     private final ServerLevel level;
@@ -122,9 +119,27 @@ public final class LevelGasVolume implements GasVolume
         final LevelChunk chunk = chunk(x, z);
         if (chunk != null)
         {
-            chunk.getData(GasAttachments.CHUNK).addDeposit(gas, moles);
+            chunk.getData(GasAttachments.CHUNK).addDeposit(gas, moles, GasChunkData.key(x, y, z));
             chunk.setUnsaved(true);
+            if (gas.evaporatesFromDeposit())
+            {
+                tracker.activate(chunk.getPos().toLong()); // A film gives its vapour off for as long as it lies there, and nothing else keeps the chunk looked at
+            }
         }
+    }
+
+    @Override
+    public float evaporate(int x, int y, int z, Gas gas, float wanted)
+    {
+        final LevelChunk chunk = chunk(x, z);
+        return chunk == null ? 0 : chunk.getData(GasAttachments.CHUNK).takeFilm(gas, wanted, GasChunkData.key(x, y, z));
+    }
+
+    @Override
+    public boolean holdsFilm(int x, int y, int z)
+    {
+        final LevelChunk chunk = chunk(x, z);
+        return chunk != null && chunk.getData(GasAttachments.CHUNK).holdsFilm(GasChunkData.key(x, y, z));
     }
 
     @Override
@@ -169,10 +184,42 @@ public final class LevelGasVolume implements GasVolume
         return !state.is(GLASS_PANES) && !state.isCollisionShapeFullBlock(level, pos);
     }
 
+    /**
+     * Zero in a position with a roof over it. In an open column it is {@link GasMath#openAirExchange(float)} of how far the position lies below the surface around it, so the air in a well or a bell pit is nearly still, and a heavy gas collects at the bottom of it.
+     */
     @Override
     public float atmosphereExchangeRate(int x, int y, int z)
     {
-        return isOpenToSky(x, y, z) ? OPEN_AIR_EXCHANGE_RATE : 0;
+        final LevelChunk chunk = chunk(x, z);
+        if (chunk == null)
+        {
+            return 0;
+        }
+        final int own = chunk.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x & 15, z & 15);
+        if (y < own)
+        {
+            return 0;
+        }
+        // The heightmap already tells whether the column has a roof. The same lookup in the four columns next to it finds the ground that a shaft was cut through, and the surface of the shaft's mouth is where the wind blows
+        int surface = own;
+        surface = Math.max(surface, surfaceAt(chunk, x + 1, z));
+        surface = Math.max(surface, surfaceAt(chunk, x - 1, z));
+        surface = Math.max(surface, surfaceAt(chunk, x, z + 1));
+        surface = Math.max(surface, surfaceAt(chunk, x, z - 1));
+        return GasMath.openAirExchange(surface - y);
+    }
+
+    /** @return the height of the ground in this column as the heightmap has it (the first position with nothing solid above it), or the lowest value if the chunk is not loaded. Asks only the chunk that is loaded: the level would load one. */
+    public int surfaceHeight(int x, int z)
+    {
+        final @Nullable LevelChunk chunk = chunk(x, z);
+        return chunk == null ? Integer.MIN_VALUE : chunk.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x & 15, z & 15) + 1;
+    }
+
+    private int surfaceAt(LevelChunk home, int x, int z)
+    {
+        final @Nullable LevelChunk chunk = x >> 4 == home.getPos().x && z >> 4 == home.getPos().z ? home : chunk(x, z);
+        return chunk == null ? Integer.MIN_VALUE : chunk.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x & 15, z & 15);
     }
 
     /** Uses the heightmap and not sky light, which lags behind block changes. Leaves do not hold gas in. */
@@ -227,11 +274,36 @@ public final class LevelGasVolume implements GasVolume
         return false;
     }
 
+    /**
+     * A film of mercury lies where it condensed, and the air there has to be given a cell to take its vapour from it, even if ventilation has cleared the cell and everything else in it.
+     */
+    private void keepFilmCellsAlive(GasChunkData data, int originX, int originZ)
+    {
+        for (int key : data.filmSiteKeys())
+        {
+            if (!isPassable(originX + GasChunkData.keyX(key), GasChunkData.keyY(key), originZ + GasChunkData.keyZ(key)))
+            {
+                data.dropFilmSite(key); // Built over: what lay there stays in the deposit of the chunk
+            }
+            else if (data.get(key) == null)
+            {
+                data.getOrCreate(key);
+            }
+        }
+    }
+
     public int stepChunk(GasSimulator simulator, LevelChunk chunk, GasChunkData data, float seconds)
     {
         final int originX = chunk.getPos().getMinBlockX(), originZ = chunk.getPos().getMinBlockZ();
         final int faces = bleedSeamFaces(chunk, data, originX, originZ, seconds);
 
+        final int structure = data.structureVersion();
+        if (data.hasFilm())
+        {
+            keepFilmCellsAlive(data, originX, originZ);
+        }
+
+        boolean flammable = false;
         final int[] keys = data.keys();
         for (int key : keys)
         {
@@ -239,16 +311,39 @@ public final class LevelGasVolume implements GasVolume
             simulator.stepCell(this, x, y, z, seconds);
 
             final @Nullable float[] cell = data.get(key);
-            if (cell != null && Flammability.isFlammable(cell) && touchesFlame(chunk, x, y, z))
+            if (cell != null && Flammability.isFlammable(cell))
             {
-                tracker.queueIgnition(new BlockPos(x, y, z));
+                flammable = true;
+                if (touchesFlame(chunk, x, y, z))
+                {
+                    tracker.queueIgnition(new BlockPos(x, y, z));
+                }
             }
         }
-        if (keys.length > 0)
+
+        // Marked for saving only if something really moved: a chunk in equilibrium used to be saved again every second, up to half a megabyte of tag each time
+        final float change = simulator.takeLargestChange();
+        final boolean structural = data.structureVersion() != structure; // Cells made or taken away mark the chunk for saving on their own
+        if (data.accumulateChange(change, GasSimulator.CHANGE_THRESHOLD_MOLES))
         {
             chunk.setUnsaved(true);
         }
-        data.setMobileContent(data.holdsMobileContent()); // Over the cells as they are now: a step creates cells as well as removing them
+
+        // Over the cells as they are now: a step creates cells as well as removing them
+        final boolean holds = data.holdsMobileContent();
+        if (holds && change < GasSimulator.CHANGE_THRESHOLD_MOLES && !structural && !flammable)
+        {
+            // Gas that is all at rest. It sleeps like a chunk of settled dust, and what it has drifted by since it was last saved is saved once now. Firedamp does not sleep: a flame put beside it has to be noticed
+            if (data.flushPendingChange())
+            {
+                chunk.setUnsaved(true);
+            }
+            data.rest();
+        }
+        else
+        {
+            data.setMobileContent(holds);
+        }
         return keys.length + faces;
     }
 }

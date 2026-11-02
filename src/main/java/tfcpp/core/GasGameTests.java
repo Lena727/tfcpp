@@ -31,6 +31,8 @@ import net.dries007.tfc.util.data.FluidHeat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -85,6 +87,7 @@ import tfcpp.pneumatics.gas.GasTracker;
 import tfcpp.pneumatics.gas.LevelGasVolume;
 import tfcpp.pneumatics.gas.Physiology;
 import tfcpp.pneumatics.instruments.DavyLamp;
+import tfcpp.pneumatics.instruments.DavyLampItem;
 import tfcpp.pneumatics.pipes.PipeChunkData;
 import tfcpp.pneumatics.pipes.PipeFittingBlock;
 import tfcpp.pneumatics.pipes.PipeMaterial;
@@ -617,6 +620,7 @@ public final class GasGameTests
         final Fluid tallow = BuiltInRegistries.FLUID.get(ResourceLocation.fromNamespaceAndPath("tfc", "tallow"));
         final int filled = handler.fill(new FluidStack(tallow, 100), IFluidHandler.FluidAction.EXECUTE);
         helper.assertTrue(filled == 100, "A Davy lamp must take the fuels of a TFC lamp, took " + filled);
+        DavyLampItem.setLit(handler.getContainer(), true); // A lamp in the hand burns only if it has been lit
         return handler.getContainer();
     }
 
@@ -671,11 +675,33 @@ public final class GasGameTests
         });
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 200)
+    @GameTest(template = TEMPLATE, timeoutTicks = 200, skyAccess = true)
     public static void fanCarriesGasOutOfARoom(GameTestHelper helper)
     {
         sealedBox(helper, 3, 2, Blocks.OBSIDIAN);
         // The fan stands in the roof, draws from the room below it, and blows sideways into the open air
+        helper.setBlock(2, 3, 2, Instruments.MINE_FAN.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.EAST));
+        helper.setBlock(3, 2, 2, Blocks.OBSIDIAN);
+        helper.setBlock(3, 3, 2, Blocks.AIR);
+        // A second way into the room: a fan only moves air that has somewhere to come from
+        helper.setBlock(4, 2, 3, Blocks.AIR);
+        addGas(helper, 1, 1, 1, Gas.CARBON_DIOXIDE, 10f);
+
+        final MineFanBlockEntity fan = (MineFanBlockEntity) helper.getBlockEntity(new BlockPos(2, 3, 2));
+        for (int second = 0; second < 30; second++)
+        {
+            helper.assertTrue(fan.moveAir(helper.getLevel(), 1.57f, 1f) || second > 0, "The fan should find the gas, status " + fan.status());
+        }
+        helper.assertTrue(fan.status() == MineFanBlockEntity.Status.DRAWING, "It has air to draw by the way in, got " + fan.status());
+        final float left = totalInBox(helper, 3, 2, Gas.CARBON_DIOXIDE);
+        helper.assertTrue(left < 8f, "Half a minute of a fan should clear the room, " + left + " of 10 mol is left");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 200, skyAccess = true)
+    public static void fanDoesNotClearASealedRoom(GameTestHelper helper)
+    {
+        sealedBox(helper, 3, 2, Blocks.OBSIDIAN);
         helper.setBlock(2, 3, 2, Instruments.MINE_FAN.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.EAST));
         helper.setBlock(3, 2, 2, Blocks.OBSIDIAN);
         helper.setBlock(3, 3, 2, Blocks.AIR);
@@ -684,10 +710,194 @@ public final class GasGameTests
         final MineFanBlockEntity fan = (MineFanBlockEntity) helper.getBlockEntity(new BlockPos(2, 3, 2));
         for (int second = 0; second < 30; second++)
         {
-            helper.assertTrue(fan.moveAir(helper.getLevel(), 1.57f, 1f) || second > 0, "The fan should find the gas");
+            helper.assertFalse(fan.moveAir(helper.getLevel(), 1.57f, 1f), "There is no air to draw, and so the fan moves none");
         }
+        helper.assertTrue(fan.status() == MineFanBlockEntity.Status.NO_INTAKE, "The fan must know why, got " + fan.status());
         final float left = totalInBox(helper, 3, 2, Gas.CARBON_DIOXIDE);
-        helper.assertTrue(left < 8f, "Half a minute of a fan should clear the room, " + left + " of 10 mol is left");
+        helper.assertTrue(Math.abs(left - 10f) < 0.01f, "A room with one opening stays gassed, " + left + " of 10 mol is left");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 200, skyAccess = true)
+    public static void fanWithNowhereToBlowSaysSo(GameTestHelper helper)
+    {
+        sealedBox(helper, 3, 2, Blocks.OBSIDIAN);
+        helper.setBlock(2, 3, 2, Instruments.MINE_FAN.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.EAST));
+        helper.setBlock(3, 3, 2, Blocks.OBSIDIAN);
+        final MineFanBlockEntity fan = (MineFanBlockEntity) helper.getBlockEntity(new BlockPos(2, 3, 2));
+        helper.assertFalse(fan.moveAir(helper.getLevel(), 1.57f, 1f), "A blocked outlet moves nothing");
+        helper.assertTrue(fan.status() == MineFanBlockEntity.Status.BLOCKED, "got " + fan.status());
+        helper.succeed();
+    }
+
+    // Fires
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 200)
+    public static void charcoalPitUnderTwoLayersOfEarthLeaksAtTheTop(GameTestHelper helper)
+    {
+        Calendars.SERVER.setPlayersLoggedOn(true); // The TFC calendar stands still on an empty server, and fires burn by the calendar
+        sealedBox(helper, 3, 6, Blocks.STONE);
+        helper.setBlock(2, 1, 2, TFCBlocks.BURNING_LOG_PILE.get());
+        helper.setBlock(2, 2, 2, Blocks.STONE);
+        helper.setBlock(2, 3, 2, Blocks.STONE);
+
+        final BlockPos pile = helper.absolutePos(new BlockPos(2, 1, 2));
+        helper.assertTrue(GasEmission.outletHeight(helper.getLevel(), volume(helper), pile) == GasEmission.SMOTHERED, "Two covers are too many to vent through");
+        helper.assertTrue(GasEmission.leakHeight(helper.getLevel(), volume(helper), pile) == pile.getY() + 3, "but what leaks comes out above them");
+
+        helper.runAfterDelay(120, () -> {
+            final float carbonMonoxide = totalInBox(helper, 3, 6, Gas.CARBON_MONOXIDE);
+            helper.assertTrue(carbonMonoxide > 0f, "The turf of a pit leaks, got " + carbonMonoxide);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 200)
+    public static void charcoalPitBuriedBeyondReachLeaksNothing(GameTestHelper helper)
+    {
+        Calendars.SERVER.setPlayersLoggedOn(true);
+        sealedBox(helper, 3, 3, Blocks.STONE);
+        helper.setBlock(2, 1, 2, TFCBlocks.BURNING_LOG_PILE.get());
+        for (int y = 2; y <= 18; y++)
+        {
+            helper.setBlock(2, y, 2, Blocks.STONE); // Solid ground all the way up, further than a leak reaches
+        }
+
+        final BlockPos pile = helper.absolutePos(new BlockPos(2, 1, 2));
+        helper.assertTrue(GasEmission.outletHeight(helper.getLevel(), volume(helper), pile) == GasEmission.SMOTHERED, "Too deep to vent");
+        helper.assertTrue(GasEmission.leakHeight(helper.getLevel(), volume(helper), pile) == GasEmission.SMOTHERED, "and no open place within reach for a leak to come out into");
+
+        helper.runAfterDelay(120, () -> {
+            helper.assertTrue(totalInBox(helper, 3, 3, Gas.CARBON_MONOXIDE) == 0f, "Nothing is made out of nothing");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 200)
+    public static void aFireInAirWithoutOxygenPutsNothingIntoIt(GameTestHelper helper)
+    {
+        Calendars.SERVER.setPlayersLoggedOn(true);
+        sealedBox(helper, 3, 3, Blocks.STONE);
+        fillBox(helper, 3, 3, Gas.FLUE_NITROGEN, 0.6f); // Under 9% oxygen
+        helper.setBlock(2, 1, 2, TFCBlocks.BURNING_LOG_PILE.get()); // A pit cannot be starved out: it burns on, in the ground
+
+        helper.runAfterDelay(120, () -> {
+            helper.assertTrue(GasTracker.get(helper.getLevel()).fireCount() > 0, "The pit must be tracked as a fire");
+            helper.assertTrue(totalInBox(helper, 3, 3, Gas.CARBON_MONOXIDE) == 0f, "There is nothing burning in that air, so nothing comes out of it");
+            helper.succeed();
+        });
+    }
+
+    // The Davy lamp
+
+    private static void clearBox(GameTestHelper helper, int size, int height)
+    {
+        for (int x = 1; x <= size; x++)
+        {
+            for (int y = 1; y <= height; y++)
+            {
+                for (int z = 1; z <= size; z++)
+                {
+                    final BlockPos pos = helper.absolutePos(new BlockPos(x, y, z));
+                    volume(helper).removeCell(pos.getX(), pos.getY(), pos.getZ());
+                }
+            }
+        }
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 100)
+    public static void aLampInHandThatBlackdampPutOutStaysOut(GameTestHelper helper)
+    {
+        sealedBox(helper, 3, 4, Blocks.OBSIDIAN);
+        fillBox(helper, 3, 4, Gas.FLUE_NITROGEN, 0.4f); // About 12.5% oxygen
+        final TestPlayer player = survivalPlayerAt(helper, 2, 1, 2);
+        final ItemStack lamp = fuelledLamp(helper);
+        player.setItemInHand(InteractionHand.MAIN_HAND, lamp);
+        helper.assertTrue(DavyLampItem.isLit(lamp), "It starts alight");
+
+        DavyLamp.tickHeld(player);
+        helper.assertFalse(DavyLampItem.isLit(player.getMainHandItem()), "Blackdamp puts the flame out");
+        helper.assertTrue(player.lastMessage != null && player.lastMessage.getContents() instanceof TranslatableContents contents && contents.getKey().equals("tfcpp.davy_lamp.went_out"), "and the player is told");
+
+        clearBox(helper, 3, 4);
+        for (int second = 0; second < 5; second++)
+        {
+            DavyLamp.tickHeld(player);
+        }
+        helper.assertFalse(DavyLampItem.isLit(player.getMainHandItem()), "In clean air it does not light itself again");
+
+        // Lit again, with what lights a gas burner, from the other hand
+        player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.FLINT_AND_STEEL));
+        player.getMainHandItem().getItem().use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+        helper.assertTrue(DavyLampItem.isLit(player.getMainHandItem()), "A lighter in the other hand lights it");
+
+        // And not in air that cannot keep a flame
+        DavyLampItem.setLit(player.getMainHandItem(), false);
+        fillBox(helper, 3, 4, Gas.FLUE_NITROGEN, 0.4f);
+        player.getMainHandItem().getItem().use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+        helper.assertFalse(DavyLampItem.isLit(player.getMainHandItem()), "There is no lighting it in blackdamp");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 100)
+    public static void aLampWithoutALighterStaysOut(GameTestHelper helper)
+    {
+        sealedBox(helper, 3, 4, Blocks.OBSIDIAN);
+        final TestPlayer player = survivalPlayerAt(helper, 2, 1, 2);
+        final ItemStack lamp = fuelledLamp(helper);
+        DavyLampItem.setLit(lamp, false);
+        player.setItemInHand(InteractionHand.MAIN_HAND, lamp);
+        player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.STICK));
+        lamp.getItem().use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+        helper.assertFalse(DavyLampItem.isLit(lamp), "A stick is not a light");
+        DavyLamp.tickHeld(player);
+        helper.assertFalse(DavyLampItem.isLit(lamp), "and an unlit lamp stays unlit");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 300)
+    public static void aPlacedLampThatBlackdampPutOutStaysOut(GameTestHelper helper)
+    {
+        sealedBox(helper, 3, 4, Blocks.OBSIDIAN);
+        final BlockPos lamp = new BlockPos(2, 1, 2);
+        helper.setBlock(lamp, Instruments.DAVY_LAMP.get().defaultBlockState().setValue(LampBlock.LIT, true));
+        final LampBlockEntity entity = (LampBlockEntity) helper.getBlockEntity(lamp);
+        entity.resetCounter();
+        entity.getSidedFluidInventory(null).fill(new FluidStack(BuiltInRegistries.FLUID.get(ResourceLocation.fromNamespaceAndPath("tfc", "tallow")), 100), IFluidHandler.FluidAction.EXECUTE);
+        helper.assertTrue(helper.getBlockState(lamp).getValue(LampBlock.LIT), "It starts alight");
+        fillBox(helper, 3, 4, Gas.FLUE_NITROGEN, 0.4f);
+
+        helper.runAtTickTime(100, () -> {
+            helper.assertFalse(helper.getBlockState(lamp).getValue(LampBlock.LIT), "Blackdamp puts out a lamp that stands in it");
+            clearBox(helper, 3, 4);
+        });
+        helper.runAtTickTime(220, () -> {
+            helper.assertFalse(helper.getBlockState(lamp).getValue(LampBlock.LIT), "and in clean air it does not light itself again");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 100)
+    public static void aLampPutDownKeepsItsFlame(GameTestHelper helper)
+    {
+        sealedBox(helper, 3, 4, Blocks.OBSIDIAN);
+        final TestPlayer player = survivalPlayerAt(helper, 2, 1, 2);
+        player.setXRot(90f); // Looking down, so that a lamp is put on the floor and not hung from the ceiling
+        final ItemStack lit = fuelledLamp(helper);
+        final ItemStack unlit = fuelledLamp(helper);
+        DavyLampItem.setLit(unlit, false);
+
+        final BlockPos at = helper.absolutePos(new BlockPos(1, 1, 1));
+        for (ItemStack stack : List.of(lit, unlit))
+        {
+            player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+            final var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(at.below()), Direction.UP, at.below(), false);
+            helper.getLevel().setBlockAndUpdate(at, Blocks.AIR.defaultBlockState());
+            stack.useOn(new net.minecraft.world.item.context.UseOnContext(helper.getLevel(), player, InteractionHand.MAIN_HAND, stack, hit));
+            final BlockState placed = helper.getLevel().getBlockState(at);
+            helper.assertTrue(placed.is(Instruments.DAVY_LAMP.get()), "The lamp is put down");
+            helper.assertTrue(placed.getValue(LampBlock.LIT) == (stack == lit), "and keeps the flame it had, lit: " + placed.getValue(LampBlock.LIT));
+        }
         helper.succeed();
     }
 
@@ -1195,6 +1405,7 @@ public final class GasGameTests
     private static final class TestPlayer extends FakePlayer
     {
         @Nullable DamageSource lastDamage;
+        @Nullable Component lastMessage;
 
         TestPlayer(GameTestHelper helper)
         {
@@ -1206,6 +1417,12 @@ public final class GasGameTests
         {
             lastDamage = source;
             return true;
+        }
+
+        @Override
+        public void displayClientMessage(Component message, boolean actionBar)
+        {
+            lastMessage = message;
         }
     }
 

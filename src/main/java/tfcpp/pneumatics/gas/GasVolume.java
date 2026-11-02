@@ -26,6 +26,23 @@ public interface GasVolume
     /** Gas has condensed out of the air onto surfaces at this position. */
     default void deposit(int x, int y, int z, Gas gas, float moles) {}
 
+    /**
+     * A liquid film on the surfaces at this position gives off vapour of this gas.
+     *
+     * @param wanted the most that the air here can take, in moles
+     * @return what was taken from the film, no more than {@code wanted}. A volume that keeps no film takes nothing.
+     */
+    default float evaporate(int x, int y, int z, Gas gas, float wanted)
+    {
+        return 0;
+    }
+
+    /** @return {@code true} if a film still lies here and will give off vapour, which keeps the cell here alive even when the air in it is clean */
+    default boolean holdsFilm(int x, int y, int z)
+    {
+        return false;
+    }
+
     /** @return the fraction of gas per second escaping to the atmosphere from this position */
     float atmosphereExchangeRate(int x, int y, int z);
 }
