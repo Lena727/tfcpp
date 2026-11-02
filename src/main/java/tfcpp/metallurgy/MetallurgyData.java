@@ -1066,7 +1066,7 @@ public final class MetallurgyData implements DataProvider
 
     private void lootTables()
     {
-        for (String block : List.of("retort", "retort_condenser", "converter", "cupel_hearth", "condensation_tower", "coke_oven", "gas_burner", "lead_chamber", "sulfur_burner", "glass_retort", "sand_bath"))
+        for (String block : List.of("retort", "retort_condenser", "converter", "cupel_hearth", "condensation_tower", "coke_oven", "gas_burner", "lead_chamber", "sulfur_burner", "glass_retort", "sand_bath", "gold_leaf_indicator"))
         {
             final JsonObject entry = new JsonObject();
             entry.addProperty("type", "minecraft:item");
@@ -1131,6 +1131,12 @@ public final class MetallurgyData implements DataProvider
         baffle.getAsJsonObject("key").add("B", item("tfc:ceramic/fire_brick"));
         baffle.getAsJsonObject("key").add("S", item("tfc:metal/sheet/copper"));
         put("data/tfcpp/recipe/crafting/settling_baffle.json", baffle);
+
+        // A sheet of gold beaten out into leaves, eight to the sheet, as gold beaters did for the leaves of an electroscope
+        final JsonObject leaf = shaped("tfcpp:gold_leaf_indicator", "S");
+        leaf.getAsJsonObject("key").add("S", item("tfc:metal/sheet/gold"));
+        leaf.add("result", stack("tfcpp:gold_leaf_indicator", 8));
+        put("data/tfcpp/recipe/crafting/gold_leaf_indicator.json", leaf);
 
         for (String block : List.of("settling_baffle", "mine_fan"))
         {

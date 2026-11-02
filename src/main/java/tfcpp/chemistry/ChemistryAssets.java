@@ -32,6 +32,7 @@ public final class ChemistryAssets
             flatItem(Chemistry.SODIUM_BISULFATE.get());
             flatItem(Chemistry.SUPERPHOSPHATE.get());
             flatItem(Chemistry.AMMONIUM_SULFATE.get());
+            flatItem(Chemistry.MARSH_APPARATUS.get());
         }
 
         /** The name has to differ from that of the other providers of models, or the data run refuses both. */

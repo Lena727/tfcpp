@@ -3,9 +3,12 @@ package tfcpp.chemistry;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Supplier;
+import com.mojang.serialization.Codec;
 import net.dries007.tfc.common.capabilities.BlockCapabilities;
 import net.dries007.tfc.common.component.fluid.FluidContainerHandler;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -25,6 +28,7 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.Nullable;
 
 import tfcpp.core.TFCpp;
@@ -121,6 +125,13 @@ public final class Chemistry
     public static final Supplier<Item> LEAD_CHAMBER_ITEM = Metallurgy.ITEMS.register("lead_chamber", () -> new BlockItem(LEAD_CHAMBER.get(), new Item.Properties()));
     public static final Supplier<Item> SULFUR_BURNER_ITEM = Metallurgy.ITEMS.register("sulfur_burner", () -> new BlockItem(SULFUR_BURNER.get(), new Item.Properties()));
 
+    /** The data components that the mod's chemistry keeps on its items. */
+    public static final DeferredRegister<DataComponentType<?>> COMPONENTS = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, TFCpp.MOD_ID);
+    /** Tests left in a marsh apparatus. A new one has none: its acid is what starts it. */
+    public static final Supplier<DataComponentType<Integer>> MARSH_TESTS = COMPONENTS.register("marsh_tests", () -> DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+    /** A flask of glass and zinc, which tests a sample or the air for the white poisons of a furnace. */
+    public static final Supplier<Item> MARSH_APPARATUS = Metallurgy.ITEMS.register("marsh_apparatus", () -> new MarshApparatusItem(new Item.Properties()));
+
     /** Potassium hydrogen sulfate, the cake that is left in the flask when nitre is distilled with oil of vitriol. */
     public static final Supplier<Item> POTASSIUM_BISULFATE = Metallurgy.ITEMS.register("powder/potassium_bisulfate", () -> new Item(new Item.Properties()));
     /** Sodium hydrogen sulfate, the salt cake that is left when salt is distilled with oil of vitriol. */
@@ -167,6 +178,7 @@ public final class Chemistry
         output.accept(GLASS_CARBOY.get());
         output.accept(GLASS_RETORT_ITEM.get());
         output.accept(SAND_BATH_ITEM.get());
+        output.accept(MARSH_APPARATUS.get());
         output.accept(POTASSIUM_BISULFATE.get());
         output.accept(SODIUM_BISULFATE.get());
         output.accept(SUPERPHOSPHATE.get());
@@ -175,6 +187,7 @@ public final class Chemistry
 
     public static void register(IEventBus modBus)
     {
+        COMPONENTS.register(modBus);
         modBus.addListener(Chemistry::registerCapabilities);
     }
 

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "tfc:silica_glass_bottle"
+    },
+    {
+      "item": "tfc:metal/ingot/zinc"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "tfcpp:marsh_apparatus"
+  }
+}

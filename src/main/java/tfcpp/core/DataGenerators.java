@@ -352,6 +352,25 @@ public final class DataGenerators
             add("tfcpp.info.sand_bath", "A tray of sand between a fire and glass. It passes up only 20 C plus a share of the fire's excess over that, one part in the depth plus one, so deeper sand gives a cooler vessel. Empty hand adds a layer, crouching removes one.");
             add("tfcpp.info.glass_carboy", "Holds 25 L of acids, the chemical liquids of the mod, vinegar and fresh water, and nothing else. Right-click a tank or a retort to pour or draw.");
             add("tfcpp.info.borosilicate_glass_batch", "Sand, lime and borax. Load it into a blowpipe and work it as any batch: this is the glass that stands heat and acid. Makes the glass carboy and the glass retort.");
+            add("tfcpp.info.coke_oven", "A closed chamber of fire brick, heated from below, that distils a charge of up to 64 pieces of coal or wood without air. Its gas goes up the pipe above it, or into the room if there is no pipe, its tar and liquor condense in the tanks of a condenser beside it, and the coke is taken out when the batch is done. Without a condenser the tar and liquor are lost as vapour, and the gas is poisonous, so lead it into a pipe.");
+            add("tfcpp.info.gas_burner", "A nozzle with a hand wheel that burns the gas of the pipe it is joined to, under whatever stands on it. Light it with flint and steel or a fire starter: a lit burner is an open flame to any gas in the room, so do not open it near methane or coal gas.");
+            add("tfcpp.info.cupel_hearth", "A fire-brick hearth floored with bone ash, over a fire. Pour in work lead and blow air over it: the lead oxidises to litharge, which is raked off, and the silver is left to be tapped at the end. Keep the hearth hot enough for the litharge to stay liquid, and do not breathe the lead fume that the blast raises.");
+            add("tfcpp.info.lead_chamber", "A chamber of lead sheet in a pipe run, where sulfur dioxide, air, steam and the oxides of nitrogen make chamber acid on its walls. Lead holds the acid while it is cool, so the tank can be drawn off into a carboy by hand. The oxides of nitrogen are poisonous, and they leak out of any joint that is not sealed.");
+            add("tfcpp.info.sulfur_burner", "A trough of fire clay in a pipe, where powdered sulfur burns in the air of the pipe to sulfur dioxide, which the lead chamber takes up. It lights from the hot flue and needs oxygen: with too little, the sulfur only smoulders. Sulfur dioxide chokes, so the trough must stand in a pipe that carries the gas away.");
+            add("tfcpp.info.marsh_apparatus", "Charge it with a millibucket of sulfuric or chamber acid from a carboy in the other hand, which gives eight tests. Right-click in the air to test the air at your eye, or with a sample in the other hand: white arsenic, antimony oxide, tetrahedrite ore or arsenical copper. A mirror says that arsenic or antimony is there, and not which one; the arsine it makes is poisonous, so test in the open.");
+            add("tfcpp.info.gold_leaf_indicator", "A leaf of gold on a thin plate, which mercury vapour whitens for good: from bright gold, through pale, to white. Place it where mercury may reach it, and read its stage with an empty hand; it shows no number. A leaf that has whitened comes up as nothing when it is broken, and a clean one comes up as a new leaf.");
+            add("item.tfcpp.marsh_apparatus", "Marsh Apparatus");
+            add("tfcpp.marsh.tests", "Tests left: %1$s");
+            add("tfcpp.marsh.none", "No mirror: neither arsenic nor antimony is in the sample");
+            add("tfcpp.marsh.faint", "A faint mirror: it could be arsenic or antimony, and only a trace of it");
+            add("tfcpp.marsh.strong", "A dense mirror: it could be arsenic or antimony, and the air of this place is poisonous");
+            add("tfcpp.marsh.no_acid", "The carboy in the other hand holds no sulfuric or chamber acid: the apparatus cannot be charged");
+            add("tfcpp.marsh.charged", "Charged with one millibucket of acid: %1$s tests");
+            add("block.tfcpp.gold_leaf_indicator", "Gold Leaf Indicator");
+            add("tfcpp.gold_leaf.stage.0", "The leaf is bright gold: no mercury has reached it");
+            add("tfcpp.gold_leaf.stage.1", "Traces: the leaf has whitened at its edges, from mercury in the air");
+            add("tfcpp.gold_leaf.stage.2", "Exposed: the leaf is pale, and the air here has held mercury for a long time");
+            add("tfcpp.gold_leaf.stage.3", "Heavily poisoned: the leaf is white, and the mercury in it will not come out");
         }
     }
 
@@ -615,6 +634,25 @@ public final class DataGenerators
             add("tfcpp.info.sand_bath", "Поддон с песком между огнём и стеклом. Наверх он отдаёт 20 °C плюс долю избытка тепла огня, одну часть на глубину плюс один: чем глубже песок, тем прохладнее сосуд. Пустая рука добавляет слой, с приседанием убирает.");
             add("tfcpp.info.glass_carboy", "Вмещает 25 л кислот, химических жидкостей мода, уксуса и пресной воды, и ничего больше. Правый клик по баку или реторте наливает или набирает.");
             add("tfcpp.info.borosilicate_glass_batch", "Песок, известь и бура. Загрузите в трубку стеклодува и работайте, как с любой шихтой: это стекло, которое держит жар и кислоту. Из неё делают стеклянную бутыль и стеклянную реторту.");
+            add("tfcpp.info.coke_oven", "Закрытая камера из шамота, которую греют снизу: в ней без воздуха перегоняют садку до 64 кусков угля или дерева. Газ уходит в трубу над печью, а если трубы нет, в комнату; смола и подсмольная вода оседают в баках конденсатора рядом. Кокс вынимают, когда партия готова. Без конденсатора смола и вода уходят парами, а газ ядовит, поэтому ведите его в трубу.");
+            add("tfcpp.info.gas_burner", "Горелка с ручным вентилем, которая сжигает газ подключённой к ней трубы под тем, что стоит сверху. Зажигается кресалом или огнивом: горящая горелка для любого газа в комнате — открытый огонь, поэтому не открывайте её рядом с метаном или коксовым газом.");
+            add("tfcpp.info.cupel_hearth", "Очаг из шамотного кирпича на поду из костяной золы, над огнём. Сюда наливают веркблей и продувают воздухом: свинец окисляется в глёт, его сгребают, а в конце остаётся серебро для выпуска. Очаг держат горячим, чтобы глёт оставался жидким, и не дышите свинцовым дымом, который поднимает дутьё.");
+            add("tfcpp.info.lead_chamber", "Камера из свинцового листа в трубе, где диоксид серы, воздух, пар и окислы азота образуют на стенках камерную кислоту. Свинец удерживает кислоту, пока она холодная, и бак можно слить в бутыль вручную. Окислы азота ядовиты и выходят через любой негерметичный стык.");
+            add("tfcpp.info.sulfur_burner", "Корыто из огнеупорной глины в трубе, где порошковая сера горит в воздухе трубы и даёт диоксид серы, который забирает свинцовая камера. Загорается от горячего дымохода и нуждается в кислороде: при его нехватке сера только тлеет. Диоксид серы удушлив, поэтому корыто должно стоять в трубе, которая уносит газ.");
+            add("tfcpp.info.marsh_apparatus", "Заряжается миллибакетом серной или камерной кислоты из бутыли в другой руке: это даёт восемь проб. Правый клик в воздухе проверяет воздух у глаз, а с пробой в другой руке (белый мышьяк, окись сурьмы, руда тетраэдрита или мышьяковистая медь) проверяет её. Зеркало говорит, что есть мышьяк или сурьма, но не какой именно; арсин, который аппарат выделяет, ядовит, поэтому пробуйте на открытом воздухе.");
+            add("tfcpp.info.gold_leaf_indicator", "Лист золота на тонкой пластине, который пары ртути белят необратимо: от ярко-золотого через бледный к белому. Поставьте его туда, куда может дойти ртуть, и читайте стадию пустой рукой, без числа. Побелевший лист при поломке не даёт ничего, а чистый выпадает новым листом.");
+            add("item.tfcpp.marsh_apparatus", "Аппарат Марша");
+            add("tfcpp.marsh.tests", "Проб осталось: %1$s");
+            add("tfcpp.marsh.none", "Зеркала нет: ни мышьяка, ни сурьмы в пробе нет");
+            add("tfcpp.marsh.faint", "Слабое зеркало: это может быть мышьяк или сурьма, и только следы");
+            add("tfcpp.marsh.strong", "Плотное зеркало: это может быть мышьяк или сурьма, и воздух здесь ядовит");
+            add("tfcpp.marsh.no_acid", "В бутыли в другой руке нет серной или камерной кислоты: аппарат не зарядить");
+            add("tfcpp.marsh.charged", "Заряжено одним миллибакетом кислоты: проб %1$s");
+            add("block.tfcpp.gold_leaf_indicator", "Индикатор из золотого листа");
+            add("tfcpp.gold_leaf.stage.0", "Лист ярко-золотой: ртуть до него не доходила");
+            add("tfcpp.gold_leaf.stage.1", "Следы: лист побелел по краям от ртути в воздухе");
+            add("tfcpp.gold_leaf.stage.2", "Подвержен: лист бледный, воздух здесь долго держал ртуть");
+            add("tfcpp.gold_leaf.stage.3", "Сильно отравлен: лист белый, ртуть из него уже не выйдет");
         }
     }
 

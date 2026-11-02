@@ -65,6 +65,13 @@ public final class TFCppJeiPlugin implements IModPlugin
         info(registration, new ItemStack(Chemistry.SAND_BATH_ITEM.get()), "tfcpp.info.sand_bath");
         info(registration, new ItemStack(Chemistry.GLASS_CARBOY.get()), "tfcpp.info.glass_carboy");
         info(registration, new ItemStack(Chemistry.BOROSILICATE_GLASS_BATCH.get()), "tfcpp.info.borosilicate_glass_batch");
+        info(registration, new ItemStack(Chemistry.COKE_OVEN_ITEM.get()), "tfcpp.info.coke_oven");
+        info(registration, new ItemStack(Chemistry.GAS_BURNER_ITEM.get()), "tfcpp.info.gas_burner");
+        info(registration, new ItemStack(Metallurgy.CUPEL_HEARTH_ITEM.get()), "tfcpp.info.cupel_hearth");
+        info(registration, new ItemStack(Chemistry.LEAD_CHAMBER_ITEM.get()), "tfcpp.info.lead_chamber");
+        info(registration, new ItemStack(Chemistry.SULFUR_BURNER_ITEM.get()), "tfcpp.info.sulfur_burner");
+        info(registration, new ItemStack(Chemistry.MARSH_APPARATUS.get()), "tfcpp.info.marsh_apparatus");
+        info(registration, new ItemStack(Instruments.GOLD_LEAF_INDICATOR_ITEM.get()), "tfcpp.info.gold_leaf_indicator");
         info(registration, new ItemStack(Metallurgy.IRON_SLAG.get()), "tfcpp.info.iron_slag");
         info(registration, new ItemStack(Metallurgy.PHOSPHORIC_IRON_SLAG.get()), "tfcpp.info.phosphoric_iron_slag");
         info(registration, new ItemStack(Metallurgy.THOMAS_SLAG.get()), "tfcpp.info.thomas_slag");

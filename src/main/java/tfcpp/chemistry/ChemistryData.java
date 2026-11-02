@@ -301,6 +301,17 @@ public final class ChemistryData implements DataProvider
         final JsonObject sulfurBurner = shaped("tfcpp:sulfur_burner", "BBB", "B B", "BBB");
         sulfurBurner.getAsJsonObject("key").add("B", item("tfc:ceramic/fire_brick"));
         put("data/tfcpp/recipe/crafting/sulfur_burner.json", sulfurBurner);
+
+        // A flask of glass with zinc in it: the zinc and the acid of the test make the arsine that shows the poison
+        final JsonObject marsh = new JsonObject();
+        marsh.addProperty("type", "minecraft:crafting_shapeless");
+        marsh.addProperty("category", "misc");
+        final JsonArray marshIngredients = new JsonArray();
+        marshIngredients.add(item("tfc:silica_glass_bottle"));
+        marshIngredients.add(item("tfc:metal/ingot/zinc"));
+        marsh.add("ingredients", marshIngredients);
+        marsh.add("result", stack("tfcpp:marsh_apparatus", 1));
+        put("data/tfcpp/recipe/crafting/marsh_apparatus.json", marsh);
     }
 
     private void put(String path, JsonElement json)

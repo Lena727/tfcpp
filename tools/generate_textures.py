@@ -426,3 +426,34 @@ for y in range(16):
             bath_side[y][x] = shade((62, 60, 64), 0)  # The edge of the iron tray
 write_png(ROOT / 'block/sand_bath_side.png', bath_side)
 write_png(ROOT / 'block/sand_bath_top.png', noise(179, (206, 186, 128), 12))
+
+
+# Stage G: the gold leaf indicator. The same grain in every stage, so that only the tone changes as mercury whitens the gold: bright gold, then pale, then white
+for stage, base in enumerate([(214, 176, 58), (216, 192, 104), (222, 218, 186), (234, 234, 230)]):
+    write_png(ROOT / f'block/gold_leaf_indicator_{stage}.png', noise(181, base, 10))
+
+
+def marsh_flask(seed):
+    """A flask of glass with a neck, half full of pale acid, with grains of zinc at the bottom."""
+    rng = random.Random(seed)
+    pixels = [[(0, 0, 0, 0)] * 16 for _ in range(16)]
+    for y in range(1, 6):
+        for x in range(6, 10):
+            pixels[y][x] = (176, 210, 216, 220) if x in (6, 9) or y == 1 else (206, 232, 236, 120)  # The rim of the neck, and the glass
+    for y in range(6, 15):
+        for x in range(16):
+            distance = ((x - 7.5) / 5.8) ** 2 + ((y - 10.5) / 4.8) ** 2
+            if distance <= 1.0:
+                if distance >= 0.7:
+                    pixels[y][x] = (176, 210, 216, 230)  # The outline of the glass
+                elif y >= 9:
+                    pixels[y][x] = shade((226, 220, 196), rng.randint(-4, 4))[:3] + (230,)  # The acid, pale as the chamber's
+                else:
+                    pixels[y][x] = (206, 232, 236, 120)
+    for x, y in ((6, 13), (8, 12), (10, 13), (7, 14), (9, 14)):
+        pixels[y][x] = (150, 156, 160, 255)  # Grains of zinc
+    pixels[7][6] = pixels[8][5] = (236, 250, 252, 230)  # A glint
+    return pixels
+
+
+write_png(ROOT / 'item/marsh_apparatus.png', marsh_flask(185))

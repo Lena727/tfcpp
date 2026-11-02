@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tfcpp:gold_leaf_indicator"
+        }
+      ],
+      "rolls": 1
+    }
+  ]
+}

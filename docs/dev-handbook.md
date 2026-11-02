@@ -48,6 +48,7 @@ bash tools/verify.sh --client   # то же, плюс настоящий кли�
 | Бак с дробными литрами (колба, вода приёмника) | `chemistry/FloatTank`; выход в целых мБ с остатком в `Remainder` |
 | Песчаная баня | `chemistry/SandBath` (чистая функция), `SandBathBlock` (глубина в состоянии блока), `SandBathBlockEntity` |
 | Бутыль для кислот | `chemistry/GlassCarboyItem` (подкласс `FluidContainerItem` TFC), теги `tfcpp:usable_in_carboy`, способность предмета в `Chemistry.registerCapabilities` |
+| Проба Марша и индикатор ртути на золотом листе | `chemistry/PoisonTests` (чистая физика, тест `PoisonTestsTest`), `MarshApparatusItem`, `pneumatics/instruments/GoldLeafIndicatorBlock` и `GoldLeafIndicatorBlockEntity`; игровые тесты `core/AcidGameTests` (batch `tfcpp_marsh`) |
 | Пары из жидкости, если её не держит конденсатор или колба | `chemistry/AcidVapour` |
 | Текстуры | `tools/generate_textures.py` |
 | Игровые тесты | `core/PhosphorusGameTests` (свежий образец: домна, конвертер, футеровка, сохранение), `ChemistryGameTests`, `GasGameTests`, `IronGameTests` |

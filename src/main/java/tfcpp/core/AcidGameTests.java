@@ -13,8 +13,10 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.material.Fluid;
@@ -47,11 +49,16 @@ import tfcpp.chemistry.SandBathBlockEntity;
 import tfcpp.metallurgy.Metallurgy;
 import tfcpp.pneumatics.gas.GasTracker;
 import tfcpp.pneumatics.gas.LevelGasVolume;
+import tfcpp.pneumatics.instruments.GoldLeafIndicatorBlock;
+import tfcpp.pneumatics.instruments.GoldLeafIndicatorBlockEntity;
+import tfcpp.pneumatics.instruments.Instruments;
 import tfcpp.chemistry.ChamberProcess;
 import tfcpp.chemistry.Chemistry;
 import tfcpp.chemistry.CorrosiveSpill;
 import tfcpp.chemistry.LeadChamberBlockEntity;
 import tfcpp.chemistry.Liquid;
+import tfcpp.chemistry.MarshApparatusItem;
+import tfcpp.chemistry.PoisonTests;
 import tfcpp.chemistry.SulfurBurnerBlockEntity;
 import tfcpp.chemistry.SulfurBurning;
 import tfcpp.pneumatics.gas.Gas;
@@ -1204,6 +1211,159 @@ public final class AcidGameTests
         helper.assertTrue(sulfate != null && Math.abs(sulfate.nitrogen() - 0.1f) < 1e-6f && sulfate.phosphorus() == 0f && sulfate.potassium() == 0f, "Ammonium sulfate is nitrogen 0.1, got " + sulfate);
         final @Nullable Fertilizer apatite = Fertilizer.get(new ItemStack(Metallurgy.APATITE_POWDER.get()));
         helper.assertTrue(apatite != null && phosphate.phosphorus() > apatite.phosphorus(), "Made soluble, the phosphate feeds more than the raw rock");
+        helper.succeed();
+    }
+
+    // --- Stage G: the marsh apparatus and the gold leaf indicator ----------------------------------------------------------------------------------------------------------
+
+    /** Its own batch, as these put mercury and arsenic into the air of a test. */
+    private static final String MARSH_BATCH = "tfcpp_marsh";
+    private static final BlockPos LEAF = new BlockPos(2, 1, 2);
+
+    private static ItemStack carboyOf(Liquid liquid, int millibuckets)
+    {
+        final ItemStack carboy = new ItemStack(Chemistry.GLASS_CARBOY.get());
+        carboy.getCapability(Capabilities.FluidHandler.ITEM).fill(new FluidStack(Chemistry.fluid(liquid), millibuckets), IFluidHandler.FluidAction.EXECUTE);
+        return carboy;
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = MARSH_BATCH)
+    public static void aCarboyChargesTheApparatusForEightTestsWithOneMillibucket(GameTestHelper helper)
+    {
+        final TestPlayer player = playerAt(helper, new BlockPos(6, 1, 6));
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Chemistry.MARSH_APPARATUS.get()));
+        player.setItemInHand(InteractionHand.OFF_HAND, carboyOf(Liquid.SULFURIC_ACID, 25));
+        Chemistry.MARSH_APPARATUS.get().use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+
+        final int tests = MarshApparatusItem.testsLeft(player.getMainHandItem());
+        helper.assertTrue(tests == MarshApparatusItem.TESTS_PER_CHARGE, "A charge gives eight tests, got " + tests);
+        final FluidStack left = player.getOffhandItem().getCapability(Capabilities.FluidHandler.ITEM).getFluidInTank(0);
+        helper.assertTrue(left.getAmount() == 24 && left.getFluid() == Chemistry.fluid(Liquid.SULFURIC_ACID), "Exactly one millibucket comes out of the carboy, got " + left.getAmount());
+        player.discard();
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = MARSH_BATCH)
+    public static void aTestUsesOneAndAnApparatusIsNotChargedWithoutAcid(GameTestHelper helper)
+    {
+        final TestPlayer player = playerAt(helper, new BlockPos(6, 1, 6));
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Chemistry.MARSH_APPARATUS.get()));
+        player.getMainHandItem().set(Chemistry.MARSH_TESTS.get(), 3);
+        Chemistry.MARSH_APPARATUS.get().use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+        helper.assertTrue(MarshApparatusItem.testsLeft(player.getMainHandItem()) == 2, "A test uses one, got " + MarshApparatusItem.testsLeft(player.getMainHandItem()));
+
+        // Empty, with no acid in the other hand: nothing is charged
+        player.getMainHandItem().set(Chemistry.MARSH_TESTS.get(), 0);
+        Chemistry.MARSH_APPARATUS.get().use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+        helper.assertTrue(MarshApparatusItem.testsLeft(player.getMainHandItem()) == 0, "With no acid in the other hand nothing is charged");
+
+        // A carboy of any other liquid is no reagent either
+        player.setItemInHand(InteractionHand.OFF_HAND, carboyOf(Liquid.WOOD_SPIRIT, 25));
+        Chemistry.MARSH_APPARATUS.get().use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+        helper.assertTrue(MarshApparatusItem.testsLeft(player.getMainHandItem()) == 0, "Only sulfuric or chamber acid charges it");
+        helper.assertTrue(player.getOffhandItem().getCapability(Capabilities.FluidHandler.ITEM).getFluidInTank(0).getAmount() == 25, "A carboy of the wrong liquid gives up none of it");
+        player.discard();
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = MARSH_BATCH)
+    public static void theAirAtTheEyeGivesADenseMirrorWithArsenicAndNoneWhenClean(GameTestHelper helper)
+    {
+        final ServerLevel level = helper.getLevel();
+        final TestPlayer poisoned = playerAt(helper, new BlockPos(2, 1, 6));
+        final TestPlayer clean = playerAt(helper, new BlockPos(6, 1, 6));
+        final BlockPos eye = BlockPos.containing(poisoned.getEyePosition());
+        // 0.0002 mol/m3 of arsenic trioxide is about 40 mg/m3, well above the dense mirror of 20
+        final @Nullable float[] cell = GasTracker.get(level).volume(level).cellForEmission(eye.getX(), eye.getY(), eye.getZ());
+        helper.assertTrue(cell != null, "The air at the eye must have a cell");
+        cell[Gas.ARSENIC_TRIOXIDE.ordinal()] = 0.0002f;
+
+        helper.assertTrue(MarshApparatusItem.sample(level, poisoned, ItemStack.EMPTY) == PoisonTests.Mirror.STRONG, "Arsenic in the air at the eye gives a dense mirror");
+        helper.assertTrue(MarshApparatusItem.sample(level, poisoned, carboyOf(Liquid.SULFURIC_ACID, 25)) == PoisonTests.Mirror.STRONG, "A carboy in the other hand is never the sample: the air is tested");
+        helper.assertTrue(MarshApparatusItem.sample(level, clean, ItemStack.EMPTY) == PoisonTests.Mirror.NONE, "Clean air gives no mirror");
+        poisoned.discard();
+        clean.discard();
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = MARSH_BATCH)
+    public static void aPowderInTheOtherHandGivesADenseMirrorAndAnOrdinaryItemNone(GameTestHelper helper)
+    {
+        final ServerLevel level = helper.getLevel();
+        final TestPlayer player = playerAt(helper, new BlockPos(6, 1, 6));
+        helper.assertTrue(MarshApparatusItem.sample(level, player, new ItemStack(Instruments.ARSENIC_TRIOXIDE.get())) == PoisonTests.Mirror.STRONG, "White arsenic gives a dense mirror");
+        helper.assertTrue(MarshApparatusItem.sample(level, player, new ItemStack(Instruments.ANTIMONY_TRIOXIDE.get())) == PoisonTests.Mirror.STRONG, "Antimony oxide gives the same mirror");
+        helper.assertTrue(MarshApparatusItem.sample(level, player, new ItemStack(BuiltInRegistries.ITEM.get(TFCpp.id("metal/ingot/arsenical_copper")))) == PoisonTests.Mirror.FAINT, "Arsenical copper gives a faint mirror");
+        helper.assertTrue(MarshApparatusItem.sample(level, player, new ItemStack(Items.DIRT)) == PoisonTests.Mirror.NONE, "An ordinary item gives none");
+        player.discard();
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = MARSH_BATCH)
+    public static void aLeafWhitensThroughItsStagesInMercuryAndKeepsItsDose(GameTestHelper helper)
+    {
+        helper.setBlock(LEAF, Instruments.GOLD_LEAF_INDICATOR.get());
+        final ServerLevel level = helper.getLevel();
+        final BlockPos at = helper.absolutePos(LEAF);
+        final GoldLeafIndicatorBlockEntity leaf = helper.getBlockEntity(LEAF);
+        // 0.00005 mol/m3 of mercury is about 10 mg/m3: a dose of about 0.17 each second, so stage 3 takes some 600 seconds of it
+        final @Nullable float[] cell = GasTracker.get(level).volume(level).cellForEmission(at.getX(), at.getY(), at.getZ());
+        helper.assertTrue(cell != null, "The leaf must have a cell");
+        cell[Gas.MERCURY_VAPOR.ordinal()] = 0.00005f;
+
+        for (int second = 1; second <= 700; second++)
+        {
+            leaf.breathe(level);
+            final int stage = helper.getBlockState(LEAF).getValue(GoldLeafIndicatorBlock.STAGE);
+            helper.assertTrue(stage == PoisonTests.leafStage(leaf.dose()), "The stage follows the dose, at second " + second + " with dose " + leaf.dose());
+        }
+        helper.assertTrue(helper.getBlockState(LEAF).getValue(GoldLeafIndicatorBlock.STAGE) == 3, "The leaf is white after 700 seconds in mercury, got dose " + leaf.dose());
+
+        // A white leaf reads no more air
+        final float dose = leaf.dose();
+        cell[Gas.MERCURY_VAPOR.ordinal()] = 0.01f;
+        leaf.breathe(level);
+        helper.assertTrue(leaf.dose() == dose, "A leaf that is white takes up no more mercury");
+
+        final var registries = level.registryAccess();
+        final GoldLeafIndicatorBlockEntity copy = new GoldLeafIndicatorBlockEntity(at, helper.getBlockState(LEAF));
+        copy.loadWithComponents(leaf.saveWithoutMetadata(registries), registries);
+        helper.assertTrue(copy.dose() == dose, "The dose is kept through a save and a load, got " + copy.dose());
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = MARSH_BATCH)
+    public static void aLeafInCleanAirDoesNotMove(GameTestHelper helper)
+    {
+        final BlockPos clean = new BlockPos(6, 1, 6);
+        helper.setBlock(clean, Instruments.GOLD_LEAF_INDICATOR.get());
+        final GoldLeafIndicatorBlockEntity leaf = helper.getBlockEntity(clean);
+        for (int second = 0; second < 100; second++)
+        {
+            leaf.breathe(helper.getLevel());
+        }
+        helper.assertTrue(leaf.dose() == 0f && helper.getBlockState(clean).getValue(GoldLeafIndicatorBlock.STAGE) == 0, "A leaf in clean air stays bright");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = MARSH_BATCH)
+    public static void aCleanLeafComesUpAsANewOneAndAWhitenedOneAsNothing(GameTestHelper helper)
+    {
+        final BlockPos at = helper.absolutePos(new BlockPos(6, 1, 6));
+        final Block leaf = Instruments.GOLD_LEAF_INDICATOR.get();
+        final List<ItemStack> clean = Block.getDrops(leaf.defaultBlockState(), helper.getLevel(), at, null);
+        helper.assertTrue(clean.size() == 1 && clean.get(0).is(Instruments.GOLD_LEAF_INDICATOR_ITEM.get()), "A clean leaf comes up as a new one");
+        final List<ItemStack> whitened = Block.getDrops(leaf.defaultBlockState().setValue(GoldLeafIndicatorBlock.STAGE, 1), helper.getLevel(), at, null);
+        helper.assertTrue(whitened.isEmpty(), "A whitened leaf comes up as nothing");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = MARSH_BATCH)
+    public static void theMarshAndLeafRecipesLoad(GameTestHelper helper)
+    {
+        final var manager = helper.getLevel().getRecipeManager();
+        helper.assertTrue(manager.byKey(TFCpp.id("crafting/marsh_apparatus")).isPresent(), "The marsh apparatus must be craftable");
+        helper.assertTrue(manager.byKey(TFCpp.id("crafting/gold_leaf_indicator")).isPresent(), "The gold leaf indicator must be craftable");
         helper.succeed();
     }
 

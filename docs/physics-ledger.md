@@ -556,3 +556,34 @@
 | Ёмкость (`CAPACITY_MILLIBUCKETS`) | `25` | мБ = л | Value of the design. |
 | Стек | `1` | шт | A carboy does not stack. |
 | Допустимые жидкости | тег `tfcpp:usable_in_carboy` | — | Every `Liquid`, `tfc:vinegar`, `#tfc:any_fresh_water`. Nothing else. |
+
+## chemistry/PoisonTests
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Молярная масса As₂O₃ (`AS2O3_MOLAR_MASS`) | `197.84f` | г/моль | As the `Gas` enum has it. The JUnit test checks it against the enum. |
+| Молярная масса Sb₂O₃ (`SB2O3_MOLAR_MASS`) | `291.52f` | г/моль | As the `Gas` enum has it. |
+| Молярная масса Hg (`HG_MOLAR_MASS`) | `200.59f` | г/моль | As the `Gas` enum has it. |
+| Слабое зеркало (`FAINT_MG_PER_M3`) | `1f` | мг/м³ | Marsh's test finds 0.02 mg of arsenic in a 20 L sample: 0.02 mg / 0.02 м³ = 1 мг/м³. Value of the design. |
+| Плотное зеркало (`STRONG_MG_PER_M3`) | `20f` | мг/м³ | Value of the design: ten times the faint mirror. |
+| Сумма As₂O₃ и Sb₂O₃ в `marsh` | сумма в мг/м³, один и тот же зеркальный результат | мг/м³ | Both give the same mirror, as in the real test: the mirror cannot say which poison it is. Value of the design. |
+| Локальный час (`HOUR_SECONDS`) | `60f` | с | `LocalTime.SECONDS_PER_DAY / 24`. |
+| Стадии листа (`STAGE_ONE_DOSE`, `STAGE_TWO_DOSE`, `STAGE_THREE_DOSE`) | `1`, `10`, `100` | (мг/м³)·ч | Value of the design. A game figure: the dose is not measured. |
+| Ячейка газа | 1 м³ | м³ | A cell is 1 м³, so moles per cell and moles per м³ are the same number. |
+
+## chemistry/MarshApparatusItem
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Проб с одного заряда (`TESTS_PER_CHARGE`) | `8` | шт | Value of the design. |
+| Кислоты на заряд (`ACID_PER_CHARGE`) | `1` | мБ = л | Value of the design: one millibucket of sulfuric or chamber acid from a carboy in the other hand. |
+| Проба из руки | тетраэдрит, As₂O₃, Sb₂O₃: плотное; мышьяковистая медь: слабое; прочее: нет | — | Value of the design. The carboy in the other hand is never the sample while tests are left: the air is tested. |
+| Рецепт | бутылка силикатного стекла + слиток цинка, без формы | — | Value of the design. Zinc and acid make the arsine that Marsh's test is run with. |
+
+## pneumatics/instruments/GoldLeafIndicatorBlockEntity
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Шаг опроса | раз в `20` тактов, со сдвигом по позиции `(time + pos) % 20 == 0` | с | As the settling baffle: once a second, spread by position. |
+| Порог записи (`SAVE_THRESHOLD`) | `0.01` | (мг/м³)·ч | A game figure: a dose that moves less does not mark the chunk changed. |
+| Стадия 3 | перестаёт читать воздух | — | A white leaf takes up no more mercury. |
+| Рецепт листа | 1 лист золота → 8 листов | шт | Value of the design. |
+| Разрушение | стадия 0 → новый лист; стадия 1 и выше → ничего | — | The dose does not go with the leaf. Value of the design. |
+| Пластина | 1/16 блока по высоте, газ проходит через неё | — | A thin shape is not a full block, so a gas cell lies across it, as with an open door. |

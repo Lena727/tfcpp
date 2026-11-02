@@ -53,6 +53,13 @@ public final class TFCppEmiPlugin implements EmiPlugin
         info(registry, "sand_bath", "tfcpp.info.sand_bath", Chemistry.SAND_BATH_ITEM.get());
         info(registry, "glass_carboy", "tfcpp.info.glass_carboy", Chemistry.GLASS_CARBOY.get());
         info(registry, "borosilicate_glass_batch", "tfcpp.info.borosilicate_glass_batch", Chemistry.BOROSILICATE_GLASS_BATCH.get());
+        info(registry, "coke_oven", "tfcpp.info.coke_oven", Chemistry.COKE_OVEN_ITEM.get());
+        info(registry, "gas_burner", "tfcpp.info.gas_burner", Chemistry.GAS_BURNER_ITEM.get());
+        info(registry, "cupel_hearth", "tfcpp.info.cupel_hearth", Metallurgy.CUPEL_HEARTH_ITEM.get());
+        info(registry, "lead_chamber", "tfcpp.info.lead_chamber", Chemistry.LEAD_CHAMBER_ITEM.get());
+        info(registry, "sulfur_burner", "tfcpp.info.sulfur_burner", Chemistry.SULFUR_BURNER_ITEM.get());
+        info(registry, "marsh_apparatus", "tfcpp.info.marsh_apparatus", Chemistry.MARSH_APPARATUS.get());
+        info(registry, "gold_leaf_indicator", "tfcpp.info.gold_leaf_indicator", Instruments.GOLD_LEAF_INDICATOR_ITEM.get());
         info(registry, "iron_slag", "tfcpp.info.iron_slag", Metallurgy.IRON_SLAG.get());
         info(registry, "phosphoric_iron_slag", "tfcpp.info.phosphoric_iron_slag", Metallurgy.PHOSPHORIC_IRON_SLAG.get());
         info(registry, "thomas_slag", "tfcpp.info.thomas_slag", Metallurgy.THOMAS_SLAG.get());

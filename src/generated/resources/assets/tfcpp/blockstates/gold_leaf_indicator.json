@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "stage=0": {
+      "model": "tfcpp:block/gold_leaf_indicator_0"
+    },
+    "stage=1": {
+      "model": "tfcpp:block/gold_leaf_indicator_1"
+    },
+    "stage=2": {
+      "model": "tfcpp:block/gold_leaf_indicator_2"
+    },
+    "stage=3": {
+      "model": "tfcpp:block/gold_leaf_indicator_3"
+    }
+  }
+}

@@ -45,6 +45,9 @@ public final class Instruments
         .blockEntity(TFCBlockEntities.LAMP)));
     public static final Supplier<Block> SETTLING_BAFFLE = Metallurgy.BLOCKS.register("settling_baffle", () -> new SettlingBaffleBlock(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_ORANGE).strength(2f, 6f).sound(SoundType.STONE).requiresCorrectToolForDrops()));
 
+    /** A leaf of gold that mercury vapour whitens. It is thin and breaks in the hand, as a leaf does. */
+    public static final Supplier<Block> GOLD_LEAF_INDICATOR = Metallurgy.BLOCKS.register("gold_leaf_indicator", () -> new GoldLeafIndicatorBlock(BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).strength(0.3f).sound(SoundType.METAL).noOcclusion()));
+
     public static final Supplier<Block> MINE_FAN = Metallurgy.BLOCKS.register("mine_fan", () -> new MineFanBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3f, 6f).sound(SoundType.METAL).requiresCorrectToolForDrops()));
 
     public static final Supplier<Item> DAVY_LAMP_ITEM = Metallurgy.ITEMS.register("davy_lamp", () -> new LampBlockItem(DAVY_LAMP.get(), new Item.Properties().stacksTo(1)));
@@ -53,12 +56,15 @@ public final class Instruments
     public static final Supplier<Item> ANIMAL_CAGE = Metallurgy.ITEMS.register("animal_cage", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> SENTINEL_CAGE = Metallurgy.ITEMS.register("sentinel_cage", () -> new SentinelCageItem(new Item.Properties()));
     public static final Supplier<Item> SETTLING_BAFFLE_ITEM = Metallurgy.ITEMS.register("settling_baffle", () -> new BlockItem(SETTLING_BAFFLE.get(), new Item.Properties()));
+    public static final Supplier<Item> GOLD_LEAF_INDICATOR_ITEM = Metallurgy.ITEMS.register("gold_leaf_indicator", () -> new BlockItem(GOLD_LEAF_INDICATOR.get(), new Item.Properties()));
     public static final Supplier<Item> ARSENIC_TRIOXIDE = Metallurgy.ITEMS.register("powder/arsenic_trioxide", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> ANTIMONY_TRIOXIDE = Metallurgy.ITEMS.register("powder/antimony_trioxide", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> ZINC_OXIDE = Metallurgy.ITEMS.register("powder/zinc_oxide", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> LEAD_OXIDE = Metallurgy.ITEMS.register("powder/lead_oxide", () -> new Item(new Item.Properties()));
 
     public static final Supplier<BlockEntityType<SettlingBaffleBlockEntity>> SETTLING_BAFFLE_ENTITY = Metallurgy.BLOCK_ENTITIES.register("settling_baffle", () -> BlockEntityType.Builder.of(SettlingBaffleBlockEntity::new, SETTLING_BAFFLE.get()).build(null));
+
+    public static final Supplier<BlockEntityType<GoldLeafIndicatorBlockEntity>> GOLD_LEAF_INDICATOR_ENTITY = Metallurgy.BLOCK_ENTITIES.register("gold_leaf_indicator", () -> BlockEntityType.Builder.of(GoldLeafIndicatorBlockEntity::new, GOLD_LEAF_INDICATOR.get()).build(null));
 
     public static final Supplier<BlockEntityType<MineFanBlockEntity>> MINE_FAN_ENTITY = Metallurgy.BLOCK_ENTITIES.register("mine_fan", () -> BlockEntityType.Builder.of(MineFanBlockEntity::new, MINE_FAN.get()).build(null));
 
@@ -69,6 +75,7 @@ public final class Instruments
         output.accept(WIRE_GAUZE.get());
         output.accept(ANIMAL_CAGE.get());
         output.accept(SETTLING_BAFFLE_ITEM.get());
+        output.accept(GOLD_LEAF_INDICATOR_ITEM.get());
         output.accept(ARSENIC_TRIOXIDE.get());
         output.accept(ANTIMONY_TRIOXIDE.get());
         output.accept(ZINC_OXIDE.get());

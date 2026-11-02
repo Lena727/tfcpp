@@ -18,6 +18,7 @@ import tfcpp.core.TFCpp;
 import tfcpp.geology.NewOre;
 import tfcpp.geology.Ores;
 import tfcpp.pneumatics.instruments.DavyLampBlock;
+import tfcpp.pneumatics.instruments.GoldLeafIndicatorBlock;
 import tfcpp.pneumatics.instruments.Instruments;
 import tfcpp.pneumatics.pipes.Pipes;
 
@@ -120,6 +121,18 @@ public final class MetallurgyAssets
             simpleBlockWithItem(Metallurgy.CUPEL_HEARTH.get(), models().cubeAll("cupel_hearth", modLoc("block/cupel_hearth")));
             simpleBlockWithItem(Metallurgy.CONDENSATION_TOWER.get(), models().cubeAll("condensation_tower", modLoc("block/condensation_tower")));
             simpleBlockWithItem(Instruments.SETTLING_BAFFLE.get(), models().cubeColumn("settling_baffle", modLoc("block/settling_baffle"), modLoc("block/retort_top")));
+
+            // One model for each stage of the whitening, a plate a sixteenth thick. The item in the hand is shown as the first stage.
+            final ModelFile[] leaf = new ModelFile[4];
+            for (int stage = 0; stage < leaf.length; stage++)
+            {
+                final ResourceLocation texture = modLoc("block/gold_leaf_indicator_" + stage);
+                leaf[stage] = models().getBuilder("block/gold_leaf_indicator_" + stage)
+                    .texture("all", texture).texture("particle", texture)
+                    .element().from(0, 0, 0).to(16, 1, 16).allFaces((face, builder) -> builder.texture("#all")).end();
+            }
+            getVariantBuilder(Instruments.GOLD_LEAF_INDICATOR.get()).forAllStates(state -> ConfiguredModel.builder().modelFile(leaf[state.getValue(GoldLeafIndicatorBlock.STAGE)]).build());
+            itemModels().getBuilder("item/gold_leaf_indicator").parent(leaf[0]);
 
             horizontalBlock(Instruments.MINE_FAN.get(), models().orientable("mine_fan", modLoc("block/mine_fan_side"), modLoc("block/mine_fan_front"), modLoc("block/mine_fan_side")));
             simpleBlockItem(Instruments.MINE_FAN.get(), models().getExistingFile(modLoc("block/mine_fan")));
