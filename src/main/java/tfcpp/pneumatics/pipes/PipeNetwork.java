@@ -21,6 +21,8 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.chemistry.Chemistry;
+import tfcpp.chemistry.CorrosiveSpill;
 import tfcpp.core.LocalTime;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasMath;
@@ -144,6 +146,20 @@ public final class PipeNetwork
         return segments.size() / 2f + 1f;
     }
 
+    /**
+     * Heat that a reaction in the network gives out. The gas, the liquid and the walls all take their share of it, so the temperature rises by the energy over the whole heat capacity.
+     *
+     * @param kilojoules heat given to the network
+     */
+    public void addHeat(float kilojoules)
+    {
+        final float capacity = contents.heatCapacity() + WALL_HEAT_CAPACITY_PER_SEGMENT * segments.size();
+        if (capacity > 0f)
+        {
+            contents.temperature += kilojoules / capacity;
+        }
+    }
+
     /** Hands each segment its share back, and leaves this empty. */
     void dissolve(ServerLevel level)
     {
@@ -224,7 +240,7 @@ public final class PipeNetwork
             if (state.getBlock() instanceof PipeMember member)
             {
                 final PipeMaterial material = member.material(state);
-                float rate = contents.litres > 0f ? material.corrosion(contents.liquid) * fill : 0f;
+                float rate = contents.litres > 0f ? material.corrosion(contents.liquid, contents.temperature) * fill : 0f;
                 if (moles > 0f)
                 {
                     for (Gas gas : Gas.VALUES)
@@ -379,6 +395,10 @@ public final class PipeNetwork
             {
                 overflowLitres -= LITRES_PER_BLOCK;
                 level.setBlockAndUpdate(outside, fluid.defaultFluidState().createLegacyBlock());
+                if (fluid.is(Chemistry.CORROSIVE)) // A whole block of it on the ground splashes whoever is by it
+                {
+                    CorrosiveSpill.at(level, outside);
+                }
             }
         }
     }

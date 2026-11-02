@@ -353,3 +353,15 @@ for y in range(16):
             inner = min(x, y, 15 - x, 15 - y) == 1
             tower[y][x] = shade((116, 120, 130), (-26 if inner else 6) + (x * 7 + y * 3) % 7)
 write_png(ROOT / 'block/condensation_tower.png', tower)
+
+
+# The lead chamber: lead sheet joined at the seams, which are the dark lines between plates
+chamber = noise(161, (118, 122, 132), 6)
+for y in range(16):
+    for x in range(16):
+        if x % 8 == 7 or y % 8 == 7:
+            chamber[y][x] = shade((118, 122, 132), -40)
+write_png(ROOT / 'block/lead_chamber.png', chamber)
+
+# The sulfur burner: fire brick with a yellow crust of sulfur on it
+write_png(ROOT / 'block/sulfur_burner.png', bricks(162, (196, 170, 84)))

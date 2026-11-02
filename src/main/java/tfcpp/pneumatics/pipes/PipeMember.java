@@ -20,4 +20,14 @@ public interface PipeMember
     {
         return 0.005f;
     }
+
+    /**
+     * A block that joins its network on every side still keeps some liquid in a tank of its own, which is not in the network at all. A piston pump on a side that opens to this takes from that tank first, when the tank holds anything, and from the network otherwise. Off by default, so that the other blocks keep what the pump has always drawn from them.
+     *
+     * @return {@code true} if the tank of this block is what a pump on its open side draws from
+     */
+    default boolean tankOpenToPump(BlockState state)
+    {
+        return false;
+    }
 }

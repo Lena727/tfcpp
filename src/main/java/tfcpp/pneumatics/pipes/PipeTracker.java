@@ -15,6 +15,8 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.chemistry.Chemistry;
+import tfcpp.chemistry.CorrosiveSpill;
 import tfcpp.core.ServerConfig;
 import tfcpp.pneumatics.gas.GasAttachments;
 import tfcpp.pneumatics.gas.GasIgnition;
@@ -320,6 +322,7 @@ public final class PipeTracker
 
         final @Nullable Fluid fluid = network.fluid();
         final int blocksOfLiquid = fluid == null ? 0 : (int) (contents.litres / 1000f);
+        final boolean corrosive = fluid != null && contents.litres > 0f && fluid.is(Chemistry.CORROSIVE); // Read before the take below empties the litres
         final PipeContents released = contents.take(1f);
         PipeNetwork.release(world, hole, released);
         contents.temperature = released.temperature;
@@ -328,6 +331,10 @@ public final class PipeTracker
         if (blocksOfLiquid > 0)
         {
             spill(level, hole, fluid, Math.min(blocksOfLiquid, MAX_SPILLED_BLOCKS));
+        }
+        if (corrosive)
+        {
+            CorrosiveSpill.at(level, hole); // Any of it, even less than a block, splashes the people by the hole
         }
         if (pressure - 1f >= BLOWDOWN_GAUGE_ATM)
         {

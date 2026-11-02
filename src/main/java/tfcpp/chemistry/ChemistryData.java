@@ -139,10 +139,11 @@ public final class ChemistryData implements DataProvider
         addToTag("data/c/tags/item/coal_coke.json", "tfcpp:coke");
         addToTag("data/tfcpp/tags/item/lights_gas_burner.json", "minecraft:flint_and_steel", "tfc:firestarter", "tfc:flint_and_pyrite");
 
-        // Tar and the liquors are kept in barrels and wooden buckets in reality. They are not ingredients of any TFC recipe, so they stay out of tfc:ingredients.
-        final String[] liquids = java.util.Arrays.stream(Liquid.values()).map(liquid -> "tfcpp:" + liquid.id()).toArray(String[]::new);
+        // Tar and the liquors are kept in barrels and wooden buckets in reality. Corrosive liquids are not: they eat the wood. None of these are ingredients of any TFC recipe, so they stay out of tfc:ingredients.
+        final String[] liquids = java.util.Arrays.stream(Liquid.values()).filter(liquid -> !liquid.isCorrosive()).map(liquid -> "tfcpp:" + liquid.id()).toArray(String[]::new);
         addToTag("data/tfc/tags/fluid/usable_in_barrel.json", liquids);
         addToTag("data/tfc/tags/fluid/usable_in_wooden_bucket.json", liquids);
+        addToTag("data/tfcpp/tags/fluid/corrosive.json", java.util.Arrays.stream(Liquid.values()).filter(Liquid::isCorrosive).map(liquid -> "tfcpp:" + liquid.id()).toArray(String[]::new));
         for (Liquid liquid : Liquid.values())
         {
             addToTag("data/c/tags/fluid/" + liquid.id() + ".json", "tfcpp:" + liquid.id());
@@ -160,6 +161,15 @@ public final class ChemistryData implements DataProvider
         burner.getAsJsonObject("key").add("C", item("tfc:brass_mechanisms"));
         burner.getAsJsonObject("key").add("B", item("tfc:metal/sheet/wrought_iron"));
         put("data/tfcpp/recipe/crafting/gas_burner.json", burner);
+
+        // Lead sheet walls: lead is what the acid cannot eat while it is cool
+        final JsonObject chamber = shaped("tfcpp:lead_chamber", "SSS", "S S", "SSS");
+        chamber.getAsJsonObject("key").add("S", item("tfcpp:metal/sheet/lead"));
+        put("data/tfcpp/recipe/crafting/lead_chamber.json", chamber);
+
+        final JsonObject sulfurBurner = shaped("tfcpp:sulfur_burner", "BBB", "B B", "BBB");
+        sulfurBurner.getAsJsonObject("key").add("B", item("tfc:ceramic/fire_brick"));
+        put("data/tfcpp/recipe/crafting/sulfur_burner.json", sulfurBurner);
     }
 
     private void put(String path, JsonElement json)

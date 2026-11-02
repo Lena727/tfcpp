@@ -40,6 +40,9 @@ bash tools/verify.sh --client   # то же, плюс настоящий кли�
 | Блок сети, который берёт вещество из газа сети: пыль и ртуть по температуре | `metallurgy/CondensationTowerBlock` и `CondensationTowerBlockEntity`, чистая физика `TowerCondensation`; тесты `core/LeadGameTests` |
 | Конвертер и его продувка | `metallurgy/ConverterBath` (чистая физика), `ConverterBlockEntity` |
 | Купелляция: серебро из веркблея, блик, глёт | `metallurgy/CupellationBath` (чистая физика), `CupelHearthBlockEntity`, `CupelHearthBlock`; время по `tickClock`, тесты `core/LeadGameTests` |
+| Свинцовая камера: серная кислота из SO₂, воздуха, воды и окислов | `chemistry/ChamberProcess` (чистая физика), `LeadChamberBlock`, `LeadChamberBlockEntity`; тесты `core/AcidGameTests` |
+| Серная горелка: сера в SO₂ из воздуха сети | `chemistry/SulfurBurning` (чистая физика), `SulfurBurnerBlock`, `SulfurBurnerBlockEntity`; тесты `core/AcidGameTests` |
+| Разлив едкой жидкости: ожог рядом | `chemistry/CorrosiveSpill`, зовётся из `PipeTracker.blowDown`, `PipeNetwork.overflow` и `LeadChamberBlockEntity.spill`; тег `tfcpp:corrosive` |
 | Смешанная загрузка домны, фосфористое железо | `metallurgy/IronBlend`, миксины `IronBlendMixins`, данные в `MetallurgyData.ironAndSteel`, `castableIngot`, `thomasProcess` |
 | Текстуры | `tools/generate_textures.py` |
 | Игровые тесты | `core/PhosphorusGameTests` (свежий образец: домна, конвертер, футеровка, сохранение), `ChemistryGameTests`, `GasGameTests`, `IronGameTests` |
@@ -52,6 +55,8 @@ bash tools/verify.sh --client   # то же, плюс настоящий кли�
 - `tfc:molten_metals` включает расплав в тег для ingot mold. `c:ingots` задаёт размер слитка: без родительского тега слиток считается мелким и складывается по 64.
 - Сплав не может содержать свой результат как компонент.
 - Топка (`FireboxBlockEntity`) расходует топливо своим методом, не через `AbstractFirepitBlockEntity`.
+- Насос берёт из сети, если блок открыт к нему. Блок, который открыт со всех сторон, но держит жидкость в своём баке (камера с кислотой), отдаёт бак первым: `PipeMember.tankOpenToPump`. У печи, которая открыта только вверх, поведение прежнее.
+- Игрок в серверном тесте не получает урон, пока его нет в мире: `helper.getLevel().addFreshEntity(player)`, иначе `getEntitiesOfClass` его не найдёт.
 - Бочки, вёдра и кувшины фильтруют жидкости по белым спискам. Едкие жидкости нельзя добавлять в `tfc:ingredients`.
 - Домна и сыродутная печь выбирают рецепт по первой загруженной крице/руде (по её расплаву): в `BlastFurnaceBlockEntity` см. `updateCachedRecipe`, `addItemsFromWorld`; то, что не подходит ни как сырьё, ни как катализатор рецепта, просто не принимается. У домны нет сплава: один `inputFluid`, и другая жидкость в нём заменяет прежнюю (`insertOrReplaceFluid`), а `outputFluidTank.fill` другой жидкости молча возвращает 0.
 - Сплав тигля (`FluidAlloy`) требует, чтобы каждая жидкость в нём была названа в рецепте: лишний металл даёт `Metal.UNKNOWN`, не сталь. Отдельный перечень «запрещено» не нужен.

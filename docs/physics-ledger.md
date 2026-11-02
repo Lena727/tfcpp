@@ -25,6 +25,13 @@
 | LEAD: коррозия от Cl2 (`corrosion(Gas.CHLORINE)`) | `0.1f` | доля стенки в сутки | Chlorine still attacks lead. |
 | LEAD: коррозия от H2S (`corrosion(Gas.HYDROGEN_SULFIDE)`) | `0.05f` | доля стенки в сутки | Hydrogen sulfide blackens lead. |
 | LEAD: коррозия от уксуса (`corrosion("tfc:vinegar")`) | `0.1f` | доля стенки в сутки | Vinegar dissolves lead, as it did in Roman wine. Вдвое больше, чем у меди (0,05). |
+| NITROGEN_OXIDES: коррозия (`corrosion(Gas.NITROGEN_OXIDES)`) | WOOD `0.05f`, COPPER `0.1f`, WROUGHT_IRON и STEEL `0.05f`, LEAD `0f` (по умолчанию), CERAMIC `0f` | доля стенки в сутки | Wet oxides make nitric acid, which chars wood and dissolves copper. Nitric acid passivates iron, so iron takes less than copper. Lead takes nothing, as in the lead chambers that ran on these oxides. |
+| Кислота камерная (`corrosion("tfcpp:chamber_acid", T)`) | WOOD `0.5f`, CERAMIC `0f`, COPPER `0.2f`, WROUGHT_IRON и STEEL `0.5f`, LEAD `0.001f` до 353 K | доля стенки в сутки | Chamber acid is about 65% sulfuric acid. Lead holds it under a film of sulfate. |
+| Серная кислота (`corrosion("tfcpp:sulfuric_acid", T)`) | WOOD `1.0f`, CERAMIC `0f`, COPPER `0.1f`, WROUGHT_IRON и STEEL `0.01f`, LEAD `0.1f` до 353 K | доля стенки в сутки | Strong sulfuric acid passivates iron, which is why steel carried oil of vitriol. Для свинца `0.1f` в сто раз больше камерной кислоты (`0.001f`) при той же плёнке сульфата: значение проекта под вопросом, см. отчёт. |
+| Азотная кислота (`corrosion("tfcpp:nitric_acid", T)`) | WOOD `1.0f`, CERAMIC `0f`, COPPER `2.0f`, WROUGHT_IRON и STEEL `0.02f`, LEAD `0.5f` | доля стенки в сутки | Strong nitric acid passivates iron. Copper dissolves in it quickly. |
+| Соляная кислота (`corrosion("tfcpp:hydrochloric_acid", T)`) | WOOD `0.02f`, CERAMIC `0f`, COPPER `0.1f`, WROUGHT_IRON и STEEL `2.0f`, LEAD `0.1f` | доля стенки в сутки | Chloride ions keep iron from passivating, so it rusts quickly. |
+| Температура, выше которой горячая кислота растворяет плёнку на свинце (`HOT_ACID_KELVIN`) | `353f` | K | Hot acid dissolves the film of lead sulfate above 80 C. |
+| Множитель коррозии свинца в горячей кислоте (`HOT_ACID_FACTOR`) | `20f` | безразм. | A game figure, not measured: the film is gone and the lead is 20 times worse. |
 | WROUGHT_IRON: прочность (`strength`) | `180f` | МПа | — |
 | WROUGHT_IRON: толщина стенки (`wall`) | `4f` | мм | — |
 | WROUGHT_IRON: максимальная температура (`maximumTemperature`) | `900f` | ? | — |
@@ -63,6 +70,7 @@
 | HYDROGEN_SULFIDE: молярная масса (`molarMass`) | `34.08f` | г/моль | — |
 | AMMONIA: молярная масса (`molarMass`) | `17.03f` | г/моль | — |
 | CHLORINE: молярная масса (`molarMass`) | `70.90f` | г/моль | — |
+| NITROGEN_OXIDES: молярная масса (`molarMass`) | `46.01f` | г/моль | Nitrogen dioxide, NO2. It carries the oxygen to the sulfur dioxide in a lead chamber. |
 | MERCURY_VAPOR: молярная масса (`molarMass`) | `200.59f` | г/моль | Air at 20 C can only hold about 13 mg/m3 of mercury vapour, or 1.6 ppm. |
 | MERCURY_VAPOR: насыщение (`saturationMoles`) | `6.6e-5f` | моль на ячейку | Air at 20 C can only hold about 13 mg/m3 of mercury vapour, or 1.6 ppm. |
 | MERCURY_VAPOR: скорость осаждения избытка (`depositionRate`) | `0.05f` | 1/с | Air at 20 C can only hold about 13 mg/m3 of mercury vapour, or 1.6 ppm. |
@@ -413,3 +421,72 @@
 | Свинец, который принимает порошок золы (`ASH_MILLIBUCKETS_PER_POWDER`) | `500f` | мБ Pb на порошок | Lead that one powder of bone ash can serve before it is full. A game figure, not measured. |
 | Ёмкость горна (`CAPACITY_MILLIBUCKETS`) | `1000f` | мБ Pb | The most work lead one hearth takes at once. A game size, not a measurement. |
 | Кислорода на моль свинца (`OXYGEN_PER_LEAD`) | `0.5f` | моль O2 на моль Pb | 2 Pb + O2 -> 2 PbO, so half a mole of oxygen for each mole of lead. |
+
+## chemistry/ChamberProcess
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Константа скорости (`RATE_CONSTANT`) | `0.26f` | моль/(с·м³) на единицу доли SO2 | Fitted to the output of real plants, not derived from kinetics: 7% SO2 gives about 2.5 kg of acid per m3 per day of 1440 s. |
+| Доля оксидов азота, при которой они перестают ограничивать (`NITROGEN_OXIDES_FULL`) | `0.002f` | доля | They are a carrier, not a reagent: a few tenths of a percent is enough. |
+| Доля кислорода, при которой он перестаёт ограничивать (`OXYGEN_FULL`) | `0.06f` | доля | Below it the chamber slows. |
+| Доля кислорода в воздухе (`OXYGEN_IN_AIR`) | `0.2095f` | доля | — |
+| Кислорода на моль кислоты (`OXYGEN_PER_MOLE`) | `0.5f` | моль O2 на моль H2SO4 | SO2 + 1/2 O2 + H2O: half a mole of oxygen for each mole of acid. |
+| Вода на моль кислоты (`WATER_LITRES_PER_MOLE`) | `0.071f` | л на моль | 18 g of water goes into the acid and 53 g dilutes it to 65%: 71 g. |
+| Объём кислоты на моль (`ACID_LITRES_PER_MOLE`) | `0.0975f` | л на моль | 98 g of H2SO4 at 65% is 151 g, at 1.55 kg/L. |
+| Потери оксидов на моль кислоты (`OXIDES_LOST_PER_MOLE`) | `0.01f` | моль на моль | A plant without a Gay-Lussac tower lost about 3 kg of saltpeter per 100 kg of sulfur, about 0.01 mol per mol S. |
+| Теплота на моль кислоты (`HEAT_KILOJOULES_PER_MOLE`) | `230f` | кДж/моль | SO2 to SO3 gives 99 kJ; SO3 taken up by water gives about 132 kJ more. |
+| Выход кислоты на 1 м³ за сутки при 7% SO2 | около 26 моль, 2,57 кг H2SO4 | моль, кг | Проверка по `ChamberProcessTest`: 0.26 x 0.07 x 1440 с. |
+
+## chemistry/SulfurBurning
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Масса порошка серы (`GRAMS_PER_POWDER`) | `50f` | г | Один порошок, размер порошка мода. |
+| Моль серы в порошке (`MOLES_PER_POWDER`) | `50f / 32.07f` | моль | 50 g over the molar mass of S, 32.07 g/mol. |
+| Скорость горения маленькой горелки (`MOLES_PER_SECOND`) | `2f / 32.07f` | моль/с | A small burner, 2 g/s. |
+| Теплота S + O2 -> SO2 (`HEAT_KILOJOULES_PER_MOLE`) | `297f` | кДж/моль | S(s) + O2 -> SO2 is 296.8 kJ per mole of S, rounded up. |
+| Минимальная доля кислорода (`LEAST_OXYGEN_SHARE`) | `0.05f` | доля | Below this the burn smoulders out. A figure for a small burner, not measured. |
+| Азот в воздухе (`NITROGEN_IN_AIR`) | `0.7905f` | доля | Rest of the air: 1 - 0.2095. |
+
+## chemistry/Liquid
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| CHAMBER_ACID: плотность (`density`) | `1550` | кг/м³ | About 65% sulfuric acid, 1.55 kg/L. |
+| CHAMBER_ACID: вязкость (`viscosity`) | `10f` | мПа·с | About 10 cP on the scale of the other liquids. |
+| CHAMBER_ACID: едкость (`corrosive`) | `true` | — | Eats wood, so it never goes into a barrel or a wooden bucket (тег `tfcpp:corrosive`). |
+
+## chemistry/LeadChamberBlock
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Объём (`VOLUME`) | `1f` | м³ | A chamber a metre across, and open: the whole of the block is gas space. |
+| Материал (`PipeMaterial.LEAD`) | — | — | Lead: 5 МПа, стенка 6 мм, размягчается около 150 °C. Холодная камерная кислота держится под плёнкой сульфата (`leadUnderAcid`). |
+| Теплопотери (`HEAT_LOSS`) | `0.02f` | кВт/К | Real chambers were built big and thin, to lose their heat. A thin lead sheet on air gives its heat away faster than brick (0,012). A game figure, not measured. |
+| Соединение | все стороны | — | Joins pipe on every side, as a chamber is a room of the network. |
+| Вода в реакции | `contents.litres`, если жидкость сети вода, иначе 0 | л | Only water in the network makes acid: a chamber with brine or nothing else makes none. |
+
+## chemistry/LeadChamberBlockEntity
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Ёмкость бака (`TANK_MILLIBUCKETS`) | `100` | мБ = л | A tank of 100 L, at 1 мБ = 1 л. |
+| Окислы азота с порошком селитры (`SALTPETER_MOLES_PER_POWDER`) | `0.5f` | моль на порошок | 50 g of KNO3 is about half a mole, burnt with sulfur in the nitre pot. |
+| Порог «полон» для кислоты в баке | `TANK_MILLIBUCKETS - amount - pending` | мБ | Room is the tank less what is in it and what waits as a fraction, so that a whole millibucket always fits. |
+
+## chemistry/SulfurBurnerBlock
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Объём (`VOLUME`) | `0.1f` | м³ | About a tenth of a cubic metre: a trough, not a room. |
+| Материал | CERAMIC (`PipeMaterial.CERAMIC`) | — | Fire-clay takes the hot flue of sulfur. |
+| Соединение | все стороны, кроме верха | — | Open on the top, where the sulfur is put in: a pipe above it does not join. |
+
+## chemistry/SulfurBurnerBlockEntity
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Ёмкость (`CAPACITY_POWDERS`) | `64` | порошков | A game size: 64 powders of 50 g, 3.2 kg of sulfur. |
+| Допуск «полон» (`EPSILON`) | `1e-3f` | моль | Float noise, not sulfur. |
+| Сжигание | `SulfurBurning.burn`, каждую секунду | моль/с | Lit by the hot flue: sulfur in air with oxygen burns with no further step. A decision of the design, not a measurement. |
+
+## chemistry/CorrosiveSpill
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Радиус (`RADIUS`) | `3.0` | блоки | A splash reaches three blocks from the place it came out. A game figure. |
+| Доля максимального здоровья (`SHARE_OF_MAX_HEALTH`) | `0.3f` | доля | A few hits of a splash are a bad burn. A game figure, not measured. |
+| Тип урона (`tfcpp:corrosive`, усталость) | `0f` | — | Its own death message, so that the death says acid, not a blow. Armour gives some protection, as against a splash. |
+| Точки вызова | разлив камеры, разрыв трубы в `PipeTracker.blowDown`, перелив в `PipeNetwork.overflow` | — | Only when the liquid is in `tfcpp:corrosive`. A chamber splashes whether or not its tank was full. |

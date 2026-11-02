@@ -102,6 +102,25 @@ class PipePhysicsTest
     }
 
     @Test
+    void acidsEatTheMetalsTheyEatAndLeadHoldsColdChamberAcid()
+    {
+        final String chamber = "tfcpp:chamber_acid", sulfuric = "tfcpp:sulfuric_acid";
+        final String[] acids = {chamber, sulfuric, "tfcpp:nitric_acid", "tfcpp:hydrochloric_acid"};
+        assertTrue(PipeMaterial.WROUGHT_IRON.corrosion(chamber, PipePhysics.ROOM_TEMPERATURE) > 10f * PipeMaterial.WROUGHT_IRON.corrosion(sulfuric, PipePhysics.ROOM_TEMPERATURE), "Chamber acid eats iron, and strong sulfuric acid hardly does");
+        assertTrue(PipeMaterial.STEEL.corrosion(chamber, PipePhysics.ROOM_TEMPERATURE) > 0.1f, "Steel is eaten by chamber acid");
+        for (String acid : acids)
+        {
+            assertEquals(0f, PipeMaterial.CERAMIC.corrosion(acid, 360f), "Ceramic takes nothing from " + acid);
+        }
+        final float cold = PipeMaterial.LEAD.corrosion(chamber, 300f);
+        assertTrue(cold < 0.01f, "Lead holds chamber acid while it is cool, got " + cold);
+        assertEquals(20f * cold, PipeMaterial.LEAD.corrosion(chamber, 360f), 1e-6f, "Above 80 C the film is gone and the lead is 20 times worse");
+        assertEquals(20f * PipeMaterial.LEAD.corrosion(sulfuric, 300f), PipeMaterial.LEAD.corrosion(sulfuric, 360f), 1e-6f, "The same for sulfuric acid");
+        assertEquals(PipeMaterial.LEAD.corrosion(chamber, 300f), PipeMaterial.LEAD.corrosion("tfcpp:chamber_acid", 293f), 0f, "Cool enough is the same at any temperature below 80 C");
+        assertEquals(PipeMaterial.COPPER.corrosion("tfc:vinegar"), PipeMaterial.COPPER.corrosion("tfc:vinegar", PipePhysics.ROOM_TEMPERATURE), 0f, "The old method is the new one at room temperature");
+    }
+
+    @Test
     void contentsSplitAndJoinWithoutLoss()
     {
         final PipeContents contents = new PipeContents();

@@ -115,6 +115,8 @@ public final class Physiology
             case HYDROGEN_SULFIDE -> severity(ppm, 50, 100, 700); // IDLH 100 ppm, collapse in one breath near 700 ppm
             case CHLORINE -> severity(ppm, 3, 10, 1000); // IDLH 10 ppm, fatal within minutes at 400 ppm, and in a few breaths at 1000 ppm
             case AMMONIA -> severity(ppm, 100, 300, 5000); // IDLH 300 ppm
+            // NIOSH IDLH for NO2 is 20 ppm. Hours later the lungs fill with fluid, so there is little warning.
+            case NITROGEN_OXIDES -> severity(ppm, 5, 20, 200);
             default -> 0;
         };
     }
@@ -137,6 +139,7 @@ public final class Physiology
             case HYDROGEN_SULFIDE -> ppm >= 0.5f;
             case AMMONIA -> ppm >= 5;
             case CHLORINE -> ppm >= 0.5f;
+            case NITROGEN_OXIDES -> ppm >= 1;
             default -> false;
         };
     }

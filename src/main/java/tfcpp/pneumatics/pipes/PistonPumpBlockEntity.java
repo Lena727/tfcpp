@@ -113,7 +113,7 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
 
         final BlockPos inletPos = worldPosition.relative(facing.getOpposite());
         // A device such as an oven is a block of a network too, but its tanks are the only thing open toward the pump
-        final @Nullable PipeNetwork input = opensToward(level, inletPos, facing) ? pipes.networkAt(inletPos) : null;
+        final @Nullable PipeNetwork input = opensToward(level, inletPos, facing) && !takenFromTank(level, inletPos, facing) ? pipes.networkAt(inletPos) : null;
         final float inletPressure = input == null ? 1f : input.pressure();
         final float torque = FRICTION_TORQUE + PipePhysics.pistonTorque(SWEPT_VOLUME, output.pressure() - inletPressure);
 
@@ -134,6 +134,29 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
     {
         final BlockState state = level.getBlockState(pos);
         return state.getBlock() instanceof PipeMember member && member.connects(state, side);
+    }
+
+    /** @return {@code true} if the block here keeps liquid in a tank that a pump on this side takes before anything in its network, and the tank holds some */
+    private static boolean takenFromTank(ServerLevel level, BlockPos pos, Direction side)
+    {
+        final BlockState state = level.getBlockState(pos);
+        if (!(state.getBlock() instanceof PipeMember member) || !member.tankOpenToPump(state))
+        {
+            return false;
+        }
+        final @Nullable IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, side);
+        if (handler == null)
+        {
+            return false;
+        }
+        for (int tank = 0; tank < handler.getTanks(); tank++)
+        {
+            if (!handler.getFluidInTank(tank).isEmpty())
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void fromNetwork(PipeNetwork input, PipeNetwork output, float swept, float litres)

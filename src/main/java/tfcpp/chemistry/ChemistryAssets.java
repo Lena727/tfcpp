@@ -64,6 +64,9 @@ public final class ChemistryAssets
             final ModelFile lit = models().cubeBottomTop("gas_burner_lit", modLoc("block/gas_burner_side"), modLoc("block/gas_burner_bottom"), modLoc("block/gas_burner_top_lit"));
             getVariantBuilder(Chemistry.GAS_BURNER.get()).forAllStates(state -> ConfiguredModel.builder().modelFile(state.getValue(GasBurnerBlock.LIT) ? lit : unlit).build());
             simpleBlockItem(Chemistry.GAS_BURNER.get(), unlit);
+
+            simpleBlockWithItem(Chemistry.LEAD_CHAMBER.get(), models().cubeAll("lead_chamber", modLoc("block/lead_chamber")));
+            simpleBlockWithItem(Chemistry.SULFUR_BURNER.get(), models().cubeAll("sulfur_burner", modLoc("block/sulfur_burner")));
         }
     }
 

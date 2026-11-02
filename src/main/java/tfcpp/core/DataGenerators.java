@@ -23,6 +23,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 import tfcpp.chemistry.ChemistryAssets;
 import tfcpp.chemistry.ChemistryData;
+import tfcpp.chemistry.CorrosiveSpill;
 import tfcpp.geology.NewOre;
 import tfcpp.geology.OreData;
 import tfcpp.metallurgy.MetallurgyAssets;
@@ -44,6 +45,7 @@ public final class DataGenerators
                 context.register(Breathing.CARBON_MONOXIDE, new DamageType("tfcpp.carbon_monoxide", 0f));
                 context.register(Breathing.TOXIC_GAS, new DamageType("tfcpp.toxic_gas", 0f));
                 context.register(GasIgnition.BLAST, new DamageType("tfcpp.blast", 0.1f));
+                context.register(CorrosiveSpill.CORROSIVE, new DamageType("tfcpp.corrosive", 0f));
             }), Set.of(TFCpp.MOD_ID)));
 
         event.getGenerator().addProvider(event.includeServer(), new DamageTags(output, datapack.getRegistryProvider(), event.getExistingFileHelper()));
@@ -104,10 +106,12 @@ public final class DataGenerators
             add("death.attack.tfcpp.asphyxiation", "%1$s ran out of air to breathe");
             add("death.attack.tfcpp.carbon_monoxide", "%1$s fell asleep and never woke up");
             add("death.attack.tfcpp.toxic_gas", "%1$s choked on toxic fumes");
+            add("death.attack.tfcpp.corrosive", "%1$s was scalded by a splash of acid");
             add("tfcpp.gas.smell.sulfur_dioxide", "A sharp, choking smell of burning sulfur catches your throat");
             add("tfcpp.gas.smell.hydrogen_sulfide", "The air stinks of rotten eggs");
             add("tfcpp.gas.smell.ammonia", "A pungent smell of ammonia stings your eyes");
             add("tfcpp.gas.smell.chlorine", "A sharp bleach-like smell burns your nose");
+            add("tfcpp.gas.smell.nitrogen_oxides", "A sharp, acrid smell of nitrous fumes stings your eyes");
 
             add("itemGroup.tfcpp", "TFC++");
             add("fluid_type.tfcpp.metal.arsenical_copper", "Molten Arsenical Copper");
@@ -254,10 +258,27 @@ public final class DataGenerators
             add("fluid_type.tfcpp.wood_tar", "Wood Tar");
             add("fluid_type.tfcpp.ammonia_liquor", "Ammoniacal Liquor");
             add("fluid_type.tfcpp.pyroligneous_liquor", "Pyroligneous Liquor");
+            add("fluid_type.tfcpp.chamber_acid", "Chamber Acid");
             add("item.tfcpp.coke", "Coke");
             add("item.tfcpp.lignite_char", "Lignite Char");
             add("block.tfcpp.coke_oven", "Coke Oven");
             add("block.tfcpp.gas_burner", "Gas Burner");
+            add("block.tfcpp.lead_chamber", "Lead Chamber");
+            add("block.tfcpp.sulfur_burner", "Sulfur Burner");
+            add("tfcpp.lead_chamber.status", "Gas %1$s C. Acid in the tank: %2$s mB. In the gas: sulfur dioxide %3$s%%, oxygen %4$s%%, nitrogen oxides %5$s%%. Water: %6$s L");
+            add("tfcpp.lead_chamber.no_network", "Not joined to a pipe: no gas passes through it");
+            add("tfcpp.lead_chamber.acid", "Acid in the tank: %1$s mB");
+            add("tfcpp.lead_chamber.no_water", "No water in the network: no acid can form");
+            add("tfcpp.lead_chamber.oxides_low", "Nitrogen oxides are below %1$s%%: the reaction is slow until saltpeter brings them in");
+            add("tfcpp.lead_chamber.oxygen_low", "Oxygen is below %1$s%%: the reaction is slow");
+            add("tfcpp.lead_chamber.empty", "The tank holds no acid");
+            add("tfcpp.lead_chamber.refused", "This container does not take chamber acid");
+            add("tfcpp.lead_chamber.saltpeter", "Saltpeter goes into the gas as nitrous fumes");
+            add("tfcpp.lead_chamber.saltpeter_no_network", "Not joined to a pipe: the nitrous fumes have nowhere to go");
+            add("tfcpp.sulfur_burner.status", "Sulfur in the burner: %1$s of %2$s powders");
+            add("tfcpp.sulfur_burner.no_network", "Not joined to a pipe: nothing burns without a network");
+            add("tfcpp.sulfur_burner.full", "The burner is full of sulfur");
+            add("tfcpp.sulfur_burner.no_air", "Oxygen is below %1$s%%: the sulfur smoulders out and does not burn");
             add("tfcpp.coke_oven.status", "%1$s C, charge: %2$s, %3$s%% done, tar: %4$s mB, liquor: %5$s mB");
             add("tfcpp.coke_oven.status.empty", "empty");
             add("tfcpp.coke_oven.too_cold", "Nothing changes below %1$s C");
@@ -304,10 +325,12 @@ public final class DataGenerators
             add("death.attack.tfcpp.asphyxiation", "%1$s задохнулся: в воздухе не осталось кислорода");
             add("death.attack.tfcpp.carbon_monoxide", "%1$s уснул и больше не проснулся");
             add("death.attack.tfcpp.toxic_gas", "%1$s отравился ядовитыми испарениями");
+            add("death.attack.tfcpp.corrosive", "%1$s обжёгся брызгами кислоты");
             add("tfcpp.gas.smell.sulfur_dioxide", "Резкий удушливый запах горелой серы перехватывает горло");
             add("tfcpp.gas.smell.hydrogen_sulfide", "В воздухе стоит запах тухлых яиц");
             add("tfcpp.gas.smell.ammonia", "Едкий запах нашатыря щиплет глаза");
             add("tfcpp.gas.smell.chlorine", "Резкий запах хлорки обжигает нос");
+            add("tfcpp.gas.smell.nitrogen_oxides", "Едкий запах окислов азота режет глаза");
 
             add("itemGroup.tfcpp", "TFC++");
             add("fluid_type.tfcpp.metal.arsenical_copper", "Расплав мышьяковистой меди");
@@ -455,10 +478,27 @@ public final class DataGenerators
             add("fluid_type.tfcpp.wood_tar", "Древесный дёготь");
             add("fluid_type.tfcpp.ammonia_liquor", "Надсмольная аммиачная вода");
             add("fluid_type.tfcpp.pyroligneous_liquor", "Подсмольная вода");
+            add("fluid_type.tfcpp.chamber_acid", "Камерная кислота");
             add("item.tfcpp.coke", "Кокс");
             add("item.tfcpp.lignite_char", "Буроугольный полукокс");
             add("block.tfcpp.coke_oven", "Коксовая печь");
             add("block.tfcpp.gas_burner", "Газовая горелка");
+            add("block.tfcpp.lead_chamber", "Свинцовая камера");
+            add("block.tfcpp.sulfur_burner", "Серная горелка");
+            add("tfcpp.lead_chamber.status", "Газ %1$s °C. Кислоты в баке: %2$s мБ. В газе: диоксид серы %3$s%%, кислород %4$s%%, окислы азота %5$s%%. Воды: %6$s л");
+            add("tfcpp.lead_chamber.no_network", "Не соединена с трубой: газ через неё не идёт");
+            add("tfcpp.lead_chamber.acid", "Кислоты в баке: %1$s мБ");
+            add("tfcpp.lead_chamber.no_water", "В сети нет воды: кислота не образуется");
+            add("tfcpp.lead_chamber.oxides_low", "Окислов азота меньше %1$s%%: реакция идёт медленно, пока селитра их не даст");
+            add("tfcpp.lead_chamber.oxygen_low", "Кислорода меньше %1$s%%: реакция идёт медленно");
+            add("tfcpp.lead_chamber.empty", "В баке нет кислоты");
+            add("tfcpp.lead_chamber.refused", "Эта ёмкость не принимает камерную кислоту");
+            add("tfcpp.lead_chamber.saltpeter", "Селитра уходит в газ окислами азота");
+            add("tfcpp.lead_chamber.saltpeter_no_network", "Не соединена с трубой: окислам некуда деться");
+            add("tfcpp.sulfur_burner.status", "Серы в горелке: %1$s из %2$s порошков");
+            add("tfcpp.sulfur_burner.no_network", "Не соединена с трубой: без сети горелка не горит");
+            add("tfcpp.sulfur_burner.full", "Горелка полна серы");
+            add("tfcpp.sulfur_burner.no_air", "Кислорода меньше %1$s%%: сера тлеет и гаснет, не горя");
             add("tfcpp.coke_oven.status", "%1$s °C, загрузка: %2$s, готово %3$s%%, смола: %4$s мБ, вода: %5$s мБ");
             add("tfcpp.coke_oven.status.empty", "пусто");
             add("tfcpp.coke_oven.too_cold", "Ниже %1$s °C ничего не происходит");
