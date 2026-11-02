@@ -18,6 +18,13 @@
 | COPPER: прочность (`strength`) | `70f` | МПа | — |
 | COPPER: толщина стенки (`wall`) | `4f` | мм | — |
 | COPPER: максимальная температура (`maximumTemperature`) | `700f` | ? | — |
+| LEAD: прочность (`strength`) | `5f` | МПа | Lead is weak and creeps under load, but it is proof against sulfuric acid. Низкая, потому что свинец течёт под нагрузкой. |
+| LEAD: толщина стенки (`wall`) | `6f` | мм | Толще меди: свинец слабее, стенку берут толще. |
+| LEAD: максимальная температура (`maximumTemperature`) | `423f` | K | It softens at about 150 C: 423 K. |
+| LEAD: коррозия от SO2 (`corrosion(Gas.SULFUR_DIOXIDE)`) | `0f` | доля стенки в сутки | Sulfur dioxide makes a film of lead sulfate that protects the metal. |
+| LEAD: коррозия от Cl2 (`corrosion(Gas.CHLORINE)`) | `0.1f` | доля стенки в сутки | Chlorine still attacks lead. |
+| LEAD: коррозия от H2S (`corrosion(Gas.HYDROGEN_SULFIDE)`) | `0.05f` | доля стенки в сутки | Hydrogen sulfide blackens lead. |
+| LEAD: коррозия от уксуса (`corrosion("tfc:vinegar")`) | `0.1f` | доля стенки в сутки | Vinegar dissolves lead, as it did in Roman wine. Вдвое больше, чем у меди (0,05). |
 | WROUGHT_IRON: прочность (`strength`) | `180f` | МПа | — |
 | WROUGHT_IRON: толщина стенки (`wall`) | `4f` | мм | — |
 | WROUGHT_IRON: максимальная температура (`maximumTemperature`) | `900f` | ? | — |
@@ -279,6 +286,13 @@
 | Фосфор в томасовской муке (`THOMAS_MEAL_PHOSPHORUS`) | `0.15f` | доля, шкала удобрений TFC | основной шлак содержит 15-20% P2O5 |
 | Томасовской муки из куска шлака | `4` | шт | кусок шлака 2 моль P (4CaO·P2O5, 366 г), порошок 50 г: даже меньше, чем по массе |
 | Порошка доломита из булыжника | `2` | шт | по образцу TFC для флюса |
+| Глёт: углерод на порошок (`LITHARGE_CARBON`) | `0.125f` | моль C на порошок | 2 PbO + C -> 2 Pb + CO2: порошок 0,25 моль PbO, значит 0,125 моль C и 0,125 моль CO2 |
+| Свинец из порошка глёта (`LITHARGE_LEAD_MILLIBUCKETS`) | `4` | мБ | Lead in one powder of litharge is 4.57 mL, and a tank holds whole millibuckets, so 4 mB; 0,57 мл округлением теряются |
+| Температура восстановления глёта (`LITHARGE_REDUCTION_TEMPERATURE`) | `800f` | °C | Выше плавления свинца (327 C), ниже кипения (1749 C). Цинку нужно 1000 C |
+| Температура обжига костной муки (`BONE_ASH_TEMPERATURE`) | `700f` | °C | Bone meal burns to bone ash once its organic matter is gone |
+| Теплоёмкость костной муки (`item_heat`, `heat_capacity`) | `0.7f` | шкала TFC | Как у молотого известняка и остальных порошков TFC |
+| Объём свинцового листа | `100` | мБ | Лист равен одному слитку (100 мБ), а не двойному слитку TFC (200 мБ): иначе рецепт из одного слитка создавал бы металл |
+| Температура ковки свинцового листа (`forging_temperature`) | `0f` | °C | Lead recrystallises at room temperature, so it has no forging temperature to meet; 0 means any heat will do |
 
 ## metallurgy/RetortBlockEntity
 | Величина | Значение | Единицы | Источник из комментария |
@@ -288,12 +302,40 @@
 | Ртуть в ампуле (`MERCURY_BULB_MILLIBUCKETS`) | `5` | мБ | — |
 | Миллибакетов в слитке (`MILLIBUCKETS_PER_INGOT`) | `100` | мБ | — |
 
-## pneumatics/instruments/SettlingBaffleBlockEntity
+## pneumatics/instruments/DustStore
+Общее хранилище пыли перегородки и конденсационной башни.
+
 | Величина | Значение | Единицы | Источник из комментария |
 |---|---|---|---|
 | Моль на предмет порошка (`MOLES_PER_POWDER`) | `0.25f` | моль на предмет | One item of powder, about 50 g of arsenic trioxide. |
+| Доля собранной пыли, поднимаемая обратно при сборе (`STIRRED_UP`) | `0.05f` | доля | Share of what is scraped off that goes up into the air as well. |
+
+## pneumatics/instruments/SettlingBaffleBlockEntity
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
 | Доля газа, осаждаемая за такт в секунду (`CAPTURE_PER_SECOND`) | `0.05f` | 1/с | — |
-| Доля собранной пыли, поднимаемая обратно при сборе (`STIRRED_UP`) | `0.05f` | доля | — |
+
+## metallurgy/TowerCondensation
+Чистая физика конденсационной башни. Доля захвата за шаг `1 - exp(-CAPTURE_RATE * t)`, поэтому длина шага ничего не меняет. N башен в одной сети ловят в N раз быстрее (каждая берёт свою долю у того, что оставила прошлая).
+
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Скорость захвата (`CAPTURE_RATE`) | `0.05f` | 1/с | The same share as a baffle takes: 5% a second of the dust, or of the mercury vapour, in the gas. |
+| Потолок оседания оксидной пыли (`DUST_CEILING_KELVIN`) | `523f` | К | 250 C. Above it the oxide fume of As, Sb, Zn and Pb stays in the gas. |
+| Потолок конденсации ртути (`MERCURY_CEILING_KELVIN`) | `373f` | К | 100 C. Above it mercury stays a vapour (it boils at 357 C, and a gas that holds it is cooled far below that to condense it). |
+| Бак ртути (`MERCURY_TANK_MILLIBUCKETS`) | `100` | мБ | The mercury a tower holds before the rest stays in the gas. Игровой размер. |
+
+## metallurgy/CondensationTowerBlock
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Объём (`VOLUME`) | `1f` | м³ | A chamber a metre across, and open. |
+| Теплопотери (`HEAT_LOSS`) | `0.012f` | кВт/К | Six faces of a metre of brick at about 2 Вт/(м²·К). Труба теряет 0,005, сосуд высокого давления 0,03. Решение не из проекта. |
+
+## metallurgy/CondensationTowerBlockEntity
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Моль ртути в мБ (`MOLES_PER_MILLIBUCKET`) | `Sulfide.CINNABAR.metalMoles(1f)` | моль на мБ | 13,53 г/см³ над 200,59 г/моль, около 0,0675. 1 мБ металла = 1 мл. |
+| Порог пометки чанка (`CHANGE_TO_SAVE`) | `1e-3f` | моль | A change in the dust smaller than this is not worth saving the chunk for. |
 
 ## chemistry/CarbonizationTable
 | Величина | Значение | Единицы | Источник из комментария |
@@ -358,3 +400,16 @@
 | Масса порошка камня для осланцевания (`KILOGRAMS_PER_STONE_DUST_POWDER`) | `0.75f` | кг | порошок флюса 0,75 кг (см. шкалы), в каменную пыль без потерь |
 | Радиус осланцевания (`STONE_DUST_RADIUS`) | `2` | блока | открытые ячейки, достижимые от грани через открытые ячейки, в кубе радиуса 2 |
 | Норма негорючего в пробе (`StoneDusting.REQUIRED_INCOMBUSTIBLE`) | `0.65f` | доля массы | норма шахт; только для текста сообщения игроку |
+
+## metallurgy/CupellationBath
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Скорость окисления свинца (`OXIDATION_MILLIBUCKETS_PER_SECOND`) | `1f` | мБ свинца в секунду | A game pace, not measured: at this rate a full charge of 1000 mB takes about 17 minutes. |
+| Минимальная температура ванны (`LEAST_TEMPERATURE`) | `960f` | °C | Litharge melts at 888 C and must stay liquid to run off the floor, so the hearth is held above that with a working margin. Below it the blast does nothing. |
+| Доля свинца, уходящая в дым (`FUME_SHARE`) | `0.03f` | доля окисленного свинца | Share of the oxidised lead that leaves as fume rather than as litharge. A hearth lost a few percent of its lead as fume, as in the galena entry of the ledger. |
+| Серебро на мБ свинца (`SILVER_PER_LEAD`) | `0.00324f` | мБ Ag на мБ Pb | 0.3% of the lead's mass, with densities of 11.34 g/cm3 for lead and 10.49 g/cm3 for silver, so 0.003 x 11.34 / 10.49 = 0.00324 mL of silver for each mL of lead. |
+| Моль свинца на мБ (`MOLES_LEAD_PER_MILLIBUCKET`) | `11.34f / 207.2f` | моль на мБ | Moles of lead in one millibucket: the density of lead, 11.34 g/cm3, over its molar mass, 207.2 g/mol. One millibucket of metal is one millilitre. |
+| Свинец в порошке глёта (`LITHARGE_MILLIBUCKETS_PER_POWDER`) | `4.57f` | мБ Pb на порошок | Lead in one powder of 0.25 mol of PbO: 0.25 x 207.2 g of lead, over 11.34 g/cm3, is 4.57 mL. |
+| Свинец, который принимает порошок золы (`ASH_MILLIBUCKETS_PER_POWDER`) | `500f` | мБ Pb на порошок | Lead that one powder of bone ash can serve before it is full. A game figure, not measured. |
+| Ёмкость горна (`CAPACITY_MILLIBUCKETS`) | `1000f` | мБ Pb | The most work lead one hearth takes at once. A game size, not a measurement. |
+| Кислорода на моль свинца (`OXYGEN_PER_LEAD`) | `0.5f` | моль O2 на моль Pb | 2 Pb + O2 -> 2 PbO, so half a mole of oxygen for each mole of lead. |

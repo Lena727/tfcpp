@@ -4,6 +4,7 @@ import java.util.Optional;
 import net.dries007.tfc.common.component.heat.HeatCapability;
 import net.dries007.tfc.common.component.heat.IHeat;
 import net.dries007.tfc.common.component.heat.IHeatConsumer;
+import net.dries007.tfc.common.fluids.TFCFluids;
 import net.dries007.tfc.common.items.TFCItems;
 import net.dries007.tfc.util.Metal;
 import net.dries007.tfc.util.data.FluidHeat;
@@ -25,6 +26,7 @@ import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -49,7 +51,7 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
     private static final int TANK_MILLIBUCKETS = 1000;
     /** Moles of carbon in a 3 kg piece of charcoal, on the same scale as the rest of the mod. */
     private static final float CARBON_PER_CHARCOAL = 200f;
-    private static final int MERCURY_BULB_MILLIBUCKETS = 5;
+    public static final int MERCURY_BULB_MILLIBUCKETS = 5;
     private static final int MILLIBUCKETS_PER_INGOT = 100;
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, RetortBlockEntity retort)
@@ -106,15 +108,16 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
             final @Nullable RetortRecipe recipe = recipeFor(stack);
             if (recipe != null && temperature >= recipe.temperature() && carbon >= recipe.carbon())
             {
-                final boolean condensing = hasCondenser();
-                if (condensing && tank.fill(recipe.result(), IFluidHandler.FluidAction.SIMULATE) < recipe.result().getAmount())
+                // Without a condenser, a recipe that does not need one still runs into the tank: its vapour is what would have escaped
+                final boolean toTank = hasCondenser() || !recipe.needsCondenser();
+                if (toTank && tank.fill(recipe.result(), IFluidHandler.FluidAction.SIMULATE) < recipe.result().getAmount())
                 {
                     continue; // Full, or holding a different liquid. The charge just waits, and nothing is wasted.
                 }
 
                 final float[] gases = new float[Gas.COUNT];
                 RetortRecipe.addTo(gases, recipe.byproducts());
-                if (condensing)
+                if (toTank)
                 {
                     tank.fill(recipe.result(), IFluidHandler.FluidAction.EXECUTE);
                 }
@@ -180,7 +183,8 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
             setChanged();
             return true;
         }
-        if (recipeFor(stack) != null)
+        final @Nullable RetortRecipe recipe = recipeFor(stack);
+        if (recipe != null)
         {
             for (int slot = 0; slot < SLOTS; slot++)
             {
@@ -188,7 +192,7 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
                 {
                     charge.set(slot, stack.split(1));
                     setChanged();
-                    if (!hasCondenser())
+                    if (recipe.needsCondenser() && !hasCondenser())
                     {
                         player.displayClientMessage(Component.translatable("tfcpp.retort.no_condenser"), true);
                     }
@@ -261,13 +265,39 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
         }
         final Component contents = tank.isEmpty() ? Component.translatable("tfcpp.retort.status.empty_tank") : tank.getFluid().getHoverName();
         player.displayClientMessage(Component.translatable("tfcpp.retort.status", Math.round(temperature), count, Math.round(carbon), tank.getFluidAmount(), contents), false);
-        if (!hasCondenser())
+        if (!hasCondenser() && (chargeIsEmpty() || chargeNeedsCondenser()))
         {
             player.displayClientMessage(Component.translatable("tfcpp.retort.no_condenser"), false);
         }
     }
 
-    /** Breaking a retort open spills it. Unused charcoal survives, mercury evaporates into the room, and zinc sets into ingots, with the last of it burning off as smoke. */
+    private boolean chargeIsEmpty()
+    {
+        for (ItemStack stack : charge)
+        {
+            if (!stack.isEmpty())
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** @return {@code true} if some piece in the charge has a recipe that needs a condenser, which is the only case where lacking one loses anything */
+    private boolean chargeNeedsCondenser()
+    {
+        for (ItemStack stack : charge)
+        {
+            final @Nullable RetortRecipe recipe = stack.isEmpty() ? null : recipeFor(stack);
+            if (recipe != null && recipe.needsCondenser())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Breaking a retort open spills it. Unused charcoal survives, mercury evaporates into the room, and zinc and lead set into ingots, with the last of them burning off as smoke. */
     public void dropContents()
     {
         assert level != null;
@@ -281,17 +311,26 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
         if (!tank.isEmpty() && level instanceof ServerLevel server)
         {
             final float[] gases = new float[Gas.COUNT];
-            int millibuckets = tank.getFluidAmount();
-            if (tank.getFluid().getFluid() == Metallurgy.MERCURY.get())
+            final int millibuckets = tank.getFluidAmount();
+            final Fluid fluid = tank.getFluid().getFluid();
+            if (fluid == Metallurgy.MERCURY.get())
             {
                 gases[Gas.MERCURY_VAPOR.ordinal()] = Sulfide.CINNABAR.metalMoles(millibuckets);
             }
-            else
+            else if (fluid == Metallurgy.LEAD.get())
+            {
+                // Lead sets into ingots, and the part short of a whole ingot goes up as litharge smoke
+                final int ingots = millibuckets / MILLIBUCKETS_PER_INGOT;
+                Containers.dropItemStack(level, x, y, z, new ItemStack(Metallurgy.LEAD_INGOT.get(), ingots));
+                gases[Gas.LEAD_OXIDE_FUME.ordinal()] = (millibuckets - ingots * MILLIBUCKETS_PER_INGOT) * CupellationBath.MOLES_LEAD_PER_MILLIBUCKET;
+            }
+            else if (fluid == TFCFluids.METALS.get(Metal.ZINC).getSource())
             {
                 final int ingots = millibuckets / MILLIBUCKETS_PER_INGOT;
                 Containers.dropItemStack(level, x, y, z, new ItemStack(TFCItems.METAL_ITEMS.get(Metal.ZINC).get(Metal.ItemType.INGOT).get(), ingots));
                 gases[Gas.ZINC_OXIDE_FUME.ordinal()] = Sulfide.SPHALERITE.metalMoles(millibuckets - ingots * MILLIBUCKETS_PER_INGOT);
             }
+            // The tank takes only what the recipes above give it, so no other liquid can be in it to be lost here
             GasEmission.release(server, worldPosition, gases);
         }
     }

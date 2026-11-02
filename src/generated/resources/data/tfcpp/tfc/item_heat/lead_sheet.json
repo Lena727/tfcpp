@@ -1,0 +1,7 @@
+{
+  "forging_temperature": 0.0,
+  "heat_capacity": 1.9111046,
+  "ingredient": {
+    "item": "tfcpp:metal/sheet/lead"
+  }
+}

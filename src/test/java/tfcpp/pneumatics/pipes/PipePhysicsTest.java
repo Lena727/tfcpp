@@ -87,6 +87,21 @@ class PipePhysicsTest
     }
 
     @Test
+    void leadResistsSulfurButNotChlorineOrVinegar()
+    {
+        assertEquals(0f, PipeMaterial.LEAD.corrosion(Gas.SULFUR_DIOXIDE), "Sulfur dioxide makes a film of lead sulfate that protects the metal");
+        assertTrue(PipeMaterial.LEAD.corrosion(Gas.CHLORINE) > 0f, "Chlorine still attacks lead");
+        assertTrue(PipeMaterial.LEAD.corrosion(Gas.HYDROGEN_SULFIDE) > 0f, "Hydrogen sulfide blackens lead");
+        assertEquals(0f, PipeMaterial.LEAD.corrosion(Gas.AMMONIA), "Nothing else in the gases touches lead");
+        assertEquals(0.1f, PipeMaterial.LEAD.corrosion("tfc:vinegar"), 1e-6f, "Vinegar dissolves lead, as it did in Roman wine");
+        assertTrue(PipeMaterial.LEAD.corrosion("tfc:vinegar") > PipeMaterial.COPPER.corrosion("tfc:vinegar"), "Lead suffers more from vinegar than copper does");
+        assertEquals(0f, PipeMaterial.LEAD.corrosion("tfc:brine"), "Brine leaves lead alone");
+        assertEquals(0f, PipeMaterial.LEAD.corrosion("tfcpp:mercury"), "Mercury does not dissolve lead");
+        assertTrue(PipeMaterial.LEAD.rating(1f, 293f) > 0f, "A lead pipe holds pressure at room temperature");
+        assertEquals(0f, PipeMaterial.LEAD.rating(1f, 430f), "Lead gives way above 150 C, which is 423 K");
+    }
+
+    @Test
     void contentsSplitAndJoinWithoutLoss()
     {
         final PipeContents contents = new PipeContents();

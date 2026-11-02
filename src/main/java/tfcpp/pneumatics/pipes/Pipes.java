@@ -70,6 +70,7 @@ public final class Pipes
         {
             case WOOD -> properties.mapColor(MapColor.WOOD).sound(SoundType.WOOD);
             case CERAMIC -> properties.mapColor(MapColor.TERRACOTTA_ORANGE).sound(SoundType.STONE);
+            case LEAD -> properties.strength(1.5f, 3f).mapColor(MapColor.METAL).sound(SoundType.METAL); // Lead is softer than copper, at about 1.5 on Mohs' scale against 3
             default -> properties.mapColor(MapColor.METAL).sound(SoundType.METAL);
         };
     }

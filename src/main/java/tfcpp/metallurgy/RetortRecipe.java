@@ -30,8 +30,9 @@ import tfcpp.pneumatics.gas.Gas;
  * @param result      the liquid that condenses, as long as there is a condenser
  * @param vapor       what escapes in its place if there is no condenser, in moles of each gas id
  * @param byproducts  what always leaves through the retort's vent, in moles of each gas id
+ * @param needsCondenser {@code false} if the result runs into the tank whether or not there is a condenser, and the vapour is then ignored: lead does not boil at the heat that reduces it
  */
-public record RetortRecipe(Ingredient input, float carbon, float temperature, FluidStack result, Map<String, Float> vapor, Map<String, Float> byproducts) implements Recipe<SingleRecipeInput>
+public record RetortRecipe(Ingredient input, float carbon, float temperature, FluidStack result, Map<String, Float> vapor, Map<String, Float> byproducts, boolean needsCondenser) implements Recipe<SingleRecipeInput>
 {
     private static final Codec<Map<String, Float>> GASES = Codec.unboundedMap(Codec.STRING, Codec.FLOAT);
     private static final StreamCodec<RegistryFriendlyByteBuf, Map<String, Float>> GASES_STREAM = ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.FLOAT);
@@ -42,18 +43,35 @@ public record RetortRecipe(Ingredient input, float carbon, float temperature, Fl
         Codec.FLOAT.fieldOf("temperature").forGetter(RetortRecipe::temperature),
         FluidStack.CODEC.fieldOf("result").forGetter(RetortRecipe::result),
         GASES.fieldOf("vapor").forGetter(RetortRecipe::vapor),
-        GASES.optionalFieldOf("byproducts", Map.of()).forGetter(RetortRecipe::byproducts)
+        GASES.optionalFieldOf("byproducts", Map.of()).forGetter(RetortRecipe::byproducts),
+        Codec.BOOL.optionalFieldOf("needs_condenser", true).forGetter(RetortRecipe::needsCondenser)
     ).apply(i, RetortRecipe::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, RetortRecipe> STREAM_CODEC = StreamCodec.composite(
-        Ingredient.CONTENTS_STREAM_CODEC, RetortRecipe::input,
-        ByteBufCodecs.FLOAT, RetortRecipe::carbon,
-        ByteBufCodecs.FLOAT, RetortRecipe::temperature,
-        FluidStack.STREAM_CODEC, RetortRecipe::result,
-        GASES_STREAM, RetortRecipe::vapor,
-        GASES_STREAM, RetortRecipe::byproducts,
-        RetortRecipe::new
-    );
+    /** Written by hand, as {@link StreamCodec#composite} takes at most six fields. */
+    public static final StreamCodec<RegistryFriendlyByteBuf, RetortRecipe> STREAM_CODEC = StreamCodec.of(RetortRecipe::write, RetortRecipe::read);
+
+    private static void write(RegistryFriendlyByteBuf buf, RetortRecipe recipe)
+    {
+        Ingredient.CONTENTS_STREAM_CODEC.encode(buf, recipe.input());
+        ByteBufCodecs.FLOAT.encode(buf, recipe.carbon());
+        ByteBufCodecs.FLOAT.encode(buf, recipe.temperature());
+        FluidStack.STREAM_CODEC.encode(buf, recipe.result());
+        GASES_STREAM.encode(buf, recipe.vapor());
+        GASES_STREAM.encode(buf, recipe.byproducts());
+        ByteBufCodecs.BOOL.encode(buf, recipe.needsCondenser());
+    }
+
+    private static RetortRecipe read(RegistryFriendlyByteBuf buf)
+    {
+        final Ingredient input = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
+        final float carbon = ByteBufCodecs.FLOAT.decode(buf);
+        final float temperature = ByteBufCodecs.FLOAT.decode(buf);
+        final FluidStack result = FluidStack.STREAM_CODEC.decode(buf);
+        final Map<String, Float> vapor = GASES_STREAM.decode(buf);
+        final Map<String, Float> byproducts = GASES_STREAM.decode(buf);
+        final boolean needsCondenser = ByteBufCodecs.BOOL.decode(buf);
+        return new RetortRecipe(input, carbon, temperature, result, vapor, byproducts, needsCondenser);
+    }
 
     /** Adds a map of gases to an array indexed by {@link Gas}. */
     static void addTo(float[] gases, Map<String, Float> amounts)

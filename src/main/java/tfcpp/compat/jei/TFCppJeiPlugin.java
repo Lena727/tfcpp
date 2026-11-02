@@ -59,6 +59,7 @@ public final class TFCppJeiPlugin implements IModPlugin
         info(registration, new ItemStack(Instruments.SETTLING_BAFFLE_ITEM.get()), "tfcpp.info.settling_baffle");
         info(registration, new ItemStack(Instruments.MINE_FAN_ITEM.get()), "tfcpp.info.mine_fan");
         info(registration, new ItemStack(Metallurgy.CONVERTER_ITEM.get()), "tfcpp.info.converter");
+        info(registration, new ItemStack(Metallurgy.CONDENSATION_TOWER_ITEM.get()), "tfcpp.info.condensation_tower");
         info(registration, new ItemStack(Metallurgy.IRON_SLAG.get()), "tfcpp.info.iron_slag");
         info(registration, new ItemStack(Metallurgy.PHOSPHORIC_IRON_SLAG.get()), "tfcpp.info.phosphoric_iron_slag");
         info(registration, new ItemStack(Metallurgy.THOMAS_SLAG.get()), "tfcpp.info.thomas_slag");

@@ -48,6 +48,12 @@ public final class Metallurgy
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, TFCpp.MOD_ID);
 
     public static final Supplier<Item> LEAD_INGOT = ITEMS.register("metal/ingot/lead", () -> new Item(new Item.Properties()));
+    /** Lead from galena, with its silver still in it, until cupellation takes the silver out. Plain lead comes only from reducing litharge. */
+    public static final Supplier<Item> WORK_LEAD_INGOT = ITEMS.register("metal/ingot/work_lead", () -> new Item(new Item.Properties()));
+    /** Lead beaten flat in the cold, as lead does not harden when it is worked: it recrystallises at room temperature. */
+    public static final Supplier<Item> LEAD_SHEET = ITEMS.register("metal/sheet/lead", () -> new Item(new Item.Properties()));
+    /** Calcium phosphate left when bone is burned. It is the floor of a cupellation hearth, which takes up litharge and holds it. */
+    public static final Supplier<Item> BONE_ASH = ITEMS.register("powder/bone_ash", () -> new Item(new Item.Properties()));
     /** Raw rock phosphate. It feeds a field slowly, as little of it dissolves until it meets acid, which comes with chemistry. */
     public static final Supplier<Item> APATITE_POWDER = ITEMS.register("powder/apatite", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> ARSENICAL_COPPER_INGOT = ITEMS.register("metal/ingot/arsenical_copper", () -> new Item(new Item.Properties()));
@@ -83,6 +89,9 @@ public final class Metallurgy
         .descriptionId("fluid_type.tfcpp.metal.arsenical_copper").density(8000).viscosity(6000).temperature(1320).canConvertToSource(false).canDrown(false).canSwim(false).canPushEntity(false)));
     public static final Supplier<FluidType> LEAD_TYPE = FLUID_TYPES.register("metal/lead", () -> new FluidType(FluidType.Properties.create()
         .descriptionId("fluid_type.tfcpp.metal.lead").density(10660).viscosity(3000).temperature(600).canConvertToSource(false).canDrown(false).canSwim(false).canPushEntity(false)));
+    /** Lead from galena. It melts and pours as lead does, and is only different in what it holds. */
+    public static final Supplier<FluidType> WORK_LEAD_TYPE = FLUID_TYPES.register("metal/work_lead", () -> new FluidType(FluidType.Properties.create()
+        .descriptionId("fluid_type.tfcpp.metal.work_lead").density(10660).viscosity(3000).temperature(600).canConvertToSource(false).canDrown(false).canSwim(false).canPushEntity(false)));
     /** Iron ore melted with nothing to reduce it. It is still an oxide: only a furnace burning carbon around it can take the oxygen away. */
     public static final Supplier<FluidType> IRON_OXIDE_TYPE = FLUID_TYPES.register("metal/iron_oxide", () -> new FluidType(FluidType.Properties.create()
         .descriptionId("fluid_type.tfcpp.metal.iron_oxide").density(5000).viscosity(6000).temperature(1838).canConvertToSource(false).canDrown(false).canSwim(false).canPushEntity(false)));
@@ -101,6 +110,8 @@ public final class Metallurgy
     private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_ARSENICAL_COPPER = FLUIDS.register("metal/flowing_arsenical_copper", () -> new BaseFlowingFluid.Flowing(arsenicalCopperProperties()));
     public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> LEAD = FLUIDS.register("metal/lead", () -> new BaseFlowingFluid.Source(leadProperties()));
     private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_LEAD = FLUIDS.register("metal/flowing_lead", () -> new BaseFlowingFluid.Flowing(leadProperties()));
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> WORK_LEAD = FLUIDS.register("metal/work_lead", () -> new BaseFlowingFluid.Source(workLeadProperties()));
+    private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_WORK_LEAD = FLUIDS.register("metal/flowing_work_lead", () -> new BaseFlowingFluid.Flowing(workLeadProperties()));
     public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> IRON_OXIDE = FLUIDS.register("metal/iron_oxide", () -> new BaseFlowingFluid.Source(ironOxideProperties()));
     private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_IRON_OXIDE = FLUIDS.register("metal/flowing_iron_oxide", () -> new BaseFlowingFluid.Flowing(ironOxideProperties()));
     public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> PHOSPHORIC_IRON_OXIDE = FLUIDS.register("metal/phosphoric_iron_oxide", () -> new BaseFlowingFluid.Source(phosphoricIronOxideProperties()));
@@ -116,14 +127,22 @@ public final class Metallurgy
     public static final Supplier<Block> RETORT_CONDENSER = BLOCKS.register("retort_condenser", () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_ORANGE).strength(2f, 6f).sound(SoundType.STONE).requiresCorrectToolForDrops()));
 
     public static final Supplier<Block> CONVERTER = BLOCKS.register("converter", () -> new ConverterBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(4f, 8f).sound(SoundType.METAL).requiresCorrectToolForDrops().pushReaction(PushReaction.BLOCK)));
+    /** A fire-brick hearth over a fire, where work lead is cupelled to silver. */
+    public static final Supplier<Block> CUPEL_HEARTH = BLOCKS.register("cupel_hearth", () -> new CupelHearthBlock(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_ORANGE).strength(2f, 6f).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+    /** A fire-clay chamber in a pipe network, where the fume of the roasting hearth cools and drops its dust. */
+    public static final Supplier<Block> CONDENSATION_TOWER = BLOCKS.register("condensation_tower", () -> new CondensationTowerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_ORANGE).strength(2f, 6f).sound(SoundType.STONE).requiresCorrectToolForDrops()));
 
     public static final Supplier<Item> RETORT_ITEM = ITEMS.register("retort", () -> new BlockItem(RETORT.get(), new Item.Properties()));
     public static final Supplier<Item> RETORT_CONDENSER_ITEM = ITEMS.register("retort_condenser", () -> new BlockItem(RETORT_CONDENSER.get(), new Item.Properties()));
 
     public static final Supplier<Item> CONVERTER_ITEM = ITEMS.register("converter", () -> new BlockItem(CONVERTER.get(), new Item.Properties()));
+    public static final Supplier<Item> CUPEL_HEARTH_ITEM = ITEMS.register("cupel_hearth", () -> new BlockItem(CUPEL_HEARTH.get(), new Item.Properties()));
+    public static final Supplier<Item> CONDENSATION_TOWER_ITEM = ITEMS.register("condensation_tower", () -> new BlockItem(CONDENSATION_TOWER.get(), new Item.Properties()));
 
     public static final Supplier<BlockEntityType<ConverterBlockEntity>> CONVERTER_ENTITY = BLOCK_ENTITIES.register("converter", () -> BlockEntityType.Builder.of(ConverterBlockEntity::new, CONVERTER.get()).build(null));
     public static final Supplier<BlockEntityType<RetortBlockEntity>> RETORT_ENTITY = BLOCK_ENTITIES.register("retort", () -> BlockEntityType.Builder.of(RetortBlockEntity::new, RETORT.get()).build(null));
+    public static final Supplier<BlockEntityType<CupelHearthBlockEntity>> CUPEL_HEARTH_ENTITY = BLOCK_ENTITIES.register("cupel_hearth", () -> BlockEntityType.Builder.of(CupelHearthBlockEntity::new, CUPEL_HEARTH.get()).build(null));
+    public static final Supplier<BlockEntityType<CondensationTowerBlockEntity>> CONDENSATION_TOWER_ENTITY = BLOCK_ENTITIES.register("condensation_tower", () -> BlockEntityType.Builder.of(CondensationTowerBlockEntity::new, CONDENSATION_TOWER.get()).build(null));
 
     public static final Supplier<RecipeType<RetortRecipe>> RETORT_RECIPE = RECIPE_TYPES.register("retort", () -> RecipeType.simple(TFCpp.id("retort")));
     public static final Supplier<RecipeSerializer<RetortRecipe>> RETORT_SERIALIZER = RECIPE_SERIALIZERS.register("retort", RetortRecipe.Serializer::new);
@@ -136,6 +155,9 @@ public final class Metallurgy
             .displayItems((parameters, output) -> {
                 output.accept(ARSENICAL_COPPER_INGOT.get());
                 output.accept(LEAD_INGOT.get());
+                output.accept(WORK_LEAD_INGOT.get());
+                output.accept(LEAD_SHEET.get());
+                output.accept(BONE_ASH.get());
                 output.accept(APATITE_POWDER.get());
                 Ores.addToTab(output);
                 ZINC_CALCINES.values().forEach(calcine -> output.accept(calcine.get()));
@@ -155,6 +177,8 @@ public final class Metallurgy
                 output.accept(RETORT_ITEM.get());
                 output.accept(RETORT_CONDENSER_ITEM.get());
                 output.accept(CONVERTER_ITEM.get());
+                output.accept(CUPEL_HEARTH_ITEM.get());
+                output.accept(CONDENSATION_TOWER_ITEM.get());
                 Instruments.addToTab(output);
                 Pipes.addToTab(output);
                 Chemistry.addToTab(output);
@@ -170,6 +194,11 @@ public final class Metallurgy
     private static BaseFlowingFluid.Properties leadProperties()
     {
         return new BaseFlowingFluid.Properties(LEAD_TYPE, LEAD, FLOWING_LEAD);
+    }
+
+    private static BaseFlowingFluid.Properties workLeadProperties()
+    {
+        return new BaseFlowingFluid.Properties(WORK_LEAD_TYPE, WORK_LEAD, FLOWING_WORK_LEAD);
     }
 
     private static BaseFlowingFluid.Properties ironOxideProperties()
@@ -216,6 +245,9 @@ public final class Metallurgy
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, RETORT_ENTITY.get(), (entity, side) -> entity.tank());
         event.registerBlockEntity(BlockCapabilities.HEAT, CONVERTER_ENTITY.get(), (entity, side) -> entity);
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, CONVERTER_ENTITY.get(), (entity, side) -> entity.tank());
+        event.registerBlockEntity(BlockCapabilities.HEAT, CUPEL_HEARTH_ENTITY.get(), (entity, side) -> entity);
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, CUPEL_HEARTH_ENTITY.get(), (entity, side) -> entity.tank());
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, CONDENSATION_TOWER_ENTITY.get(), (entity, side) -> entity.outlet());
     }
 
     private Metallurgy() {}

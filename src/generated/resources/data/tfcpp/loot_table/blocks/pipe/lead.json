@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tfcpp:pipe/lead"
+        }
+      ],
+      "rolls": 1
+    }
+  ]
+}

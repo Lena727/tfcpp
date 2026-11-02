@@ -123,6 +123,10 @@ public final class DataGenerators
             add("item.tfcpp.powder.borax", "Borax Flux");
             add("fluid_type.tfcpp.metal.lead", "Molten Lead");
             add("item.tfcpp.metal.ingot.lead", "Lead Ingot");
+            add("fluid_type.tfcpp.metal.work_lead", "Molten Work Lead");
+            add("item.tfcpp.metal.ingot.work_lead", "Work Lead Ingot");
+            add("item.tfcpp.metal.sheet.lead", "Lead Sheet");
+            add("item.tfcpp.powder.bone_ash", "Bone Ash");
             add("item.tfcpp.powder.lead_oxide", "Litharge");
             add("item.tfcpp.powder.apatite", "Ground Apatite");
             for (NewOre ore : NewOre.values())
@@ -219,10 +223,12 @@ public final class DataGenerators
             add("tfcpp.info.davy_lamp", "A lamp whose gauze keeps its flame from lighting the air around it. Carried in hand with oil in it, it shows firedamp as a blue cap above the flame, and goes out when oxygen runs low. It does not show carbon monoxide, and a gauze with gas burning in it for minutes gets hot enough to light the gas outside.");
             add("tfcpp.info.sentinel_cage", "Right-click a rat or a quail with an empty cage. The animal takes in carbon monoxide twenty times as fast as a person, so it collapses long before you feel anything. Feed it grain from the other hand at least every three days.");
             add("tfcpp.info.settling_baffle", "Place these in a closed chamber that furnace fumes pass through. Arsenic, antimony and zinc oxide dust settles on the plates, and is scraped off by right-clicking with an empty hand. Scraping stirs up some of the dust, so do not breathe it.");
+            add("tfcpp.info.condensation_tower", "Put it in a run of pipe that carries furnace fumes. While the gas is below 250 C, arsenic, antimony, zinc and lead oxide settle on its walls as dust, and mercury runs down as a liquid when the gas is below 100 C. Sulfur dioxide goes on through. Scrape the dust off with an empty hand while crouching, which stirs some of it into the air, and tap the mercury into a container. Several towers in a row catch proportionally more.");
             add("block.tfcpp.mine_fan", "Mine Fan");
             add("block.tfcpp.pipe.wood", "Wooden Pipe");
             add("block.tfcpp.pipe.ceramic", "Fired Clay Pipe");
             add("block.tfcpp.pipe.copper", "Copper Pipe");
+            add("block.tfcpp.pipe.lead", "Lead Pipe");
             add("block.tfcpp.pipe.wrought_iron", "Wrought Iron Pipe");
             add("block.tfcpp.pipe.steel", "Steel Pipe");
             add("block.tfcpp.pipe_valve", "Gate Valve");
@@ -265,6 +271,23 @@ public final class DataGenerators
             add("tfcpp.coke_oven.loaded", "%1$s x %2$s in the oven");
             add("tfcpp.coke_oven.nothing", "Nothing to take out");
             add("tfcpp.gas_burner.shut", "Open the gas first");
+            add("block.tfcpp.cupel_hearth", "Cupellation Hearth");
+            add("tfcpp.cupel_hearth.status", "%1$s C, lead: %2$s mB, silver: %3$s mB, the ash can still take %4$s mB of lead");
+            add("tfcpp.cupel_hearth.needs_ash", "The floor is full of litharge: lay bone ash on it, or the blast stops");
+            add("tfcpp.cupel_hearth.too_cold", "Litharge stays liquid only above %1$s C, and the blast does nothing below it");
+            add("tfcpp.cupel_hearth.poor_air", "The air over the hearth has too little oxygen for the blast");
+            add("tfcpp.cupel_hearth.plain_lead", "Plain lead holds no silver to take out: only work lead can be cupelled");
+            add("tfcpp.cupel_hearth.wrong_fluid", "Only work lead can be poured in");
+            add("tfcpp.cupel_hearth.full", "The hearth is full of lead");
+            add("tfcpp.cupel_hearth.lead_left", "The lead must all be oxidised before the silver can be tapped");
+            add("tfcpp.cupel_hearth.no_silver", "There is no silver to tap yet");
+            add("tfcpp.cupel_hearth.blick", "Blick: the last litharge has cleared, and the silver flashes");
+            add("block.tfcpp.condensation_tower", "Condensation Tower");
+            add("tfcpp.condensation_tower.status", "Gas %1$s C. Dust on the walls, in powders: arsenic %2$s, antimony %3$s, zinc %4$s, lead %5$s. Mercury: %6$s mB");
+            add("tfcpp.condensation_tower.nothing", "Too little dust on the walls to scrape off");
+            add("tfcpp.condensation_tower.no_network", "Not joined to a pipe: no gas passes through it");
+            add("tfcpp.condensation_tower.too_hot", "The gas at %1$s C is too hot: dust settles only below %2$s C and mercury only below %3$s C");
+            add("tfcpp.condensation_tower.tank_full", "The mercury tank is full, and more stays in the gas");
         }
     }
 
@@ -300,6 +323,10 @@ public final class DataGenerators
             add("item.tfcpp.powder.borax", "Флюс из буры");
             add("fluid_type.tfcpp.metal.lead", "Расплав свинца");
             add("item.tfcpp.metal.ingot.lead", "Слиток свинца");
+            add("fluid_type.tfcpp.metal.work_lead", "Расплав веркблея");
+            add("item.tfcpp.metal.ingot.work_lead", "Слиток веркблея");
+            add("item.tfcpp.metal.sheet.lead", "Свинцовый лист");
+            add("item.tfcpp.powder.bone_ash", "Костяная зола");
             add("item.tfcpp.powder.lead_oxide", "Глёт");
             add("item.tfcpp.powder.apatite", "Молотый апатит");
             for (NewOre ore : NewOre.values())
@@ -397,10 +424,12 @@ public final class DataGenerators
             add("tfcpp.info.davy_lamp", "Лампа, сетка которой не даёт пламени поджечь окружающий воздух. В руке и с маслом показывает рудничный газ голубым ореолом над пламенем и гаснет, когда не хватает кислорода. Угарный газ она не показывает, а сетка с горящим внутри газом за несколько минут раскаляется настолько, что поджигает газ снаружи.");
             add("tfcpp.info.sentinel_cage", "Правым кликом пустой клеткой поймайте крысу или перепела. Животное набирает угарный газ в двадцать раз быстрее человека и падает задолго до того, как вы что-то почувствуете. Кормите его зерном из другой руки хотя бы раз в три дня.");
             add("tfcpp.info.settling_baffle", "Ставятся в закрытой камере, через которую идут печные газы. Пыль мышьяка, сурьмы и оксида цинка оседает на пластинах, её соскребают правым кликом пустой рукой. При этом часть пыли снова поднимается в воздух, так что дышать ею нельзя.");
+            add("tfcpp.info.condensation_tower", "Ставится в трубу, по которой идут печные газы. Пока газ холоднее 250 °C, оксиды мышьяка, сурьмы, цинка и свинца оседают на стенках пылью, а при газе холоднее 100 °C стекает жидкая ртуть. Диоксид серы проходит дальше. Пыль соскребают пустой рукой с приседанием, при этом часть её поднимается в воздух, ртуть сливают в ёмкость. Несколько башен подряд ловят пропорционально больше.");
             add("block.tfcpp.mine_fan", "Шахтный вентилятор");
             add("block.tfcpp.pipe.wood", "Деревянная труба");
             add("block.tfcpp.pipe.ceramic", "Керамическая труба");
             add("block.tfcpp.pipe.copper", "Медная труба");
+            add("block.tfcpp.pipe.lead", "Свинцовая труба");
             add("block.tfcpp.pipe.wrought_iron", "Труба из сварочного железа");
             add("block.tfcpp.pipe.steel", "Стальная труба");
             add("block.tfcpp.pipe_valve", "Задвижка");
@@ -443,6 +472,23 @@ public final class DataGenerators
             add("tfcpp.coke_oven.loaded", "В печи: %1$s × %2$s");
             add("tfcpp.coke_oven.nothing", "Выгружать нечего");
             add("tfcpp.gas_burner.shut", "Сначала откройте газ");
+            add("block.tfcpp.cupel_hearth", "Купеляционный под");
+            add("tfcpp.cupel_hearth.status", "%1$s °C, свинца: %2$s мБ, серебра: %3$s мБ, золы хватит ещё на %4$s мБ свинца");
+            add("tfcpp.cupel_hearth.needs_ash", "Под полон глёта: положите костяную золу, иначе дутьё остановится");
+            add("tfcpp.cupel_hearth.too_cold", "Глёт остаётся жидким только выше %1$s °C, ниже дутьё ничего не делает");
+            add("tfcpp.cupel_hearth.poor_air", "Над подом слишком мало кислорода для дутья");
+            add("tfcpp.cupel_hearth.plain_lead", "В простом свинце нет серебра для выделения: купелируют только веркблей");
+            add("tfcpp.cupel_hearth.wrong_fluid", "Сюда льют только веркблей");
+            add("tfcpp.cupel_hearth.full", "Под полон свинца");
+            add("tfcpp.cupel_hearth.lead_left", "Серебро выпускают, когда весь свинец окислится");
+            add("tfcpp.cupel_hearth.no_silver", "Серебра для выпуска пока нет");
+            add("tfcpp.cupel_hearth.blick", "Блик: последний глёт ушёл, и серебро блеснуло");
+            add("block.tfcpp.condensation_tower", "Конденсационная башня");
+            add("tfcpp.condensation_tower.status", "Газ %1$s °C. Пыль на стенках, в порошках: мышьяк %2$s, сурьма %3$s, цинк %4$s, свинец %5$s. Ртуть: %6$s мБ");
+            add("tfcpp.condensation_tower.nothing", "На стенках слишком мало пыли, соскрести нечего");
+            add("tfcpp.condensation_tower.no_network", "Не соединена с трубой: газ через неё не идёт");
+            add("tfcpp.condensation_tower.too_hot", "Газ при %1$s °C слишком горяч: пыль оседает только ниже %2$s °C, ртуть только ниже %3$s °C");
+            add("tfcpp.condensation_tower.tank_full", "Бак ртути полон, остальная остаётся в газе");
         }
     }
 

@@ -39,6 +39,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -52,6 +54,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -68,6 +71,7 @@ import tfcpp.mechanics.ShaftPhysics;
 import tfcpp.mechanics.ShaftSource;
 import tfcpp.mechanics.ShaftTracker;
 import tfcpp.mechanics.WaterBodies;
+import tfcpp.metallurgy.CupellationBath;
 import tfcpp.metallurgy.Metallurgy;
 import tfcpp.metallurgy.RetortBlockEntity;
 import tfcpp.metallurgy.Sulfide;
@@ -92,6 +96,7 @@ import tfcpp.pneumatics.pipes.Pipes;
 import tfcpp.pneumatics.pipes.PistonPumpBlockEntity;
 import tfcpp.pneumatics.instruments.Instruments;
 import tfcpp.pneumatics.instruments.SentinelCageItem;
+import tfcpp.pneumatics.instruments.DustStore;
 import tfcpp.pneumatics.instruments.SettlingBaffleBlockEntity;
 
 /** Checks the parts that only exist inside a running server: mixins, TFC block entities, chunk storage and blocks stopping gas. */
@@ -332,6 +337,82 @@ public final class GasGameTests
             helper.assertTrue(totalInBox(helper, 5, 3, Gas.ZINC_OXIDE_FUME) > 0f, "The zinc must escape and burn");
             helper.succeed();
         });
+    }
+
+    /** Lead does not boil at 900 C, so reduced litharge runs into the tank with no condenser beside the retort, and nothing fumes. */
+    @GameTest(template = TEMPLATE, timeoutTicks = 1400)
+    public static void lithargeReducesToLeadWithoutACondenser(GameTestHelper helper)
+    {
+        sealedBox(helper, 5, 3, Blocks.STONE);
+        final BlockPos pos = new BlockPos(2, 1, 2);
+        helper.setBlock(pos, Metallurgy.RETORT.get());
+        final RetortBlockEntity retort = helper.getBlockEntity(pos);
+        retort.load(new ItemStack(Instruments.LEAD_OXIDE.get()), 0.125f);
+        helper.onEachTick(() -> retort.setTemperature(900f));
+
+        helper.runAfterDelay(1100, /* A retort heats at about 1 C per tick */ () -> {
+            helper.assertTrue(retort.tank().getFluid().getFluid() == Metallurgy.LEAD.get() && retort.tank().getFluidAmount() == 4, "Expected 4 mB of lead with no condenser, got " + retort.tank().getFluidAmount());
+            helper.assertTrue(totalInBox(helper, 5, 3, Gas.LEAD_OXIDE_FUME) == 0f, "Lead does not boil at this heat, so it must not fume");
+            helper.assertTrue(totalInBox(helper, 5, 3, Gas.CARBON_DIOXIDE) > 0f, "The carbon of the reduction leaves as CO2");
+            helper.succeed();
+        });
+    }
+
+    /** Breaking a retort open: lead sets into ingots, and the part short of an ingot burns off as litharge smoke. */
+    @GameTest(template = TEMPLATE, timeoutTicks = 40)
+    public static void aBrokenRetortSetsItsLeadIntoIngots(GameTestHelper helper)
+    {
+        sealedBox(helper, 5, 3, Blocks.STONE);
+        final BlockPos pos = new BlockPos(2, 1, 2);
+        helper.setBlock(pos, Metallurgy.RETORT.get());
+        final RetortBlockEntity retort = helper.getBlockEntity(pos);
+        retort.tank().fill(new FluidStack(Metallurgy.LEAD.get(), 250), IFluidHandler.FluidAction.EXECUTE);
+        retort.dropContents();
+
+        helper.runAfterDelay(1, () -> {
+            final int ingots = droppedItems(helper, pos, Metallurgy.LEAD_INGOT.get());
+            helper.assertTrue(ingots == 2, "250 mB of lead is two ingots, got " + ingots);
+            final float expected = 50f * CupellationBath.MOLES_LEAD_PER_MILLIBUCKET;
+            final float fume = totalInBox(helper, 5, 3, Gas.LEAD_OXIDE_FUME);
+            helper.assertTrue(Math.abs(fume - expected) < 0.05f, "The 50 mB short of an ingot should burn as " + expected + " mol of litharge smoke, got " + fume);
+            helper.assertTrue(totalInBox(helper, 5, 3, Gas.ZINC_OXIDE_FUME) == 0f, "Lead must not smoke as zinc");
+            helper.succeed();
+        });
+    }
+
+    /** Zinc keeps its own ingots and its own smoke when the retort is broken, and lead is never sent to them. */
+    @GameTest(template = TEMPLATE, timeoutTicks = 40)
+    public static void aBrokenRetortSetsItsZincIntoZincIngots(GameTestHelper helper)
+    {
+        sealedBox(helper, 5, 3, Blocks.STONE);
+        final BlockPos pos = new BlockPos(2, 1, 2);
+        helper.setBlock(pos, Metallurgy.RETORT.get());
+        final RetortBlockEntity retort = helper.getBlockEntity(pos);
+        retort.tank().fill(new FluidStack(TFCFluids.METALS.get(Metal.ZINC).getSource(), 250), IFluidHandler.FluidAction.EXECUTE);
+        retort.dropContents();
+
+        helper.runAfterDelay(1, () -> {
+            final int ingots = droppedItems(helper, pos, TFCItems.METAL_ITEMS.get(Metal.ZINC).get(Metal.ItemType.INGOT).get());
+            helper.assertTrue(ingots == 2, "250 mB of zinc is two ingots, got " + ingots);
+            helper.assertTrue(droppedItems(helper, pos, Metallurgy.LEAD_INGOT.get()) == 0, "Zinc must not come out as lead");
+            helper.assertTrue(totalInBox(helper, 5, 3, Gas.ZINC_OXIDE_FUME) > 0f, "The zinc short of an ingot must burn as zinc oxide smoke");
+            helper.assertTrue(totalInBox(helper, 5, 3, Gas.LEAD_OXIDE_FUME) == 0f, "Zinc must not smoke as lead");
+            helper.succeed();
+        });
+    }
+
+    /** @return how many of this item lie on the ground around a point, as a broken block leaves them */
+    private static int droppedItems(GameTestHelper helper, BlockPos pos, Item item)
+    {
+        int count = 0;
+        for (ItemEntity entity : helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(pos)).inflate(3)))
+        {
+            if (entity.getItem().is(item))
+            {
+                count += entity.getItem().getCount();
+            }
+        }
+        return count;
     }
 
     private static RetortBlockEntity retortIn(GameTestHelper helper, boolean condenser)
@@ -1009,7 +1090,7 @@ public final class GasGameTests
     @GameTest(template = TEMPLATE)
     public static void pipeRecipesLoad(GameTestHelper helper)
     {
-        for (String recipe : List.of("pipe/wood", "pipe/ceramic", "pipe/copper", "pipe/wrought_iron", "pipe/steel", "pipe_valve", "pipe_vent", "pipe_tap", "safety_valve", "mercury_manometer", "piston_pump", "pressure_vessel"))
+        for (String recipe : List.of("pipe/wood", "pipe/ceramic", "pipe/copper", "pipe/lead", "pipe/wrought_iron", "pipe/steel", "pipe_valve", "pipe_vent", "pipe_tap", "safety_valve", "mercury_manometer", "piston_pump", "pressure_vessel"))
         {
             helper.assertTrue(helper.getLevel().getRecipeManager().byKey(TFCpp.id("crafting/" + recipe)).isPresent(), "Missing recipe " + recipe);
         }
@@ -1062,7 +1143,7 @@ public final class GasGameTests
             final TestPlayer player = survivalPlayerAt(helper, 1, 1, 1);
             baffle.scrape(player);
             final int powder = player.getInventory().countItem(Instruments.ARSENIC_TRIOXIDE.get());
-            helper.assertTrue(powder == (int) (caught / (SettlingBaffleBlockEntity.MOLES_PER_POWDER * (1 + SettlingBaffleBlockEntity.STIRRED_UP))), "Scraping should give whole items of powder, and pay for what it stirs up, got " + powder);
+            helper.assertTrue(powder == (int) (caught / (DustStore.MOLES_PER_POWDER * (1 + DustStore.STIRRED_UP))), "Scraping should give whole items of powder, and pay for what it stirs up, got " + powder);
             helper.succeed();
         });
     }

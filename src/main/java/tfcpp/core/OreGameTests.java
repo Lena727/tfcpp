@@ -4,8 +4,11 @@ import java.util.List;
 import net.dries007.tfc.common.TFCTags;
 import net.dries007.tfc.common.blockentities.FarmlandBlockEntity;
 import net.dries007.tfc.common.blocks.rock.Rock;
+import net.dries007.tfc.common.component.heat.HeatCapability;
+import net.dries007.tfc.common.component.heat.IHeat;
 import net.dries007.tfc.common.component.size.ItemSizeManager;
 import net.dries007.tfc.common.component.size.Size;
+import net.dries007.tfc.common.recipes.AnvilRecipe;
 import net.dries007.tfc.common.recipes.HeatingRecipe;
 import net.dries007.tfc.util.data.Fertilizer;
 import net.dries007.tfc.util.data.FluidHeat;
@@ -14,6 +17,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -102,43 +106,84 @@ public final class OreGameTests
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 40)
-    public static void galenaSmeltsToLeadAndGivesOffSulfurAndLead(GameTestHelper helper)
+    public static void galenaSmeltsToWorkLeadAndGivesOffSulfurAndLead(GameTestHelper helper)
     {
         final ItemStack ore = new ItemStack(Ores.PIECES.get("normal_galena").get());
         final @Nullable HeatingRecipe recipe = HeatingRecipe.getRecipe(ore);
         helper.assertTrue(recipe != null, "Galena should smelt");
         helper.assertTrue(recipe.getTemperature() == 800f, "Galena smelts at 800 C, got " + recipe.getTemperature());
         final FluidStack melted = recipe.assembleFluid(ore);
-        helper.assertTrue(melted.getFluid() == Metallurgy.LEAD.get() && melted.getAmount() == 25, "Normal galena should give 25 mB of lead, got " + melted);
+        helper.assertTrue(melted.getFluid() == Metallurgy.WORK_LEAD.get() && melted.getAmount() == 25, "Normal galena should give 25 mB of work lead, got " + melted);
 
         final FluidHeat lead = FluidHeat.get(Metallurgy.LEAD.get());
         helper.assertTrue(lead != null && lead.meltTemperature() == 327f, "Lead should melt at 327 C");
-        helper.assertTrue(HeatingRecipe.getRecipe(new ItemStack(Metallurgy.LEAD_INGOT.get())) != null, "A lead ingot should melt");
-        helper.assertTrue(helper.getLevel().getRecipeManager().byKey(TFCpp.id("casting/lead_ingot")).isPresent(), "Lead should cast");
-        helper.assertTrue(helper.getLevel().getRecipeManager().byKey(TFCpp.id("casting/lead_fire_ingot")).isPresent(), "Lead should cast in a fire ingot mold");
-        final Size size = ItemSizeManager.get(new ItemStack(Metallurgy.LEAD_INGOT.get())).getSize(new ItemStack(Metallurgy.LEAD_INGOT.get()));
-        helper.assertTrue(size == Size.LARGE, "A lead ingot should be as large as any other ingot, got " + size);
+        final FluidHeat workLead = FluidHeat.get(Metallurgy.WORK_LEAD.get());
+        helper.assertTrue(workLead != null && workLead.meltTemperature() == 327f, "Work lead should melt at the same 327 C as lead");
+        for (String name : List.of("lead", "work_lead"))
+        {
+            final ItemStack ingot = new ItemStack(name.equals("lead") ? Metallurgy.LEAD_INGOT.get() : Metallurgy.WORK_LEAD_INGOT.get());
+            helper.assertTrue(HeatingRecipe.getRecipe(ingot) != null, name + " ingot should melt");
+            helper.assertTrue(helper.getLevel().getRecipeManager().byKey(TFCpp.id("casting/" + name + "_ingot")).isPresent(), name + " should cast");
+            helper.assertTrue(helper.getLevel().getRecipeManager().byKey(TFCpp.id("casting/" + name + "_fire_ingot")).isPresent(), name + " should cast in a fire ingot mold");
+            final Size size = ItemSizeManager.get(ingot).getSize(ingot);
+            helper.assertTrue(size == Size.LARGE, name + " ingot should be as large as any other ingot, got " + size);
+        }
 
+        // Melting either ingot gives no fume: the smoke of galena is the only lead fume that a furnace makes
         final BlockPos pos = helper.absolutePos(new BlockPos(4, 1, 4));
+        final float[] before = fumesAbove(helper, pos);
+        for (ItemStack ingot : List.of(new ItemStack(Metallurgy.LEAD_INGOT.get()), new ItemStack(Metallurgy.WORK_LEAD_INGOT.get())))
+        {
+            final @Nullable HeatingRecipe melt = HeatingRecipe.getRecipe(ingot);
+            MeltContext.enter(helper.getLevel(), pos);
+            melt.assembleItem(ingot);
+            MeltContext.exit();
+        }
+        helper.assertTrue(fumesAbove(helper, pos)[1] == before[1], "Melting lead or work lead must not fume");
+
         MeltContext.enter(helper.getLevel(), pos);
         recipe.assembleItem(ore);
         MeltContext.exit();
 
+        final float[] fumes = fumesAbove(helper, pos);
+        final float expected = 25f * 11.34f / 207.2f; // Moles of lead, and one of sulfur with each
+        helper.assertTrue(Math.abs(fumes[0] - expected) < 0.01f, "Galena should give " + expected + " mol of SO2, got " + fumes[0]);
+        helper.assertTrue(fumes[1] > 0f, "Smelting galena in the open should fill the air with its lead fume");
+        helper.succeed();
+    }
+
+    /** Lead can be worked cold: TFC's anvil only asks that the item be hot enough, and lead has no forging temperature to meet. */
+    @GameTest(template = TEMPLATE, timeoutTicks = 40)
+    public static void leadSheetIsBeatenColdFromEitherIngot(GameTestHelper helper)
+    {
+        final var recipes = helper.getLevel().getRecipeManager();
+        helper.assertTrue(recipes.byKey(TFCpp.id("anvil/lead_sheet")).isPresent(), "A lead ingot should make a sheet on the anvil");
+        helper.assertTrue(recipes.byKey(TFCpp.id("anvil/work_lead_sheet")).isPresent(), "A work lead ingot should make a sheet on the anvil");
+        for (Item item : List.of(Metallurgy.LEAD_INGOT.get(), Metallurgy.WORK_LEAD_INGOT.get(), Metallurgy.LEAD_SHEET.get()))
+        {
+            final ItemStack stack = new ItemStack(item);
+            final @Nullable IHeat heat = HeatCapability.get(stack);
+            helper.assertTrue(heat != null && heat.canWork(), stack + " must be workable cold");
+        }
+        helper.assertTrue(AnvilRecipe.hasAny(helper.getLevel(), new ItemStack(Metallurgy.LEAD_INGOT.get()), 0), "The lowest anvil must take a lead ingot");
+        helper.succeed();
+    }
+
+    /** @return the moles of SO2 and of lead fume in the column above a point, which is where a furnace puts its smoke */
+    private static float[] fumesAbove(GameTestHelper helper, BlockPos pos)
+    {
         final LevelGasVolume volume = GasTracker.get(helper.getLevel()).volume(helper.getLevel());
-        float sulfurDioxide = 0f, fume = 0f;
+        final float[] fumes = new float[2];
         for (int y = 0; y < 48; y++)
         {
             final @Nullable float[] cell = volume.cell(pos.getX(), pos.getY() + y, pos.getZ());
             if (cell != null)
             {
-                sulfurDioxide += cell[Gas.SULFUR_DIOXIDE.ordinal()];
-                fume += cell[Gas.LEAD_OXIDE_FUME.ordinal()];
+                fumes[0] += cell[Gas.SULFUR_DIOXIDE.ordinal()];
+                fumes[1] += cell[Gas.LEAD_OXIDE_FUME.ordinal()];
             }
         }
-        final float expected = 25f * 11.34f / 207.2f; // Moles of lead, and one of sulfur with each
-        helper.assertTrue(Math.abs(sulfurDioxide - expected) < 0.01f, "Galena should give " + expected + " mol of SO2, got " + sulfurDioxide);
-        helper.assertTrue(fume > 0f, "Smelting lead in the open should fill the air with its fume");
-        helper.succeed();
+        return fumes;
     }
 
     private OreGameTests() {}

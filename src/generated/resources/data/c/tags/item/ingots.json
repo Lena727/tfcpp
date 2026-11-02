@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "#c:ingots/lead",
+    "#c:ingots/work_lead",
     "#c:ingots/arsenical_copper",
     "#c:ingots/phosphoric_pig_iron",
     "#c:ingots/cold_short_iron"

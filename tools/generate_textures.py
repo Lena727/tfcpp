@@ -52,6 +52,17 @@ def ingot(seed, base):
     return pixels
 
 
+def sheet(seed, base):
+    """A flat plate of metal in the hand, with its edges shaded."""
+    rng = random.Random(seed)
+    pixels = [[(0, 0, 0, 0)] * 16 for _ in range(16)]
+    for y in range(4, 12):
+        for x in range(2, 14):
+            edge = y in (4, 11) or x in (2, 13)
+            pixels[y][x] = shade(base, (-30 if edge else 14) + rng.randint(-6, 6))
+    return pixels
+
+
 def heap(seed, base):
     rng = random.Random(seed)
     pixels = [[(0, 0, 0, 0)] * 16 for _ in range(16)]
@@ -139,7 +150,7 @@ for y in range(16):
             fan_front[y][x] = shade((182, 104, 70), int(r) * 3)  # Copper blades
 write_png(ROOT / 'block/mine_fan_front.png', fan_front)
 
-for material, color in {'wood': (128, 94, 58), 'ceramic': (176, 120, 88), 'copper': (190, 112, 74), 'wrought_iron': (110, 110, 114), 'steel': (150, 154, 160)}.items():
+for material, color in {'wood': (128, 94, 58), 'ceramic': (176, 120, 88), 'copper': (190, 112, 74), 'lead': (116, 120, 130), 'wrought_iron': (110, 110, 114), 'steel': (150, 154, 160)}.items():
     pipe_side = noise(50 + len(material), color, 8)
     for i in range(16):
         pipe_side[i][0] = pipe_side[i][15] = shade(color, -30)
@@ -193,6 +204,9 @@ write_png(ROOT / 'item/powder/borax.png', heap(75, (226, 226, 214)))
 write_png(ROOT / 'item/powder/lead_oxide.png', heap(76, (214, 186, 92)))
 write_png(ROOT / 'item/powder/apatite.png', heap(77, (138, 186, 170)))
 write_png(ROOT / 'item/metal/ingot/lead.png', ingot(78, (116, 120, 130)))
+write_png(ROOT / 'item/metal/ingot/work_lead.png', ingot(148, (98, 104, 116)))  # A little darker: the silver in it
+write_png(ROOT / 'item/metal/sheet/lead.png', sheet(149, (116, 120, 130)))
+write_png(ROOT / 'item/powder/bone_ash.png', heap(150, (222, 218, 206)))  # Off-white, as the bone it came from
 
 
 def overlay(seed, base, density):
@@ -326,3 +340,16 @@ def brick(seed, base):
 
 
 write_png(ROOT / 'item/basic_brick.png', brick(147, (74, 62, 56)))  # Dolomite with tar: nearly black
+
+# The cupellation hearth: fire brick, as the converter and retort are, with a lighter tone that a bone-ash floor would make
+write_png(ROOT / 'block/cupel_hearth.png', bricks(150, (196, 132, 96)))
+
+
+# The condensation tower: fire brick with a frame of lead sheet at the edges, where the walls are joined
+tower = bricks(151, (176, 120, 88))
+for y in range(16):
+    for x in range(16):
+        if min(x, y, 15 - x, 15 - y) < 2:
+            inner = min(x, y, 15 - x, 15 - y) == 1
+            tower[y][x] = shade((116, 120, 130), (-26 if inner else 6) + (x * 7 + y * 3) % 7)
+write_png(ROOT / 'block/condensation_tower.png', tower)

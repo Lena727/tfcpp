@@ -36,8 +36,10 @@ bash tools/verify.sh --client   # то же, плюс настоящий кли�
 | Вид газа, токсичность, горение | `pneumatics/gas/Gas`, `Physiology`, `Flammability`, `Deflagration` |
 | Выброс газа в комнату | `GasEmission.release` |
 | Угольная и каменная пыль: источники, осланцевание | `pneumatics/gas/DustSources`, `StoneDusting`, `QuernMixin` |
-| Поверхность с осевшей пылью, выгребание | `pneumatics/instruments/SettlingBaffleBlockEntity` |
+| Поверхность с осевшей пылью, выгребание | `pneumatics/instruments/DustStore` (общее: хранение, сбор, подъём пыли, выпадение), `SettlingBaffleBlockEntity` |
+| Блок сети, который берёт вещество из газа сети: пыль и ртуть по температуре | `metallurgy/CondensationTowerBlock` и `CondensationTowerBlockEntity`, чистая физика `TowerCondensation`; тесты `core/LeadGameTests` |
 | Конвертер и его продувка | `metallurgy/ConverterBath` (чистая физика), `ConverterBlockEntity` |
+| Купелляция: серебро из веркблея, блик, глёт | `metallurgy/CupellationBath` (чистая физика), `CupelHearthBlockEntity`, `CupelHearthBlock`; время по `tickClock`, тесты `core/LeadGameTests` |
 | Смешанная загрузка домны, фосфористое железо | `metallurgy/IronBlend`, миксины `IronBlendMixins`, данные в `MetallurgyData.ironAndSteel`, `castableIngot`, `thomasProcess` |
 | Текстуры | `tools/generate_textures.py` |
 | Игровые тесты | `core/PhosphorusGameTests` (свежий образец: домна, конвертер, футеровка, сохранение), `ChemistryGameTests`, `GasGameTests`, `IronGameTests` |
@@ -65,6 +67,8 @@ bash tools/verify.sh --client   # то же, плюс настоящий кли�
 - `helper.relativePos` ненадёжен, используй абсолютные координаты. Сервер не убирает постройки прошлых batch.
 - Порядок `runAtTickTime` внутри такта не определён. Шаг сети может прийти в любой такт. Огонь в тесте надо подтверждать каждый такт.
 - Трубы могут пересекать границу чанка.
+- Сеть труб шагает раз в 20 тактов, фаза зависит от позиции первого сегмента: число шагов за срок теста известно с точностью до одного, поэтому считай его по самому веществу (`ln(остаток / начало) / ln(1 - доля)`), а не по тактам. Температуру сети держи `helper.onEachTick`: сама она остывает к погоде с постоянной времени около 9 с.
+- Форма TFC (`Mold`) отдаёт жидкость, только когда её температура не ниже точки плавления содержимого (`isMolten`). Холодная форма с металлом не сливается: после наполнения выставь `HeatCapability.setTemperature(stack, t)`.
 - Серверные тесты не видят ошибки клиента: моделей, текстур, рендера. `simpleBlockItem`, `basicItem`, `getBuilder` теряют папку у имён с путём, поэтому пиши явные `block/` и `item/`.
 
 ## Чек-лист перед сдачей

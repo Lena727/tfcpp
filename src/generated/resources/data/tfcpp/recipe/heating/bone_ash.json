@@ -1,0 +1,11 @@
+{
+  "type": "tfc:heating",
+  "ingredient": {
+    "item": "minecraft:bone_meal"
+  },
+  "result_item": {
+    "count": 1,
+    "id": "tfcpp:powder/bone_ash"
+  },
+  "temperature": 700.0
+}

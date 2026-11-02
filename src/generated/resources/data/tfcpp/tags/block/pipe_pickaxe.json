@@ -10,6 +10,7 @@
     "tfcpp:piston_pump",
     "tfcpp:pipe/ceramic",
     "tfcpp:pipe/copper",
+    "tfcpp:pipe/lead",
     "tfcpp:pipe/wrought_iron",
     "tfcpp:pipe/steel"
   ]

@@ -3,6 +3,7 @@
   "values": [
     "tfcpp:metal/arsenical_copper",
     "tfcpp:metal/lead",
+    "tfcpp:metal/work_lead",
     "tfcpp:metal/phosphoric_pig_iron",
     "tfcpp:metal/cold_short_iron"
   ]

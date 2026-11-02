@@ -5,7 +5,7 @@
   },
   "result_fluid": {
     "amount": 10,
-    "id": "tfcpp:metal/lead"
+    "id": "tfcpp:metal/work_lead"
   },
   "temperature": 800.0
 }

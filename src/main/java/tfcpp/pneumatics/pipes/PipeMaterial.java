@@ -14,6 +14,8 @@ public enum PipeMaterial
     /** Fired clay is proof against nearly everything, but it is brittle and its joints are weak. */
     CERAMIC(1.2f, 15f, 1400f),
     COPPER(70f, 4f, 700f),
+    /** Lead is weak and creeps under load, but it is proof against sulfuric acid, which is why chamber acid was made in lead. It softens at about 150 C. */
+    LEAD(5f, 6f, 423f),
     WROUGHT_IRON(180f, 4f, 900f),
     STEEL(350f, 4f, 1000f);
 
@@ -67,6 +69,13 @@ public enum PipeMaterial
                 case CARBON_DIOXIDE -> 0.005f;
                 default -> 0f;
             };
+            // Sulfur dioxide takes nothing from lead, as the film of lead sulfate it makes protects the metal, and so the chamber process ran in lead
+            case LEAD -> switch (gas)
+            {
+                case CHLORINE -> 0.1f;
+                case HYDROGEN_SULFIDE -> 0.05f;
+                default -> 0f;
+            };
         };
     }
 
@@ -77,7 +86,12 @@ public enum PipeMaterial
         {
             case "tfcpp:mercury" -> this == COPPER ? 1f : 0f; // Mercury dissolves copper. It was always carried in iron flasks.
             case "tfc:salt_water", "tfc:brine" -> this == WROUGHT_IRON || this == STEEL ? 0.03f : this == COPPER ? 0.005f : 0f;
-            case "tfc:vinegar" -> this == WROUGHT_IRON || this == STEEL || this == COPPER ? 0.05f : 0f;
+            case "tfc:vinegar" -> switch (this)
+            {
+                case LEAD -> 0.1f; // Vinegar dissolves lead, which is what poisoned the wine of Rome
+                case WROUGHT_IRON, STEEL, COPPER -> 0.05f;
+                default -> 0f;
+            };
             case "minecraft:water", "tfc:spring_water", "tfc:limewater", "tfc:lye" -> this == WROUGHT_IRON ? 0.002f : this == STEEL ? 0.002f : 0f;
             default -> 0f;
         };

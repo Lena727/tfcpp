@@ -1,0 +1,17 @@
+{
+  "type": "tfcpp:retort",
+  "byproducts": {
+    "carbon_dioxide": 0.125
+  },
+  "carbon": 0.125,
+  "input": {
+    "item": "tfcpp:powder/lead_oxide"
+  },
+  "needs_condenser": false,
+  "result": {
+    "amount": 4,
+    "id": "tfcpp:metal/lead"
+  },
+  "temperature": 800.0,
+  "vapor": {}
+}

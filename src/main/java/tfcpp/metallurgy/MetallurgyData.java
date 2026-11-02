@@ -39,6 +39,14 @@ public final class MetallurgyData implements DataProvider
     /** A bloomery loses a third of its iron to slag. */
     private static final int BLOOMERY_CHARGE_PER_BLOOM = 150;
     private static final float GALENA_SMELTS = 800f;
+    /** 2 PbO + C -> 2 Pb + CO2. A powder of litharge holds 0.25 mol of PbO, so it takes this much carbon and gives this much CO2. */
+    private static final float LITHARGE_CARBON = 0.125f;
+    /** Lead in one powder of litharge is 4.57 mL, and a tank holds whole millibuckets, so the 4 mB that come out are rounded down. */
+    private static final int LITHARGE_LEAD_MILLIBUCKETS = 4;
+    /** Litharge is reduced by carbon above the melting point of lead, and well below the 1000 C that zinc needs. */
+    private static final float LITHARGE_REDUCTION_TEMPERATURE = 800f;
+    /** Bone meal burns to bone ash, the calcium phosphate of the bone, once its organic matter is gone. */
+    private static final float BONE_ASH_TEMPERATURE = 700f;
     private static final float BURNT_DOLOMITE_TEMPERATURE = 1500f;
     /** Basic slag holds 15-20% P2O5, which is a good fertiliser and a quick one, unlike raw rock phosphate. */
     private static final float THOMAS_MEAL_PHOSPHORUS = 0.15f;
@@ -71,6 +79,7 @@ public final class MetallurgyData implements DataProvider
             ironTemperatures();
             ironAndSteel();
             lead();
+            boneAsh();
             phosphoricIron();
             thomasProcess();
             apatite();
@@ -239,6 +248,18 @@ public final class MetallurgyData implements DataProvider
         mercury.add("vapor", gases("mercury_vapor", CINNABAR_MERCURY_MOLES));
         mercury.add("byproducts", gases("sulfur_dioxide", CINNABAR_MERCURY_MOLES));
         put("data/tfcpp/recipe/retort/mercury.json", mercury);
+
+        // 2 PbO + C -> 2 Pb + CO2. Lead does not boil at this heat, so it runs into the tank with no condenser and leaves no vapour.
+        final JsonObject lead = new JsonObject();
+        lead.addProperty("type", "tfcpp:retort");
+        lead.add("input", item("tfcpp:powder/lead_oxide"));
+        lead.addProperty("carbon", LITHARGE_CARBON);
+        lead.addProperty("temperature", LITHARGE_REDUCTION_TEMPERATURE);
+        lead.add("result", fluidStack("tfcpp:metal/lead", LITHARGE_LEAD_MILLIBUCKETS));
+        lead.add("vapor", new JsonObject());
+        lead.add("byproducts", gases("carbon_dioxide", LITHARGE_CARBON));
+        lead.addProperty("needs_condenser", false);
+        put("data/tfcpp/recipe/retort/lead.json", lead);
 
         final JsonObject retort = shaped("tfcpp:retort", "BBB", "B B", "BBB");
         retort.getAsJsonObject("key").add("B", item("tfc:ceramic/fire_brick"));
@@ -480,6 +501,16 @@ public final class MetallurgyData implements DataProvider
         converter.getAsJsonObject("key").add("S", item("tfc:metal/double_sheet/wrought_iron"));
         converter.getAsJsonObject("key").add("B", item("tfc:ceramic/fire_brick"));
         put("data/tfcpp/recipe/crafting/converter.json", converter);
+
+        final JsonObject hearth = shaped("tfcpp:cupel_hearth", "F F", "FFF");
+        hearth.getAsJsonObject("key").add("F", item("tfc:ceramic/fire_brick"));
+        put("data/tfcpp/recipe/crafting/cupel_hearth.json", hearth);
+
+        // Fire-brick walls for the gas to cool against, and lead sheet on the joints between them: lead is what the fume cannot eat
+        final JsonObject tower = shaped("tfcpp:condensation_tower", "BLB", "L L", "BLB");
+        tower.getAsJsonObject("key").add("B", item("tfc:ceramic/fire_brick"));
+        tower.getAsJsonObject("key").add("L", item("tfcpp:metal/sheet/lead"));
+        put("data/tfcpp/recipe/crafting/condensation_tower.json", tower);
     }
 
     /** @return the share of high-carbon iron that brings a mix with wrought iron up to this much carbon */
@@ -550,7 +581,7 @@ public final class MetallurgyData implements DataProvider
     }
 
     /**
-     * Galena gives up lead readily: it needs only a fire well short of copper's, and no carbon, as part of the sulfide roasting to oxide then reacts with the rest. Real lead from it holds some silver, which comes out by cupellation once there is a way to do that.
+     * Galena gives up lead readily: it needs only a fire well short of copper's, and no carbon, as part of the sulfide roasting to oxide then reacts with the rest. What it gives is work lead, which holds silver. Plain lead comes only from reducing litharge in a retort, and cupellation takes the silver out of work lead.
      */
     private void lead() throws IOException
     {
@@ -566,6 +597,8 @@ public final class MetallurgyData implements DataProvider
         put("data/tfcpp/tfc/item_heat/lead_ingot.json", ingotHeat);
 
         put("data/tfcpp/recipe/heating/lead_ingot.json", heatingToFluid(item("tfcpp:metal/ingot/lead"), "tfcpp:metal/lead", 100, MetalHeat.LEAD.melt()));
+        // A sheet is the metal of one ingot, so it melts back to the same 100 mB
+        put("data/tfcpp/recipe/heating/lead_sheet.json", heatingToFluid(item("tfcpp:metal/sheet/lead"), "tfcpp:metal/lead", 100, MetalHeat.LEAD.melt()));
 
         final JsonObject casting = new JsonObject();
         casting.addProperty("type", "tfc:casting");
@@ -581,15 +614,56 @@ public final class MetallurgyData implements DataProvider
         fireIngot.add("result", stack("tfcpp:metal/ingot/lead", 1));
         put("data/tfcpp/recipe/casting/lead_fire_ingot.json", fireIngot);
 
+        // Galena gives work lead, which goes through the same ingot path as lead, and is cast and melted in the same way
+        castableIngot("work_lead", MetalHeat.LEAD);
         final String[] pieces = {"tfcpp:ore/small_galena", "tfcpp:ore/poor_galena", "tfcpp:ore/normal_galena", "tfcpp:ore/rich_galena"};
         for (int i = 0; i < pieces.length; i++)
         {
-            put("data/tfcpp/recipe/heating/ore/" + ORE_GRADES[i] + "_galena.json", heatingToFluid(item(pieces[i]), "tfcpp:metal/lead", ORE_MILLIBUCKETS[i], GALENA_SMELTS));
+            put("data/tfcpp/recipe/heating/ore/" + ORE_GRADES[i] + "_galena.json", heatingToFluid(item(pieces[i]), "tfcpp:metal/work_lead", ORE_MILLIBUCKETS[i], GALENA_SMELTS));
+        }
+
+        // Lead in the cold: lead recrystallises at room temperature, so it has no forging temperature and any heat will do to beat it.
+        // A sheet is the metal of one ingot here, and not TFC's double ingot, so that the recipe does not make metal out of nothing.
+        final JsonObject sheetHeat = new JsonObject();
+        sheetHeat.add("ingredient", item("tfcpp:metal/sheet/lead"));
+        sheetHeat.addProperty("heat_capacity", MetalHeat.LEAD.ingotCapacity());
+        sheetHeat.addProperty("forging_temperature", 0f);
+        put("data/tfcpp/tfc/item_heat/lead_sheet.json", sheetHeat);
+
+        for (String ingot : List.of("lead", "work_lead"))
+        {
+            final JsonObject sheet = new JsonObject();
+            sheet.addProperty("type", "tfc:anvil");
+            sheet.add("ingredient", item("tfcpp:metal/ingot/" + ingot));
+            sheet.add("result", stack("tfcpp:metal/sheet/lead", 1));
+            final JsonArray rules = new JsonArray();
+            rules.add("hit_last");
+            rules.add("hit_second_last");
+            rules.add("hit_third_last");
+            sheet.add("rules", rules);
+            sheet.addProperty("tier", 0); // Any anvil will do
+            put("data/tfcpp/recipe/anvil/" + ingot + "_sheet.json", sheet);
         }
 
         addToTag("data/c/tags/item/ingots/lead.json", "tfcpp:metal/ingot/lead");
         addToTag("data/c/tags/fluid/lead.json", "tfcpp:metal/lead");
         addToTag("data/c/tags/item/dusts/litharge.json", "tfcpp:powder/lead_oxide");
+    }
+
+    /** Bone meal burned to bone ash, which is what a cupellation hearth is floored with. Bone meal has no heat of its own in TFC, so it gets one as the powders do. */
+    private void boneAsh()
+    {
+        final JsonObject heat = new JsonObject();
+        heat.add("ingredient", item("minecraft:bone_meal"));
+        heat.addProperty("heat_capacity", 0.7f); // As TFC's own ground limestone
+        put("data/tfcpp/tfc/item_heat/bone_meal.json", heat);
+
+        final JsonObject burn = new JsonObject();
+        burn.addProperty("type", "tfc:heating");
+        burn.add("ingredient", item("minecraft:bone_meal"));
+        burn.add("result_item", stack("tfcpp:powder/bone_ash", 1));
+        burn.addProperty("temperature", BONE_ASH_TEMPERATURE);
+        put("data/tfcpp/recipe/heating/bone_ash.json", burn);
     }
 
     /**
@@ -970,7 +1044,7 @@ public final class MetallurgyData implements DataProvider
 
     private void tags()
     {
-        addToTag("data/tfc/tags/fluid/molten_metals.json", "tfcpp:metal/arsenical_copper", "tfcpp:metal/lead", "tfcpp:metal/phosphoric_pig_iron", "tfcpp:metal/cold_short_iron"); // Not iron oxide: this is what lets a mould take it, and nothing can be cast from it
+        addToTag("data/tfc/tags/fluid/molten_metals.json", "tfcpp:metal/arsenical_copper", "tfcpp:metal/lead", "tfcpp:metal/work_lead", "tfcpp:metal/phosphoric_pig_iron", "tfcpp:metal/cold_short_iron"); // Not iron oxide: this is what lets a mould take it, and nothing can be cast from it
         addToTag("data/tfc/tags/fluid/usable_in_ingot_mold.json", "tfcpp:metal/arsenical_copper");
         addToTag("data/tfc/tags/fluid/usable_in_tool_head_mold.json", "tfcpp:metal/arsenical_copper");
         addToTag("data/tfc/tags/fluid/usable_in_jug.json", "tfcpp:mercury"); // Glazed pottery and glass both hold mercury, which attacks neither
@@ -987,12 +1061,12 @@ public final class MetallurgyData implements DataProvider
         addToTag("data/tfcpp/tags/fluid/castable_copper.json", "tfc:metal/copper", "tfcpp:metal/arsenical_copper");
         addToTag("data/c/tags/fluid/mercury.json", "tfcpp:mercury");
         addToTag("data/c/tags/item/ingots/arsenical_copper.json", "tfcpp:metal/ingot/arsenical_copper");
-        addToTag("data/c/tags/item/ingots.json", "#c:ingots/lead", "#c:ingots/arsenical_copper", "#c:ingots/phosphoric_pig_iron", "#c:ingots/cold_short_iron"); // TFC sizes ingots by this parent tag, and without it they would count as tiny items that stack to 64
+        addToTag("data/c/tags/item/ingots.json", "#c:ingots/lead", "#c:ingots/work_lead", "#c:ingots/arsenical_copper", "#c:ingots/phosphoric_pig_iron", "#c:ingots/cold_short_iron"); // TFC sizes ingots by this parent tag, and without it they would count as tiny items that stack to 64
     }
 
     private void lootTables()
     {
-        for (String block : List.of("retort", "retort_condenser", "converter", "coke_oven", "gas_burner"))
+        for (String block : List.of("retort", "retort_condenser", "converter", "cupel_hearth", "condensation_tower", "coke_oven", "gas_burner"))
         {
             final JsonObject entry = new JsonObject();
             entry.addProperty("type", "minecraft:item");
@@ -1029,7 +1103,7 @@ public final class MetallurgyData implements DataProvider
         addToTag("data/tfcpp/tags/item/open_flames.json", "minecraft:torch", "minecraft:soul_torch", "tfc:torch");
         addToTag("data/tfcpp/tags/entity_type/sentinel_animals.json", "tfc:rat", "tfc:quail");
         addToTag("data/tfc/tags/block/lamps.json", "tfcpp:davy_lamp");
-        addToTag("data/minecraft/tags/block/mineable/pickaxe.json", "tfcpp:retort", "tfcpp:retort_condenser", "tfcpp:davy_lamp", "tfcpp:settling_baffle", "tfcpp:mine_fan", "tfcpp:converter", "tfcpp:coke_oven", "tfcpp:gas_burner", "#tfcpp:pipe_pickaxe", "#tfcpp:ore_pickaxe");
+        addToTag("data/minecraft/tags/block/mineable/pickaxe.json", "tfcpp:retort", "tfcpp:retort_condenser", "tfcpp:davy_lamp", "tfcpp:settling_baffle", "tfcpp:mine_fan", "tfcpp:converter", "tfcpp:cupel_hearth", "tfcpp:condensation_tower", "tfcpp:coke_oven", "tfcpp:gas_burner", "#tfcpp:pipe_pickaxe", "#tfcpp:ore_pickaxe");
         addToTag("data/c/tags/item/dusts/arsenic_trioxide.json", "tfcpp:powder/arsenic_trioxide");
         addToTag("data/c/tags/item/dusts/antimony_trioxide.json", "tfcpp:powder/antimony_trioxide");
         addToTag("data/c/tags/item/dusts/zinc_oxide.json", "tfcpp:powder/zinc_oxide");
@@ -1120,6 +1194,12 @@ public final class MetallurgyData implements DataProvider
             put("data/tfcpp/recipe/crafting/pipe/" + metal + ".json", pipe);
         }
 
+        // Lead pipe is the same shape as copper's, from the lead sheet this mod makes
+        final JsonObject leadPipe = shaped("tfcpp:pipe/lead", "S", "S");
+        leadPipe.getAsJsonObject("result").addProperty("count", 2);
+        leadPipe.getAsJsonObject("key").add("S", item("tfcpp:metal/sheet/lead"));
+        put("data/tfcpp/recipe/crafting/pipe/lead.json", leadPipe);
+
         fitting("pipe_valve", "tfc:brass_mechanisms", "tfc:metal/sheet/wrought_iron");
         fitting("pipe_vent", "tfc:metal/rod/wrought_iron", "tfc:metal/sheet/wrought_iron");
         fitting("pipe_tap", "tfc:metal/rod/copper", "tfc:metal/sheet/wrought_iron");
@@ -1134,7 +1214,7 @@ public final class MetallurgyData implements DataProvider
         final List<String> blocks = new ArrayList<>(List.of("pipe_valve", "pipe_vent", "pipe_tap", "safety_valve", "mercury_manometer", "pressure_vessel", "piston_pump"));
         final List<String> pickaxe = new ArrayList<>();
         blocks.forEach(block -> pickaxe.add("tfcpp:" + block));
-        for (String material : List.of("wood", "ceramic", "copper", "wrought_iron", "steel"))
+        for (String material : List.of("wood", "ceramic", "copper", "lead", "wrought_iron", "steel"))
         {
             blocks.add("pipe/" + material);
             if (!material.equals("wood"))
@@ -1144,7 +1224,7 @@ public final class MetallurgyData implements DataProvider
         }
         addToTag("data/tfcpp/tags/block/pipe_pickaxe.json", pickaxe.toArray(String[]::new));
         addToTag("data/minecraft/tags/block/mineable/axe.json", "tfcpp:pipe/wood");
-        addToTag("data/tfc/tags/block/charcoal_forge_invisible.json", "tfcpp:retort", "tfcpp:pressure_vessel", "tfcpp:converter", "tfcpp:coke_oven");
+        addToTag("data/tfc/tags/block/charcoal_forge_invisible.json", "tfcpp:retort", "tfcpp:pressure_vessel", "tfcpp:converter", "tfcpp:cupel_hearth", "tfcpp:coke_oven");
 
         for (String block : blocks)
         {

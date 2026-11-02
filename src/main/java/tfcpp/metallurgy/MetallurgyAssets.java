@@ -47,6 +47,9 @@ public final class MetallurgyAssets
             flatItem(Metallurgy.COLD_SHORT_IRON_INGOT.get());
             flatItem(Metallurgy.BORAX_FLUX.get());
             flatItem(Metallurgy.LEAD_INGOT.get());
+            flatItem(Metallurgy.WORK_LEAD_INGOT.get());
+            flatItem(Metallurgy.LEAD_SHEET.get());
+            flatItem(Metallurgy.BONE_ASH.get());
             flatItem(Metallurgy.APATITE_POWDER.get());
             flatItem(Instruments.LEAD_OXIDE.get());
             Ores.PIECES.values().forEach(piece -> flatItem(piece.get()));
@@ -114,6 +117,8 @@ public final class MetallurgyAssets
                 }
             }
             simpleBlockWithItem(Metallurgy.CONVERTER.get(), models().cubeColumn("converter", modLoc("block/converter_side"), modLoc("block/converter_top")));
+            simpleBlockWithItem(Metallurgy.CUPEL_HEARTH.get(), models().cubeAll("cupel_hearth", modLoc("block/cupel_hearth")));
+            simpleBlockWithItem(Metallurgy.CONDENSATION_TOWER.get(), models().cubeAll("condensation_tower", modLoc("block/condensation_tower")));
             simpleBlockWithItem(Instruments.SETTLING_BAFFLE.get(), models().cubeColumn("settling_baffle", modLoc("block/settling_baffle"), modLoc("block/retort_top")));
 
             horizontalBlock(Instruments.MINE_FAN.get(), models().orientable("mine_fan", modLoc("block/mine_fan_side"), modLoc("block/mine_fan_front"), modLoc("block/mine_fan_side")));

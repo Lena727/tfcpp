@@ -4,6 +4,7 @@
     "tfcpp:retort",
     "tfcpp:pressure_vessel",
     "tfcpp:converter",
+    "tfcpp:cupel_hearth",
     "tfcpp:coke_oven"
   ]
 }
