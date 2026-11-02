@@ -302,3 +302,27 @@ for name, ring, core in (('gas_burner_top', (70, 66, 64), (36, 34, 34)), ('gas_b
             if distance < 4:
                 burner_top[y][x] = shade(core, int(distance * 8) if name.endswith('lit') else 0)  # The nozzle, with its flame when lit
     write_png(ROOT / f'block/{name}.png', burner_top)
+
+
+# Phosphorus and the basic converter: ingots of phosphoric pig iron (grey-brown, coarse) and cold short iron (pale, bright), slags, and dolomite
+write_png(ROOT / 'item/metal/ingot/phosphoric_pig_iron.png', ingot(140, (128, 112, 104)))
+write_png(ROOT / 'item/metal/ingot/cold_short_iron.png', ingot(141, (156, 152, 158)))
+write_png(ROOT / 'item/slag/phosphoric_iron.png', heap(142, (98, 66, 44)))
+write_png(ROOT / 'item/slag/thomas.png', heap(143, (84, 78, 92)))
+write_png(ROOT / 'item/powder/thomas_meal.png', heap(144, (74, 70, 78)))
+write_png(ROOT / 'item/powder/dolomite.png', heap(145, (218, 214, 204)))
+write_png(ROOT / 'item/powder/burnt_dolomite.png', heap(146, (186, 164, 138)))
+
+
+def brick(seed, base):
+    """A single brick in the hand, with a lit top and a dark underside."""
+    rng = random.Random(seed)
+    pixels = [[(0, 0, 0, 0)] * 16 for _ in range(16)]
+    for y in range(5, 12):
+        for x in range(2, 14):
+            highlight = 24 if y == 5 else (-36 if y == 11 or x == 13 else 0)
+            pixels[y][x] = shade(base, highlight + rng.randint(-8, 8))
+    return pixels
+
+
+write_png(ROOT / 'item/basic_brick.png', brick(147, (74, 62, 56)))  # Dolomite with tar: nearly black

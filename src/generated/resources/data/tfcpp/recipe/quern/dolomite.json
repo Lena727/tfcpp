@@ -1,0 +1,10 @@
+{
+  "type": "tfc:quern",
+  "ingredient": {
+    "item": "tfc:rock/cobble/dolomite"
+  },
+  "result": {
+    "count": 2,
+    "id": "tfcpp:powder/dolomite"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "type": "tfc:quern",
+  "ingredient": {
+    "item": "tfcpp:slag/thomas"
+  },
+  "result": {
+    "count": 4,
+    "id": "tfcpp:powder/thomas_meal"
+  }
+}

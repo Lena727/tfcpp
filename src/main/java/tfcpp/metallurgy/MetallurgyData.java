@@ -39,6 +39,9 @@ public final class MetallurgyData implements DataProvider
     /** A bloomery loses a third of its iron to slag. */
     private static final int BLOOMERY_CHARGE_PER_BLOOM = 150;
     private static final float GALENA_SMELTS = 800f;
+    private static final float BURNT_DOLOMITE_TEMPERATURE = 1500f;
+    /** Basic slag holds 15-20% P2O5, which is a good fertiliser and a quick one, unlike raw rock phosphate. */
+    private static final float THOMAS_MEAL_PHOSPHORUS = 0.15f;
     /** Half of what bone meal gives, as most of it stays locked up in the soil. */
     private static final float APATITE_PHOSPHORUS = 0.05f;
     private static final float ORIGINAL_CERAMIC_TEMPERATURE = 1399f, POTTERY_TEMPERATURE = 850f, FIRE_CLAY_TEMPERATURE = 1300f;
@@ -68,6 +71,8 @@ public final class MetallurgyData implements DataProvider
             ironTemperatures();
             ironAndSteel();
             lead();
+            phosphoricIron();
+            thomasProcess();
             apatite();
             ceramics();
             fuels();
@@ -366,6 +371,9 @@ public final class MetallurgyData implements DataProvider
         oxide.addProperty("melt_temperature", IRON_OXIDE_MELT);
         oxide.addProperty("specific_heat_capacity", 0.008571429f);
         put("data/tfcpp/tfc/fluid_heat/iron_oxide.json", oxide);
+        final JsonObject phosphoricOxide = oxide.deepCopy();
+        phosphoricOxide.addProperty("fluid", "tfcpp:metal/phosphoric_iron_oxide");
+        put("data/tfcpp/tfc/fluid_heat/phosphoric_iron_oxide.json", phosphoricOxide);
 
         final JsonObject steelHeat = read(tfcFile("data/tfc/tfc/fluid_heat/steel.json"));
         steelHeat.addProperty("melt_temperature", STEEL_MELT);
@@ -411,12 +419,25 @@ public final class MetallurgyData implements DataProvider
         }
 
         final JsonObject bloomery = read(tfcFile("data/tfc/recipe/bloomery/raw_iron_bloom.json"));
-        bloomery.add("fluid", fluid("tfcpp:metal/iron_oxide", BLOOMERY_CHARGE_PER_BLOOM));
+        // A bloomery's slag takes the phosphorus out of the iron, so a charge of either ore, or both, gives the same ordinary bloom
+        final JsonObject bloomeryCharge = new JsonObject();
+        bloomeryCharge.addProperty("type", "neoforge:compound");
+        final JsonArray oxides = new JsonArray();
+        oxides.add(fluidIngredient("tfcpp:metal/iron_oxide"));
+        oxides.add(fluidIngredient("tfcpp:metal/phosphoric_iron_oxide"));
+        bloomeryCharge.add("ingredients", oxides);
+        bloomeryCharge.addProperty("amount", BLOOMERY_CHARGE_PER_BLOOM);
+        bloomery.add("fluid", bloomeryCharge);
         put("data/tfc/recipe/bloomery/raw_iron_bloom.json", bloomery);
 
+        // A blast furnace hearth is liquid iron, and iron dissolves the phosphorus of any ore in it. Which recipe applies is up to the oxide that melted, and a mixed charge is merged to the phosphoric one: see IronBlend.
         final JsonObject blastFurnace = read(tfcFile("data/tfc/recipe/blast_furnace/pig_iron.json"));
         blastFurnace.add("fluid", fluid("tfcpp:metal/iron_oxide", 1));
         put("data/tfc/recipe/blast_furnace/pig_iron.json", blastFurnace);
+        final JsonObject phosphoricBlastFurnace = blastFurnace.deepCopy();
+        phosphoricBlastFurnace.add("fluid", fluid("tfcpp:metal/phosphoric_iron_oxide", 1));
+        phosphoricBlastFurnace.add("result", fluidStack("tfcpp:metal/phosphoric_pig_iron", 1));
+        put("data/tfcpp/recipe/blast_furnace/phosphoric_pig_iron.json", phosphoricBlastFurnace);
 
         // Slag from a bloomery still holds its iron, and goes back in a furnace
         put("data/tfcpp/recipe/heating/iron_slag.json", heatingToFluid(item("tfcpp:slag/iron"), "tfcpp:metal/iron_oxide", IronSmelting.MILLIBUCKETS_PER_SLAG, IRON_OXIDE_MELT));
@@ -424,6 +445,13 @@ public final class MetallurgyData implements DataProvider
         slagHeat.add("ingredient", item("tfcpp:slag/iron"));
         slagHeat.addProperty("heat_capacity", 1.1428572f);
         put("data/tfcpp/tfc/item_heat/iron_slag.json", slagHeat);
+
+        // And phosphoric slag goes back as the phosphoric oxide, so that it cannot be used to clean the phosphorus out of anything
+        put("data/tfcpp/recipe/heating/phosphoric_iron_slag.json", heatingToFluid(item("tfcpp:slag/phosphoric_iron"), "tfcpp:metal/phosphoric_iron_oxide", IronSmelting.MILLIBUCKETS_PER_SLAG, IRON_OXIDE_MELT));
+        final JsonObject phosphoricSlagHeat = new JsonObject();
+        phosphoricSlagHeat.add("ingredient", item("tfcpp:slag/phosphoric_iron"));
+        phosphoricSlagHeat.addProperty("heat_capacity", 1.1428572f);
+        put("data/tfcpp/tfc/item_heat/phosphoric_iron_slag.json", phosphoricSlagHeat);
 
         // A hammer cannot take carbon out of iron. That takes oxygen.
         final JsonObject disabled = new JsonObject();
@@ -494,7 +522,8 @@ public final class MetallurgyData implements DataProvider
             case "tfc:metal/cast_iron" -> {
                 if (relative.startsWith("ore/"))
                 {
-                    result.addProperty("id", "tfcpp:metal/iron_oxide");
+                    // Brown iron ore carries phosphorus, 0.5-2%. Hematite and magnetite are poor in it.
+                    result.addProperty("id", relative.contains("limonite") ? "tfcpp:metal/phosphoric_iron_oxide" : "tfcpp:metal/iron_oxide");
                     recipe.addProperty("temperature", IRON_OXIDE_MELT);
                     put("data/tfc/recipe/heating/" + relative, recipe);
                 }
@@ -561,6 +590,98 @@ public final class MetallurgyData implements DataProvider
         addToTag("data/c/tags/item/ingots/lead.json", "tfcpp:metal/ingot/lead");
         addToTag("data/c/tags/fluid/lead.json", "tfcpp:metal/lead");
         addToTag("data/c/tags/item/dusts/litharge.json", "tfcpp:powder/lead_oxide");
+    }
+
+    /**
+     * Phosphoric pig iron and cold short iron. They can be melted, poured and cast, and nothing more: no anvil recipe is written for either, and the alloy recipes of wrought iron and steel name only the fluids they take, so these cannot be mixed into them.
+     */
+    private void phosphoricIron() throws IOException
+    {
+        castableIngot("phosphoric_pig_iron", MetalHeat.PHOSPHORIC_PIG_IRON);
+        castableIngot("cold_short_iron", MetalHeat.COLD_SHORT_IRON);
+    }
+
+    /** A metal that is only ever cast: a fluid, its heat, an ingot, and the way between the two. */
+    private void castableIngot(String name, MetalHeat.Metal heat) throws IOException
+    {
+        final String fluidId = "tfcpp:metal/" + name, ingotId = "tfcpp:metal/ingot/" + name;
+
+        final JsonObject fluidHeat = new JsonObject();
+        fluidHeat.addProperty("fluid", fluidId);
+        fluidHeat.addProperty("melt_temperature", heat.melt());
+        fluidHeat.addProperty("specific_heat_capacity", heat.liquidCapacity());
+        put("data/tfcpp/tfc/fluid_heat/" + name + ".json", fluidHeat);
+
+        final JsonObject ingotHeat = new JsonObject();
+        ingotHeat.add("ingredient", item(ingotId));
+        ingotHeat.addProperty("heat_capacity", heat.ingotCapacity());
+        put("data/tfcpp/tfc/item_heat/" + name + "_ingot.json", ingotHeat);
+
+        put("data/tfcpp/recipe/heating/" + name + "_ingot.json", heatingToFluid(item(ingotId), fluidId, 100, heat.melt()));
+
+        final JsonObject casting = new JsonObject();
+        casting.addProperty("type", "tfc:casting");
+        casting.addProperty("break_chance", 0.1f);
+        casting.add("fluid", fluid(fluidId, 100));
+        casting.add("mold", item("tfc:ceramic/ingot_mold"));
+        casting.add("result", stack(ingotId, 1));
+        put("data/tfcpp/recipe/casting/" + name + "_ingot.json", casting);
+
+        final JsonObject fireIngot = read(tfcFile("data/tfc/recipe/casting/copper_fire_ingot.json"));
+        fireIngot.add("fluid", fluid(fluidId, fireIngot.getAsJsonObject("fluid").get("amount").getAsInt()));
+        fireIngot.add("result", stack(ingotId, 1));
+        put("data/tfcpp/recipe/casting/" + name + "_fire_ingot.json", fireIngot);
+
+        addToTag("data/c/tags/item/ingots/" + name + ".json", ingotId);
+        addToTag("data/c/tags/fluid/" + name + ".json", fluidId);
+    }
+
+    /**
+     * Thomas and Gilchrist's basic lining: dolomite ground, burned hard until it has lost its CO2 and no longer slakes, then pressed with tar into bricks. The slag it makes, with its lime, is full of phosphate and is ground for fields.
+     */
+    private void thomasProcess()
+    {
+        final JsonObject grindDolomite = new JsonObject();
+        grindDolomite.addProperty("type", "tfc:quern");
+        grindDolomite.add("ingredient", item("tfc:rock/cobble/dolomite"));
+        grindDolomite.add("result", stack("tfcpp:powder/dolomite", 2));
+        put("data/tfcpp/recipe/quern/dolomite.json", grindDolomite);
+
+        for (String powder : List.of("dolomite", "burnt_dolomite"))
+        {
+            final JsonObject heat = new JsonObject();
+            heat.add("ingredient", item("tfcpp:powder/" + powder));
+            heat.addProperty("heat_capacity", 0.7f); // As TFC's own ground limestone
+            put("data/tfcpp/tfc/item_heat/" + powder + ".json", heat);
+        }
+
+        // CaMg(CO3)2 -> CaO.MgO + 2 CO2: dead-burned dolomite is made at some 1500 C, and a pit or a bloomery cannot reach it
+        final JsonObject burn = new JsonObject();
+        burn.addProperty("type", "tfc:heating");
+        burn.add("ingredient", item("tfcpp:powder/dolomite"));
+        burn.add("result_item", stack("tfcpp:powder/burnt_dolomite", 1));
+        burn.addProperty("temperature", BURNT_DOLOMITE_TEMPERATURE);
+        put("data/tfcpp/recipe/heating/burnt_dolomite.json", burn);
+
+        final JsonObject brick = new JsonObject();
+        brick.addProperty("type", "tfc:barrel_instant");
+        brick.add("input_item", sized("tfcpp:powder/burnt_dolomite", 4));
+        brick.add("input_fluid", fluid("tfcpp:coal_tar", 1));
+        brick.add("output_item", stack("tfcpp:basic_brick", 1));
+        put("data/tfcpp/recipe/barrel/basic_brick.json", brick);
+
+        final JsonObject grindSlag = new JsonObject();
+        grindSlag.addProperty("type", "tfc:quern");
+        grindSlag.add("ingredient", item("tfcpp:slag/thomas"));
+        grindSlag.add("result", stack("tfcpp:powder/thomas_meal", 4));
+        put("data/tfcpp/recipe/quern/thomas_meal.json", grindSlag);
+
+        final JsonObject fertilizer = new JsonObject();
+        fertilizer.add("ingredient", item("tfcpp:powder/thomas_meal"));
+        fertilizer.addProperty("phosphorus", THOMAS_MEAL_PHOSPHORUS);
+        put("data/tfcpp/tfc/fertilizer/thomas_meal.json", fertilizer);
+
+        addToTag("data/c/tags/item/dusts/dolomite.json", "tfcpp:powder/dolomite");
     }
 
     /** Rock phosphate is a real fertiliser, though a slow one. Superphosphate waits for sulfuric acid. */
@@ -849,7 +970,7 @@ public final class MetallurgyData implements DataProvider
 
     private void tags()
     {
-        addToTag("data/tfc/tags/fluid/molten_metals.json", "tfcpp:metal/arsenical_copper", "tfcpp:metal/lead"); // Not iron oxide: this is what lets a mould take it, and nothing can be cast from it
+        addToTag("data/tfc/tags/fluid/molten_metals.json", "tfcpp:metal/arsenical_copper", "tfcpp:metal/lead", "tfcpp:metal/phosphoric_pig_iron", "tfcpp:metal/cold_short_iron"); // Not iron oxide: this is what lets a mould take it, and nothing can be cast from it
         addToTag("data/tfc/tags/fluid/usable_in_ingot_mold.json", "tfcpp:metal/arsenical_copper");
         addToTag("data/tfc/tags/fluid/usable_in_tool_head_mold.json", "tfcpp:metal/arsenical_copper");
         addToTag("data/tfc/tags/fluid/usable_in_jug.json", "tfcpp:mercury"); // Glazed pottery and glass both hold mercury, which attacks neither
@@ -866,7 +987,7 @@ public final class MetallurgyData implements DataProvider
         addToTag("data/tfcpp/tags/fluid/castable_copper.json", "tfc:metal/copper", "tfcpp:metal/arsenical_copper");
         addToTag("data/c/tags/fluid/mercury.json", "tfcpp:mercury");
         addToTag("data/c/tags/item/ingots/arsenical_copper.json", "tfcpp:metal/ingot/arsenical_copper");
-        addToTag("data/c/tags/item/ingots.json", "#c:ingots/lead", "#c:ingots/arsenical_copper"); // TFC sizes ingots by this parent tag, and without it they would count as tiny items that stack to 64
+        addToTag("data/c/tags/item/ingots.json", "#c:ingots/lead", "#c:ingots/arsenical_copper", "#c:ingots/phosphoric_pig_iron", "#c:ingots/cold_short_iron"); // TFC sizes ingots by this parent tag, and without it they would count as tiny items that stack to 64
     }
 
     private void lootTables()
@@ -1126,6 +1247,23 @@ public final class MetallurgyData implements DataProvider
         final JsonObject json = new JsonObject();
         json.addProperty("amount", amount);
         json.addProperty("fluid", id);
+        return json;
+    }
+
+    /** A fluid ingredient with no amount, for use among others in a compound one. */
+    private static JsonObject fluidIngredient(String id)
+    {
+        final JsonObject json = new JsonObject();
+        json.addProperty("fluid", id);
+        return json;
+    }
+
+    /** An item ingredient that wants several of itself. */
+    private static JsonObject sized(String id, int count)
+    {
+        final JsonObject json = new JsonObject();
+        json.addProperty("count", count);
+        json.addProperty("item", id);
         return json;
     }
 

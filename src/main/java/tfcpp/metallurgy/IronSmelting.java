@@ -6,6 +6,7 @@ import net.dries007.tfc.common.recipes.BloomeryRecipe;
 import net.dries007.tfc.util.Helpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -30,6 +31,8 @@ public final class IronSmelting
     private static final float CARBON_DIOXIDE_PER_IRON = 1.5f;
     /** A flux powder of 0.75 kg of limestone: CaCO3 -> CaO + CO2. */
     public static final float CARBON_DIOXIDE_PER_FLUX = 7.5f;
+    /** A dolomite powder of 0.75 kg: CaMg(CO3)2 -> CaO + MgO + 2 CO2, 184 g/mol. */
+    public static final float CARBON_DIOXIDE_PER_DOLOMITE = 8.1f;
 
     /** @return pieces of slag left by a bloomery charge holding this much iron, for what did not go into blooms */
     public static int bloomerySlag(int chargeMillibuckets, int bloomMillibuckets)
@@ -43,6 +46,14 @@ public final class IronSmelting
         return millibuckets * MOLES_OF_IRON_PER_MILLIBUCKET * CARBON_DIOXIDE_PER_IRON;
     }
 
+    /**
+     * The slag of a bloomery that smelted any brown ore. The phosphorus of the ore does not go into a bloom: a real tap cinder is very phosphoric, so the slag must not wash it out for free.
+     */
+    public static Item slagOf(boolean phosphoric)
+    {
+        return phosphoric ? Metallurgy.PHOSPHORIC_IRON_SLAG.get() : Metallurgy.IRON_SLAG.get();
+    }
+
     /** A bloomery has burned out. Called before it consumes what was in it. */
     public static void bloomeryFinished(BloomeryBlockEntity bloomery, List<ItemStack> charge, @Nullable BloomeryRecipe recipe)
     {
@@ -52,12 +63,14 @@ public final class IronSmelting
         }
 
         int iron = 0, catalyst = 0;
+        boolean phosphoric = false;
         for (ItemStack stack : charge)
         {
             final @Nullable FluidStack fluid = recipe.consumeInput(stack);
             if (fluid != null)
             {
                 iron += fluid.getAmount();
+                phosphoric |= fluid.getFluid() == Metallurgy.PHOSPHORIC_IRON_OXIDE.get();
             }
             else
             {
@@ -79,7 +92,7 @@ public final class IronSmelting
         final int slag = bloomerySlag(iron, blooms * BLOOM_MILLIBUCKETS);
         if (slag > 0)
         {
-            Helpers.spawnItem(level, bloomery.getExternalBlock(), new ItemStack(Metallurgy.IRON_SLAG.get(), slag));
+            Helpers.spawnItem(level, bloomery.getExternalBlock(), new ItemStack(slagOf(phosphoric), slag));
         }
     }
 

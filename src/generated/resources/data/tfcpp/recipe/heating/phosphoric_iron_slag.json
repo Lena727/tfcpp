@@ -1,0 +1,11 @@
+{
+  "type": "tfc:heating",
+  "ingredient": {
+    "item": "tfcpp:slag/phosphoric_iron"
+  },
+  "result_fluid": {
+    "amount": 25,
+    "id": "tfcpp:metal/phosphoric_iron_oxide"
+  },
+  "temperature": 1565.0
+}

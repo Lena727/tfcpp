@@ -37,8 +37,9 @@ bash tools/verify.sh --client   # то же, плюс настоящий кли�
 | Выброс газа в комнату | `GasEmission.release` |
 | Поверхность с осевшей пылью, выгребание | `pneumatics/instruments/SettlingBaffleBlockEntity` |
 | Конвертер и его продувка | `metallurgy/ConverterBath` (чистая физика), `ConverterBlockEntity` |
+| Смешанная загрузка домны, фосфористое железо | `metallurgy/IronBlend`, миксины `IronBlendMixins`, данные в `MetallurgyData.ironAndSteel`, `castableIngot`, `thomasProcess` |
 | Текстуры | `tools/generate_textures.py` |
-| Игровые тесты | `core/ChemistryGameTests` (свежий образец), `GasGameTests`, `IronGameTests` |
+| Игровые тесты | `core/PhosphorusGameTests` (свежий образец: домна, конвертер, футеровка, сохранение), `ChemistryGameTests`, `GasGameTests`, `IronGameTests` |
 | Перечень миксинов | таблица в `README.md`, каждый новый добавляется туда и в `tfcpp.mixins.json` |
 
 ## Факты о TFC, которые стоили времени
@@ -49,6 +50,9 @@ bash tools/verify.sh --client   # то же, плюс настоящий кли�
 - Сплав не может содержать свой результат как компонент.
 - Топка (`FireboxBlockEntity`) расходует топливо своим методом, не через `AbstractFirepitBlockEntity`.
 - Бочки, вёдра и кувшины фильтруют жидкости по белым спискам. Едкие жидкости нельзя добавлять в `tfc:ingredients`.
+- Домна и сыродутная печь выбирают рецепт по первой загруженной крице/руде (по её расплаву): в `BlastFurnaceBlockEntity` см. `updateCachedRecipe`, `addItemsFromWorld`; то, что не подходит ни как сырьё, ни как катализатор рецепта, просто не принимается. У домны нет сплава: один `inputFluid`, и другая жидкость в нём заменяет прежнюю (`insertOrReplaceFluid`), а `outputFluidTank.fill` другой жидкости молча возвращает 0.
+- Сплав тигля (`FluidAlloy`) требует, чтобы каждая жидкость в нём была названа в рецепте: лишний металл даёт `Metal.UNKNOWN`, не сталь. Отдельный перечень «запрещено» не нужен.
+- Рецепты домны, сыродутной печи, бочки принимают `{"tag": ...}` и `{"type":"neoforge:compound","ingredients":[...]}` в `fluid`/`input_fluid`.
 - Руды: `tfc:prospectable` = `#c:ores`, `tfc:collapse`. Больше rarity значит реже. Жила: `tfc:cluster_vein` или `tfc:disc_vein` с `blocks` и `indicator`, подключается тегом `tfc:in_biome/veins`.
 
 ## Ловушки игровых тестов

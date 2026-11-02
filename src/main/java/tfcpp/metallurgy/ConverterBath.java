@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
  * The molten charge of a Bessemer converter. Air blown up through the iron burns what is dissolved in it, in the order that real blows showed: silicon first, then carbon, and iron itself once the carbon runs short.
  * <p>
  * No fuel is burned. Those reactions are the only source of heat, against the heat that the blast carries off and what the vessel loses. Bessemer's discovery was that this comes out ahead, which is what let steel stay liquid without a furnace able to reach 1500 C, but it only does so with a strong enough blast.
+ * <p>
+ * Phosphorus, which Bessemer's acid lining could not remove, burns only in a basic one (Thomas and Gilchrist, 1878): the lining and the lime thrown in hold it as 4 CaO.P2O5, and it burns after the carbon, in the "afterblow".
  */
 public final class ConverterBath
 {
@@ -15,23 +17,28 @@ public final class ConverterBath
      */
     public enum Grade
     {
-        WROUGHT_IRON("tfc:metal/wrought_iron", 0.2f, 0.03f, 0f),
-        STEEL("tfc:metal/steel", 1.0f, 0.2f, 0f),
-        HIGH_CARBON_STEEL("tfc:metal/high_carbon_steel", 2.1f, 1.0f, 0f),
-        CAST_IRON("tfc:metal/cast_iron", 4.0f, 2.1f, 0f),
-        PIG_IRON("tfc:metal/pig_iron", Float.MAX_VALUE, 4.0f, 1.0f);
+        WROUGHT_IRON("tfc:metal/wrought_iron", 0.2f, 0.03f, 0f, 0f),
+        STEEL("tfc:metal/steel", 1.0f, 0.2f, 0f, 0f),
+        HIGH_CARBON_STEEL("tfc:metal/high_carbon_steel", 2.1f, 1.0f, 0f, 0f),
+        CAST_IRON("tfc:metal/cast_iron", 4.0f, 2.1f, 0f, 0f),
+        PIG_IRON("tfc:metal/pig_iron", Float.MAX_VALUE, 4.0f, 1.0f, 0f),
+        /** Pig iron from a brown ore, which carries phosphorus. It is not named by carbon: only {@link #ofFluid} finds it. */
+        PHOSPHORIC_PIG_IRON("tfcpp:metal/phosphoric_pig_iron", Float.MAX_VALUE, 4.0f, 1.0f, 1.5f),
+        /** What phosphorus makes of iron whatever its carbon. It counts as the least carbon so that pouring it back never gains any; the 0.2% is the most a tap of it can hold. */
+        COLD_SHORT_IRON("tfcpp:metal/cold_short_iron", 0.2f, 0.03f, 0f, 1.5f);
 
         private static final Grade[] VALUES = values();
 
         private final String fluid;
-        private final float upTo, carbon, silicon;
+        private final float upTo, carbon, silicon, phosphorus;
 
-        Grade(String fluid, float upTo, float carbon, float silicon)
+        Grade(String fluid, float upTo, float carbon, float silicon, float phosphorus)
         {
             this.fluid = fluid;
             this.upTo = upTo;
             this.carbon = carbon;
             this.silicon = silicon;
+            this.phosphorus = phosphorus;
         }
 
         public String fluid()
@@ -49,10 +56,20 @@ public final class ConverterBath
             return silicon;
         }
 
+        public float phosphorus()
+        {
+            return phosphorus;
+        }
+
+        /** Names phosphorus-free iron by its carbon. The grades that carry phosphorus are never chosen here: see {@link ConverterBath#tapGrade()}. */
         public static Grade ofCarbon(float carbon)
         {
             for (Grade grade : VALUES)
             {
+                if (grade.phosphorus > 0f)
+                {
+                    continue;
+                }
                 if (carbon + ROUNDING < grade.upTo) // Iron of 4% poured in by the drop should not come to just under it
                 {
                     return grade;
@@ -85,13 +102,15 @@ public final class ConverterBath
         /** Carbon is running short. */
         SHORTENING,
         /** The carbon is gone. The flame falls away and brown smoke of burning iron takes its place. */
-        DROPPED
+        DROPPED,
+        /** Phosphorus burns on a basic lining with the carbon flame gone: thick white smoke of P2O5. */
+        AFTERBLOW
     }
 
     /** The heat and the gas that came out of one step of a blow. */
-    public record Blow(float carbonBurned, float oxygenUsed, float ironBurned)
+    public record Blow(float carbonBurned, float oxygenUsed, float ironBurned, float phosphorusBurned)
     {
-        public static final Blow NONE = new Blow(0f, 0f, 0f);
+        public static final Blow NONE = new Blow(0f, 0f, 0f, 0f);
     }
 
     private static final float ROUNDING = 1e-3f;
@@ -99,9 +118,25 @@ public final class ConverterBath
     public static final float KG_PER_MILLIBUCKET = 0.0079f;
     public static final float AMBIENT = 20f;
 
-    private static final float GRAMS_PER_MOL_CARBON = 12.011f, GRAMS_PER_MOL_SILICON = 28.086f, GRAMS_PER_MOL_IRON = 55.845f;
+    private static final float GRAMS_PER_MOL_CARBON = 12.011f, GRAMS_PER_MOL_SILICON = 28.086f, GRAMS_PER_MOL_IRON = 55.845f, GRAMS_PER_MOL_PHOSPHORUS = 30.974f;
     /** Heats of Si + O2 -> SiO2, C + 1/2 O2 -> CO and Fe + 1/2 O2 -> FeO, in kJ per mole of the element. */
     private static final float SILICON_HEAT = 911f, CARBON_HEAT = 110.5f, IRON_HEAT = 272f;
+    /** Heat of 2 P + 5/2 O2 -> P2O5 as it is taken up by lime in 4 CaO.P2O5, in kJ per mole of phosphorus. */
+    private static final float PHOSPHORUS_HEAT = 745f;
+    /** Moles of O2 for a mole of P: 2 P + 5/2 O2 -> P2O5. */
+    private static final float OXYGEN_PER_PHOSPHORUS = 1.25f;
+    /** Moles of CaO that slag needs to hold a mole of silicon (as 2 CaO.SiO2) and a mole of phosphorus (as 4 CaO.P2O5). */
+    private static final float LIME_PER_SILICON = 2f, LIME_PER_PHOSPHORUS = 2f;
+    /** Moles of CaO in one powder of lime. */
+    public static final float LIME_MOLES_PER_POWDER = 7.5f;
+    /** Molar heat of CaO, in kJ/mol/K. Lime goes in cold, and heating it to the temperature of the bath is a real cost of the Thomas process. */
+    private static final float LIME_HEAT_CAPACITY = 0.048f;
+    /** Above this much phosphorus, in weight percent, iron is cold short. */
+    public static final float PHOSPHORUS_LIMIT_PERCENT = 0.1f;
+    /** Phosphorus burns only once the carbon no longer competes for the air. At twice the floor the carbon still takes a tenth of the oxygen, and less as it falls. */
+    private static final float AFTERBLOW_CARBON_PERCENT = 0.06f;
+    /** Below this much phosphorus the white smoke of P2O5 is too thin to see. */
+    private static final float SMOKE_PERCENT = 0.02f;
     /** Below this much carbon, a bubble of air meets iron more often than it meets carbon. */
     private static final float CARBON_RACE_PERCENT = 0.3f;
     /** The least carbon air can take out of iron, where it stands in balance with the oxygen dissolved in the iron. */
@@ -121,11 +156,19 @@ public final class ConverterBath
 
     /** The liquid iron in millibuckets. */
     public float metal;
-    /** Carbon and silicon in weight percent. */
-    public float carbon, silicon;
+    /** Carbon, silicon and phosphorus in weight percent. */
+    public float carbon, silicon, phosphorus;
     public float temperature;
     /** What has gone from the metal to slag, in millibuckets of iron. */
     public float slag;
+    /** Whether the lining is basic (dolomite) and not acid (silica). It decides whether phosphorus can leave the metal. */
+    public boolean basic;
+    /** Moles of CaO in the bath, waiting to take silica and phosphorus into slag. It only comes in through {@link #addLime}, which makes it cost heat. */
+    private float lime;
+    /** Moles of silica that formed on a basic lining with no lime to take it, and so attacked the lining instead. For the vessel to wear its lining by and reset. */
+    public float silicaWithoutLime;
+    /** Moles of phosphorus that have gone to slag as 4 CaO.P2O5, which is Thomas slag. For the vessel to turn into items and reset. */
+    public float thomasSlagPhosphorus;
 
     /** @return the temperature in C at which iron of this much carbon starts to set */
     public static float liquidus(float carbonPercent)
@@ -138,9 +181,58 @@ public final class ConverterBath
         return metal > 0f && temperature >= liquidus(carbon);
     }
 
+    /** @return the grade by carbon alone, which ignores phosphorus: use {@link #tapGrade()} for what a tap gives */
     public Grade grade()
     {
         return Grade.ofCarbon(carbon);
+    }
+
+    /**
+     * @return what a tap gives. With more than 0.1% phosphorus it is never named by carbon: iron that still holds the carbon of pig iron (2.1% or more) is phosphoric pig iron, which a converter can take again, and anything below that is cold short iron.
+     * Without phosphorus the grade goes by carbon.
+     */
+    public Grade tapGrade()
+    {
+        if (phosphorus > PHOSPHORUS_LIMIT_PERCENT)
+        {
+            return carbon >= Grade.CAST_IRON.carbon() ? Grade.PHOSPHORIC_PIG_IRON : Grade.COLD_SHORT_IRON;
+        }
+        return grade();
+    }
+
+    /** @return moles of CaO in the bath */
+    public float lime()
+    {
+        return lime;
+    }
+
+    /**
+     * Throws lime into the vessel, cold. It takes heat from the bath to reach its temperature; into an empty vessel it is held until the first iron is poured, which then pays for it.
+     */
+    public void addLime(float moles)
+    {
+        if (moles <= 0f)
+        {
+            return;
+        }
+        lime += moles;
+        if (metal > 0f)
+        {
+            mixColdLime(moles);
+        }
+    }
+
+    /** For loading a saved vessel only. Lime that was in a saved bath has already paid its heat. */
+    public void restoreLime(float moles)
+    {
+        lime = Math.max(moles, 0f);
+    }
+
+    private void mixColdLime(float moles)
+    {
+        final float capacity = heatCapacity();
+        final float limeCapacity = moles * LIME_HEAT_CAPACITY;
+        temperature = (capacity * temperature + limeCapacity * AMBIENT) / (capacity + limeCapacity);
     }
 
     public Flame flame()
@@ -148,6 +240,7 @@ public final class ConverterBath
         if (silicon > 0.02f) return Flame.SPARKS;
         if (carbon > 1f) return Flame.BOILING;
         if (carbon > Grade.WROUGHT_IRON.upTo) return Flame.SHORTENING;
+        if (basic && lime > 0f && carbon <= AFTERBLOW_CARBON_PERCENT && phosphorus > SMOKE_PERCENT) return Flame.AFTERBLOW;
         return Flame.DROPPED;
     }
 
@@ -157,16 +250,22 @@ public final class ConverterBath
         return metal * KG_PER_MILLIBUCKET * IRON_HEAT_CAPACITY + LINING_HEAT_CAPACITY;
     }
 
-    /** Pours in more iron. Carbon, silicon and heat all mix by weight. */
+    /** Pours in more iron. Carbon, silicon, phosphorus and heat all mix by weight. */
     public void add(float amount, Grade grade, float sourceTemperature)
     {
         final float total = metal + amount;
         if (total > 0f)
         {
+            final boolean emptyWithLime = metal <= 0f && lime > 0f;
             carbon = (carbon * metal + grade.carbon() * amount) / total;
             silicon = (silicon * metal + grade.silicon() * amount) / total;
+            phosphorus = (phosphorus * metal + grade.phosphorus() * amount) / total;
             temperature = (temperature * metal + sourceTemperature * amount) / total;
             metal = total;
+            if (emptyWithLime)
+            {
+                mixColdLime(lime); // Lime put in before the iron was poured, and cold
+            }
         }
     }
 
@@ -189,30 +288,49 @@ public final class ConverterBath
 
         final float siliconBurned = Math.min(grams * silicon / 100f / GRAMS_PER_MOL_SILICON, left);
         left -= siliconBurned;
+        final float limeForSilicon = Math.min(lime, siliconBurned * LIME_PER_SILICON);
+        lime -= limeForSilicon;
+        if (basic)
+        {
+            silicaWithoutLime += siliconBurned - limeForSilicon / LIME_PER_SILICON;
+        }
 
         final float carbonAvailable = Math.max(grams * (carbon - CARBON_FLOOR_PERCENT) / 100f / GRAMS_PER_MOL_CARBON, 0f);
         final float race = Math.clamp((carbon - CARBON_FLOOR_PERCENT) / CARBON_RACE_PERCENT, 0f, 1f);
         final float carbonBurned = Math.min(left * race * 2f, carbonAvailable);
         left -= carbonBurned / 2f;
 
+        // On an acid lining the silica slag cannot hold phosphorus, so what forms goes straight back into the iron and nothing is lost for good.
+        // On a basic one it needs lime; with none, it stays too and the blast goes on to the iron.
+        float phosphorusBurned = 0f;
+        if (basic && lime > 0f && carbon <= AFTERBLOW_CARBON_PERCENT)
+        {
+            final float phosphorusAvailable = grams * phosphorus / 100f / GRAMS_PER_MOL_PHOSPHORUS;
+            phosphorusBurned = Math.max(Math.min(Math.min(phosphorusAvailable, Math.max(left, 0f) / OXYGEN_PER_PHOSPHORUS), lime / LIME_PER_PHOSPHORUS), 0f);
+            left -= phosphorusBurned * OXYGEN_PER_PHOSPHORUS;
+            lime -= phosphorusBurned * LIME_PER_PHOSPHORUS;
+            thomasSlagPhosphorus += phosphorusBurned;
+        }
+
         final float thrown = carbonBurned * IRON_THROWN_PER_CARBON;
         final float ironAvailable = grams / GRAMS_PER_MOL_IRON - thrown;
         final float ironBurned = Math.clamp(left * 2f, 0f, Math.max(ironAvailable, 0f));
         final float used = oxygen - left + ironBurned / 2f;
 
-        final float heat = siliconBurned * SILICON_HEAT + carbonBurned * CARBON_HEAT + ironBurned * IRON_HEAT - gasThrough * GAS_HEAT_CAPACITY * (temperature - blastTemperature);
+        final float heat = siliconBurned * SILICON_HEAT + carbonBurned * CARBON_HEAT + phosphorusBurned * PHOSPHORUS_HEAT + ironBurned * IRON_HEAT - gasThrough * GAS_HEAT_CAPACITY * (temperature - blastTemperature);
         temperature += heat / heatCapacity();
 
         final float ironLost = (ironBurned + thrown) * GRAMS_PER_MOL_IRON / (KG_PER_MILLIBUCKET * 1000f);
-        final float remaining = Math.max(grams - siliconBurned * GRAMS_PER_MOL_SILICON - carbonBurned * GRAMS_PER_MOL_CARBON - (ironBurned + thrown) * GRAMS_PER_MOL_IRON, 0f);
+        final float remaining = Math.max(grams - siliconBurned * GRAMS_PER_MOL_SILICON - carbonBurned * GRAMS_PER_MOL_CARBON - phosphorusBurned * GRAMS_PER_MOL_PHOSPHORUS - (ironBurned + thrown) * GRAMS_PER_MOL_IRON, 0f);
         if (remaining > 0f)
         {
             silicon = Math.max((grams * silicon / 100f - siliconBurned * GRAMS_PER_MOL_SILICON) / remaining * 100f, 0f);
             carbon = Math.max((grams * carbon / 100f - carbonBurned * GRAMS_PER_MOL_CARBON) / remaining * 100f, 0f);
+            phosphorus = Math.max((grams * phosphorus / 100f - phosphorusBurned * GRAMS_PER_MOL_PHOSPHORUS) / remaining * 100f, 0f);
         }
         slag += ironLost;
-        metal = remaining / (KG_PER_MILLIBUCKET * 1000f); // The carbon and silicon burned have gone as well, as gas and into the slag
-        return new Blow(carbonBurned, used, ironBurned);
+        metal = remaining / (KG_PER_MILLIBUCKET * 1000f); // The carbon, silicon and phosphorus burned have gone as well, as gas and into the slag
+        return new Blow(carbonBurned, used, ironBurned, phosphorusBurned);
     }
 
     /** Lets the vessel lose heat to the air. */
@@ -236,6 +354,8 @@ public final class ConverterBath
             metal = 0f;
             carbon = 0f;
             silicon = 0f;
+            phosphorus = 0f;
+            lime = 0f; // What is left goes out with the slag, and must not carry into the next charge
         }
         return tapped;
     }

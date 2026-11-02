@@ -48,6 +48,9 @@ public final class TFCppEmiPlugin implements EmiPlugin
         info(registry, "mine_fan", "tfcpp.info.mine_fan", Instruments.MINE_FAN_ITEM.get());
         info(registry, "converter", "tfcpp.info.converter", Metallurgy.CONVERTER_ITEM.get());
         info(registry, "iron_slag", "tfcpp.info.iron_slag", Metallurgy.IRON_SLAG.get());
+        info(registry, "phosphoric_iron_slag", "tfcpp.info.phosphoric_iron_slag", Metallurgy.PHOSPHORIC_IRON_SLAG.get());
+        info(registry, "thomas_slag", "tfcpp.info.thomas_slag", Metallurgy.THOMAS_SLAG.get());
+        info(registry, "basic_brick", "tfcpp.info.basic_brick", Metallurgy.BASIC_BRICK.get());
         info(registry, "pipes", "tfcpp.info.pipes", Pipes.PIPE_ITEMS.values().stream().map(Supplier::get).toArray(Item[]::new));
         info(registry, "pressure_vessel", "tfcpp.info.pressure_vessel", Pipes.PRESSURE_VESSEL.get().asItem());
         info(registry, "piston_pump", "tfcpp.info.piston_pump", Pipes.PISTON_PUMP.get().asItem());

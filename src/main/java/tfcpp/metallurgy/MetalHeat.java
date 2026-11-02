@@ -51,6 +51,10 @@ public final class MetalHeat
     /** Not in {@link #METALS}, as that lists what TFC has data for. */
     public static final Metal LEAD = new Metal("lead", 11.34f, 0.129f, 23f, 327f);
     public static final Metal WROUGHT_IRON = new Metal("wrought_iron", 7.87f, 0.449f, 247f, 1535f);
+    /** Not in {@link #METALS}. Phosphoric pig iron melts like pig iron: the carbon sets the melting point, and a percent of phosphorus changes it little. */
+    public static final Metal PHOSPHORIC_PIG_IRON = new Metal("phosphoric_pig_iron", 7.2f, 0.46f, 200f, 1200f);
+    /** Not in {@link #METALS}. Cold short iron melts like wrought iron, as it holds hardly any carbon. */
+    public static final Metal COLD_SHORT_IRON = new Metal("cold_short_iron", 7.87f, 0.449f, 247f, 1535f);
 
     private static final float STEEL_DENSITY = 7.85f, STEEL_SPECIFIC_HEAT = 0.49f, STEEL_LATENT_HEAT = 250f;
 

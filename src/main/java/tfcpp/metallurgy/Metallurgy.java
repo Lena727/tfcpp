@@ -64,6 +64,18 @@ public final class Metallurgy
     public static final Supplier<Item> FURNACE_SLAG = ITEMS.register("slag/furnace", () -> new Item(new Item.Properties()));
     /** Ground borax. Melts onto iron and keeps air from a weld, and later makes glass that stands heat, but it is not limestone and cannot be burned to lime. */
     public static final Supplier<Item> BORAX_FLUX = ITEMS.register("powder/borax", () -> new Item(new Item.Properties()));
+    /** Slag from a bloomery that smelted brown ore. A real tap cinder from phosphoric ore is very phosphoric, so melting it again gives phosphoric oxide and washes nothing clean. */
+    public static final Supplier<Item> PHOSPHORIC_IRON_SLAG = ITEMS.register("slag/phosphoric_iron", () -> new Item(new Item.Properties()));
+    /** Basic slag from a converter on a dolomite lining, 4CaO.P2O5 with silicates. Ground, it is the first phosphate fertiliser made from iron. */
+    public static final Supplier<Item> THOMAS_SLAG = ITEMS.register("slag/thomas", () -> new Item(new Item.Properties()));
+    public static final Supplier<Item> THOMAS_MEAL = ITEMS.register("powder/thomas_meal", () -> new Item(new Item.Properties()));
+    /** Ground dolomite, CaMg(CO3)2. Burned hard at 1500 C it loses its CO2 and sinters, and does not slake. */
+    public static final Supplier<Item> DOLOMITE_POWDER = ITEMS.register("powder/dolomite", () -> new Item(new Item.Properties()));
+    public static final Supplier<Item> BURNT_DOLOMITE = ITEMS.register("powder/burnt_dolomite", () -> new Item(new Item.Properties()));
+    /** Burnt dolomite pressed with tar, which is how Thomas and Gilchrist's lining was made: bonded with tar, and not fired. */
+    public static final Supplier<Item> BASIC_BRICK = ITEMS.register("basic_brick", () -> new Item(new Item.Properties()));
+    public static final Supplier<Item> PHOSPHORIC_PIG_IRON_INGOT = ITEMS.register("metal/ingot/phosphoric_pig_iron", () -> new Item(new Item.Properties()));
+    public static final Supplier<Item> COLD_SHORT_IRON_INGOT = ITEMS.register("metal/ingot/cold_short_iron", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> GLASS_BULB = ITEMS.register("glass_bulb", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> MERCURY_BULB = ITEMS.register("mercury_bulb", () -> new Item(new Item.Properties()));
 
@@ -74,6 +86,13 @@ public final class Metallurgy
     /** Iron ore melted with nothing to reduce it. It is still an oxide: only a furnace burning carbon around it can take the oxygen away. */
     public static final Supplier<FluidType> IRON_OXIDE_TYPE = FLUID_TYPES.register("metal/iron_oxide", () -> new FluidType(FluidType.Properties.create()
         .descriptionId("fluid_type.tfcpp.metal.iron_oxide").density(5000).viscosity(6000).temperature(1838).canConvertToSource(false).canDrown(false).canSwim(false).canPushEntity(false)));
+    /** Brown iron ore melted with nothing to reduce it. It is iron oxide, with the phosphorus of the ore still in it. */
+    public static final Supplier<FluidType> PHOSPHORIC_IRON_OXIDE_TYPE = FLUID_TYPES.register("metal/phosphoric_iron_oxide", () -> new FluidType(FluidType.Properties.create()
+        .descriptionId("fluid_type.tfcpp.metal.phosphoric_iron_oxide").density(5000).viscosity(6000).temperature(1838).canConvertToSource(false).canDrown(false).canSwim(false).canPushEntity(false)));
+    public static final Supplier<FluidType> PHOSPHORIC_PIG_IRON_TYPE = FLUID_TYPES.register("metal/phosphoric_pig_iron", () -> new FluidType(FluidType.Properties.create()
+        .descriptionId("fluid_type.tfcpp.metal.phosphoric_pig_iron").density(7200).viscosity(5000).temperature(1473).canConvertToSource(false).canDrown(false).canSwim(false).canPushEntity(false)));
+    public static final Supplier<FluidType> COLD_SHORT_IRON_TYPE = FLUID_TYPES.register("metal/cold_short_iron", () -> new FluidType(FluidType.Properties.create()
+        .descriptionId("fluid_type.tfcpp.metal.cold_short_iron").density(7800).viscosity(6000).temperature(1808).canConvertToSource(false).canDrown(false).canSwim(false).canPushEntity(false)));
     /** Mercury is liquid at room temperature, and dense enough that a person floats on it. */
     public static final Supplier<FluidType> MERCURY_TYPE = FLUID_TYPES.register("mercury", () -> new FluidType(FluidType.Properties.create()
         .descriptionId("fluid_type.tfcpp.mercury").density(13530).viscosity(1500).temperature(293).canConvertToSource(false).canDrown(false).canSwim(false)));
@@ -84,6 +103,12 @@ public final class Metallurgy
     private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_LEAD = FLUIDS.register("metal/flowing_lead", () -> new BaseFlowingFluid.Flowing(leadProperties()));
     public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> IRON_OXIDE = FLUIDS.register("metal/iron_oxide", () -> new BaseFlowingFluid.Source(ironOxideProperties()));
     private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_IRON_OXIDE = FLUIDS.register("metal/flowing_iron_oxide", () -> new BaseFlowingFluid.Flowing(ironOxideProperties()));
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> PHOSPHORIC_IRON_OXIDE = FLUIDS.register("metal/phosphoric_iron_oxide", () -> new BaseFlowingFluid.Source(phosphoricIronOxideProperties()));
+    private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_PHOSPHORIC_IRON_OXIDE = FLUIDS.register("metal/flowing_phosphoric_iron_oxide", () -> new BaseFlowingFluid.Flowing(phosphoricIronOxideProperties()));
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> PHOSPHORIC_PIG_IRON = FLUIDS.register("metal/phosphoric_pig_iron", () -> new BaseFlowingFluid.Source(phosphoricPigIronProperties()));
+    private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_PHOSPHORIC_PIG_IRON = FLUIDS.register("metal/flowing_phosphoric_pig_iron", () -> new BaseFlowingFluid.Flowing(phosphoricPigIronProperties()));
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> COLD_SHORT_IRON = FLUIDS.register("metal/cold_short_iron", () -> new BaseFlowingFluid.Source(coldShortIronProperties()));
+    private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_COLD_SHORT_IRON = FLUIDS.register("metal/flowing_cold_short_iron", () -> new BaseFlowingFluid.Flowing(coldShortIronProperties()));
     public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> MERCURY = FLUIDS.register("mercury", () -> new BaseFlowingFluid.Source(mercuryProperties()));
     private static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_MERCURY = FLUIDS.register("flowing_mercury", () -> new BaseFlowingFluid.Flowing(mercuryProperties()));
 
@@ -116,6 +141,14 @@ public final class Metallurgy
                 ZINC_CALCINES.values().forEach(calcine -> output.accept(calcine.get()));
                 output.accept(IRON_SLAG.get());
                 output.accept(FURNACE_SLAG.get());
+                output.accept(PHOSPHORIC_IRON_SLAG.get());
+                output.accept(THOMAS_SLAG.get());
+                output.accept(THOMAS_MEAL.get());
+                output.accept(DOLOMITE_POWDER.get());
+                output.accept(BURNT_DOLOMITE.get());
+                output.accept(BASIC_BRICK.get());
+                output.accept(PHOSPHORIC_PIG_IRON_INGOT.get());
+                output.accept(COLD_SHORT_IRON_INGOT.get());
                 output.accept(BORAX_FLUX.get());
                 output.accept(GLASS_BULB.get());
                 output.accept(MERCURY_BULB.get());
@@ -142,6 +175,21 @@ public final class Metallurgy
     private static BaseFlowingFluid.Properties ironOxideProperties()
     {
         return new BaseFlowingFluid.Properties(IRON_OXIDE_TYPE, IRON_OXIDE, FLOWING_IRON_OXIDE);
+    }
+
+    private static BaseFlowingFluid.Properties phosphoricIronOxideProperties()
+    {
+        return new BaseFlowingFluid.Properties(PHOSPHORIC_IRON_OXIDE_TYPE, PHOSPHORIC_IRON_OXIDE, FLOWING_PHOSPHORIC_IRON_OXIDE);
+    }
+
+    private static BaseFlowingFluid.Properties phosphoricPigIronProperties()
+    {
+        return new BaseFlowingFluid.Properties(PHOSPHORIC_PIG_IRON_TYPE, PHOSPHORIC_PIG_IRON, FLOWING_PHOSPHORIC_PIG_IRON);
+    }
+
+    private static BaseFlowingFluid.Properties coldShortIronProperties()
+    {
+        return new BaseFlowingFluid.Properties(COLD_SHORT_IRON_TYPE, COLD_SHORT_IRON, FLOWING_COLD_SHORT_IRON);
     }
 
     private static BaseFlowingFluid.Properties mercuryProperties()

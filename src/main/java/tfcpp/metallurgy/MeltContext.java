@@ -59,6 +59,13 @@ public final class MeltContext
             GasEmission.release(device.level, device.pos, gases);
             return;
         }
+        if (input.getItem() == Metallurgy.DOLOMITE_POWDER.get())
+        {
+            final float[] gases = new float[Gas.COUNT];
+            gases[Gas.CARBON_DIOXIDE.ordinal()] = IronSmelting.CARBON_DIOXIDE_PER_DOLOMITE * input.getCount(); // CaMg(CO3)2 -> CaO + MgO + 2 CO2
+            GasEmission.release(device.level, device.pos, gases);
+            return;
+        }
         final @Nullable OreFumes ore = sulfides().get(input.getItem());
         if (ore != null)
         {

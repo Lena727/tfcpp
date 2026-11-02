@@ -1,0 +1,11 @@
+{
+  "type": "tfc:heating",
+  "ingredient": {
+    "item": "tfcpp:metal/ingot/phosphoric_pig_iron"
+  },
+  "result_fluid": {
+    "amount": 100,
+    "id": "tfcpp:metal/phosphoric_pig_iron"
+  },
+  "temperature": 1200.0
+}

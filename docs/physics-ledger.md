@@ -182,6 +182,8 @@
 | Плотность стали (`STEEL_DENSITY`) | `7.85f` | г/см³ | — |
 | Удельная теплоёмкость стали (`STEEL_SPECIFIC_HEAT`) | `0.49f` | Дж/(г·К) | — |
 | Скрытая теплота плавления стали (`STEEL_LATENT_HEAT`) | `250f` | Дж/г | — |
+| Фосфористый чугун (`PHOSPHORIC_PIG_IRON`) | плотность 7,2 г/см³, 0,46 Дж/(г·К), скрытая 200 Дж/г, плавление 1200 °C | — | плавится как чугун: температуру задаёт углерод |
+| Хладноломкое железо (`COLD_SHORT_IRON`) | плотность 7,87 г/см³, 0,449 Дж/(г·К), скрытая 247 Дж/г, плавление 1535 °C | — | плавится как сварочное железо: углерода в нём почти нет |
 
 ## metallurgy/IronSmelting
 | Величина | Значение | Единицы | Источник из комментария |
@@ -191,6 +193,7 @@
 | Моль железа на мБ (`MOLES_OF_IRON_PER_MILLIBUCKET`) | `7.87f / 55.845f` | моль/мБ | — |
 | CO2 на моль железа при восстановлении (`CARBON_DIOXIDE_PER_IRON`) | `1.5f` | моль CO2 на моль Fe | Fe2O3 + 3 CO -> 2 Fe + 3 CO2: one and a half moles of CO2 for every mole of iron. |
 | CO2 от одной порции флюса (`CARBON_DIOXIDE_PER_FLUX`) | `7.5f` | моль CO2 на порцию флюса | A flux powder of 0.75 kg of limestone: CaCO3 -> CaO + CO2. |
+| CO2 от одной порции доломита (`CARBON_DIOXIDE_PER_DOLOMITE`) | `8.1f` | моль CO2 на порцию доломита | A dolomite powder of 0.75 kg: CaMg(CO3)2 -> CaO + MgO + 2 CO2, 184 g/mol. |
 
 ## metallurgy/ConverterBath
 | Величина | Значение | Единицы | Источник из комментария |
@@ -210,6 +213,23 @@
 | PIG_IRON: верхний предел углерода (`upTo`) | `Float.MAX_VALUE` | % мас. | the point in weight percent where each kind ends |
 | PIG_IRON: углерод (`carbon`) | `4.0f` | % мас. | each kind counts as the least it can hold |
 | PIG_IRON: кремний (`silicon`) | `1.0f` | % мас. | each kind counts as the least it can hold |
+| PHOSPHORIC_PIG_IRON: верхний предел углерода (`upTo`) | `Float.MAX_VALUE` | % мас. | не выбирается по углероду, только по жидкости |
+| PHOSPHORIC_PIG_IRON: углерод (`carbon`) | `4.0f` | % мас. | — |
+| PHOSPHORIC_PIG_IRON: кремний (`silicon`) | `1.0f` | % мас. | — |
+| PHOSPHORIC_PIG_IRON: фосфор (`phosphorus`) | `1.5f` | % мас. | бурые железняки 0,5–2% P |
+| COLD_SHORT_IRON: верхний предел углерода (`upTo`) | `0.2f` | % мас. | не более 0,2% C в выпуске |
+| COLD_SHORT_IRON: углерод (`carbon`) | `0.03f` | % мас. | считается наименьшим, чтобы переливка не прибавляла углерод |
+| COLD_SHORT_IRON: фосфор (`phosphorus`) | `1.5f` | % мас. | — |
+| Молярная масса фосфора (`GRAMS_PER_MOL_PHOSPHORUS`) | `30.974f` | г/моль | — |
+| Теплота окисления фосфора (`PHOSPHORUS_HEAT`) | `745f` | кДж/моль P | 2 P + 5/2 O2 -> P2O5 с переходом в 4CaO·P2O5, на моль фосфора |
+| Кислорода на моль фосфора (`OXYGEN_PER_PHOSPHORUS`) | `1.25f` | моль O2 на моль P | 2 P + 5/2 O2 -> P2O5 |
+| Извести на моль кремния (`LIME_PER_SILICON`) | `2f` | моль CaO на моль Si | 2CaO·SiO2 |
+| Извести на моль фосфора (`LIME_PER_PHOSPHORUS`) | `2f` | моль CaO на моль P | 4CaO·P2O5 |
+| CaO в порошке извести (`LIME_MOLES_PER_POWDER`) | `7.5f` | моль CaO на порошок | по проекту v1.0 |
+| Предел хладноломкости (`PHOSPHORUS_LIMIT_PERCENT`) | `0.1f` | % мас. P | выше него выпуск всегда `cold_short_iron` |
+| Углерод, ниже которого горит фосфор (`AFTERBLOW_CARBON_PERCENT`) | `0.06f` | % мас. C | вдвое выше предела `CARBON_FLOOR_PERCENT`: углерод ещё забирает не более десятой доли кислорода |
+| Дым P2O5 заметен выше (`SMOKE_PERCENT`) | `0.02f` | % мас. P | порог пламени `AFTERBLOW` |
+| Теплоёмкость CaO (`LIME_HEAT_CAPACITY`) | `0.048f` | кДж/(моль·К) | Известь бросают холодной, и нагрев её до температуры ванны это настоящая плата за процесс Томаса |
 | Ёмкость конвертера (`MILLIBUCKETS`) | `2000f` | мБ | — |
 | Масса 1 мБ железа (`KG_PER_MILLIBUCKET`) | `0.0079f` | кг/мБ | — |
 | Температура окружения (`AMBIENT`) | `20f` | °C | — |
@@ -229,6 +249,21 @@
 | Ликвидус чистого железа (`LIQUIDUS_PURE_IRON`) | `1538f` | °C | — |
 | Наклон ликвидуса по углероду (`LIQUIDUS_PER_CARBON_PERCENT`) | `91f` | °C на % мас. C | The iron-carbon liquidus, from 1538 C for pure iron to the eutectic of 1147 C at 4.3% carbon, which is nearly straight. |
 | Эвтектика Fe-C (`EUTECTIC`) | `1147f` | °C | — |
+
+## metallurgy/ConverterBlockEntity
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Основных кирпичей на футеровку (`BASIC_BRICKS_PER_LINING`) | `8` | шт | столько же, сколько шамотных: футеровка того же размера |
+| Износ от моля кремнезёма без извести (`SILICA_WEAR_PER_MOLE`) | `60f` | с футеровки на моль | кремнезём может разъесть только основную футеровку |
+| Фосфор в куске томасовского шлака (`PHOSPHORUS_PER_THOMAS_PIECE`) | `2f` | моль P | одна формульная единица 4CaO·P2O5 |
+
+## metallurgy/MetallurgyData
+| Величина | Значение | Единицы | Источник из комментария |
+|---|---|---|---|
+| Обжиг доломита (`BURNT_DOLOMITE_TEMPERATURE`) | `1500f` | °C | CaMg(CO3)2 -> CaO·MgO + 2 CO2: до спекания, не гасится |
+| Фосфор в томасовской муке (`THOMAS_MEAL_PHOSPHORUS`) | `0.15f` | доля, шкала удобрений TFC | основной шлак содержит 15-20% P2O5 |
+| Томасовской муки из куска шлака | `4` | шт | кусок шлака 2 моль P (4CaO·P2O5, 366 г), порошок 50 г: даже меньше, чем по массе |
+| Порошка доломита из булыжника | `2` | шт | по образцу TFC для флюса |
 
 ## metallurgy/RetortBlockEntity
 | Величина | Значение | Единицы | Источник из комментария |

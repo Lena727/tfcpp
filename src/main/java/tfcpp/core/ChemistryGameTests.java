@@ -320,6 +320,11 @@ public final class ChemistryGameTests
                 network.contents().air = 0f;
                 network.contents().gases[Gas.HYDROGEN.ordinal()] = PipePhysics.moles(1.3f, network.contents().temperature, network.volume());
             }
+            // A burner with no gas yet goes out, and this one is meant to stay lit throughout
+            if (!helper.getBlockState(burnerPos).getValue(GasBurnerBlock.LIT))
+            {
+                helper.setBlock(burnerPos, burner(true, true));
+            }
         });
         helper.runAtTickTime(200, () -> {
             helper.assertTrue(oven.getTemperature() > 100f, "The burner should have heated the oven above it, it is at " + oven.getTemperature());

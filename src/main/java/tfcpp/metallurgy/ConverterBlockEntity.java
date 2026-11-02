@@ -1,9 +1,11 @@
 package tfcpp.metallurgy;
 
+import java.util.Locale;
 import net.dries007.tfc.common.blocks.TFCBlocks;
 import net.dries007.tfc.common.component.heat.HeatCapability;
 import net.dries007.tfc.common.component.heat.IHeat;
 import net.dries007.tfc.common.component.heat.IHeatConsumer;
+import net.dries007.tfc.common.items.Powder;
 import net.dries007.tfc.common.items.TFCItems;
 import net.dries007.tfc.util.Helpers;
 import net.dries007.tfc.util.Metal;
@@ -79,6 +81,12 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
     private static final float LINING_SCRAP = 0.25f;
     private static final float CLEAN_FLAME_CARBON_MONOXIDE = 0.05f;
     private static final int MILLIBUCKETS_PER_INGOT = 100;
+    /** Basic bricks that make a new basic lining, as many as a lining takes of fire bricks: the lining is the same size. */
+    private static final int BASIC_BRICKS_PER_LINING = 8;
+    /** Seconds of lining life that a mole of silica eats when there is no lime to take it into slag: a basic lining is the only thing that silica can attack. */
+    private static final float SILICA_WEAR_PER_MOLE = 60f;
+    /** Moles of phosphorus in one piece of Thomas slag, which is one formula unit of 4CaO.P2O5. */
+    private static final float PHOSPHORUS_PER_THOMAS_PIECE = 2f;
     private static final int SPILL_BURN_RADIUS = 2;
     private static final int SPILL_BURN_SECONDS = 8;
 
@@ -120,6 +128,8 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
     private final IFluidHandler tank = new Tank();
 
     private float liningWorn;
+    /** Basic bricks laid in an acid lining so far. Until the lining is complete it is still the old acid one. */
+    private int basicBricks;
     private float heatFromOutside;
     private int heatStabilityTicks;
     private long nextStepTick = -1L;
@@ -144,6 +154,12 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
     public float liningWorn()
     {
         return liningWorn;
+    }
+
+    /** @return basic bricks laid toward a basic lining that is not complete yet */
+    public int basicBricks()
+    {
+        return basicBricks;
     }
 
     public void wearLining(float seconds)
@@ -193,6 +209,8 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
         final float oxygen = blast.air * GasMath.OXYGEN_IN_AIR;
         final Blow blow = bath.blow(oxygen, blast.gasMoles(), blast.temperature - 273.15f);
         release(level, blast, blow);
+        liningWorn += bath.silicaWithoutLime * SILICA_WEAR_PER_MOLE;
+        bath.silicaWithoutLime = 0f;
         wear(level, seconds);
         setChanged();
         showFlame(level);
@@ -264,8 +282,9 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
             case SPARKS -> ParticleTypes.LAVA;
             case BOILING, SHORTENING -> ParticleTypes.FLAME;
             case DROPPED -> ParticleTypes.CAMPFIRE_COSY_SMOKE;
+            case AFTERBLOW -> ParticleTypes.CAMPFIRE_SIGNAL_SMOKE; // The thick white smoke of P2O5
         };
-        final int count = flame == Flame.BOILING ? 24 : 6;
+        final int count = flame == Flame.BOILING ? 24 : flame == Flame.AFTERBLOW ? 36 : 6;
         final double rise = flame == Flame.BOILING ? 0.25 : 0.08;
         level.sendParticles(particle, x, y, z, count, 0.15, 0.1, 0.15, rise);
         level.playSound(null, worldPosition, flame == Flame.BOILING ? SoundEvents.BLAZE_BURN : SoundEvents.FURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, flame == Flame.BOILING ? 1.5f : 0.6f, 0.6f);
@@ -278,7 +297,14 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
         {
             final int pieces = (int) (bath.slag / IronSmelting.MILLIBUCKETS_PER_SLAG);
             bath.slag -= pieces * IronSmelting.MILLIBUCKETS_PER_SLAG;
-            Helpers.spawnItem(level, worldPosition.above(), new ItemStack(Metallurgy.IRON_SLAG.get(), pieces));
+            Helpers.spawnItem(level, worldPosition.above(), new ItemStack(IronSmelting.slagOf(bath.phosphorus > ConverterBath.PHOSPHORUS_LIMIT_PERCENT), pieces));
+            setChanged();
+        }
+        if (bath.thomasSlagPhosphorus >= PHOSPHORUS_PER_THOMAS_PIECE)
+        {
+            final int pieces = (int) (bath.thomasSlagPhosphorus / PHOSPHORUS_PER_THOMAS_PIECE);
+            bath.thomasSlagPhosphorus -= pieces * PHOSPHORUS_PER_THOMAS_PIECE;
+            Helpers.spawnItem(level, worldPosition.above(), new ItemStack(Metallurgy.THOMAS_SLAG.get(), pieces));
             setChanged();
         }
     }
@@ -286,14 +312,24 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
     /** @return {@code true} if holding this item means to use it on the converter, and not to place it against the block */
     public static boolean canUse(ItemStack stack)
     {
-        return stack.is(TFCItems.FIRE_BRICK.get()) || stack.getCapability(Capabilities.FluidHandler.ITEM) != null;
+        return stack.is(TFCItems.FIRE_BRICK.get()) || stack.is(Metallurgy.BASIC_BRICK.get()) || isLime(stack) || stack.getCapability(Capabilities.FluidHandler.ITEM) != null;
+    }
+
+    private static boolean isLime(ItemStack stack)
+    {
+        return stack.is(TFCItems.POWDERS.get(Powder.LIME).asItem());
     }
 
     public void interact(ItemStack stack, Player player, InteractionHand hand)
     {
-        if (stack.is(TFCItems.FIRE_BRICK.get()))
+        if (stack.is(TFCItems.FIRE_BRICK.get()) || stack.is(Metallurgy.BASIC_BRICK.get()))
         {
             reline(stack, player);
+            return;
+        }
+        if (isLime(stack))
+        {
+            throwLime(stack, player);
             return;
         }
         if (!pourIn(stack, player, hand))
@@ -302,12 +338,37 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
         }
     }
 
-    /** New lining goes into an empty, cool vessel, which is how a worn one has to be turned around. */
+    /**
+     * New lining goes into an empty vessel, which is how a worn one has to be turned around.
+     * A vessel is acid when new. Eight basic bricks laid in an empty one make the lining basic and new, and until the eighth it is still the acid one. A basic lining is only repaired with basic bricks, as fire clay is silica and would flux away in the slag.
+     */
     private void reline(ItemStack stack, Player player)
     {
+        final boolean basicBrick = stack.is(Metallurgy.BASIC_BRICK.get());
         if (bath.metal > 0f)
         {
             player.displayClientMessage(Component.translatable("tfcpp.converter.reline_full"), true);
+        }
+        else if (bath.basic && !basicBrick)
+        {
+            player.displayClientMessage(Component.translatable("tfcpp.converter.reline_basic"), true);
+        }
+        else if (!bath.basic && basicBrick)
+        {
+            basicBricks++;
+            stack.shrink(1);
+            if (basicBricks >= BASIC_BRICKS_PER_LINING)
+            {
+                basicBricks = 0;
+                bath.basic = true;
+                liningWorn = 0f;
+                player.displayClientMessage(Component.translatable("tfcpp.converter.basic_done"), true);
+            }
+            else
+            {
+                player.displayClientMessage(Component.translatable("tfcpp.converter.basic_progress", basicBricks, BASIC_BRICKS_PER_LINING), true);
+            }
+            setChanged();
         }
         else if (liningWorn > 0f)
         {
@@ -315,6 +376,19 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
             stack.shrink(1);
             setChanged();
         }
+    }
+
+    /** Lime has to be thrown into the bath to take the silica and phosphorus into slag. On a silica lining it would only flux the lining away, so that is refused. */
+    private void throwLime(ItemStack stack, Player player)
+    {
+        if (!bath.basic)
+        {
+            player.displayClientMessage(Component.translatable("tfcpp.converter.lime_acid"), true);
+            return;
+        }
+        bath.addLime(ConverterBath.LIME_MOLES_PER_POWDER);
+        stack.shrink(1);
+        setChanged();
     }
 
     /** Empties a held mould or vessel of molten iron into the bath, along with its heat. @return {@code true} if anything was poured */
@@ -362,7 +436,7 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
 
         final ItemStack single = stack.copyWithCount(1);
         final @Nullable IFluidHandlerItem handler = single.getCapability(Capabilities.FluidHandler.ITEM);
-        final Fluid fluid = fluidOf(bath.grade());
+        final Fluid fluid = fluidOf(bath.tapGrade());
         final int filled = handler == null ? 0 : handler.fill(new FluidStack(fluid, (int) bath.metal), IFluidHandler.FluidAction.EXECUTE);
         if (filled <= 0)
         {
@@ -395,14 +469,24 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
 
     public void showStatus(Player player)
     {
+        final String lime = String.format(Locale.ROOT, "%.1f", bath.lime());
         if (bath.metal < 1f)
         {
-            player.displayClientMessage(Component.translatable("tfcpp.converter.status_empty", lining()), false);
+            player.displayClientMessage(Component.translatable("tfcpp.converter.status_empty", lining(), liningKind(), lime), false);
+            if (!bath.basic && basicBricks > 0)
+            {
+                player.displayClientMessage(Component.translatable("tfcpp.converter.basic_progress", basicBricks, BASIC_BRICKS_PER_LINING), false);
+            }
             return;
         }
-        final Component contents = new FluidStack(fluidOf(bath.grade()), 1).getHoverName();
-        final Component state = bath.isMolten() ? Component.translatable("tfcpp.converter.flame." + bath.flame().name().toLowerCase(java.util.Locale.ROOT)) : Component.translatable("tfcpp.converter.set");
-        player.displayClientMessage(Component.translatable("tfcpp.converter.status", Math.round(bath.temperature), (int) bath.metal, contents, state, lining()), false);
+        final Component contents = new FluidStack(fluidOf(bath.tapGrade()), 1).getHoverName();
+        final Component state = bath.isMolten() ? Component.translatable("tfcpp.converter.flame." + bath.flame().name().toLowerCase(Locale.ROOT)) : Component.translatable("tfcpp.converter.set");
+        player.displayClientMessage(Component.translatable("tfcpp.converter.status", Math.round(bath.temperature), (int) bath.metal, contents, state, lining(), liningKind(), lime), false);
+    }
+
+    private Component liningKind()
+    {
+        return Component.translatable(bath.basic ? "tfcpp.converter.lining.basic" : "tfcpp.converter.lining.acid");
     }
 
     public boolean isScrap()
@@ -420,6 +504,13 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
     public void spill()
     {
         assert level != null;
+        // Slag that was not yet skimmed comes out whole piece by piece, and what is less than a piece is lost with the vessel
+        final int thomas = (int) (bath.thomasSlagPhosphorus / PHOSPHORUS_PER_THOMAS_PIECE);
+        if (thomas > 0)
+        {
+            Helpers.spawnItem(level, worldPosition, new ItemStack(Metallurgy.THOMAS_SLAG.get(), thomas));
+        }
+        bath.thomasSlagPhosphorus = 0f;
         if (bath.metal <= 0f)
         {
             return;
@@ -429,14 +520,14 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
         final int ingots = (int) (bath.metal / MILLIBUCKETS_PER_INGOT);
         if (ingots > 0)
         {
-            final ItemStack metal = new ItemStack(ingotOf(bath.grade()), ingots);
+            final ItemStack metal = new ItemStack(ingotOf(bath.tapGrade()), ingots);
             HeatCapability.setTemperature(metal, bath.temperature);
             Helpers.spawnItem(level, worldPosition, metal);
         }
         final int slag = (int) ((bath.slag + (bath.metal - ingots * MILLIBUCKETS_PER_INGOT)) / IronSmelting.MILLIBUCKETS_PER_SLAG);
         if (slag > 0)
         {
-            Helpers.spawnItem(level, worldPosition, new ItemStack(Metallurgy.IRON_SLAG.get(), slag));
+            Helpers.spawnItem(level, worldPosition, new ItemStack(IronSmelting.slagOf(bath.phosphorus > ConverterBath.PHOSPHORUS_LIMIT_PERCENT), slag));
         }
         bath.metal = 0f;
         bath.slag = 0f;
@@ -467,7 +558,13 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
             case HIGH_CARBON_STEEL -> Metal.HIGH_CARBON_STEEL;
             case CAST_IRON -> Metal.CAST_IRON;
             case PIG_IRON -> Metal.PIG_IRON;
+            case PHOSPHORIC_PIG_IRON -> null;
+            case COLD_SHORT_IRON -> null;
         };
+        if (metal == null)
+        {
+            return grade == Grade.PHOSPHORIC_PIG_IRON ? Metallurgy.PHOSPHORIC_PIG_IRON_INGOT.get() : Metallurgy.COLD_SHORT_IRON_INGOT.get();
+        }
         return TFCItems.METAL_ITEMS.get(metal).get(Metal.ItemType.INGOT).asItem();
     }
 
@@ -523,6 +620,12 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
         tag.putFloat("metal", bath.metal);
         tag.putFloat("carbon", bath.carbon);
         tag.putFloat("silicon", bath.silicon);
+        tag.putFloat("phosphorus", bath.phosphorus);
+        tag.putFloat("lime", bath.lime());
+        tag.putBoolean("basic", bath.basic);
+        tag.putInt("basicBricks", basicBricks);
+        tag.putFloat("silicaWithoutLime", bath.silicaWithoutLime);
+        tag.putFloat("thomasSlag", bath.thomasSlagPhosphorus);
         tag.putFloat("temperature", bath.temperature);
         tag.putFloat("slag", bath.slag);
         tag.putFloat("lining", liningWorn);
@@ -537,6 +640,12 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
         bath.metal = tag.getFloat("metal");
         bath.carbon = tag.getFloat("carbon");
         bath.silicon = tag.getFloat("silicon");
+        bath.phosphorus = tag.getFloat("phosphorus");
+        bath.restoreLime(tag.getFloat("lime"));
+        bath.basic = tag.getBoolean("basic");
+        basicBricks = tag.getInt("basicBricks");
+        bath.silicaWithoutLime = tag.getFloat("silicaWithoutLime");
+        bath.thomasSlagPhosphorus = tag.getFloat("thomasSlag");
         bath.temperature = tag.getFloat("temperature");
         bath.slag = tag.getFloat("slag");
         liningWorn = tag.getFloat("lining");
@@ -556,7 +665,7 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
         @Override
         public FluidStack getFluidInTank(int tank)
         {
-            return bath.metal < 1f ? FluidStack.EMPTY : new FluidStack(fluidOf(bath.grade()), (int) bath.metal);
+            return bath.metal < 1f ? FluidStack.EMPTY : new FluidStack(fluidOf(bath.tapGrade()), (int) bath.metal);
         }
 
         @Override
@@ -603,7 +712,7 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
             {
                 return FluidStack.EMPTY;
             }
-            final Fluid fluid = fluidOf(bath.grade());
+            final Fluid fluid = fluidOf(bath.tapGrade());
             final int amount = Math.min(maxDrain, (int) bath.metal);
             if (amount <= 0)
             {

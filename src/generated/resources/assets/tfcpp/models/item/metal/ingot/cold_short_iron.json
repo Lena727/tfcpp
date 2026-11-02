@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "tfcpp:item/metal/ingot/cold_short_iron"
+  }
+}

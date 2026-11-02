@@ -1,0 +1,11 @@
+{
+  "type": "tfc:heating",
+  "ingredient": {
+    "item": "tfcpp:powder/dolomite"
+  },
+  "result_item": {
+    "count": 1,
+    "id": "tfcpp:powder/burnt_dolomite"
+  },
+  "temperature": 1500.0
+}

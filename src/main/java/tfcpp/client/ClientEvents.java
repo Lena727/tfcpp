@@ -24,6 +24,9 @@ public final class ClientEvents
     {
         event.registerFluidType(fluid(STILL, FLOWING, 0xFFB5A27A), Metallurgy.ARSENICAL_COPPER_TYPE.get());
         event.registerFluidType(fluid(STILL, FLOWING, 0xFF6E3B2A), Metallurgy.IRON_OXIDE_TYPE.get());
+        event.registerFluidType(fluid(STILL, FLOWING, 0xFF7A4A24), Metallurgy.PHOSPHORIC_IRON_OXIDE_TYPE.get());
+        event.registerFluidType(fluid(STILL, FLOWING, 0xFFE0A070), Metallurgy.PHOSPHORIC_PIG_IRON_TYPE.get());
+        event.registerFluidType(fluid(STILL, FLOWING, 0xFFE8D0B0), Metallurgy.COLD_SHORT_IRON_TYPE.get());
         event.registerFluidType(fluid(WATER_STILL, WATER_FLOWING, 0xFF8F939C), Metallurgy.LEAD_TYPE.get());
         event.registerFluidType(fluid(WATER_STILL, WATER_FLOWING, 0xFFC9CDD2), Metallurgy.MERCURY_TYPE.get());
         Chemistry.LIQUIDS.forEach((liquid, chemical) -> event.registerFluidType(fluid(WATER_STILL, WATER_FLOWING, liquid.tint()), chemical.type.get()));

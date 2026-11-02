@@ -1,0 +1,15 @@
+{
+  "type": "tfc:casting",
+  "break_chance": 0.01,
+  "fluid": {
+    "amount": 100,
+    "fluid": "tfcpp:metal/cold_short_iron"
+  },
+  "mold": {
+    "item": "tfc:ceramic/fire_ingot_mold"
+  },
+  "result": {
+    "count": 1,
+    "id": "tfcpp:metal/ingot/cold_short_iron"
+  }
+}

@@ -6,8 +6,16 @@
   },
   "duration": 14400,
   "fluid": {
+    "type": "neoforge:compound",
     "amount": 150,
-    "fluid": "tfcpp:metal/iron_oxide"
+    "ingredients": [
+      {
+        "fluid": "tfcpp:metal/iron_oxide"
+      },
+      {
+        "fluid": "tfcpp:metal/phosphoric_iron_oxide"
+      }
+    ]
   },
   "result": {
     "count": 1,

@@ -14,6 +14,8 @@
     "FurnaceHeatMixins$Firebox",
     "FurnaceHeatMixins$PitKiln",
     "HeatingRecipeMixin",
+    "IronBlendMixins$BlastFurnace",
+    "IronBlendMixins$Recipe",
     "IronSmeltingMixins$BlastFurnace",
     "IronSmeltingMixins$Bloomery",
     "MeltContextMixins$Crucible",

@@ -103,22 +103,22 @@ public final class IronGameTests
         Calendars.SERVER.setCalendarTickRate(DEFAULT_RATE);
     }
 
-    private static Fluid metal(Metal metal)
+    static Fluid metal(Metal metal)
     {
         return TFCFluids.METALS.get(metal).getSource();
     }
 
-    private static Item ingot(Metal metal)
+    static Item ingot(Metal metal)
     {
         return TFCItems.METAL_ITEMS.get(metal).get(Metal.ItemType.INGOT).asItem();
     }
 
-    private static Item ore(Ore ore, Ore.Grade grade)
+    static Item ore(Ore ore, Ore.Grade grade)
     {
         return TFCItems.GRADED_ORES.get(ore).get(grade).asItem();
     }
 
-    private static void assertMelts(GameTestHelper helper, Item item, Fluid fluid, float temperature)
+    static void assertMelts(GameTestHelper helper, Item item, Fluid fluid, float temperature)
     {
         final @Nullable HeatingRecipe recipe = HeatingRecipe.getRecipe(new ItemStack(item));
         helper.assertTrue(recipe != null, item + " should melt");
@@ -130,11 +130,13 @@ public final class IronGameTests
     @GameTest(template = TEMPLATE)
     public static void oreWithoutAFurnaceOnlyMeltsToOxide(GameTestHelper helper)
     {
-        for (Ore mineral : List.of(Ore.HEMATITE, Ore.MAGNETITE, Ore.LIMONITE))
+        for (Ore mineral : List.of(Ore.HEMATITE, Ore.MAGNETITE))
         {
             assertMelts(helper, ore(mineral, Ore.Grade.NORMAL), Metallurgy.IRON_OXIDE.get(), 1565f);
         }
+        assertMelts(helper, ore(Ore.LIMONITE, Ore.Grade.NORMAL), Metallurgy.PHOSPHORIC_IRON_OXIDE.get(), 1565f); // Brown ore carries phosphorus
         helper.assertTrue(FluidHeat.get(Metallurgy.IRON_OXIDE.get()) != null, "Iron oxide needs its melting data");
+        helper.assertTrue(FluidHeat.get(Metallurgy.PHOSPHORIC_IRON_OXIDE.get()) != null, "Phosphoric iron oxide needs its melting data");
         helper.succeed();
     }
 
@@ -197,7 +199,7 @@ public final class IronGameTests
     }
 
     /** Everything of a gas in the column above this position. */
-    private static float total(GameTestHelper helper, int x, int y, int z, Gas gas)
+    static float total(GameTestHelper helper, int x, int y, int z, Gas gas)
     {
         final BlockPos from = helper.absolutePos(new BlockPos(x, y, z));
         final LevelGasVolume volume = GasTracker.get(helper.getLevel()).volume(helper.getLevel());
@@ -219,12 +221,12 @@ public final class IronGameTests
         return total;
     }
 
-    private static int itemsAround(GameTestHelper helper, BlockPos pos, Item item)
+    static int itemsAround(GameTestHelper helper, BlockPos pos, Item item)
     {
         return itemsAroundAbsolute(helper, helper.absolutePos(pos), item);
     }
 
-    private static int itemsAroundAbsolute(GameTestHelper helper, BlockPos absolute, Item item)
+    static int itemsAroundAbsolute(GameTestHelper helper, BlockPos absolute, Item item)
     {
         int count = 0;
         for (ItemEntity entity : helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(absolute).inflate(3)))
@@ -273,7 +275,7 @@ public final class IronGameTests
     }
 
     @SuppressWarnings("unchecked")
-    private static void loadBlastFurnace(BlastFurnaceBlockEntity furnace, List<ItemStack> inputs) throws ReflectiveOperationException
+    static void loadBlastFurnace(BlastFurnaceBlockEntity furnace, List<ItemStack> inputs) throws ReflectiveOperationException
     {
         for (ItemStack stack : inputs)
         {
@@ -294,7 +296,7 @@ public final class IronGameTests
     }
 
     /** The furnace throws out what it has no room for on a whole second, and this one has no chimney, so the charge has to melt before then. */
-    private static long ticksPastASecond(GameTestHelper helper)
+    static long ticksPastASecond(GameTestHelper helper)
     {
         return 22 - helper.getLevel().getGameTime() % 20;
     }

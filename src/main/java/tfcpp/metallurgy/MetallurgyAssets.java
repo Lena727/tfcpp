@@ -37,6 +37,14 @@ public final class MetallurgyAssets
             Metallurgy.ZINC_CALCINES.values().forEach(calcine -> flatItem(calcine.get()));
             flatItem(Metallurgy.IRON_SLAG.get());
             flatItem(Metallurgy.FURNACE_SLAG.get());
+            flatItem(Metallurgy.PHOSPHORIC_IRON_SLAG.get());
+            flatItem(Metallurgy.THOMAS_SLAG.get());
+            flatItem(Metallurgy.THOMAS_MEAL.get());
+            flatItem(Metallurgy.DOLOMITE_POWDER.get());
+            flatItem(Metallurgy.BURNT_DOLOMITE.get());
+            flatItem(Metallurgy.BASIC_BRICK.get());
+            flatItem(Metallurgy.PHOSPHORIC_PIG_IRON_INGOT.get());
+            flatItem(Metallurgy.COLD_SHORT_IRON_INGOT.get());
             flatItem(Metallurgy.BORAX_FLUX.get());
             flatItem(Metallurgy.LEAD_INGOT.get());
             flatItem(Metallurgy.APATITE_POWDER.get());
