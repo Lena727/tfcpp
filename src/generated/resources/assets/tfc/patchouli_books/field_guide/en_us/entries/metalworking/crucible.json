@@ -66,7 +66,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "Native metals, malachite and cassiterite melt into metal. Sulfide ores roast instead, and give off fumes where the pot stands: tetrahedrite gives arsenical copper, bismuthinite gives bismuth, sphalerite gives a calcine and no zinc, which needs a retort. Iron ore melts only into an oxide that cannot be cast.",
+      "text": "Native metals, malachite and cassiterite melt into metal. Sulfide ores roast instead, and give off fumes where the pot stands: tetrahedrite gives arsenical copper, bismuthinite gives bismuth, sphalerite gives a calcine and no zinc, which needs a retort. Iron ore melts only into an oxide that cannot be cast. See $(l:tfcpp/sulfides)Sulfide Ores and the Retort$() and $(l:tfcpp/iron_phosphorus)Iron and Phosphorus$().",
       "title": "What melts"
     },
     {

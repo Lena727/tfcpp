@@ -43,7 +43,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "A new converter has an acid lining of fire clay, which cannot remove phosphorus. Iron from limonite stays phosphoric, and a tap of it is brittle $(thing)Cold Short Iron$(), only fit to be cast or poured in again. Only a basic lining of dolomite bricks, with lime thrown in, takes the phosphorus out, as Thomas and Gilchrist found in 1878.",
+      "text": "A new converter has an acid lining of fire clay, which cannot remove phosphorus. Iron from limonite stays phosphoric, and a tap of it is brittle $(thing)Cold Short Iron$(), only fit to be cast or poured in again. Only a basic lining of dolomite bricks, with lime thrown in, takes the phosphorus out, as Thomas and Gilchrist found in 1878. See $(l:tfcpp/iron_phosphorus)Iron and Phosphorus$().",
       "title": "Phosphorus"
     },
     {

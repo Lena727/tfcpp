@@ -1,0 +1,82 @@
+{
+  "category": "tfc:tfcpp",
+  "extra_recipe_mappings": {
+    "tfcpp:animal_cage": 11,
+    "tfcpp:sentinel_cage": 11
+  },
+  "icon": "tfcpp:sentinel_cage",
+  "name": "Poisons",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "You breathe the air of the cell at your eyes, once a second. Some gases harm at once, as long as you breathe them. Others leave a $(bold)dose$() in the body, which the body clears slowly. A doctor would call them acute and chronic.$(br2)Poison damage goes through armour and shields, and it throws you nowhere. Nothing worn helps: what helps is clean air, and warning before you go in. Dying cures no slow poison (see the last pages).",
+      "title": "Two kinds of poison"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "carbon_monoxide",
+      "text": "Haemoglobin binds $(thing)carbon monoxide$() 246 times harder than oxygen, so a little of it fills the blood. How much, by the law of Haldane, depends on the oxygen at the lungs as well: 100 ppm settles at about 15% of the blood, 400 ppm at 42%, 1000 ppm at 64%.$(li)From 20%: slowness and mining fatigue.$(li)From 35%: nausea and heavy slowness.$(li)From 50%: death.$(br)There is no smell, no colour, no warning.",
+      "title": "Carbon monoxide"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The blood fills slowly from a thin mix and fast from a thick one. At 400 ppm the symptoms come after about 25 minutes and incapacity after more than an hour: it never reaches death. At 1000 ppm they come after 9 minutes and death after 36. At 12 800 ppm, a room thick with smoke, death comes in about two minutes.$(br2)In clean air the blood clears itself with a half-time of 5 hours of process time: 5 minutes of real time. Air thinned of oxygen raises every figure above.",
+      "title": "How fast CO works"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "lungs",
+      "text": "Parts per million for slight, serious and deadly harm:$(li)sulfur dioxide 20, 100, 1000$(li)hydrogen sulfide 50, 100, 700$(li)chlorine 3, 10, 1000$(li)ammonia 100, 300, 5000$(li)nitrous fumes 5, 20, 200$(li)hydrogen chloride 5, 50, 1300$(li)carbon dioxide 4%, 10%, 17%$(br)Slight harm weakens you. Serious harm takes half a percent of your health every second, about three minutes in all. Deadly harm takes a tenth a second.",
+      "title": "Gases that burn the lungs"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Most of these announce themselves, and a message tells you of the smell: sulfur dioxide from 1 ppm, nitrous fumes and hydrogen chloride from 1, chlorine from 0.5, ammonia from 5. You hear it at most once in ten seconds.$(br2)$(bold)Hydrogen sulfide$() smells of rotten eggs from 0.05 ppm, but above 100 ppm it numbs the nerve of smell. The worst air gives no warning, and kills those who go in after a friend. Carbon monoxide, methane, hydrogen, nitrogen and carbon dioxide have no smell.",
+      "title": "Smell and its limits"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Smoke and heavy gases push the oxygen out. Below 16% oxygen you slow down. Below 10% you are sick and lose half a percent of your health every second, and below 6% a tenth. Fresh air is 20.95%.$(br2)A fire warns sooner than a lung does: a flame burns badly from 19% and goes out at 12%, long before the air is fatal (see $(l:tfcpp/gases#fires)Gases$()). A smothered fire warns only those who watch it.",
+      "title": "No air to breathe"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "chronic",
+      "text": "You breathe 20 litres a minute and keep 80% of what is in them. The poison stays in the body as a dose in milligrams, which falls by half in a set time. These times are process time: a day is 24 real minutes (see $(l:tfcpp/introduction)the introduction$()).$(li)arsenic: half in 4 days; symptoms at 20 mg, incapacity 70, death 150$(li)mercury: 60 days; 5, 20, 50 mg$(li)lead: 30 days; 30, 100, 300 mg$(li)zinc fume: 6 hours; 15, 60 mg, no death",
+      "title": "Slow poisons"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The white fume of $(thing)arsenic oxide$() comes from tetrahedrite (see $(l:tfcpp/sulfides)Sulfide ores$()). Arsenic leaves the body slowly. At the level of incapacity you are weak and sick, and from 150 mg you lose two percent of your health a second.$(br2)Antimony oxide does the same harm at a third of the strength, and is counted with it. Air with 100 mg of arsenic oxide in a cubic metre brings symptoms in 13 minutes and death in under three hours. The fume settles as dust, and then it is no longer breathed.",
+      "title": "Arsenic and antimony"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "mercury",
+      "text": "Air at 20 °C holds at most 13 mg of mercury vapour a cubic metre (1.6 ppm). The rest settles as a film, which evaporates again within about 20 seconds: a spill keeps the room at that level for long, and one airing does not clear it. In such air a tremor comes after 24 minutes, incapacity after an hour and a half, death after four hours.$(br2)Swallowed mercury is taken up through the gut at 0.01%: a millilitre is 1.35 mg, a 100 mB drink from a jug 135 mg, felt only over the next day.",
+      "title": "Mercury"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Lead$() fume (the smoke of litharge) gives weakness, then palsy of the wrists (mining fatigue), and at 300 mg death at half a percent of health a second. It leaves the body over weeks of process time, so the dose of a day at the hearth is carried a long while.$(br2)$(thing)Zinc oxide fume$() gives metal fume fever: hunger and weakness from 15 mg. It is awful and passes within hours, and it never kills. Brass founders knew it as the Monday fever.",
+      "title": "Lead and zinc fume"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A player who dies keeps his slow poisons, up to the level of incapacity and no higher: death cannot be used as a cure, and a body is not killed again on rising. The blood is fresh, and mercury still in the gut is lost.$(br2)A poisoned man is helped only by clean air and time. Learn the signs: the weakness and the tremor, the icons of the effects, the message of a smell. Then build ventilation and condensers, and warn others.",
+      "title": "A death does not cure"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/animal_cage",
+      "text": "A $(thing)Cage$() of eight copper rods holds a rat or a quail: right-click the animal with it."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "John Scott Haldane proposed it after the mine disasters of the 1890s. A small animal takes carbon monoxide in twenty times faster than you do, so it falls long before you feel anything. Carry the cage with you.$(br2)It is uneasy at 10% of its blood, collapsed at 20%, dead at 50%. It also dies of a gas at the serious level, or of starving air. It recovers in clean air. Feed it grain from the other hand at least every three days.",
+      "title": "The animal in the cage"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 2
+}

@@ -1,0 +1,117 @@
+{
+  "category": "tfc:tfcpp",
+  "extra_recipe_mappings": {
+    "tfcpp:mercury_manometer": 12,
+    "tfcpp:pipe/ceramic": 1,
+    "tfcpp:pipe/copper": 1,
+    "tfcpp:pipe/lead": 1,
+    "tfcpp:pipe/steel": 1,
+    "tfcpp:pipe/wood": 1,
+    "tfcpp:pipe/wrought_iron": 1,
+    "tfcpp:piston_pump": 9,
+    "tfcpp:pressure_vessel": 4,
+    "tfcpp:safety_valve": 6,
+    "tfcpp:safety_valve_ceramic": 6,
+    "tfcpp:safety_valve_lead": 6
+  },
+  "icon": "tfcpp:pipe/wrought_iron",
+  "name": "Pipes and Pressure",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "anchor": "network",
+      "text": "Connected pipes and fittings make one $(thing)network$(): a single volume at a single pressure. A pipe has a bore of 100 mm, about 8 litres to the metre. Gas obeys $(bold)pV = nRT$(), so its pressure follows its absolute temperature. Liquid weighs: a column of water presses on its foot with 1 atm for each 10 m. How fast anything flows follows Darcy and Weisbach: a long rough pipe passes less.$(br2)A network bursts at its weakest wall or joint, and breaking a pipe lets out everything in the run. Close a valve first.",
+      "title": "A run of pipe"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/pipe/wrought_iron",
+      "recipe2": "tfcpp:crafting/pipe/lead",
+      "text": "Three lumber or three fire bricks make three pipes of wood or fired clay. Two sheets of copper, lead, wrought iron or steel make two pipes of that metal."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "walls",
+      "text": "Barlow's formula gives the bursting pressure of a thin wall: p = 2 S t / D.$(li)wood 8.9 atm, to 177 °C$(li)fired clay 3.5 atm, to 1127 °C$(li)copper 10 atm, to 427 °C$(li)lead 5.9 atm, to 150 °C$(li)wrought iron 10 atm, to 627 °C$(li)steel 10 atm, to 727 °C$(br)Joints of hemp and tallow hold 10 atm at most, whatever the metal: steel gains nothing over iron until rubber gaskets come. Hotter than its limit a pipe holds nothing.",
+      "title": "What a wall holds"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "heat",
+      "text": "Heat a closed pipe and its gas gains pressure with the absolute temperature. Water adds the pressure of its vapour (the Antoine equation): 1 atm at 100 °C, 4.7 at 150 °C and 10 at 180 °C, which is the limit of the joints.$(br2)Worst is a pipe filled to the brim with liquid. Water expands 0.021% a kelvin and is hardly compressible, so each kelvin of warming adds 4.6 atm: two kelvin burst an iron pipe at once. Leave room for the liquid to expand, or fit a safety valve.",
+      "title": "Heat, steam and water"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/pressure_vessel",
+      "text": "The $(thing)Pressure Vessel$() is eight wrought iron double sheets round a hollow: half a cubic metre that joins every pipe touching it."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A fire below a pressure vessel heats the whole network joined to it, and a vessel with water and a closed outlet is a boiler. Its pressure climbs with the temperature until something gives way. Nothing makes it safe but a $(thing)safety valve$() and a hand to watch the gauge.$(br2)Its walls count as a pipe's do: Barlow, the joints, the temperature limit and the corrosion of what it holds. See $(l:tfcpp/pipes#walls)the table$().",
+      "title": "Boilers"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/safety_valve",
+      "recipe2": "tfcpp:crafting/safety_valve_lead",
+      "text": "The $(thing)Safety Valve$() is three ingots under a brass mechanism: wrought iron, or lead. A fired clay one is made of fire bricks."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "safety",
+      "text": "A valve has to lift before its own body gives way, so its weight is set to four fifths of the rating of the body, up to 8 atm. An iron one lifts at 8 atm above the air outside and seats again at 7, with a loud hiss; one of lead lifts at 4.7 and seats at 3.7; one of fired clay at 2.8, seat 1.8. It cannot be held shut.$(br2)Drowned in liquid, it still lifts, and the gas bubbles out through the liquid. The hiss tells you that the pressure is high.",
+      "title": "The safety valve"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "fittings",
+      "text": "$(li)$(thing)Gate valve$(): a hand wheel. Closed, it splits the network in two. It cannot be turned again for a second.$(li)$(thing)Vent$(): an open pipe end that passes gas either way, by the pressure on each side. Into liquid it lets gas only out.$(li)$(thing)Tap$(): lets liquid out into a barrel or any holder in front of it.$(br)Each comes in iron, lead and fired clay, and takes the strength and the corrosion of its body. Two liquids never join: pipes that carry them touch without opening to each other.",
+      "title": "Fittings"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/piston_pump",
+      "text": "The $(thing)Piston Pump$() is three wrought iron double sheets under a brass mechanism. A shaft drives it from the side."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "pump",
+      "text": "The pump takes in from its back (a pipe, a barrel, standing water or the air) and delivers into a pipe at its front. Each turn sweeps 0.1 cubic metre, and the shaft pays for the pressure difference and the lift of the liquid in the front pipe.$(br2)The air pushes water up a suction pipe 10.3 m at most, acid of density 1800 only 5.7 m. A pump takes no lava or molten metal, and delivers into no line that runs on into unloaded land. Right-click it to see why it stands. See $(l:mechanics/pumps)Pumps$().",
+      "title": "The pump"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A burst frees the energy of the gas as it expands to the air, and of the hot water that flashes to steam. A vessel of 500 litres of water at 180 °C gives about 28 MJ. The shock works as a gas blast does (see $(l:tfcpp/mine_safety#blast)Mine Safety$()), and steam scalds everyone within four blocks.$(br2)Liquid of a thousand litres or more spills as blocks, and any corrosive liquid splashes the people near. A pipe whose wall has lost more than a twentieth gives nothing back when you pick it up.",
+      "title": "When it bursts"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/mercury_manometer",
+      "text": "The $(thing)Mercury Manometer$() is glass panes round a bulb of mercury, from $(l:tfcpp/sulfides#mercury)cinnabar$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Right-click it to read the pressure in millimetres of mercury: 760 is the air outside. It also says when the line runs on past loaded land.$(br2)Above 3 atm over the air outside the mercury is blown out of the tube into the room, once (and mercury is poison: see $(l:tfcpp/poisons#mercury)Poisons$()). The tube then leaks a hundredth of the bore, and the pipes keep their pressure otherwise.",
+      "title": "Reading the gauge"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "corrosion",
+      "text": "Corrosion eats a share of the wall each process day (24 minutes) in a full pipe. Iron or steel, copper, lead, wood:$(li)chamber acid: 0.5, 0.2, 0.001, 0.5$(li)sulfuric acid: 0.01, 0.1, 0.1, 1.0$(li)nitric acid: 0.02, 2.0, 0.5, 1.0$(li)hydrochloric acid: 2.0, 0.1, 0.1, 0.02$(br)Fired clay takes none of these. Strong acid passivates iron, but dilute eats it, and chloride never lets it. Lead holds sulfuric acid under a film of sulfate until 80 °C, then loses 20 times faster.",
+      "title": "Corrosion by liquids"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Per process day, in a full pipe:$(li)mercury in copper: 1.0 (iron flasks carried it)$(li)vinegar: lead 0.1, iron and copper 0.05$(li)brine: iron 0.03, copper 0.005$(li)water: iron 0.002$(li)hot lye above 80 °C: fired clay 0.05$(br)In pure gas: sulfur dioxide takes 0.1 from iron and nothing from lead, whose film it feeds. Ammonia takes 0.5 from copper, chlorine 0.3.$(br2)A worn wall bursts: look at your pipes.",
+      "title": "Other corrosion"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A network is worked out while its chunks are loaded. A run that ends in unloaded land is marked as running on: the pump will not deliver into it, and the gauge says so. A liquid that has overflowed is kept until it makes a whole block, and does not vanish.$(br2)Corrosion is counted for each section of pipe from when it was last looked at, so a section left in unloaded land for days pays for them all when it returns.",
+      "title": "Loaded land"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 6
+}

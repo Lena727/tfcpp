@@ -121,7 +121,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "A fire burns the oxygen of its room and fills it with gas: carbon dioxide, and carbon monoxide, which has no colour or smell and kills quietly. A firepit gives off about 15 kW of heat; a bellows doubles that. Under open sky or up a flue the gas leaves. In a shut room the fire dies when the oxygen falls below 12%, and you may die before it does.",
+      "text": "A fire burns the oxygen of its room and fills it with gas: carbon dioxide, and carbon monoxide, which has no colour or smell and kills quietly. A firepit gives off about 15 kW of heat; a bellows doubles that. Under open sky or up a flue the gas leaves. In a shut room the fire dies when the oxygen falls below 12%, and you may die before it does. See $(l:tfcpp/gases)Gases and Ventilation$() and $(l:tfcpp/poisons)Poisons$().",
       "title": "Air and gas"
     },
     {

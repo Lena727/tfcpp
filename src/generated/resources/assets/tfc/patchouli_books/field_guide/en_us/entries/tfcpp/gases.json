@@ -1,0 +1,71 @@
+{
+  "category": "tfc:tfcpp",
+  "extra_recipe_mappings": {
+    "tfcpp:mine_fan": 7
+  },
+  "icon": "tfcpp:mine_fan",
+  "name": "Gases and Ventilation",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "anchor": "grid",
+      "text": "The air of the world is counted in cells of one cubic metre. At 20 °C and one atmosphere a cell holds 41.6 moles of gas ($(bold)pV = nRT$()), and each gas in it is counted apart, in parts per million. The grid lives in the chunks and costs nothing where the air is clean.$(br2)Gases move as real ones do: they mix, they sink or rise by their weight, and fires, rock and opened coal faces add them. What drifts out into the open sky above is gone.",
+      "title": "Air by the cubic metre"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "weight",
+      "text": "A gas is lighter or heavier than air (29 g per mole) by its molar mass.$(li)$(bold)Lighter:$() hydrogen 2, methane 16, ammonia 17. They rise and lie under the roof.$(li)$(bold)About as heavy:$() carbon monoxide and the nitrogen of smoke, 28. They spread through the room, up to the height of your face.$(li)$(bold)Heavier:$() hydrogen sulfide 34, hydrogen chloride 36, carbon dioxide 44, nitrous fumes 46, sulfur dioxide 64, chlorine 71, arsenic oxide 198, mercury vapour 201. They pour down stairs and shafts and fill the low places.",
+      "title": "Light and heavy"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Where a heavy cell lies over a lighter one, the two overturn and the gas falls as a body. Where a light layer lies over a heavier one it is stable, and the step in density holds the mixing back: a difference of 0.1% cuts it to a third. So firedamp lies along a roof for days, and carbon dioxide stays in a still cave for ages.$(br2)A gas that is already mixed evenly into the air never separates again. A layer is cleared only by moving air.",
+      "title": "Layers"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "fires",
+      "text": "Every fire burns fuel at a power of its own, and turns a share of its carbon into $(thing)carbon monoxide$(), the rest into carbon dioxide:$(li)campfire 15 kW, 5% as CO$(li)charcoal forge 30 kW, 10%; firebox 25 kW, 8%; pit kiln 15 kW, 15%$(li)charcoal pit 2 kW, 30%, with some methane$(li)bloomery 60 kW, 35%$(li)blast furnace 200 kW, 75%$(br)A fire that takes $(l:metalworking/bellows)bellows$() burns at twice the rate.",
+      "title": "What a fire gives off"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A fire eats the oxygen of its room. Below 19% oxygen the burn turns dirty and the share of CO climbs, to four fifths of the carbon. Below 12% embers cannot go on: a campfire, a forge and a blast furnace go out. A bloomery, a firebox, a pit kiln and a charcoal pit cannot be put out so: their fuel smoulders on, but gives nothing to air like that.$(br2)So a fire in a shut room first poisons it, and only then goes out. See $(l:getting_started/firepit)the campfire$() and $(l:metalworking/charcoal_forge)the forge$().",
+      "title": "A fire needs air"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Hot flue gas rises in a plume until it meets a ceiling, then cools and spreads down from there, as smoke fills a room from the top. Under open sky, or up a chimney that ends in it, it is simply gone.$(br2)A device under two layers of earth or more cannot vent. A tenth of its gas gets through the cover, to the first open place above it, and the rest stays beside it. That is how charcoal pits have killed people who slept next to them. A $(l:metalworking/charcoal_pit)pit$() wants one layer of cover only.",
+      "title": "Where the smoke goes"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Open air takes gas from the top of a column. A cell in an open pit loses $(bold)0.3 e^(-d/3)$() of its gas each second, d being the depth below the ground around it in metres: 30% a second at the surface, 11% at 3 m, half a percent at 12 m. A well, a prospecting pit and a mine shaft hold heavy gas as a cave does. A roof over a cell stops the exchange altogether.$(br2)Never go down into a pit you have not tested.",
+      "title": "Wells and shafts"
+    },
+    {
+      "type": "patchouli:crafting",
+      "anchor": "fan",
+      "recipe": "tfcpp:crafting/mine_fan",
+      "text": "Only moving air clears a mine. The $(thing)Mine Fan$() is six copper sheets round two brass mechanisms. It stands on a $(l:mechanics/mechanical_power)shaft$() and blows out of its front."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "At the speed of a water wheel the fan moves about 4 cubic metres of air a second and takes about 1 kW off the shaft. The flow grows with the speed, the power with its cube, so a slow shaft moves air cheaply and a fast one loads the wheel hard.$(br2)The fan draws along the open spaces behind it. Gas moves about a cell a second, one shell of cells at a time, as fast as air moved in the old mines. A fan lifts no settled dust.",
+      "title": "The fan and its shaft"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A fan moves air only where air has somewhere to come from: the space it draws on must lead to open sky, or be larger than the 512 cells the fan can walk. A closed room or a dead end has no such way. There the fan only stirs, and a right click says so.$(br2)The law after the Hartley disaster of 1862 required a second shaft to every colliery for just this reason: one opening gives air nowhere to enter.",
+      "title": "Air must come from somewhere"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Most gases cannot be seen. Some announce themselves: a message on the screen tells of a sharp smell, and the $(l:tfcpp/mine_safety)Davy lamp$() shows firedamp. Carbon monoxide has no smell at all. Read $(l:tfcpp/poisons)Poisons$() before you work near fire in a closed place.$(br2)A pipe vent passes gas both ways, by the pressure on each side (see $(l:tfcpp/pipes)Pipes and Pressure$()). Operators can read a cell with $(bold)/tfcpp gas read$(), add gas with $(bold)/tfcpp gas add$() and count the chunks with $(bold)/tfcpp gas stats$().",
+      "title": "Seeing the air"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 1
+}

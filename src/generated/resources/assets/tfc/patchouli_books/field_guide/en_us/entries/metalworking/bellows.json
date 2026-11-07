@@ -5,7 +5,7 @@
   "pages": [
     {
       "type": "patchouli:text",
-      "text": "A $(thing)Bellows$() pushes air into the device it faces, or into one a block lower than that: a $(l:getting_started/firepit)Firepit$(), a $(l:metalworking/charcoal_forge)Charcoal Forge$(), a blast furnace. More air makes the fuel burn hotter and twice as fast, and gives off twice the gas.$(br2)The blast adds at most 500 °C to the fuel. A forge on charcoal tops out at 1600 °C, so melting steel is hard, as it should be."
+      "text": "A $(thing)Bellows$() pushes air into the device it faces, or into one a block lower than that: a $(l:getting_started/firepit)Firepit$(), a $(l:metalworking/charcoal_forge)Charcoal Forge$(), a blast furnace. More air makes the fuel burn hotter and twice as fast, and gives off twice the gas.$(br2)The blast adds at most 500 °C to the fuel. A forge on charcoal tops out at 1600 °C, so melting steel is hard, as it should be. For the gas, see $(l:tfcpp/gases#fires)Gases$() and $(l:tfcpp/poisons)Poisons$()."
     },
     {
       "type": "patchouli:crafting",

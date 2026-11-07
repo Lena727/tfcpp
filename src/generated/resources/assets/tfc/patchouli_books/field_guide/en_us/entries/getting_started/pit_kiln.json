@@ -13,7 +13,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "$(bold)1.$() Put up to four items into a hole one block wide with $(item)$(k:tfc.key.place_block)$().$(br)$(bold)2.$() Cover them with eight $(thing)Straw$() or two $(thing)Thatch$() blocks.$(br)$(bold)3.$() Fill the pit with eight $(thing)Logs$().$(br)$(bold)4.$() Light the top.$(br2)The kiln burns for $(cfg:pitKilnTicks) and slowly heats what is inside."
+      "text": "$(bold)1.$() Put up to four items into a hole one block wide with $(item)$(k:tfc.key.place_block)$().$(br)$(bold)2.$() Cover them with eight $(thing)Straw$() or two $(thing)Thatch$() blocks.$(br)$(bold)3.$() Fill the pit with eight $(thing)Logs$().$(br)$(bold)4.$() Light the top.$(br2)The kiln burns for $(cfg:pitKilnTicks) and slowly heats what is inside. It makes smoke and carbon monoxide: see $(l:tfcpp/gases#fires)Gases$() and $(l:tfcpp/poisons#carbon_monoxide)Poisons$()."
     },
     {
       "type": "patchouli:image",

@@ -15,7 +15,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "The $(thing)Firebox$() has a temperature gauge and 16 slots, all for fuel, any fuel. In the open it heats nothing. Below Bright Red it heats up to 64 blocks, above that 128. The time it needs grows with the number of blocks and the temperature wanted. It is a fire like any other: it uses air and fumes up the room, with sulfur dioxide if it burns coal."
+      "text": "The $(thing)Firebox$() has a temperature gauge and 16 slots, all for fuel, any fuel. In the open it heats nothing. Below Bright Red it heats up to 64 blocks, above that 128. The time it needs grows with the number of blocks and the temperature wanted. It is a fire like any other: it uses air and fumes up the room, with sulfur dioxide if it burns coal. See $(l:tfcpp/gases)Gases$() and $(l:tfcpp/poisons)Poisons$()."
     },
     {
       "type": "patchouli:text",

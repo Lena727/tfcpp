@@ -179,7 +179,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "The pit burns without air, and is the dirtiest fire there is: up to 30% of its carbon leaves as carbon monoxide, with some methane from the wood. The turf is never airtight. Even under thick cover a tenth of the gas gets through, and people have died sleeping beside charcoal pits. Burn it in the open, and never sleep next to it.",
+      "text": "The pit burns without air, and is the dirtiest fire there is: up to 30% of its carbon leaves as carbon monoxide, with some methane from the wood. The turf is never airtight. Even under thick cover a tenth of the gas gets through, and people have died sleeping beside charcoal pits. Burn it in the open, and never sleep next to it. See $(l:tfcpp/gases#fires)Gases$() and $(l:tfcpp/poisons#carbon_monoxide)Poisons$().",
       "title": "Danger"
     }
   ],

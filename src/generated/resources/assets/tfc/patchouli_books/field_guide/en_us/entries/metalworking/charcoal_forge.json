@@ -16,7 +16,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "The block above must be air or a crucible. TFC++ asks neither for a chimney nor for the sky: a forge burns without them. But a chimney is what carries the fumes away. A forge in a shut room fills it with smoke and carbon monoxide, and with sulfur dioxide if it burns coal. Build it under open sky, or ventilate the room."
+      "text": "The block above must be air or a crucible. TFC++ asks neither for a chimney nor for the sky: a forge burns without them. But a chimney is what carries the fumes away. A forge in a shut room fills it with smoke and carbon monoxide, and with sulfur dioxide if it burns coal. Build it under open sky, or ventilate the room. See $(l:tfcpp/gases)Gases$() and $(l:tfcpp/poisons)Poisons$()."
     },
     {
       "type": "patchouli:text",

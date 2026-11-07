@@ -1,0 +1,91 @@
+{
+  "category": "tfc:tfcpp",
+  "extra_recipe_mappings": {
+    "tfcpp:basic_brick": 9,
+    "tfcpp:converter": 5,
+    "tfcpp:powder/dolomite": 8,
+    "tfcpp:slag/thomas": 12
+  },
+  "icon": "tfcpp:converter",
+  "name": "Iron and Phosphorus",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "anchor": "oxide",
+      "text": "Iron ore is an oxide, and heat alone will not make metal of it: carbon has to take its oxygen away. A piece of hematite, magnetite or limonite melted in a forge or a crucible gives only liquid $(thing)iron oxide$() at 1565 °C. It cannot be cast into an ingot. Poured into a mold of 100 mB it sets as four pieces of $(thing)slag$(), 25 mB each, which go back into the $(l:metalworking/bloomery)bloomery$() or the $(l:metalworking/blast_furnace)blast furnace$() to be reduced.$(br2)The ore must meet carbon, and not only fire.",
+      "title": "Iron is not made in one melt"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "phosphoric",
+      "text": "Brown ironstone, the $(thing)limonite$(), holds 0.5 to 2% phosphorus. Its oxide and its slag stay marked as phosphoric. In the bloomery the phosphorus goes into the slag, and the bloom is plain iron. In the blast furnace it goes into the iron: the pig iron is $(thing)phosphoric$() (4% carbon, 1% silicon, 1.5% phosphorus, melting at 1200 °C), and one piece of limonite in the charge makes all the iron of the hearth phosphoric.$(br2)It is good for casting and for the converter.",
+      "title": "Phosphorus in brown ore"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Phosphorus above 0.1% makes iron crack under the hammer when it is cold: smiths called it cold short. Melt phosphoric pig iron with wrought iron, steel or cast iron in a crucible, and you get $(thing)Cold Short Iron$(), which can only be cast or poured again, never forged.$(br2)A crucible does not thin the phosphorus out, but a converter counts the bath by percent: one part of phosphoric pig iron in fifteen of clean iron is only 0.09%, which is clean.",
+      "title": "Cold short iron"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "grades",
+      "text": "Iron is named by its carbon, and each kind melts at its own heat:$(li)wrought iron up to 0.2% C, 1535 °C$(li)steel 0.2 to 1%, 1520 °C$(li)high carbon steel 1 to 2.1%, 1450 °C$(li)cast iron 2.1 to 4%, 1350 °C$(li)pig iron over 4%, 1200 °C$(br)An ingot does not remember its exact carbon, silicon and phosphorus, so a kind counts as the least a tap of it can hold: pouring can lose them, never gain. Pig iron that has lost its silicon is cast iron.",
+      "title": "The kinds of iron"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A $(l:metalworking/crucible)crucible$() averages the carbon by weight. With wrought iron: pig iron 4 to 24% of the melt gives steel, 24 to 52% high carbon steel, 52 to 99% cast iron. Cast iron as the second metal, 8 to 47%, gives steel, and the rest high carbon steel.$(br2)A hammer cannot take carbon out: what the crucible cannot dilute, only the $(l:metalworking/steel)converter$() burns out. High carbon steel is also made steel by diluting it with wrought iron. Cast iron cannot be forged or welded at all, only cast.",
+      "title": "Alloying in the crucible"
+    },
+    {
+      "type": "patchouli:crafting",
+      "anchor": "converter",
+      "recipe": "tfcpp:crafting/converter",
+      "text": "The $(thing)Converter$() is seven wrought iron double sheets round a fire brick. Air from a piston pump is blown up through the iron by pipe."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The vessel holds 2000 mB of iron, about 16 kg. Air burns the silicon first (911 kJ a mole), then the carbon (110 kJ a mole as monoxide), and the iron when the carbon runs short. Those reactions are the only heat, and the vessel loses 0.01 kW for each kelvin: 15 kW at 1500 °C. A blast under one mole of air a second cannot keep the bath hot: one pump (0.2 mole) chills it till the iron sets.$(br2)The blast must beat the weight of the iron: 0.7 atm over a full vessel, and a tenth more.",
+      "title": "A blow without fuel"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A new vessel is lined with fire clay, which is silica: an $(thing)acid$() lining. It takes carbon and silicon out of the iron, but the phosphorus stays, and a tap with more than 0.1% of it is cold short iron. Lime thrown into such a vessel would only dissolve the lining, so the game refuses it.$(br2)This was the failure of Bessemer: his converter worked only on pure ores. Thomas and Gilchrist solved it in 1878 with a lining that lime does not dissolve.",
+      "title": "The acid lining cannot"
+    },
+    {
+      "type": "tfc:heat_recipe",
+      "recipe": "tfcpp:heating/burnt_dolomite",
+      "text": "Dolomite powder (a $(thing)Dolomite Cobble$() ground on a quern gives two) fired at 1500 °C is $(thing)burnt dolomite$(): lime and magnesia that do not slake."
+    },
+    {
+      "type": "tfc:instant_barrel_recipe",
+      "recipe": "tfcpp:barrel/basic_brick",
+      "text": "Four burnt dolomite powders and a litre of coal tar make a $(thing)Basic Brick$() in a barrel. It is not fired."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "basic_lining",
+      "text": "Right-click an empty converter with basic bricks. Eight of them lay a new $(thing)basic$() lining, and until the eighth it is still the acid one. A basic lining is repaired only with basic bricks. It lasts about 12 000 seconds of blowing, and wears faster above 1650 °C. A worn lining drops with the vessel as an item, and a vessel with no lining left breaks out.$(br2)It is the only lining that lime does not dissolve, and the only one that takes phosphorus out.",
+      "title": "The basic lining"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "afterblow",
+      "text": "Throw $(l:metalworking/flux)lime powder$() into the bath (7.5 moles of CaO each). Each mole of silicon takes 2 of CaO and each mole of phosphorus another 2: a full vessel of phosphoric pig iron wants about 27 moles, four powders.$(br2)Phosphorus burns after the carbon, in the $(thing)afterblow$(), with thick white smoke over the mouth, and gives 745 kJ a mole. Blow on until the smoke ends. With too little lime the phosphorus stays, and silica without lime eats the lining away.",
+      "title": "Lime and the afterblow"
+    },
+    {
+      "type": "tfc:quern_recipe",
+      "recipe": "tfcpp:quern/thomas_meal",
+      "text": "The slag of the blow comes off the top as $(thing)Thomas slag$() (2 moles of phosphorus a piece). Ground, it gives four powders of $(thing)Thomas meal$(): a phosphate fertiliser."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A litre of water in the blast pipe turns to 1700 litres of steam in a bath of iron, and the vessel is torn apart. Water must never reach the pipe, and the first drop must be gone before the blow. Hot iron from a broken vessel sets the floor alight and burns anyone near.$(br2)The smoke over the mouth is carbon monoxide and nitrogen, and in the afterblow the fume of phosphorus oxide: blow in the open or under a chimney (see $(l:tfcpp/gases)Gases$()). To read the flame, see $(l:metalworking/steel)Steel$().",
+      "title": "Wet iron kills"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 5
+}

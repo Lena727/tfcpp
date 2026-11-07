@@ -59,7 +59,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "$(li)The furnace burns about 200 kW of fuel and sends three quarters of its carbon up as carbon monoxide, and the ore and the flux add carbon dioxide. Never run it in a shut room.$(li)Only a tenth of the sulfur of the fuel escapes as sulfur dioxide, as lime slag takes the rest. Each flux leaves a piece of slag.$(li)Limonite in the charge makes all the iron phosphoric: good for casting, brittle in steel.",
+      "text": "$(li)The furnace burns about 200 kW of fuel and sends three quarters of its carbon up as carbon monoxide, and the ore and the flux add carbon dioxide. Never run it in a shut room.$(li)Only a tenth of the sulfur of the fuel escapes as sulfur dioxide, as lime slag takes the rest. Each flux leaves a piece of slag.$(li)Limonite in the charge makes all the iron phosphoric: good for casting, brittle in steel. See $(l:tfcpp/iron_phosphorus)Iron and Phosphorus$().",
       "title": "Dangers and details"
     }
   ],

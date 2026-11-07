@@ -21,7 +21,7 @@ public final class PipePhysics
     /** Gas cannot leave a pipe faster than the speed of sound, and the flow chokes there. */
     private static final float SPEED_OF_SOUND = 340f;
 
-    /** Thermal expansion of water per kelvin, and its bulk modulus in atmospheres. A pipe full of liquid with nowhere to expand gains about 40 atm per kelvin of heating. */
+    /** Thermal expansion of water per kelvin, and its bulk modulus in atmospheres. A pipe full of liquid with nowhere to expand gains about 4.6 atm per kelvin of heating (2.1e-4 times 21700). */
     private static final float LIQUID_EXPANSION = 2.1e-4f;
     private static final float LIQUID_BULK_MODULUS = 21700f;
     /** Below this share of free space, gas no longer sets the pressure. */

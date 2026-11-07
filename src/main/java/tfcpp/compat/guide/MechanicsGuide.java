@@ -29,8 +29,8 @@ final class MechanicsGuide
                 L.of("$(li)On its narrow side the pump stands against the working end of a crankshaft.$(li)The line of pipe is up to $(bold)16$() blocks long, and its open end must stand in the liquid. The atmosphere lifts water only about 10 m, so that end may lie no more than $(bold)10$() blocks below the pump. A deep mine needs pumps in stages.$(li)While the crank turns, liquid comes out on the wide end a block at a time.",
                     "$(li)Узкой стороной насос стоит у рабочего конца коленвала.$(li)Линия труб длиной до $(bold)16$() блоков, и её открытый конец должен стоять в жидкости. Атмосфера поднимает воду лишь на 10 м, поэтому этот конец может лежать не глубже $(bold)10$() блоков под насосом. Глубокой шахте нужны насосы ступенями.$(li)Пока крутится кривошип, жидкость выходит на широком конце по блоку."))
             .text(
-                L.of("The lift is work, and it loads the shaft: the higher the water goes, the harder the crank is to turn. A block takes tens of seconds even at the full speed of a water wheel, and a wheel that is too weak, or a lift that is too high, stops the shaft.",
-                    "Подъём это работа, и он нагружает вал: чем выше идёт вода, тем тяжелее крутить кривошип. Блок воды занимает десятки секунд даже при полной скорости водяного колеса, а слишком слабое колесо или слишком высокий подъём останавливают вал."));
+                L.of("The lift is work, and it loads the shaft: the higher the water goes, the harder the crank is to turn. A block takes tens of seconds even at the full speed of a water wheel, and a wheel that is too weak, or a lift that is too high, stops the shaft. TFC++ adds a pump of its own for pipes: see $(l:tfcpp/pipes)Pipes and Pressure$().",
+                    "Подъём это работа, и он нагружает вал: чем выше идёт вода, тем тяжелее крутить кривошип. Блок воды занимает десятки секунд даже при полной скорости водяного колеса, а слишком слабое колесо или слишком высокий подъём останавливают вал. TFC++ добавляет свой насос для труб: см. $(l:tfcpp/pipes)Трубы и давление$()."));
     }
 
     private MechanicsGuide() {}

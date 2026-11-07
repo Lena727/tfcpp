@@ -242,7 +242,7 @@
     {
       "type": "patchouli:text",
       "anchor": "tetrahedrite",
-      "text": "Tetrahedrite is an ore of $(thing)Copper$(): at any height, richer deeper, in $(l:the_world/geology#metamorphic)Metamorphic$() rock.$(br2)It is a sulfide with arsenic and antimony. It melts into $(thing)arsenical copper$() at 1050 °C, good for tools and bronze, and its smoke is sulfur dioxide with the oxides of arsenic and antimony: poison. Smelt it in the open or under a flue.",
+      "text": "Tetrahedrite is an ore of $(thing)Copper$(): at any height, richer deeper, in $(l:the_world/geology#metamorphic)Metamorphic$() rock.$(br2)It is a sulfide with arsenic and antimony. It melts into $(thing)arsenical copper$() at 1050 °C, good for tools and bronze, and its smoke is sulfur dioxide with the oxides of arsenic and antimony: poison. Smelt it in the open or under a flue. See $(l:tfcpp/sulfides#tetrahedrite)Sulfide Ores and the Retort$().",
       "title": "Tetrahedrite"
     },
     {

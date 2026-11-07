@@ -27,7 +27,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "The lift is work, and it loads the shaft: the higher the water goes, the harder the crank is to turn. A block takes tens of seconds even at the full speed of a water wheel, and a wheel that is too weak, or a lift that is too high, stops the shaft."
+      "text": "The lift is work, and it loads the shaft: the higher the water goes, the harder the crank is to turn. A block takes tens of seconds even at the full speed of a water wheel, and a wheel that is too weak, or a lift that is too high, stops the shaft. TFC++ adds a pump of its own for pipes: see $(l:tfcpp/pipes)Pipes and Pressure$()."
     }
   ],
   "read_by_default": true

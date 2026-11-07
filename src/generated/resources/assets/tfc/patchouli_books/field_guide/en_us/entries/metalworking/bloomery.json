@@ -70,7 +70,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "$(li)The oxygen of the ore leaves as carbon dioxide, and the fire itself makes carbon monoxide: over a third of its carbon. A bloomery shut in a room poisons it. Build it in the open.$(li)The phosphorus of limonite goes into the slag, not the bloom, so a bloom is plain iron. That slag stays phosphoric.$(li)Overfilling spits items out of the front.$(li)To get items back from a cold bloomery, break the bloomery block, not the tower of ore.",
+      "text": "$(li)The oxygen of the ore leaves as carbon dioxide, and the fire itself makes carbon monoxide: over a third of its carbon. A bloomery shut in a room poisons it. Build it in the open.$(li)The phosphorus of limonite goes into the slag, not the bloom, so a bloom is plain iron. That slag stays phosphoric.$(li)Overfilling spits items out of the front.$(li)To get items back from a cold bloomery, break the bloomery block, not the tower of ore.$(li)See $(l:tfcpp/iron_phosphorus)Iron and Phosphorus$().",
       "title": "Dangers and details"
     }
   ],

@@ -1,0 +1,96 @@
+{
+  "category": "tfc:tfcpp",
+  "extra_recipe_mappings": {
+    "tfc:ore/normal_sphalerite": 5,
+    "tfc:ore/normal_tetrahedrite": 2,
+    "tfcpp:condensation_tower": 10,
+    "tfcpp:retort": 6,
+    "tfcpp:retort_condenser": 6,
+    "tfcpp:settling_baffle": 10
+  },
+  "icon": "tfcpp:retort",
+  "name": "Sulfide Ores and the Retort",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "anchor": "roasting",
+      "text": "In a sulfide ore the metal is bound to sulfur, and heat in air tears them apart: the sulfur burns to $(thing)sulfur dioxide$() and the metal is left as metal or as oxide. That is the real chemistry of $(l:the_world/ores_and_minerals#tetrahedrite)tetrahedrite$(), $(l:the_world/ores_and_minerals#sphalerite)sphalerite$(), $(l:the_world/ores_and_minerals#bismuthinite)bismuthinite$(), cinnabar and galena.$(br2)The gas comes off in the moment the ore is converted in a fire, a crucible or a forge, into the air above that device. A piece gives the metal of its size: small 10 mB, poor 15, normal 25, rich 35.",
+      "title": "Roast, do not smelt"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A normal piece of tetrahedrite gives 3.8 moles of sulfur dioxide at once, which is 9% of the air of a whole cell: 92 000 ppm, against 1000 ppm that kills. In a closed hall of 100 cubic metres it is still 920 ppm.$(br2)So roast in the open air, where the gas goes upward and away, or under a chimney. In a closed room it is a death trap, and the poison does not drop below the deadly level for a long while (see $(l:tfcpp/gases)Gases$() and $(l:tfcpp/poisons#lungs)Poisons$()).",
+      "title": "How much gas"
+    },
+    {
+      "type": "tfc:heat_recipe",
+      "recipe": "tfc:heating/ore/normal_tetrahedrite",
+      "text": "$(thing)Tetrahedrite$() melts at 1080 °C into arsenical copper. The pit kiln cannot reach it: use a forge with bellows, or a crucible."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "tetrahedrite",
+      "text": "Tetrahedrite is Cu12(As,Sb)4S13. For each mole of copper it gives 13/12 mole of sulfur dioxide and 1/12 mole each of arsenic oxide and antimony oxide: from a normal piece 3.8 moles of the gas, 58 g of white arsenic and 86 g of antimony oxide.$(br2)In a hall of 100 cubic metres that is 580 mg of arsenic oxide in each cubic metre: six times the level that kills in under three hours. The fumes settle as white dust (see below), which is raw material, but while it floats it is poison.",
+      "title": "Arsenic and antimony fume"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "arsenical_copper",
+      "text": "The metal from tetrahedrite is $(thing)arsenical copper$(), melting at 1050 °C. It forges tools and mixes into bronze as copper does, but things made of it carry a mark: they melt back into arsenical copper, and clean copper mixed with it turns arsenical, for the arsenic does not thin out.$(br2)Copper from malachite and native copper stays clean, and stays clean when forged and melted again. Keep the two apart, because the mark cannot be washed off.",
+      "title": "Arsenical copper"
+    },
+    {
+      "type": "tfc:heat_recipe",
+      "anchor": "sphalerite",
+      "recipe": "tfc:heating/ore/normal_sphalerite",
+      "text": "$(thing)Sphalerite$() no longer melts. At 900 °C it roasts to a $(thing)calcine$(), the zinc oxide of the piece, with 1 mole of sulfur dioxide for each mole of zinc."
+    },
+    {
+      "type": "patchouli:crafting",
+      "anchor": "retort",
+      "recipe": "tfcpp:crafting/retort",
+      "recipe2": "tfcpp:crafting/retort_condenser",
+      "text": "A $(thing)Retort$() is eight fire bricks round a hollow, and its $(thing)Condenser$() has two copper sheets in the ring."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Carbon takes the oxygen from zinc oxide only above about 1000 °C, and zinc boils at 907 °C. So zinc comes off as vapour, and in an open crucible burns at once to a white smoke of zinc oxide, which gives metal fume fever. A closed retort leads the vapour to a cool $(thing)condenser$(), where it runs off as liquid zinc.$(br2)A calcine needs 1000 °C, charcoal for its carbon (a normal piece takes 2.7 moles, and one charcoal holds 200) and gives zinc by its size, with carbon monoxide.",
+      "title": "Zinc: why a retort"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "mercury",
+      "text": "Mercury boils at 357 °C, so cinnabar roasted in the open loses all its mercury as vapour, and the room stays poisoned for hours (see $(l:tfcpp/poisons#mercury)Poisons$()). In the retort it is held at 600 °C beside a condenser and runs off as $(thing)liquid mercury$(): 25 mB for each piece of cinnabar, with 1.7 moles of sulfur dioxide that escape anyway, so ventilate.$(br2)Carry mercury in a jug or a bottle. A $(thing)glass bulb$() (a glass pane) takes 5 mB for a thermometer or manometer.",
+      "title": "Mercury from cinnabar"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Bismuthinite$() roasts at 600 °C into liquid bismuth and 1.5 moles of sulfur dioxide for each mole of bismuth: 1.8 moles from a normal piece.$(br2)$(thing)Galena$(), the lead ore of TFC++, roasts at 800 °C into work lead (lead with 0.3% silver in it) and sulfur dioxide, and 3% of its lead goes up as an oxide smoke (see $(l:tfcpp/poisons#chronic)Poisons$()). The refining of lead and silver is a chapter of its own, later in this book.",
+      "title": "Bismuth and galena"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/settling_baffle",
+      "recipe2": "tfcpp:crafting/condensation_tower",
+      "text": "The $(thing)Settling Baffle$() is fire brick and copper plates. The $(thing)Condensation Tower$() is fire brick round lead sheet."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "catching",
+      "text": "Dust of arsenic, antimony, zinc and lead oxide settles by itself when the gas cools. A $(thing)baffle$() in a closed chamber that the fumes cross takes 5% of the dust in the gas each second. Scrape it with an empty hand: it gives powder (0.25 mole, about 50 g), but 5% of what you scrape rises into the air again.$(br2)A $(thing)tower$() sits in a run of pipe and does the same below 250 °C, and also condenses mercury below 100 °C into its tank of 100 mB. Sulfur dioxide passes through both. Several in a row catch more.",
+      "title": "Catching the fumes"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)Set the retort over a forge or a campfire: it takes their heat.$(li)Put a condenser against its side.$(li)Right-click with charcoal for the carbon, then with the charge (up to eight pieces).$(li)Once hot enough it works one piece a second.$(li)An empty hand shows its state.$(li)Run the liquid into a mold, jug or bottle with a right click.",
+      "title": "Working a retort"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A fraction of a millibucket stays in the retort as liquid until a whole one has gathered, so nothing is lost to rounding. If the tank is full or holds another liquid, the charge waits.$(br2)Without a condenser a recipe that needs one still runs, but its vapour goes into the room: mercury, or zinc that burns to smoke. Breaking the retort spills it: mercury evaporates, zinc and lead set into ingots, and the last of them burns away as smoke.",
+      "title": "What it keeps and what it spills"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 4
+}

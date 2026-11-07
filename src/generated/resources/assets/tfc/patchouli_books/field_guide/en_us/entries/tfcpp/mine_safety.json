@@ -1,0 +1,78 @@
+{
+  "category": "tfc:tfcpp",
+  "extra_recipe_mappings": {
+    "tfcpp:davy_lamp": 8,
+    "tfcpp:wire_gauze": 8
+  },
+  "icon": "tfcpp:davy_lamp",
+  "name": "Mine Safety",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "anchor": "seam_gas",
+      "text": "Coal holds methane on its inner surface, and the deeper it lies the more it holds (an isotherm of Langmuir). Bituminous coal holds up to 25 cubic metres a tonne, nearly all methane. Lignite holds 6, only a fifth of it methane, the rest carbon dioxide.$(br2)A block of coal (1.3 tonnes) gives a tenth of its gas at once when broken: at 30 m deep about 0.4 cubic metres of methane, at 100 m more than one. That is enough to bring 20 cubic metres of air up to the lower limit of an explosion.",
+      "title": "Gas in coal"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "One region in 64 (4 by 4 by 4 blocks) of rock beside a seam holds a pocket of free gas, 4 to 16 cubic metres, squeezed by the rock above it: at 30 m depth it lets out 16 to 64 cubic metres of methane at once, with a hiss, when you break into it.$(br2)A newly bared face of coal bleeds out the same tenth slowly, with a time constant of 24 minutes. Gas keeps collecting in a working no one is in, and an old working is full of it.",
+      "title": "Pockets and slow faces"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Near the surface, above 15 m, air has reached the coal and has been burning its oxygen away for ages. What comes out there is $(thing)blackdamp$(): 13% carbon dioxide, the rest nitrogen, and no methane at all.$(br2)It smothers a flame at 16% oxygen and a person soon after: slowness below 16%, collapse below 10% (see $(l:tfcpp/poisons)Poisons$()). It is heavy and fills the low galleries and shaft bottoms. Pockets beside lignite hold it too.",
+      "title": "Blackdamp"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "ignition",
+      "text": "An open flame lights a burnable mixture: a $(thing)torch$(), even in the hand, a campfire, a burning furnace, charcoal pit or bloomery, lava, a candle, an oil lamp, a gas burner. Carry none of them into a coal seam.$(br2)Iron and steel tools throw a spark when they break rock: 5% of the blows, if there is gas beside the block. Bronze and copper never spark, which is why miners kept tools of them. A $(thing)Davy lamp$(), the one flame you may carry, is shown on the pages after.",
+      "title": "What lights it"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Methane burns only between 5% and 15% of the air, and not at all below 12% oxygen. Below 5% it is too thin, above 15% too rich: but a rich cloud that mixes with air burns as it goes. Burnable gases add by the rule of Le Chatelier (the sum of each over its lower limit must reach one).$(li)hydrogen 4 to 75%$(li)carbon monoxide 12.5 to 74%$(li)hydrogen sulfide 4.3 to 46%$(li)ammonia 15 to 28%",
+      "title": "When the gas burns"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "blast",
+      "text": "The flame burns through every connected cell of burnable gas, and its heat raises the pressure by 0.25 kPa for each kilojoule in a cubic metre. The blast stays strong far along a narrow gallery and is worst in a sealed room.$(br2)35 kPa injures, 400 kPa kills. Glass breaks at about 9 kPa, wood at 40, stone at 77. From 100 kPa a roof without shoring falls in. After it comes $(thing)afterdamp$(): nitrogen, carbon dioxide and carbon monoxide, which has killed more miners than the blast.",
+      "title": "The blast"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "dust",
+      "text": "Coal dust burns too: from 50 grams in a cubic metre to 2 kilograms, and not below 12% oxygen. Breaking a block of coal puts 5 grams in the air and lays 50 on the floor, a quern grinding it 2 grams. Half the cloud settles in about 70 seconds. Settled dust is not moved by the air.$(br2)A little firedamp makes a thin cloud of dust explode, and a little dust does the same for lean firedamp. A blast lifts the dust from the floor when more than 35% of it is coal: so a small fire grows into a disaster.",
+      "title": "Coal dust"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Since the 1920s mines have been made safe from dust by spreading ground limestone through the galleries, until at least 65% of the dust on the floor cannot burn. Use $(l:metalworking/flux)flux powder$() on the face of a wall: it spreads over the open cells within two blocks, and a message gives the share of dust that cannot burn, against the 65% needed.$(br2)A powder is 0.75 kg, so it goes far in a short gallery and thin in a long one. Do it again after mining: coal dust settles on top of the stone.",
+      "title": "Stone dusting"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/davy_lamp",
+      "text": "A $(thing)Davy Lamp$() is a copper gauze on an unfinished copper lamp. The gauze is four copper rods. The lamp gives light 9."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "lamp",
+      "text": "A copper gauze draws the heat out of a flame faster than the flame can light the gas outside. Carry the lit lamp, filled with oil, in either hand. Firedamp burns on the flame as a blue cap:$(li)from 1%: a pale cap$(li)2%: blue, 3%: tall$(li)5%: the flame fills the gauze: get out$(li)above 15%: the flame is smothered$(br)The flame also burns low below 18% oxygen and dies at 16%. It does not show carbon monoxide.",
+      "title": "Reading the lamp"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A flame that the air put out stays out. It does not light itself again: light it with a flint and steel, a fire starter or flint and pyrite from the other hand, in air where a flame can burn. A lamp standing on the ground is lit the same way.$(br2)If the flame fills the gauze for two minutes, the gauze glows red and lights the gas outside. A lamp is not safe forever: leave when the flame fills it.",
+      "title": "A lamp that went out"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)Work with bronze or copper tools. Light no torch.$(li)Carry a lit Davy lamp and a $(l:tfcpp/poisons#carbon_monoxide)caged animal$().$(li)Drive a $(l:tfcpp/gases#fan)fan$() on a second shaft, so that there is air to draw.$(li)Dust the galleries with stone.$(li)Mine a little and wait: a face bleeds for an hour.$(li)Never go back into a sealed working without testing the air.",
+      "title": "Going into a coal mine"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 3
+}

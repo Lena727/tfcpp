@@ -53,7 +53,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "$(li)Native Copper: $(thing)Copper$()$(li)Native Gold: $(thing)Gold$()$(li)Native Silver: $(thing)Silver$()$(li)Malachite: $(thing)Copper$()$(li)Cassiterite: $(thing)Tin$()$(li)Garnierite: $(thing)Nickel$()$(li)Bismuthinite: $(thing)Bismuth$(), roasted with fumes$(li)Tetrahedrite: arsenical $(thing)Copper$(), with poison fumes$(li)Sphalerite: only a calcine, no zinc$(li)Hematite, Magnetite, Limonite: iron oxide, no iron yet",
+      "text": "$(li)Native Copper: $(thing)Copper$()$(li)Native Gold: $(thing)Gold$()$(li)Native Silver: $(thing)Silver$()$(li)Malachite: $(thing)Copper$()$(li)Cassiterite: $(thing)Tin$()$(li)Garnierite: $(thing)Nickel$()$(li)Bismuthinite: $(thing)Bismuth$(), roasted with fumes$(li)Tetrahedrite: arsenical $(thing)Copper$(), with poison fumes$(li)Sphalerite: only a calcine, no zinc$(li)Hematite, Magnetite, Limonite: iron oxide, no iron yet$(br2)On the fumes: $(l:tfcpp/sulfides)Sulfide Ores and the Retort$().",
       "title": "Small Ores"
     },
     {

@@ -1,5 +1,6 @@
 package tfcpp.compat.guide;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,7 +23,12 @@ final class TfcppGuide
 
     static List<Entry> entries()
     {
-        return List.of(introduction());
+        final List<Entry> entries = new ArrayList<>();
+        entries.add(introduction());
+        entries.addAll(GasesGuide.entries());
+        entries.addAll(SulfidesGuide.entries());
+        entries.addAll(PipesGuide.entries());
+        return entries;
     }
 
     private static Entry introduction()
