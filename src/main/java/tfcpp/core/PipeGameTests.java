@@ -753,12 +753,25 @@ public final class PipeGameTests
 
     // ---- P10: a wall that has gone gives nothing back ----
 
-    private static int itemsAround(GameTestHelper helper, BlockPos pos)
+    /** The item entities that stand nearest to each of these blocks, as a drop slides a metre from where it fell and may be nearer a neighbour. */
+    private static int[] itemsNearest(GameTestHelper helper, BlockPos[] blocks)
     {
-        final List<ItemEntity> items = level(helper).getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(pos)).inflate(0.9));
-        final int count = items.size();
-        items.forEach(ItemEntity::discard);
-        return count;
+        final int[] counts = new int[blocks.length];
+        final BlockPos middle = helper.absolutePos(new BlockPos(4, 1, 4));
+        for (ItemEntity item : level(helper).getEntitiesOfClass(ItemEntity.class, new AABB(middle).inflate(7)))
+        {
+            int nearest = 0;
+            for (int i = 1; i < blocks.length; i++)
+            {
+                if (item.position().distanceToSqr(Vec3.atCenterOf(helper.absolutePos(blocks[i]))) < item.position().distanceToSqr(Vec3.atCenterOf(helper.absolutePos(blocks[nearest]))))
+                {
+                    nearest = i;
+                }
+            }
+            counts[nearest]++;
+            item.discard();
+        }
+        return counts;
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = BATCH)
@@ -783,10 +796,10 @@ public final class PipeGameTests
             }
         });
         helper.runAtTickTime(8, () -> {
-            for (BlockPos pos : fresh)
+            final int[] counts = itemsNearest(helper, fresh);
+            for (int i = 0; i < fresh.length; i++)
             {
-                final int count = itemsAround(helper, pos);
-                helper.assertTrue(count >= 1, "A whole block gives itself back: " + pos + " " + helper.getBlockState(pos) + " items " + count);
+                helper.assertTrue(counts[i] >= 1, "A whole block gives itself back: " + fresh[i]);
             }
             for (BlockPos pos : worn)
             {
@@ -794,9 +807,10 @@ public final class PipeGameTests
             }
         });
         helper.runAtTickTime(12, () -> {
-            for (BlockPos pos : worn)
+            final int[] counts = itemsNearest(helper, worn);
+            for (int i = 0; i < worn.length; i++)
             {
-                helper.assertTrue(itemsAround(helper, pos) == 0, "A wall that has lost a tenth is scrap: " + pos);
+                helper.assertTrue(counts[i] == 0, "A wall that has lost a tenth is scrap: " + worn[i]);
             }
             helper.succeed();
         });
