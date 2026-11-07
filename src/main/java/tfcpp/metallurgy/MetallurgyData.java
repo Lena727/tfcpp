@@ -48,6 +48,10 @@ public final class MetallurgyData implements DataProvider
     /** Lead in one powder of litharge is 4.57 mL, and a tank holds whole millibuckets, so 4 mB come out at once and the retort keeps the 0.57 mL as liquid until a whole millibucket has gathered. */
     private static final int LITHARGE_LEAD_MILLIBUCKETS = 4;
     private static final float LITHARGE_LEAD_EXACT_MILLIBUCKETS = 0.25f / CupellationBath.MOLES_LEAD_PER_MILLIBUCKET;
+    /** ZnO + C -> Zn + CO for the zinc oxide caught in a tower. A powder is 50 g of ZnO at 81.38 g/mol, 0.614 mol, which gives 0.614 mol of zinc, 5.63 mL at 65.38 g/mol and 7.14 g/mL: 5 mB at once and the 0.63 mL kept as liquid by the retort. */
+    private static final float ZINC_OXIDE_POWDER_MOLES = 50f / 81.38f;
+    private static final int ZINC_OXIDE_ZINC_MILLIBUCKETS = 5;
+    private static final float ZINC_OXIDE_ZINC_EXACT_MILLIBUCKETS = ZINC_OXIDE_POWDER_MOLES * 65.38f / 7.14f;
     /** One piece of bloomery slag, in millibuckets of the iron oxide that it melts to. */
     private static final int OXIDE_PER_SLAG = IronSmelting.MILLIBUCKETS_PER_SLAG;
     /** Litharge is reduced by carbon above the melting point of lead, and well below the 1000 C that zinc needs. */
@@ -247,6 +251,8 @@ public final class MetallurgyData implements DataProvider
         anvil.add("result", marked(anvil.getAsJsonObject("result")));
         put("data/tfcpp/recipe/crafting/arsenical_copper_anvil.json", anvil);
 
+        markedCrafting();
+
         // Whatever copper is hammered into at the anvil, arsenical copper is as well, marked. What is made of the marked item is marked in turn.
         final Path anvils = tfcFile("data/tfc/recipe/anvil");
         try (Stream<Path> paths = Files.walk(anvils))
@@ -349,6 +355,78 @@ public final class MetallurgyData implements DataProvider
         addToTag("data/c/tags/item/double_ingots.json", "#c:double_ingots/arsenical_copper"); // TFC sizes double ingots by this parent tag
     }
 
+    /**
+     * A tool is a head and a stick, a lamp is an unfinished lamp and a glass, a block is sheets, a grate is bars: TFC's crafting recipes give a new copper item and copy nothing from the part of copper, so a marked head would be made into an unmarked pickaxe, which melts to pure copper and launders the arsenic. Every crafting recipe of a copper item that has a copper part is split as the anvil recipes are: TFC's takes the unmarked part, and ours takes the marked one and marks its result. Only items that melt back to copper matter, so the slabs, stairs and signs, which do not melt, are left alone.
+     */
+    private void markedCrafting() throws IOException
+    {
+        final Path crafting = tfcFile("data/tfc/recipe/crafting/metal");
+        try (Stream<Path> paths = Files.walk(crafting))
+        {
+            for (Path path : (Iterable<Path>) paths::iterator)
+            {
+                final String relative = crafting.relativize(path).toString().replace('\\', '/');
+                if (!relative.endsWith("/copper.json") || relative.startsWith("anvil/"))
+                {
+                    continue;
+                }
+                final JsonObject recipe = read(path);
+                final JsonObject result = recipe.getAsJsonObject("result");
+                final JsonObject stack = result.has("stack") ? result.getAsJsonObject("stack") : result;
+                final String id = stack.get("id").getAsString();
+                final String kind = id.startsWith("tfc:metal/") && id.endsWith("/copper") ? id.substring("tfc:metal/".length(), id.length() - "/copper".length()) : null;
+                if (kind == null || !Files.exists(tfcFile("data/tfc/recipe/heating/metal/" + kind + "/copper.json")))
+                {
+                    continue; // Not a thing that melts, so nothing for the mark to be lost from
+                }
+
+                // The slots that hold a part of copper: the entries of the key of a shaped recipe, or the list of a shapeless one
+                final List<Runnable> unmark = new ArrayList<>();
+                final JsonObject variant = recipe.deepCopy();
+                int parts = 0;
+                if (recipe.has("key"))
+                {
+                    for (String key : recipe.getAsJsonObject("key").keySet())
+                    {
+                        final JsonElement slot = recipe.getAsJsonObject("key").get(key);
+                        if (slot.isJsonObject() && isCopperItems(slot.getAsJsonObject()))
+                        {
+                            variant.getAsJsonObject("key").add(key, markedIngredient(slot.getAsJsonObject()));
+                            unmark.add(() -> recipe.getAsJsonObject("key").add(key, unmarkedIngredient(slot.getAsJsonObject())));
+                            parts++;
+                        }
+                    }
+                }
+                else if (recipe.has("ingredients"))
+                {
+                    final JsonArray list = recipe.getAsJsonArray("ingredients");
+                    for (int i = 0; i < list.size(); i++)
+                    {
+                        final int index = i;
+                        if (list.get(i).isJsonObject() && isCopperItems(list.get(i).getAsJsonObject()))
+                        {
+                            variant.getAsJsonArray("ingredients").set(i, markedIngredient(list.get(i).getAsJsonObject()));
+                            unmark.add(() -> list.set(index, unmarkedIngredient(list.get(index).getAsJsonObject())));
+                            parts++;
+                        }
+                    }
+                }
+                if (parts == 0)
+                {
+                    continue;
+                }
+                if (parts > 1)
+                {
+                    throw new IllegalStateException("A recipe with two parts of copper needs the mixed cases written out, as welding does: " + relative);
+                }
+                variant.add("result", marked(variant.getAsJsonObject("result")));
+                put("data/tfcpp/recipe/crafting/arsenical/" + relative, variant);
+                unmark.forEach(Runnable::run);
+                put("data/tfc/recipe/crafting/metal/" + relative, recipe);
+            }
+        }
+    }
+
     private static final Map<String, String> COPPER_TAG_ITEMS = Map.of(
         "c:rods/copper", "tfc:metal/rod/copper",
         "c:sheets/copper", "tfc:metal/sheet/copper",
@@ -428,6 +506,18 @@ public final class MetallurgyData implements DataProvider
             zinc.add("byproducts", gases("carbon_monoxide", moles));
             put("data/tfcpp/recipe/retort/zinc_" + ORE_GRADES[i] + ".json", zinc);
         }
+
+        // The zinc oxide that a tower caught is the same oxide as the calcine, and goes the same way: ZnO + C -> Zn + CO above the boiling point of zinc, in a closed retort. Without a condenser the zinc leaves as vapour and burns back to oxide, as with the calcine.
+        final JsonObject oxide = new JsonObject();
+        oxide.addProperty("type", "tfcpp:retort");
+        oxide.add("input", item("tfcpp:powder/zinc_oxide"));
+        oxide.addProperty("carbon", ZINC_OXIDE_POWDER_MOLES);
+        oxide.addProperty("temperature", 1000f);
+        oxide.add("result", fluidStack("tfc:metal/zinc", ZINC_OXIDE_ZINC_MILLIBUCKETS));
+        oxide.addProperty("result_millibuckets", ZINC_OXIDE_ZINC_EXACT_MILLIBUCKETS);
+        oxide.add("vapor", gases("zinc_oxide_fume", ZINC_OXIDE_POWDER_MOLES));
+        oxide.add("byproducts", gases("carbon_monoxide", ZINC_OXIDE_POWDER_MOLES));
+        put("data/tfcpp/recipe/retort/zinc_oxide_powder.json", oxide);
 
         // HgS + O2 -> Hg + SO2
         final JsonObject mercury = new JsonObject();

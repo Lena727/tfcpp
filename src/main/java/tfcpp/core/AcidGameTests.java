@@ -49,6 +49,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import tfcpp.chemistry.BorosilicateGlass;
 import tfcpp.chemistry.Distillation;
 import tfcpp.chemistry.DistillationRecipe;
 import tfcpp.chemistry.DistillationTable;
@@ -177,7 +178,7 @@ public final class AcidGameTests
     }
 
     /** @return litres of acid per second that the chamber process makes in this network, for the gas it holds now and the blocks of chamber in it */
-    private static float litresPerSecond(PipeNetwork network, int chambers)
+    private static float litresPerSecond(PipeNetwork network, int chambers, float kelvin)
     {
         final PipeContents contents = network.contents();
         final float moles = contents.gasMoles();
@@ -185,8 +186,23 @@ public final class AcidGameTests
             contents.gases[Gas.SULFUR_DIOXIDE.ordinal()] / moles,
             contents.gases[Gas.NITROGEN_OXIDES.ordinal()] / moles,
             contents.air * ChamberProcess.OXYGEN_IN_AIR / moles);
-        return chambers * rate * ChamberProcess.ACID_LITRES_PER_MOLE;
+        return chambers * rate * ChamberProcess.ACID_LITRES_PER_MOLE * ChamberProcess.temperatureFactor(kelvin);
     }
+
+    /** Holds the network at this position at this temperature, in Kelvin, every tick: a chamber works at its temperature, and a network cools towards the weather. */
+    private static void keepAt(GameTestHelper helper, BlockPos pos, float kelvin)
+    {
+        helper.onEachTick(() -> {
+            final @Nullable PipeNetwork network = networkAt(helper, pos);
+            if (network != null)
+            {
+                network.contents().temperature = kelvin;
+            }
+        });
+    }
+
+    /** A chamber at the warmth the process is fitted at and above. */
+    private static final float WARM = 345f;
 
     /** @return litres of acid the chamber has made and holds, counting the fraction that is still waiting to be whole */
     private static float acidOf(LeadChamberBlockEntity chamber)
@@ -200,11 +216,12 @@ public final class AcidGameTests
         helper.setBlock(CHAMBER, Chemistry.LEAD_CHAMBER.get());
         final LeadChamberBlockEntity chamber = helper.getBlockEntity(CHAMBER);
         final float[] expected = new float[1];
+        keepAt(helper, CHAMBER, WARM);
         helper.runAtTickTime(5, () -> {
             final @Nullable PipeNetwork network = networkAt(helper, CHAMBER);
             helper.assertTrue(network != null, "The chamber should form a network");
             charge(network, 37.6f, 2.9f, 0.5f, 20f); // 7% sulfur dioxide of 41 mol, with oxides and water
-            expected[0] = litresPerSecond(network, 1) * 10f;
+            expected[0] = litresPerSecond(network, 1, WARM) * 10f;
         });
         helper.runAtTickTime(205, () -> {
             final @Nullable PipeNetwork network = networkAt(helper, CHAMBER);
@@ -266,11 +283,12 @@ public final class AcidGameTests
         helper.setBlock(CHAMBER.east(), Chemistry.LEAD_CHAMBER.get());
         final LeadChamberBlockEntity one = helper.getBlockEntity(CHAMBER), two = helper.getBlockEntity(CHAMBER.east());
         final float[] expected = new float[1];
+        keepAt(helper, CHAMBER, WARM);
         helper.runAtTickTime(5, () -> {
             final @Nullable PipeNetwork network = networkAt(helper, CHAMBER);
             helper.assertTrue(network != null && network == networkAt(helper, CHAMBER.east()), "Two chambers side by side make one network");
             charge(network, 75.2f, 5.8f, 1f, 40f); // The same shares as the chamber on its own, in twice the volume
-            expected[0] = litresPerSecond(network, 2) * 10f;
+            expected[0] = litresPerSecond(network, 2, WARM) * 10f;
         });
         helper.runAtTickTime(205, () -> {
             final float made = acidOf(one) + acidOf(two);
@@ -310,6 +328,7 @@ public final class AcidGameTests
         final ItemStack powders = new ItemStack(sulfur(), 2);
         helper.assertTrue(burner.addPowder(powders, player) && burner.addPowder(powders, player), "Two powders of sulfur go in");
         helper.assertTrue(powders.isEmpty(), "Both powders are used");
+        helper.assertTrue(burner.light(), "A flame lights the sulfur");
 
         final float[] start = new float[3]; // sulfur, sulfur dioxide and air at the first step the test sees
         helper.runAtTickTime(5, () -> {
@@ -342,6 +361,7 @@ public final class AcidGameTests
         final ItemStack powders = new ItemStack(sulfur(), 2);
         burner.addPowder(powders, player);
         burner.addPowder(powders, player);
+        burner.light();
 
         // Two moles of air: 0.42 mol of oxygen, which is less than the sulfur would take
         helper.runAtTickTime(5, () -> charge(networkAt(helper, CHAMBER), 2f, 0f, 0f, 0f));
@@ -358,6 +378,74 @@ public final class AcidGameTests
             helper.assertTrue(Math.abs(contents.gases[Gas.SULFUR_DIOXIDE.ordinal()] - atTen[0]) < 1e-4f, "It stops, so no more sulfur dioxide, got " + contents.gases[Gas.SULFUR_DIOXIDE.ordinal()] + " after " + atTen[0]);
             helper.assertTrue(contents.gases[Gas.SULFUR_DIOXIDE.ordinal()] <= 0.2095f * 2f + 1e-3f, "Never more than the oxygen there was");
             helper.assertTrue(Math.abs(burner.sulfurMoles() - atTen[1]) < 1e-4f && burner.sulfurMoles() > 2 * SulfurBurning.MOLES_PER_POWDER - 1f, "The sulfur is kept in the burner, got " + burner.sulfurMoles());
+            helper.assertFalse(burner.isLit(), "The flame smouldered out with the oxygen: the sulfur has to be lit again");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 300, batch = BATCH)
+    public static void sulfurInAColdPipeWaitsForAFlameAndThenKeepsBurningOnItsOwn(GameTestHelper helper)
+    {
+        helper.setBlock(CHAMBER, Chemistry.SULFUR_BURNER.get());
+        helper.setBlock(CHAMBER.east(), ceramicPipe());
+        final SulfurBurnerBlockEntity burner = helper.getBlockEntity(CHAMBER);
+        final FakePlayer player = player(helper);
+        final ItemStack powders = new ItemStack(sulfur(), 2);
+        burner.addPowder(powders, player);
+        burner.addPowder(powders, player);
+        final float start = burner.sulfurMoles();
+
+        // A pipe at 20 C is well short of the 250 C at which sulfur lights by itself
+        keepAt(helper, CHAMBER, 293.15f);
+        helper.runAtTickTime(100, () -> {
+            helper.assertTrue(burner.sulfurMoles() == start && !burner.isLit(), "Sulfur in a cold pipe does not burn, got " + burner.sulfurMoles() + " of " + start);
+            final FakePlayer smith = player(helper);
+            smith.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.FLINT_AND_STEEL));
+            useAsPlayer(helper, smith, CHAMBER);
+            helper.assertTrue(burner.isLit(), "Flint and steel in the hand lights it");
+            helper.assertTrue(smith.getMainHandItem().getDamageValue() == 1, "And the steel wears");
+        });
+        helper.runAtTickTime(200, () -> {
+            helper.assertTrue(start - burner.sulfurMoles() > 0.2f && burner.isLit(), "Once lit it burns in the cold pipe, got " + (start - burner.sulfurMoles()) + " mol and lit " + burner.isLit());
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 300, batch = BATCH)
+    public static void sulfurInAPipeAboveTwoHundredFiftyDegreesLightsByItself(GameTestHelper helper)
+    {
+        helper.setBlock(CHAMBER, Chemistry.SULFUR_BURNER.get());
+        helper.setBlock(CHAMBER.east(), ceramicPipe());
+        final SulfurBurnerBlockEntity burner = helper.getBlockEntity(CHAMBER);
+        final ItemStack powders = new ItemStack(sulfur(), 1);
+        burner.addPowder(powders, player(helper));
+        final float start = burner.sulfurMoles();
+        keepAt(helper, CHAMBER, 600f);
+        helper.runAtTickTime(150, () -> {
+            helper.assertTrue(burner.isLit() && burner.sulfurMoles() < start, "In a pipe at 257 C sulfur lights without a flame, got " + burner.sulfurMoles() + " of " + start);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 260, batch = BATCH)
+    public static void aChamberInFrostMakesNoAcidAndOneAtRoomTemperatureASixteenth(GameTestHelper helper)
+    {
+        final BlockPos far = new BlockPos(6, 1, 6);
+        helper.setBlock(CHAMBER, Chemistry.LEAD_CHAMBER.get());
+        helper.setBlock(far, Chemistry.LEAD_CHAMBER.get());
+        final LeadChamberBlockEntity frozen = helper.getBlockEntity(CHAMBER), cool = helper.getBlockEntity(far);
+        keepAt(helper, CHAMBER, 263.15f);
+        keepAt(helper, far, 293.15f);
+        final float[] expected = new float[1];
+        helper.runAtTickTime(5, () -> {
+            charge(networkAt(helper, CHAMBER), 37.6f, 2.9f, 0.5f, 20f);
+            charge(networkAt(helper, far), 37.6f, 2.9f, 0.5f, 20f);
+            expected[0] = litresPerSecond(networkAt(helper, far), 1, 293.15f) * 10f;
+        });
+        helper.runAtTickTime(205, () -> {
+            helper.assertTrue(acidOf(frozen) == 0f, "A chamber in frost makes nothing, got " + acidOf(frozen));
+            final float made = acidOf(cool);
+            helper.assertTrue(made > 0f && Math.abs(made - expected[0]) <= 0.25f * expected[0], "At 20 C about a sixteenth of the warm rate, " + expected[0] + " L, got " + made);
             helper.succeed();
         });
     }
@@ -392,6 +480,8 @@ public final class AcidGameTests
         {
             burner.addPowder(powders, player);
         }
+        burner.light();
+        keepAt(helper, CHAMBER, WARM);
         final ItemStack saltpetre = new ItemStack(saltpeter(), 1);
         final float[] start = new float[2];
         helper.runAtTickTime(5, () -> {
@@ -560,9 +650,11 @@ public final class AcidGameTests
         final FakePlayer player = player(helper);
         burner.addPowder(new ItemStack(sulfur(), 2), player);
         burner.addPowder(new ItemStack(sulfur(), 2), player);
+        burner.light();
         final SulfurBurnerBlockEntity burnerCopy = new SulfurBurnerBlockEntity(helper.absolutePos(burnerPos), helper.getBlockState(burnerPos));
         burnerCopy.loadWithComponents(burner.saveWithoutMetadata(registries), registries);
         helper.assertTrue(Math.abs(burnerCopy.sulfurMoles() - 2 * SulfurBurning.MOLES_PER_POWDER) < 1e-5f, "The sulfur is kept, got " + burnerCopy.sulfurMoles());
+        helper.assertTrue(burnerCopy.isLit(), "And the flame");
         helper.succeed();
     }
 
@@ -768,8 +860,8 @@ public final class AcidGameTests
         final GlassRetortBlockEntity retort = retortInBox(helper, true);
         charge(helper, retort, row, false);
         runRow(helper, retort, row, () -> {
-            helper.assertTrue(retort.product().is(Chemistry.SUPERPHOSPHATE.get()) && retort.product().getCount() == 8, "Eight powders of superphosphate, got " + retort.product());
-            helper.assertTrue(Math.abs(retort.input().litres() - (5.0 - 0.16)) < 1e-3, "0.16 L of chamber acid is taken, got " + retort.input().litres());
+            helper.assertTrue(retort.product().is(Chemistry.SUPERPHOSPHATE.get()) && retort.product().getCount() == row.byproducts(), "Thirteen powders of superphosphate, got " + retort.product());
+            helper.assertTrue(Math.abs(retort.input().litres() - (5.0 - row.litres())) < 1e-3, "0.27 L of chamber acid is taken, got " + retort.input().litres());
             helper.assertTrue(retort.charge().isEmpty() && retort.receiver().isEmpty(), "The apatite is taken and nothing comes over");
         });
     }
@@ -1220,11 +1312,82 @@ public final class AcidGameTests
         helper.succeed();
     }
 
+    private static ItemStack pipeWith(Item pipe, ItemStack batch, float celsius)
+    {
+        final ItemStack stack = GlassWorking.createWithBatch(new ItemStack(pipe), batch);
+        net.dries007.tfc.common.component.heat.HeatCapability.setTemperature(stack, celsius);
+        return stack;
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = GLASS_BATCH)
+    public static void borosilicateIsWorkedFromTwelveFiftyOnACeramicPipeAndNeverOnBrass(GameTestHelper helper)
+    {
+        final ItemStack ours = new ItemStack(Chemistry.BOROSILICATE_GLASS_BATCH.get());
+        final ItemStack silica = new ItemStack(TFCItems.SILICA_GLASS_BATCH.asItem());
+        final GlassOperation blow = GlassOperation.BLOW.get(), saw = GlassOperation.SAW.get();
+        final Item ceramic = TFCItems.CERAMIC_BLOWPIPE_WITH_GLASS.asItem(), brass = TFCItems.BLOWPIPE_WITH_GLASS.asItem();
+
+        helper.assertFalse(blow.hasRequiredTemperature(pipeWith(ceramic, ours, 1000f)), "At 1000 C TFC alone would say yes at 480, and borosilicate is still stiff");
+        helper.assertFalse(blow.hasRequiredTemperature(pipeWith(ceramic, ours, 1249f)), "Just short of the working point");
+        helper.assertTrue(blow.hasRequiredTemperature(pipeWith(ceramic, ours, 1300f)), "From 1250 C it is worked on a ceramic pipe");
+        helper.assertFalse(blow.hasRequiredTemperature(pipeWith(brass, ours, 1300f)), "A brass pipe melts at 930 C and cannot work it at any heat");
+        helper.assertFalse(blow.hasRequiredTemperature(pipeWith(brass, ours, 700f)), "Not cold either");
+        helper.assertTrue(blow.hasRequiredTemperature(pipeWith(brass, silica, 600f)), "Silica glass on brass is worked at 600 C as in TFC");
+        helper.assertTrue(blow.hasRequiredTemperature(pipeWith(ceramic, silica, 600f)), "And on ceramic");
+        helper.assertFalse(blow.hasRequiredTemperature(pipeWith(brass, silica, 300f)), "And not below its own 480 C");
+        helper.assertTrue(saw.hasRequiredTemperature(pipeWith(ceramic, ours, 25f)), "Sawing needs no heat of either glass");
+
+        // The batch is not put on a brass pipe by hand or by crafting
+        final var recipes = helper.getLevel().getRecipeManager();
+        final var brassRecipe = recipes.byKey(ResourceLocation.fromNamespaceAndPath("tfc", "crafting/blowpipe_with_glass"));
+        final var ceramicRecipe = recipes.byKey(ResourceLocation.fromNamespaceAndPath("tfc", "crafting/ceramic_blowpipe_with_glass"));
+        helper.assertTrue(brassRecipe.isPresent() && ceramicRecipe.isPresent(), "Both pipe recipes load");
+        final ItemStack brassPipe = new ItemStack(TFCItems.BLOWPIPE.asItem()), ceramicPipe = new ItemStack(TFCItems.CERAMIC_BLOWPIPE.asItem());
+        helper.assertFalse(((net.minecraft.world.item.crafting.CraftingRecipe) brassRecipe.get().value()).matches(net.minecraft.world.item.crafting.CraftingInput.of(2, 1, List.of(ours, brassPipe)), helper.getLevel()), "Borosilicate and a brass pipe make nothing");
+        helper.assertTrue(((net.minecraft.world.item.crafting.CraftingRecipe) brassRecipe.get().value()).matches(net.minecraft.world.item.crafting.CraftingInput.of(2, 1, List.of(silica, brassPipe)), helper.getLevel()), "Silica and a brass pipe still do");
+        helper.assertTrue(((net.minecraft.world.item.crafting.CraftingRecipe) ceramicRecipe.get().value()).matches(net.minecraft.world.item.crafting.CraftingInput.of(2, 1, List.of(ours, ceramicPipe)), helper.getLevel()), "Borosilicate and a ceramic pipe do");
+
+        final FakePlayer player = player(helper);
+        final net.minecraft.world.inventory.Slot brassSlot = new net.minecraft.world.inventory.Slot(new net.minecraft.world.SimpleContainer(brassPipe.copy()), 0, 0, 0);
+        final var brassClick = net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.ItemStackedOnOtherEvent(ours.copy(), brassSlot.getItem(), brassSlot, net.minecraft.world.inventory.ClickAction.SECONDARY, player, net.minecraft.world.entity.SlotAccess.NULL));
+        helper.assertTrue(brassClick.isCanceled() && brassSlot.getItem().is(TFCItems.BLOWPIPE.asItem()), "Clicking the batch on a brass pipe is refused and the pipe stays as it was, got " + brassSlot.getItem());
+        final net.minecraft.world.inventory.Slot ceramicSlot = new net.minecraft.world.inventory.Slot(new net.minecraft.world.SimpleContainer(ceramicPipe.copy()), 0, 0, 0);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.ItemStackedOnOtherEvent(ours.copy(), ceramicSlot.getItem(), ceramicSlot, net.minecraft.world.inventory.ClickAction.SECONDARY, player, net.minecraft.world.entity.SlotAccess.NULL));
+        helper.assertTrue(ceramicSlot.getItem().is(TFCItems.CERAMIC_BLOWPIPE_WITH_GLASS.asItem()) && BorosilicateGlass.carriesOurs(ceramicSlot.getItem()), "On a ceramic pipe TFC takes it as any batch");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = GLASS_BATCH)
+    public static void theBorosilicateBatchIsTwoSandsAndBoraxAndNoLime(GameTestHelper helper)
+    {
+        final var holder = helper.getLevel().getRecipeManager().byKey(TFCpp.id("crafting/borosilicate_glass_batch"));
+        helper.assertTrue(holder.isPresent(), "The batch recipe loads");
+        final var recipe = holder.get().value();
+        helper.assertTrue(recipe.getIngredients().size() == 3, "Borax and two sands, got " + recipe.getIngredients().size());
+        helper.assertFalse(recipe.getIngredients().stream().anyMatch(ingredient -> ingredient.test(new ItemStack(TFCItems.POWDERS.get(net.dries007.tfc.common.items.Powder.LIME).asItem()))), "No lime in borosilicate");
+        helper.assertTrue(recipe.getIngredients().stream().anyMatch(ingredient -> ingredient.test(new ItemStack(BuiltInRegistries.ITEM.get(TFCpp.id("powder/borax"))))), "And borax");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = GLASS_BATCH)
+    public static void ligniteCharIsAFuelOfTheForgeAndThePitButNotOfABlastFurnace(GameTestHelper helper)
+    {
+        final ItemStack charStack = new ItemStack(Chemistry.LIGNITE_CHAR.get());
+        helper.assertTrue(charStack.is(net.dries007.tfc.common.TFCTags.Items.FORGE_FUEL), "A forge burns lignite char");
+        helper.assertTrue(charStack.is(net.dries007.tfc.common.TFCTags.Items.FIREPIT_FUEL), "A firepit does too");
+        helper.assertFalse(charStack.is(net.dries007.tfc.common.TFCTags.Items.BLAST_FURNACE_FUEL), "A blast furnace does not take it: it crumbles and carries its sulfur");
+        final @Nullable var fuel = net.dries007.tfc.util.data.Fuel.get(charStack);
+        helper.assertTrue(fuel != null && fuel.temperature() == 1100f && fuel.duration() == 1500, "It burns at 1100 C for 1500 ticks, got " + (fuel == null ? "nothing" : fuel.temperature() + " C, " + fuel.duration()));
+        final @Nullable var coal = net.dries007.tfc.util.data.Fuel.get(new ItemStack(Items.COAL));
+        helper.assertTrue(coal != null && fuel.temperature() < coal.temperature() && fuel.duration() < coal.duration(), "Cooler and shorter than coal");
+        helper.succeed();
+    }
+
     @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = GLASS_BATCH)
     public static void superphosphateAndAmmoniumSulfateAreFertilisers(GameTestHelper helper)
     {
         final @Nullable Fertilizer phosphate = Fertilizer.get(new ItemStack(Chemistry.SUPERPHOSPHATE.get()));
-        helper.assertTrue(phosphate != null && Math.abs(phosphate.phosphorus() - 0.2f) < 1e-6f && phosphate.nitrogen() == 0f && phosphate.potassium() == 0f, "Superphosphate is phosphorus 0.2, got " + phosphate);
+        helper.assertTrue(phosphate != null && Math.abs(phosphate.phosphorus() - 0.12f) < 1e-6f && phosphate.nitrogen() == 0f && phosphate.potassium() == 0f, "Superphosphate is phosphorus 0.12, got " + phosphate);
         final @Nullable Fertilizer sulfate = Fertilizer.get(new ItemStack(Chemistry.AMMONIUM_SULFATE.get()));
         helper.assertTrue(sulfate != null && Math.abs(sulfate.nitrogen() - 0.1f) < 1e-6f && sulfate.phosphorus() == 0f && sulfate.potassium() == 0f, "Ammonium sulfate is nitrogen 0.1, got " + sulfate);
         final @Nullable Fertilizer apatite = Fertilizer.get(new ItemStack(Metallurgy.APATITE_POWDER.get()));
@@ -1314,6 +1477,56 @@ public final class AcidGameTests
         helper.assertTrue(MarshApparatusItem.sample(level, player, new ItemStack(BuiltInRegistries.ITEM.get(TFCpp.id("metal/ingot/arsenical_copper")))) == PoisonTests.Mirror.FAINT, "Arsenical copper gives a faint mirror");
         helper.assertTrue(MarshApparatusItem.sample(level, player, new ItemStack(Items.DIRT)) == PoisonTests.Mirror.NONE, "An ordinary item gives none");
         player.discard();
+        helper.succeed();
+    }
+
+    private static float arsenicAround(GameTestHelper helper, TestPlayer player)
+    {
+        final ServerLevel level = helper.getLevel();
+        final BlockPos eye = BlockPos.containing(player.getEyePosition());
+        float sum = 0f;
+        for (int dx = -1; dx <= 1; dx++)
+        {
+            for (int dy = -2; dy <= 60; dy++)
+            {
+                for (int dz = -1; dz <= 1; dz++)
+                {
+                    final @Nullable float[] cell = GasTracker.get(level).volume(level).cell(eye.getX() + dx, eye.getY() + dy, eye.getZ() + dz);
+                    sum += cell == null ? 0f : cell[Gas.ARSENIC_TRIOXIDE.ordinal()];
+                }
+            }
+        }
+        return sum;
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = MARSH_BATCH)
+    public static void aTestOfASampleLetsOutItsArsineAndATestOfTheAirAddsNone(GameTestHelper helper)
+    {
+        final TestPlayer sampler = playerAt(helper, new BlockPos(2, 1, 2));
+        sampler.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Chemistry.MARSH_APPARATUS.get()));
+        sampler.getMainHandItem().set(Chemistry.MARSH_TESTS.get(), 2);
+        sampler.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Instruments.ARSENIC_TRIOXIDE.get()));
+        Chemistry.MARSH_APPARATUS.get().use(helper.getLevel(), sampler, InteractionHand.MAIN_HAND);
+        final float let = arsenicAround(helper, sampler);
+        helper.assertTrue(Math.abs(let - PoisonTests.STRONG_PINCH_MOLES) < 1e-7f, "A test of white arsenic lets out a pinch of arsenic, " + PoisonTests.STRONG_PINCH_MOLES + " mol, got " + let);
+
+        final TestPlayer airTester = playerAt(helper, new BlockPos(7, 1, 7));
+        airTester.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Chemistry.MARSH_APPARATUS.get()));
+        airTester.getMainHandItem().set(Chemistry.MARSH_TESTS.get(), 2);
+        Chemistry.MARSH_APPARATUS.get().use(helper.getLevel(), airTester, InteractionHand.MAIN_HAND);
+        helper.assertTrue(arsenicAround(helper, airTester) == 0f, "A test of clean air lets nothing out");
+
+        final TestPlayer plain = playerAt(helper, new BlockPos(7, 1, 2));
+        plain.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Chemistry.MARSH_APPARATUS.get()));
+        plain.getMainHandItem().set(Chemistry.MARSH_TESTS.get(), 2);
+        plain.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.DIRT));
+        Chemistry.MARSH_APPARATUS.get().use(helper.getLevel(), plain, InteractionHand.MAIN_HAND);
+        helper.assertTrue(arsenicAround(helper, plain) == 0f, "A sample with no arsenic lets none out");
+
+        helper.assertTrue(MarshApparatusItem.messageKey(PoisonTests.Mirror.STRONG, true).equals("tfcpp.marsh.sample_strong") && MarshApparatusItem.messageKey(PoisonTests.Mirror.STRONG, false).equals("tfcpp.marsh.strong"), "A sample has its own message, which says nothing of the air");
+        sampler.discard();
+        airTester.discard();
+        plain.discard();
         helper.succeed();
     }
 

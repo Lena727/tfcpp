@@ -374,5 +374,105 @@ public final class MetalDataGameTests
         });
     }
 
+    /** 50 g of ZnO is 0.614 mol and gives 5.63 mL of zinc, so eight powders give 45 whole millibuckets and a hundredth left over. */
+    @GameTest(template = TEMPLATE, timeoutTicks = 2100)
+    public static void zincOxideCaughtInATowerIsReducedToZincInAClosedRetort(GameTestHelper helper)
+    {
+        final BlockPos pos = new BlockPos(2, 1, 2);
+        helper.setBlock(pos, Metallurgy.RETORT.get());
+        helper.setBlock(pos.east(), Metallurgy.RETORT_CONDENSER.get());
+        final RetortBlockEntity retort = helper.getBlockEntity(pos);
+        helper.assertTrue(helper.getLevel().getRecipeManager().byKey(TFCpp.id("retort/zinc_oxide_powder")).isPresent(), "The recipe of the captured oxide must load");
+        retort.load(new ItemStack(Instruments.ZINC_OXIDE.get(), 8), 8f);
+        helper.onEachTick(() -> retort.setTemperature(1100f));
+
+        helper.runAfterDelay(1800, /* A retort heats at about 1 C per tick to the 1000 C of zinc, and each piece takes a second */ () -> {
+            helper.assertTrue(retort.tank().getFluid().getFluid() == fluid("tfc:metal/zinc") && retort.tank().getFluidAmount() == 45, "Eight powders hold 45.0 mL of zinc, got " + retort.tank().getFluidAmount() + " of " + BuiltInRegistries.FLUID.getKey(retort.tank().getFluid().getFluid()));
+            helper.assertTrue(totalOf(helper, Gas.ZINC_OXIDE_FUME) == 0f, "Nothing escapes through a condenser");
+            helper.assertTrue(totalOf(helper, Gas.CARBON_MONOXIDE) > 0.05f, "ZnO + C gives CO, got " + totalOf(helper, Gas.CARBON_MONOXIDE));
+            helper.succeed();
+        });
+    }
+
+    private static float totalOf(GameTestHelper helper, Gas gas)
+    {
+        float sum = 0f;
+        for (int x = 0; x < 9; x++)
+        {
+            for (int y = 0; y < 5; y++)
+            {
+                for (int z = 0; z < 9; z++)
+                {
+                    final BlockPos pos = helper.absolutePos(new BlockPos(x, y, z));
+                    final @Nullable float[] cell = GasTracker.get(helper.getLevel()).volume(helper.getLevel()).cell(pos.getX(), pos.getY(), pos.getZ());
+                    sum += cell == null ? 0f : cell[gas.ordinal()];
+                }
+            }
+        }
+        return sum;
+    }
+
+    private static ItemStack markedCopper(String path)
+    {
+        final ItemStack stack = new ItemStack(item("tfc:metal/" + path + "/copper"));
+        stack.set(Metallurgy.ARSENICAL.get(), net.minecraft.util.Unit.INSTANCE);
+        return stack;
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void aToolMadeOfAMarkedHeadAndAStickIsMarkedAndMeltsBackToArsenicalCopper(GameTestHelper helper)
+    {
+        final var recipes = helper.getLevel().getRecipeManager();
+        final ItemStack stick = new ItemStack(Items.STICK);
+        for (String tool : List.of("pickaxe", "axe", "hammer", "shovel", "hoe", "chisel", "javelin", "mace", "propick"))
+        {
+            final ItemStack head = markedCopper(tool + "_head");
+            final CraftingInput grid = CraftingInput.of(1, 2, List.of(head, stick));
+            final var found = recipes.getRecipeFor(RecipeType.CRAFTING, grid, helper.getLevel());
+            helper.assertTrue(found.isPresent(), "A marked " + tool + " head and a stick must still make a tool");
+            final ItemStack made = found.get().value().assemble(grid, helper.getLevel().registryAccess());
+            helper.assertTrue(made.is(item("tfc:metal/" + tool + "/copper")), "It is the copper " + tool + ", got " + made);
+            helper.assertTrue(made.has(Metallurgy.ARSENICAL.get()), "The " + tool + " from a marked head carries the mark, or it would melt to pure copper");
+            final @Nullable HeatingRecipe melt = HeatingRecipe.getRecipe(made);
+            helper.assertTrue(melt != null && melt.assembleFluid(made).getFluid() == Metallurgy.ARSENICAL_COPPER.get(), "And melts back to arsenical copper");
+
+            final ItemStack plainHead = new ItemStack(item("tfc:metal/" + tool + "_head/copper"));
+            final CraftingInput plain = CraftingInput.of(1, 2, List.of(plainHead, stick));
+            final var plainFound = recipes.getRecipeFor(RecipeType.CRAFTING, plain, helper.getLevel());
+            helper.assertTrue(plainFound.isPresent(), "A plain copper " + tool + " head makes the tool as in TFC");
+            final ItemStack plainMade = plainFound.get().value().assemble(plain, helper.getLevel().registryAccess());
+            helper.assertFalse(plainMade.has(Metallurgy.ARSENICAL.get()), "A tool from a plain head is not marked");
+            final @Nullable HeatingRecipe plainMelt = HeatingRecipe.getRecipe(plainMade);
+            helper.assertTrue(plainMelt != null && plainMelt.assembleFluid(plainMade).getFluid() == fluid("tfc:metal/copper"), "And melts to copper");
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void everyCraftingOfACopperItemFromACopperPartKeepsTheMark(GameTestHelper helper)
+    {
+        final var recipes = helper.getLevel().getRecipeManager();
+        // The other things crafted of a part of copper that melt back to copper: the knife, saw and scythe, the lamp, the grate, a block of sheets, the armour of horses and the fishing rod
+        for (String kind : List.of("knife", "saw", "scythe", "sword", "fishing_rod", "lamp", "grate", "block", "horse_armor"))
+        {
+            final var variant = recipes.byKey(TFCpp.id("crafting/arsenical/" + kind + "/copper"));
+            helper.assertTrue(variant.isPresent(), "A recipe of the marked part for the copper " + kind + " must exist");
+            helper.assertTrue(variant.get().value().getResultItem(helper.getLevel().registryAccess()).has(Metallurgy.ARSENICAL.get()), "And its result is marked");
+            final var tfc = recipes.byKey(ResourceLocation.fromNamespaceAndPath("tfc", "crafting/metal/" + kind + "/copper"));
+            helper.assertTrue(tfc.isPresent() && !tfc.get().value().getResultItem(helper.getLevel().registryAccess()).has(Metallurgy.ARSENICAL.get()), "TFC's own recipe of the " + kind + " stays and is not marked");
+        }
+        // A block of marked sheets: four sheets, a hammer and a plank, as TFC has it
+        final ItemStack sheet = markedCopper("sheet");
+        final ItemStack hammer = new ItemStack(item("tfc:metal/hammer/bronze"));
+        final ItemStack plank = new ItemStack(item("tfc:wood/planks/oak"));
+        final ItemStack none = ItemStack.EMPTY;
+        final CraftingInput block = CraftingInput.of(3, 3, List.of(none, sheet, hammer, sheet.copy(), plank, sheet.copy(), none, sheet.copy(), none));
+        final var found = recipes.getRecipeFor(RecipeType.CRAFTING, block, helper.getLevel());
+        helper.assertTrue(found.isPresent(), "A block of marked sheets must be made");
+        final ItemStack made = found.get().value().assemble(block, helper.getLevel().registryAccess());
+        helper.assertTrue(made.is(item("tfc:metal/block/copper")) && made.getCount() == 8 && made.has(Metallurgy.ARSENICAL.get()), "Eight blocks, marked, got " + made);
+        helper.succeed();
+    }
+
     private MetalDataGameTests() {}
 }

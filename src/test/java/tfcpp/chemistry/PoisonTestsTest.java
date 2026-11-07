@@ -107,4 +107,13 @@ class PoisonTestsTest
         assertEquals(3, PoisonTests.leafStage(100f));
         assertEquals(3, PoisonTests.leafStage(1000f));
     }
+
+    @Test
+    void aTestLetsOutTheArsineOfItsSampleAndNothingForNoMirror()
+    {
+        assertEquals(0f, PoisonTests.pinchMoles(Mirror.NONE));
+        assertTrue(PoisonTests.pinchMoles(Mirror.STRONG) > PoisonTests.pinchMoles(Mirror.FAINT) && PoisonTests.pinchMoles(Mirror.FAINT) > 0f);
+        // 2.5e-5 mol of As2O3 at 197.84 g/mol is about 5 mg: a pinch, not a flask of it
+        assertEquals(5f, PoisonTests.STRONG_PINCH_MOLES * Gas.ARSENIC_TRIOXIDE.molarMass() * 1000f, 0.1f, "milligrams of oxide from a strong sample");
+    }
 }

@@ -4,6 +4,7 @@
   "package": "tfcpp.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "BorosilicateGlassMixin",
     "CharcoalForgeBlockMixin",
     "DrinkableMixin",
     "FuelSulfurMixins$BlastFurnace",

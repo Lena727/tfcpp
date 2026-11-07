@@ -13,7 +13,7 @@
   ],
   "liquor": {
     "fluid": "tfcpp:ammonia_liquor",
-    "litres": 1.0
+    "litres": 0.4
   },
   "seconds": 1080.0,
   "solid": {

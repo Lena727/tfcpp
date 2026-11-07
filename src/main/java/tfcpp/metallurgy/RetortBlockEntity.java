@@ -386,7 +386,7 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
             {
                 final int ingots = millibuckets / MILLIBUCKETS_PER_INGOT;
                 Containers.dropItemStack(level, x, y, z, new ItemStack(TFCItems.METAL_ITEMS.get(Metal.ZINC).get(Metal.ItemType.INGOT).get(), ingots));
-                gases[Gas.ZINC_OXIDE_FUME.ordinal()] = Sulfide.SPHALERITE.metalMoles(millibuckets - ingots * MILLIBUCKETS_PER_INGOT);
+                gases[Gas.ZINC_OXIDE_FUME.ordinal()] = Sulfide.SPHALERITE.metalMoles(millibuckets - ingots * MILLIBUCKETS_PER_INGOT + (float) leftover.pending()); // With the fraction of a millibucket that no tank could hold
             }
             // The tank takes only what the recipes above give it, so no other liquid can be in it to be lost here
             GasEmission.release(server, worldPosition, gases);

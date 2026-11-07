@@ -48,6 +48,35 @@ public final class ChamberProcess
      */
     public static final float HEAT_KILOJOULES_PER_MOLE = 230f;
 
+    /**
+     * The temperature the fitted rate is for, 60 C: real chambers were held at 50 to 90 C, warmed by the hot flue of the burners, the heat of the reaction and steam let in, and the plants the rate is fitted to ran at about this.
+     */
+    public static final float REFERENCE_KELVIN = 333.15f;
+
+    /**
+     * Kelvins by which the chamber must cool for its rate to halve, a Q10 of 2, the usual rule of thumb for a reaction in solution near room temperature. A figure of the design, not measured: the oxidation of NO alone slows as it warms, but the whole chamber (absorption of the oxides in the acid mist, and the SO2 taken up by it) is what the plants saw slow in cold weather.
+     */
+    public static final float HALVING_KELVIN = 10f;
+
+    /**
+     * How much of its rate a chamber has at this temperature. Full at 60 C and above, halved for each 10 K below it, and nothing at or below freezing, where the water of the chamber is ice and no mist forms.
+     *
+     * @param kelvin temperature of the chamber
+     * @return a share from 0 to 1
+     */
+    public static float temperatureFactor(float kelvin)
+    {
+        if (kelvin <= 273.15f)
+        {
+            return 0f;
+        }
+        if (kelvin >= REFERENCE_KELVIN)
+        {
+            return 1f;
+        }
+        return (float) Math.pow(2.0, (kelvin - REFERENCE_KELVIN) / HALVING_KELVIN);
+    }
+
     /** What one step of the chamber gave. Gas is in moles, water in litres of the network, and acid in both moles and litres. */
     public record Result(float acidMoles, float sulfurDioxide, float air, float nitrogenLeftBehind, float oxidesLost, float water, float acidLitres, float heatKilojoules)
     {
@@ -91,13 +120,23 @@ public final class ChamberProcess
      */
     public static Result react(float sulfurDioxide, float nitrogenOxides, float air, float gasMoles, float waterLitres, float tankRoomLitres, float seconds)
     {
+        return react(sulfurDioxide, nitrogenOxides, air, gasMoles, waterLitres, tankRoomLitres, seconds, REFERENCE_KELVIN);
+    }
+
+    /**
+     * As {@link #react(float, float, float, float, float, float, float)} for a chamber at a given temperature: the rate is scaled by {@link #temperatureFactor}, and the limits of the gas, water and tank are not.
+     *
+     * @param temperatureKelvin temperature of the chamber
+     */
+    public static Result react(float sulfurDioxide, float nitrogenOxides, float air, float gasMoles, float waterLitres, float tankRoomLitres, float seconds, float temperatureKelvin)
+    {
         if (gasMoles <= 0f || seconds <= 0f)
         {
             return Result.NONE;
         }
 
         final float oxygen = air * OXYGEN_IN_AIR;
-        final float wanted = rate(sulfurDioxide / gasMoles, nitrogenOxides / gasMoles, oxygen / gasMoles) * seconds;
+        final float wanted = rate(sulfurDioxide / gasMoles, nitrogenOxides / gasMoles, oxygen / gasMoles) * seconds * temperatureFactor(temperatureKelvin);
         final float acid = Math.min(
             Math.min(wanted, sulfurDioxide),
             Math.min(oxygen / OXYGEN_PER_MOLE, Math.min(waterLitres / WATER_LITRES_PER_MOLE, tankRoomLitres / ACID_LITRES_PER_MOLE)));

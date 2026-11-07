@@ -86,7 +86,7 @@ public final class LeadChamberBlockEntity extends BlockEntity
         final float water = contents.isWater() ? contents.litres : 0f;
         final float room = Math.max(0f, TANK_MILLIBUCKETS - tank.getFluidAmount() - (float) carry.pending()); // Litres of room, less what is waiting to be counted into the tank
         final ChamberProcess.Result result = ChamberProcess.react(
-            contents.gases[Gas.SULFUR_DIOXIDE.ordinal()], contents.gases[Gas.NITROGEN_OXIDES.ordinal()], contents.air, contents.gasMoles(), water, room, seconds);
+            contents.gases[Gas.SULFUR_DIOXIDE.ordinal()], contents.gases[Gas.NITROGEN_OXIDES.ordinal()], contents.air, contents.gasMoles(), water, room, seconds, contents.temperature);
         if (result.acidMoles() <= 0f)
         {
             return;

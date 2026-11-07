@@ -1,12 +1,12 @@
 {
   "type": "tfcpp:glass_distillation",
   "byproduct": {
-    "count": 8,
+    "count": 13,
     "item": "tfcpp:powder/superphosphate"
   },
   "fluid": {
     "fluid": "tfcpp:chamber_acid",
-    "litres": 0.16
+    "litres": 0.27
   },
   "gas": {},
   "item": {

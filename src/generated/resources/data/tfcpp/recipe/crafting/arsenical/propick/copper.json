@@ -1,0 +1,33 @@
+{
+  "type": "tfc:advanced_shaped_crafting",
+  "key": {
+    "S": {
+      "tag": "c:rods/wooden"
+    },
+    "X": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/propick_head/copper"
+    }
+  },
+  "pattern": [
+    "X",
+    "S"
+  ],
+  "result": {
+    "modifiers": [
+      {
+        "type": "tfc:copy_forging_bonus"
+      }
+    ],
+    "stack": {
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "count": 1,
+      "id": "tfc:metal/propick/copper"
+    }
+  }
+}

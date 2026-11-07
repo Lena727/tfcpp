@@ -66,9 +66,9 @@ public final class CarbonizationTable
             Gas.HYDROGEN, 21f, Gas.METHANE, 14f, Gas.CARBON_MONOXIDE, 3f, Gas.CARBON_DIOXIDE, 1f,
             Gas.FLUE_NITROGEN, 2f, Gas.AMMONIA, 0.3f, Gas.HYDROGEN_SULFIDE, 0.2f));
 
-    /** Lignite chars below 700 C and does not cake, which is why its char is a poor fuel and no blast furnace charge. It is wet, and gives a lot of water. */
+    /** Lignite chars below 700 C and does not cake, which is why its char is a poor fuel and no blast furnace charge. It is wet and gives more water than coal, but its nitrogen is half that of coal and the liquor holds about 0.76 mol of ammonia a litre, so 0.4 L is the same share of the nitrogen (about 17%) as the 0.30 L of coal. */
     public static final Row LIGNITE = new Row("lignite", COAL_PIECE_KILOGRAMS, 700f, 18f * HOUR, "tfcpp:lignite_char", 0.4, 3.0,
-        Liquid.COAL_TAR, 0.24f, Liquid.AMMONIA_LIQUOR, 1.0f, gas(
+        Liquid.COAL_TAR, 0.24f, Liquid.AMMONIA_LIQUOR, 0.4f, gas(
             Gas.CARBON_DIOXIDE, 7f, Gas.CARBON_MONOXIDE, 3f, Gas.METHANE, 3f, Gas.HYDROGEN, 2f));
 
     /** Wood chars from 280 C, and is done by 400 C. About 30 percent of a log's mass remains as charcoal, and the rest is mostly water and carbon dioxide. */

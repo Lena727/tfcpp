@@ -22,6 +22,11 @@ public final class SulfurBurning
      */
     public static final float LEAST_OXYGEN_SHARE = 0.05f;
 
+    /**
+     * Temperature at which sulfur lights by itself: it autoignites at about 232 C, and 250 C is that with a little to spare, 523.15 K. Cooler than this, a burner must be lit by a flame; once it burns, its own heat keeps it going.
+     */
+    public static final float AUTOIGNITION_KELVIN = 523.15f;
+
     /** Share of nitrogen in dry air, which is the rest of the air. */
     private static final float NITROGEN_IN_AIR = 0.7905f;
 
@@ -33,6 +38,18 @@ public final class SulfurBurning
 
     private SulfurBurning()
     {
+    }
+
+    /**
+     * Whether sulfur is on fire: a flame already burning goes on, a cold burner does not light itself, and a hot pipe lights it.
+     *
+     * @param lit whether it burned in the last step or was lit by a flame
+     * @param temperatureKelvin temperature of the pipe it is in
+     * @return {@code true} if the sulfur burns this step
+     */
+    public static boolean burning(boolean lit, float temperatureKelvin)
+    {
+        return lit || temperatureKelvin >= AUTOIGNITION_KELVIN;
     }
 
     /**

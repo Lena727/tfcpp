@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "H": {
+      "item": "minecraft:leather_horse_armor"
+    },
+    "J": {
+      "item": "tfc:jute_fiber"
+    },
+    "S": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/double_sheet/copper"
+    }
+  },
+  "pattern": [
+    "JHJ",
+    "SSS"
+  ],
+  "result": {
+    "components": {
+      "tfcpp:arsenical": {}
+    },
+    "count": 1,
+    "id": "tfc:metal/horse_armor/copper"
+  }
+}

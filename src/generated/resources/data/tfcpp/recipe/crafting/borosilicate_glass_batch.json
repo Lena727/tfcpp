@@ -3,10 +3,10 @@
   "category": "misc",
   "ingredients": [
     {
-      "item": "tfc:powder/lime"
+      "item": "tfcpp:powder/borax"
     },
     {
-      "item": "tfcpp:powder/borax"
+      "tag": "c:sands/silica"
     },
     {
       "tag": "c:sands/silica"

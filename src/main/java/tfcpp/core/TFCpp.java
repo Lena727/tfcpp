@@ -1,12 +1,14 @@
 package tfcpp.core;
 
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 
+import tfcpp.chemistry.BorosilicateGlass;
 import tfcpp.chemistry.Chemistry;
 import tfcpp.mechanics.WaterBodies;
 import tfcpp.geology.OreSurvey;
@@ -43,5 +45,6 @@ public final class TFCpp
         NeoForge.EVENT_BUS.register(PipeEvents.class);
         NeoForge.EVENT_BUS.addListener(WaterBodies::onCreateFluidSource);
         NeoForge.EVENT_BUS.addListener(OreSurvey::onServerStarted);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, BorosilicateGlass::onItemStacked);
     }
 }

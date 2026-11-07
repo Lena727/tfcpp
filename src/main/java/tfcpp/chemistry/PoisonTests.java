@@ -29,6 +29,28 @@ public final class PoisonTests
     /** The dose at which a leaf of gold starts to whiten, and the next two stages. In (mg/m3)&middot;h. */
     public static final float STAGE_ONE_DOSE = 1f, STAGE_TWO_DOSE = 10f, STAGE_THREE_DOSE = 100f;
 
+    /**
+     * Moles of arsenic trioxide (or antimony trioxide) that the arsine (or stibine) of one test of a strong sample lets go, as the gas of the grid has it: 2.5e-5 mol, 5 mg of the oxide. Marsh worked with milligrams, and the flask is vented. Value of the design.
+     */
+    public static final float STRONG_PINCH_MOLES = 2.5e-5f;
+
+    /** A faint sample, arsenical copper, holds a tenth of that. */
+    public static final float FAINT_PINCH_MOLES = STRONG_PINCH_MOLES / 10f;
+
+    /**
+     * @param mirror the mirror that a sample of an item gave
+     * @return moles of the poison that its test lets into the air of the room: the arsine of the flask is not all broken to a mirror, and the vent has it
+     */
+    public static float pinchMoles(Mirror mirror)
+    {
+        return switch (mirror)
+        {
+            case NONE -> 0f;
+            case FAINT -> FAINT_PINCH_MOLES;
+            case STRONG -> STRONG_PINCH_MOLES;
+        };
+    }
+
     /** How dense the mirror of one test is: none, faint, or strong. */
     public enum Mirror
     {

@@ -61,8 +61,11 @@ public final class DistillationTable
     public static final Row WOOD_SPIRIT = new Row("wood_spirit", null, 0, id(Liquid.PYROLIGNEOUS_LIQUOR), 1f, null, 0f, 70f, 100f, 30f,
         id(Liquid.WOOD_SPIRIT), 0.02f, "tfc:vinegar", 0.9f, 0f, Map.of(), null, 0);
 
-    public static final Row SUPERPHOSPHATE = new Row("superphosphate", "tfcpp:powder/apatite", 8, id(Liquid.CHAMBER_ACID), 0.16f, null, 0f, 0f, 100f, 30f,
-        null, 0f, null, 0f, 0f, Map.of(), "tfcpp:powder/superphosphate", 8);
+    /**
+     * 2 Ca5(PO4)3F + 7 H2SO4 + 3 H2O -> 3 Ca(H2PO4)2.H2O + 7 CaSO4 + 2 HF. Eight powders of apatite are 400 g, 0.794 mol of mineral (504 g/mol), which takes 3.5 mol of acid each, 2.78 mol, 272 g of H2SO4: 0.27 L of chamber acid at 1.0075 kg of acid to the litre. The solids come to 0.397 x 1708 g = 678 g, which is 13.6 powders, and 13 are given (650 g). What is not given is the water of the chamber acid that boils off in the heat of the reaction, and the fluorine, which leaves as HF and SiF4 and which the gas grid has no species for yet. The balance is in the ledger.
+     */
+    public static final Row SUPERPHOSPHATE = new Row("superphosphate", "tfcpp:powder/apatite", 8, id(Liquid.CHAMBER_ACID), 0.27f, null, 0f, 0f, 100f, 30f,
+        null, 0f, null, 0f, 0f, Map.of(), "tfcpp:powder/superphosphate", 13);
 
     public static final Row AMMONIUM_SULFATE = new Row("ammonium_sulfate", null, 0, id(Liquid.AMMONIA_LIQUOR), 1f, id(Liquid.SULFURIC_ACID), 0.02f, 0f, 100f, 30f,
         null, 0f, null, 0f, 0f, Map.of(), "tfcpp:powder/ammonium_sulfate", 1);

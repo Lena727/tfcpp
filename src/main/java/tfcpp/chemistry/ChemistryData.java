@@ -25,7 +25,8 @@ public final class ChemistryData implements DataProvider
     private static final float COKE_SPECIFIC_HEAT = 1.3f, CHAR_SPECIFIC_HEAT = 1.2f;
     private static final float PIECE_GRAMS = 3000f;
     /** Fertiliser values on the scale of TFC's: apatite 0.05 and Thomas meal 0.15 are the raw and the slag. */
-    private static final float SUPERPHOSPHATE_PHOSPHORUS = 0.2f, AMMONIUM_SULFATE_NITROGEN = 0.1f;
+    static final float SUPERPHOSPHATE_PHOSPHORUS = 0.12f, RAW_APATITE_PHOSPHORUS = 0.05f;
+    private static final float AMMONIUM_SULFATE_NITROGEN = 0.1f;
 
     private final Path root;
     private final Map<String, JsonElement> files = new LinkedHashMap<>();
@@ -149,16 +150,16 @@ public final class ChemistryData implements DataProvider
     /** The batch of borosilicate glass, and what is blown from it. */
     private void glass()
     {
-        // Made as TFC makes its silica batch, with borax in the place of potash as the flux: four batches from one of each
+        // Borosilicate is silica and boron oxide with a little soda, about 81% SiO2, 13% B2O3 and 4% Na2O, and no lime: borax is the flux and brings the boron and the soda, so the batch is two sands and one borax, four batches from one lot
         final JsonObject batch = new JsonObject();
         batch.addProperty("type", "minecraft:crafting_shapeless");
         batch.addProperty("category", "misc");
         final JsonArray ingredients = new JsonArray();
-        ingredients.add(item("tfc:powder/lime"));
         ingredients.add(item("tfcpp:powder/borax"));
         final JsonObject sand = new JsonObject();
         sand.addProperty("tag", "c:sands/silica");
         ingredients.add(sand);
+        ingredients.add(sand.deepCopy());
         batch.add("ingredients", ingredients);
         batch.add("result", stack("tfcpp:borosilicate_glass_batch", 4));
         put("data/tfcpp/recipe/crafting/borosilicate_glass_batch.json", batch);
@@ -169,6 +170,30 @@ public final class ChemistryData implements DataProvider
         // The batch is a glass of the highest tier, like volcanic glass: it goes on a blowpipe, and into the recipes that take any batch or any but the first tier
         addToTag("data/tfc/tags/item/glass_batches.json", "tfcpp:borosilicate_glass_batch");
         addToTag("data/tfc/tags/item/glass_batches_not_tier_1.json", "tfcpp:borosilicate_glass_batch");
+
+        // A brass blowpipe melts at 930 C and borosilicate is worked at 1250 C and up, so the batch does not go on a brass pipe: TFC's recipe of the brass pipe with glass takes any batch but ours. The ceramic pipe's recipe takes it, as it takes any batch.
+        final JsonObject notOurs = new JsonObject();
+        notOurs.addProperty("type", "neoforge:difference");
+        final JsonObject anyBatch = new JsonObject();
+        anyBatch.addProperty("tag", "tfc:glass_batches");
+        notOurs.add("base", anyBatch);
+        notOurs.add("subtracted", item("tfcpp:borosilicate_glass_batch"));
+        final JsonObject brassPipe = new JsonObject();
+        brassPipe.addProperty("type", "tfc:advanced_shapeless_crafting");
+        final JsonArray pipeIngredients = new JsonArray();
+        pipeIngredients.add(notOurs);
+        pipeIngredients.add(item("tfc:blowpipe"));
+        brassPipe.add("ingredients", pipeIngredients);
+        brassPipe.add("primary_ingredient", notOurs.deepCopy());
+        final JsonObject pipeResult = new JsonObject();
+        final JsonArray pipeModifiers = new JsonArray();
+        final JsonObject addGlass = new JsonObject();
+        addGlass.addProperty("type", "tfc:add_glass");
+        pipeModifiers.add(addGlass);
+        pipeResult.add("modifiers", pipeModifiers);
+        pipeResult.add("stack", stack("tfc:blowpipe_with_glass", 1));
+        brassPipe.add("result", pipeResult);
+        put("data/tfc/recipe/crafting/blowpipe_with_glass.json", brassPipe);
 
         final JsonObject bath = shaped("tfcpp:sand_bath", "ISI", "III");
         bath.getAsJsonObject("key").add("I", item("tfc:metal/sheet/wrought_iron"));
@@ -234,8 +259,8 @@ public final class ChemistryData implements DataProvider
     {
         // Burns hotter than the coal it came from because the volatile matter that cools a flame is gone, and for as long as charcoal does
         fuel("coke", 1250f, 2200, COKE_SPECIFIC_HEAT);
-        // Lignite chars without caking and leaves a crumbling, ashy fuel that burns out quickly and cannot hold a blast furnace charge
-        fuel("lignite_char", 900f, 800, CHAR_SPECIFIC_HEAT);
+        // Lignite chars without caking and leaves a crumbling, ashy fuel that cannot hold a blast furnace charge. Its heat comes from its carbon, about 25 MJ/kg against 30 for charcoal and coal, so it burns a sixth cooler and a sixth shorter than charcoal (1350 C, 1800 ticks): 1100 C, 1500 ticks. The ledger has the working.
+        fuel("lignite_char", 1100f, 1500, CHAR_SPECIFIC_HEAT);
 
         final JsonObject quern = new JsonObject();
         quern.addProperty("type", "tfc:quern");
@@ -263,6 +288,9 @@ public final class ChemistryData implements DataProvider
         addToTag("data/tfc/tags/item/blast_furnace_fuel.json", "tfcpp:coke"); // Coal and lignite are not: their sulfur would go into the iron and their lumps would cake shut
         addToTag("data/minecraft/tags/item/coals.json", "tfcpp:coke");
         addToTag("data/c/tags/item/coal_coke.json", "tfcpp:coke");
+        // Lignite char is a fuel for a forge and a firepit like the coals, but not for a blast furnace
+        addToTag("data/tfc/tags/item/forge_fuel.json", "tfcpp:lignite_char");
+        addToTag("data/tfc/tags/item/firepit_fuel.json", "tfcpp:lignite_char");
         addToTag("data/tfcpp/tags/item/lights_gas_burner.json", "minecraft:flint_and_steel", "tfc:firestarter", "tfc:flint_and_pyrite");
 
         // Tar and the liquors are kept in barrels and wooden buckets in reality. Corrosive liquids are not: they eat the wood. None of these are ingredients of any TFC recipe, so they stay out of tfc:ingredients.

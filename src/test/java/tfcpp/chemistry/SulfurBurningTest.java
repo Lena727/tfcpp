@@ -63,4 +63,13 @@ class SulfurBurningTest
         assertEquals(SulfurBurning.Result.NONE, SulfurBurning.burn(100f, 0f, GAS, 1f));
         assertEquals(SulfurBurning.Result.NONE, SulfurBurning.burn(100f, AIR, GAS, 0f));
     }
+
+    @Test
+    void sulfurInAColdPipeDoesNotLightByItself()
+    {
+        assertFalse(SulfurBurning.burning(false, 293.15f), "Sulfur in a cold pipe is just sulfur");
+        assertFalse(SulfurBurning.burning(false, 523.0f), "Just under 250 C");
+        assertTrue(SulfurBurning.burning(false, 523.15f), "From 250 C it lights: it autoignites at about 232 C");
+        assertTrue(SulfurBurning.burning(true, 250f), "Once lit it keeps burning in a cold pipe: it makes its own heat");
+    }
 }

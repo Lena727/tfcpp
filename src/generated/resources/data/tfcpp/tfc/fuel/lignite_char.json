@@ -1,7 +1,7 @@
 {
-  "duration": 800,
+  "duration": 1500,
   "ingredient": {
     "item": "tfcpp:lignite_char"
   },
-  "temperature": 900.0
+  "temperature": 1100.0
 }

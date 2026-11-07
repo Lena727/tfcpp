@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "type": "neoforge:difference",
+      "base": {
+        "item": "tfc:metal/unfinished_lamp/copper"
+      },
+      "subtracted": {
+        "type": "neoforge:components",
+        "components": {
+          "tfcpp:arsenical": {}
+        },
+        "items": "tfc:metal/unfinished_lamp/copper"
+      }
+    },
+    {
+      "item": "tfc:lamp_glass"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "tfc:metal/lamp/copper"
+  }
+}

@@ -3,6 +3,9 @@ package tfcpp.chemistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
@@ -72,7 +75,20 @@ public final class SulfurBurnerBlock extends Block implements EntityBlock, PipeM
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
     {
-        if (!stack.is(SulfurBurnerBlockEntity.sulfurItem()) || !(level.getBlockEntity(pos) instanceof SulfurBurnerBlockEntity burner))
+        if (!(level.getBlockEntity(pos) instanceof SulfurBurnerBlockEntity burner))
+        {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        if (stack.is(Chemistry.LIGHTS_BURNER))
+        {
+            if (!level.isClientSide && burner.light())
+            {
+                level.playSound(null, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1f, level.random.nextFloat() * 0.4f + 0.8f);
+                stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
+            }
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
+        if (!stack.is(SulfurBurnerBlockEntity.sulfurItem()))
         {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }

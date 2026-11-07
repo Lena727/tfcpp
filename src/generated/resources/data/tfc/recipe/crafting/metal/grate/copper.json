@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "type": "neoforge:difference",
+      "base": {
+        "item": "tfc:metal/bars/copper"
+      },
+      "subtracted": {
+        "type": "neoforge:components",
+        "components": {
+          "tfcpp:arsenical": {}
+        },
+        "items": "tfc:metal/bars/copper"
+      }
+    }
+  },
+  "pattern": [
+    " B ",
+    "B B",
+    " B "
+  ],
+  "result": {
+    "count": 1,
+    "id": "tfc:metal/grate/copper"
+  }
+}

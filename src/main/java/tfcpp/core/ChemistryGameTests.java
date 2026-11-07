@@ -149,7 +149,7 @@ public final class ChemistryGameTests
             helper.assertTrue(oven.charge().isEmpty() && oven.progress() == 0.0, "The batch should be finished");
             helper.assertTrue(oven.product().is(Chemistry.LIGNITE_CHAR.get()) && oven.product().getCount() == 2, "6 x 0.4 of char is 2 whole pieces, got " + oven.product());
             helper.assertTrue(oven.tarTank().getFluidAmount() == 1 && oven.tarTank().getFluid().getFluid() == Chemistry.fluid(Liquid.COAL_TAR), "6 x 0.24 L of tar is 1 mB, got " + oven.tarTank().getFluidAmount());
-            helper.assertTrue(oven.liquorTank().getFluidAmount() == 6 && oven.liquorTank().getFluid().getFluid() == Chemistry.fluid(Liquid.AMMONIA_LIQUOR), "6 x 1 L of liquor is 6 mB, got " + oven.liquorTank().getFluidAmount());
+            helper.assertTrue(oven.liquorTank().getFluidAmount() == 2 && oven.liquorTank().getFluid().getFluid() == Chemistry.fluid(Liquid.AMMONIA_LIQUOR), "6 x 0.4 L of liquor is 2 mB, got " + oven.liquorTank().getFluidAmount());
 
             final PipeNetwork network = networkAt(helper, ovenPos);
             helper.assertTrue(network != null && network.segments().size() == 8, "The oven and its seven vessels should be one network");

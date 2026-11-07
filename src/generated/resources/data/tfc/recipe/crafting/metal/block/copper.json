@@ -1,0 +1,41 @@
+{
+  "type": "tfc:advanced_shaped_crafting",
+  "input_column": 2,
+  "key": {
+    "H": {
+      "tag": "c:tools/hammer"
+    },
+    "S": {
+      "type": "neoforge:difference",
+      "base": {
+        "tag": "c:sheets/copper"
+      },
+      "subtracted": {
+        "type": "neoforge:components",
+        "components": {
+          "tfcpp:arsenical": {}
+        },
+        "items": "tfc:metal/sheet/copper"
+      }
+    },
+    "W": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    " SH",
+    "SWS",
+    " S "
+  ],
+  "remainder": {
+    "modifiers": [
+      {
+        "type": "tfc:damage_crafting_remainder"
+      }
+    ]
+  },
+  "result": {
+    "count": 8,
+    "id": "tfc:metal/block/copper"
+  }
+}

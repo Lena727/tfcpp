@@ -1,0 +1,19 @@
+{
+  "type": "tfcpp:retort",
+  "byproducts": {
+    "carbon_monoxide": 0.6144016
+  },
+  "carbon": 0.6144016,
+  "input": {
+    "item": "tfcpp:powder/zinc_oxide"
+  },
+  "result": {
+    "amount": 5,
+    "id": "tfc:metal/zinc"
+  },
+  "result_millibuckets": 5.625991,
+  "temperature": 1000.0,
+  "vapor": {
+    "zinc_oxide_fume": 0.6144016
+  }
+}

@@ -23,6 +23,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import tfcpp.chemistry.PoisonTests.Mirror;
 import tfcpp.core.TFCpp;
 import tfcpp.pneumatics.gas.Gas;
+import tfcpp.pneumatics.gas.GasEmission;
 import tfcpp.pneumatics.gas.GasTracker;
 import tfcpp.pneumatics.instruments.Instruments;
 
@@ -80,8 +81,15 @@ public final class MarshApparatusItem extends Item
         }
 
         apparatus.set(Chemistry.MARSH_TESTS.get(), testsLeft(apparatus) - 1);
-        final Mirror mirror = sample(server, player, other);
-        player.displayClientMessage(Component.translatable(messageKey(mirror)), true);
+        final Sample sample = sampleOf(server, player, other);
+        player.displayClientMessage(Component.translatable(messageKey(sample.mirror(), sample.ofItem())), true);
+        if (sample.gas() != null && sample.mirror() != Mirror.NONE)
+        {
+            // The arsine that is made from a sample is let out of the vent of the flask, a little of it
+            final float[] released = new float[Gas.COUNT];
+            released[sample.gas().ordinal()] = PoisonTests.pinchMoles(sample.mirror());
+            GasEmission.release(server, BlockPos.containing(player.getEyePosition()), released);
+        }
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GLASS_HIT, SoundSource.PLAYERS, 1f, 1f);
         return InteractionResultHolder.success(apparatus);
     }
@@ -92,6 +100,21 @@ public final class MarshApparatusItem extends Item
      */
     public static Mirror sample(ServerLevel level, Player player, ItemStack other)
     {
+        return sampleOf(level, player, other).mirror();
+    }
+
+    /**
+     * What a test finds, and what it lets out.
+     *
+     * @param mirror the mirror
+     * @param ofItem {@code true} if the test was of an item in the hand, and not of the air
+     * @param gas    the poison that the arsine or stibine of the sample lets into the air, or {@code null} for the air, which is only drawn from, and for a sample with none
+     */
+    public record Sample(Mirror mirror, boolean ofItem, @Nullable Gas gas) {}
+
+    /** As {@link #sample}, with what the test lets out. */
+    public static Sample sampleOf(ServerLevel level, Player player, ItemStack other)
+    {
         if (!other.isEmpty() && !(other.getItem() instanceof GlassCarboyItem))
         {
             return sampleItem(other);
@@ -100,19 +123,23 @@ public final class MarshApparatusItem extends Item
         final @Nullable float[] cell = GasTracker.get(level).volume(level).cell(eye.getX(), eye.getY(), eye.getZ());
         if (cell == null)
         {
-            return Mirror.NONE;
+            return new Sample(Mirror.NONE, false, null);
         }
-        return PoisonTests.marsh(cell[Gas.ARSENIC_TRIOXIDE.ordinal()], cell[Gas.ANTIMONY_TRIOXIDE.ordinal()]);
+        return new Sample(PoisonTests.marsh(cell[Gas.ARSENIC_TRIOXIDE.ordinal()], cell[Gas.ANTIMONY_TRIOXIDE.ordinal()]), false, null);
     }
 
-    /** The oxides and the ore of the poisons give a dense mirror, and the arsenical copper of a furnace gives a faint one. Anything else gives none. */
-    private static Mirror sampleItem(ItemStack sample)
+    /** The oxides and the ore of the poisons give a dense mirror, and the arsenical copper of a furnace gives a faint one. Anything else gives none. White arsenic, the ore and the copper let out arsenic, antimony oxide antimony. */
+    private static Sample sampleItem(ItemStack sample)
     {
-        if (sample.is(Instruments.ARSENIC_TRIOXIDE.get()) || sample.is(Instruments.ANTIMONY_TRIOXIDE.get()) || BuiltInRegistries.ITEM.getKey(sample.getItem()).getPath().contains("tetrahedrite"))
+        if (sample.is(Instruments.ANTIMONY_TRIOXIDE.get()))
         {
-            return Mirror.STRONG;
+            return new Sample(Mirror.STRONG, true, Gas.ANTIMONY_TRIOXIDE);
         }
-        return BuiltInRegistries.ITEM.getKey(sample.getItem()).equals(TFCpp.id("metal/ingot/arsenical_copper")) ? Mirror.FAINT : Mirror.NONE;
+        if (sample.is(Instruments.ARSENIC_TRIOXIDE.get()) || BuiltInRegistries.ITEM.getKey(sample.getItem()).getPath().contains("tetrahedrite"))
+        {
+            return new Sample(Mirror.STRONG, true, Gas.ARSENIC_TRIOXIDE);
+        }
+        return BuiltInRegistries.ITEM.getKey(sample.getItem()).equals(TFCpp.id("metal/ingot/arsenical_copper")) ? new Sample(Mirror.FAINT, true, Gas.ARSENIC_TRIOXIDE) : new Sample(Mirror.NONE, true, null);
     }
 
     /** Draws one millibucket of sulfuric or chamber acid from a carboy.
@@ -139,13 +166,14 @@ public final class MarshApparatusItem extends Item
         return true;
     }
 
-    private static String messageKey(Mirror mirror)
+    /** @return the message for a mirror: a sample has its own, which does not speak of the air of the place */
+    public static String messageKey(Mirror mirror, boolean ofItem)
     {
         return switch (mirror)
         {
-            case NONE -> "tfcpp.marsh.none";
-            case FAINT -> "tfcpp.marsh.faint";
-            case STRONG -> "tfcpp.marsh.strong";
+            case NONE -> ofItem ? "tfcpp.marsh.sample_none" : "tfcpp.marsh.none";
+            case FAINT -> ofItem ? "tfcpp.marsh.sample_faint" : "tfcpp.marsh.faint";
+            case STRONG -> ofItem ? "tfcpp.marsh.sample_strong" : "tfcpp.marsh.strong";
         };
     }
 

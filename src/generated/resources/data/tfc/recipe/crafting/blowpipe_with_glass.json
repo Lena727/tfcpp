@@ -1,0 +1,37 @@
+{
+  "type": "tfc:advanced_shapeless_crafting",
+  "ingredients": [
+    {
+      "type": "neoforge:difference",
+      "base": {
+        "tag": "tfc:glass_batches"
+      },
+      "subtracted": {
+        "item": "tfcpp:borosilicate_glass_batch"
+      }
+    },
+    {
+      "item": "tfc:blowpipe"
+    }
+  ],
+  "primary_ingredient": {
+    "type": "neoforge:difference",
+    "base": {
+      "tag": "tfc:glass_batches"
+    },
+    "subtracted": {
+      "item": "tfcpp:borosilicate_glass_batch"
+    }
+  },
+  "result": {
+    "modifiers": [
+      {
+        "type": "tfc:add_glass"
+      }
+    ],
+    "stack": {
+      "count": 1,
+      "id": "tfc:blowpipe_with_glass"
+    }
+  }
+}

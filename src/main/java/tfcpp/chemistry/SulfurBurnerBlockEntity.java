@@ -22,7 +22,7 @@ import tfcpp.pneumatics.pipes.PipeNetwork;
 import tfcpp.pneumatics.pipes.PipeTracker;
 
 /**
- * The sulfur held in a sulfur burner, and the burning of it in the air of its network, which {@link SulfurBurning} works out. The burner is lit by the hot flue: a burner holding sulfur in air that has oxygen in it burns, and no one needs to light it.
+ * The sulfur held in a sulfur burner, and the burning of it in the air of its network, which {@link SulfurBurning} works out. Sulfur has to be lit: with a flame from {@code tfcpp:lights_gas_burner}, or by a pipe already hotter than it autoignites ({@link SulfurBurning#AUTOIGNITION_KELVIN}). Once alight it keeps its own heat, and goes out when the sulfur or the oxygen is gone.
  */
 public final class SulfurBurnerBlockEntity extends BlockEntity
 {
@@ -37,6 +37,9 @@ public final class SulfurBurnerBlockEntity extends BlockEntity
     /** Sulfur waiting to burn, in moles. */
     private float sulfurMoles;
 
+    /** Whether the sulfur is on fire. Lit by a flame or a hot pipe, and out when it has nothing to burn or no oxygen. */
+    private boolean lit;
+
     public SulfurBurnerBlockEntity(BlockPos pos, BlockState state)
     {
         super(Chemistry.SULFUR_BURNER_ENTITY.get(), pos, state);
@@ -48,6 +51,24 @@ public final class SulfurBurnerBlockEntity extends BlockEntity
         return sulfurMoles;
     }
 
+    /** @return whether the sulfur is on fire */
+    public boolean isLit()
+    {
+        return lit;
+    }
+
+    /** Lights the sulfur with a flame, if there is sulfur to light. Without oxygen it will go out again at the next step. */
+    public boolean light()
+    {
+        if (lit || sulfurMoles <= 0f)
+        {
+            return false;
+        }
+        lit = true;
+        setChanged();
+        return true;
+    }
+
     /**
      * Burns sulfur for one step of the network it is in. The oxygen of the air is used up as the sulfur takes it, and the sulfur dioxide and the nitrogen of the air go into the gas.
      *
@@ -56,22 +77,34 @@ public final class SulfurBurnerBlockEntity extends BlockEntity
      */
     public void step(PipeNetwork network, float seconds)
     {
-        if (sulfurMoles <= 0f)
+        final PipeContents contents = network.contents();
+        if (sulfurMoles <= 0f || !SulfurBurning.burning(lit, contents.temperature))
         {
+            setOut();
             return;
         }
-        final PipeContents contents = network.contents();
         final SulfurBurning.Result result = SulfurBurning.burn(sulfurMoles, contents.air, contents.gasMoles(), seconds);
         if (result.sulfurBurned() <= 0f)
         {
+            setOut(); // The flame smoulders out: the sulfur must be lit again
             return;
         }
+        lit = true; // A hot pipe lit it
         sulfurMoles = Math.max(0f, sulfurMoles - result.sulfurBurned());
         contents.air = Math.max(0f, contents.air - result.air());
         contents.gases[Gas.SULFUR_DIOXIDE.ordinal()] += result.sulfurDioxide();
         contents.gases[Gas.FLUE_NITROGEN.ordinal()] += result.nitrogenLeftBehind();
         network.addHeat(result.heatKilojoules());
         setChanged();
+    }
+
+    private void setOut()
+    {
+        if (lit)
+        {
+            lit = false;
+            setChanged();
+        }
     }
 
     /** @return {@code true} if the powder was taken into the burner, which uses one of the stack */
@@ -100,6 +133,10 @@ public final class SulfurBurnerBlockEntity extends BlockEntity
         }
         final PipeContents contents = network.contents();
         final float moles = contents.gasMoles();
+        if (sulfurMoles > 0f && !lit && contents.temperature < SulfurBurning.AUTOIGNITION_KELVIN)
+        {
+            player.displayClientMessage(Component.translatable("tfcpp.sulfur_burner.unlit", String.format(Locale.ROOT, "%.0f", SulfurBurning.AUTOIGNITION_KELVIN - 273.15f)), false);
+        }
         if (sulfurMoles > 0f && (moles <= 0f || contents.air * ChamberProcess.OXYGEN_IN_AIR / moles < SulfurBurning.LEAST_OXYGEN_SHARE))
         {
             player.displayClientMessage(Component.translatable("tfcpp.sulfur_burner.no_air", String.format(Locale.ROOT, "%.0f", SulfurBurning.LEAST_OXYGEN_SHARE * 100f)), false);
@@ -115,6 +152,7 @@ public final class SulfurBurnerBlockEntity extends BlockEntity
             Helpers.spawnItem(level, worldPosition, new ItemStack(sulfurItem(), powders));
         }
         sulfurMoles = 0f;
+        lit = false;
     }
 
     private int wholePowders()
@@ -138,6 +176,7 @@ public final class SulfurBurnerBlockEntity extends BlockEntity
     {
         super.saveAdditional(tag, provider);
         tag.putFloat("sulfur", sulfurMoles);
+        tag.putBoolean("lit", lit);
     }
 
     @Override
@@ -145,5 +184,6 @@ public final class SulfurBurnerBlockEntity extends BlockEntity
     {
         super.loadAdditional(tag, provider);
         sulfurMoles = tag.getFloat("sulfur");
+        lit = tag.getBoolean("lit");
     }
 }

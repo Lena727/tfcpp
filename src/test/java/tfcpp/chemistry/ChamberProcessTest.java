@@ -103,4 +103,26 @@ class ChamberProcessTest
         assertEquals(ChamberProcess.Result.NONE, ChamberProcess.react(SO2, OXIDES, AIR, 0f, WATER, ROOM, 1f));
         assertEquals(ChamberProcess.Result.NONE, ChamberProcess.react(SO2, OXIDES, AIR, GAS, WATER, ROOM, 0f));
     }
+
+    @Test
+    void aChamberIsAtFullRateFromSixtyDegreesAndHalvesForEveryTenKelvinBelow()
+    {
+        assertEquals(1f, ChamberProcess.temperatureFactor(333.15f), 1e-6f);
+        assertEquals(1f, ChamberProcess.temperatureFactor(353.15f), 1e-6f, "Above sixty it is no faster: the rate is fitted at sixty");
+        assertEquals(0.5f, ChamberProcess.temperatureFactor(323.15f), 1e-5f, "Fifty degrees: half");
+        assertEquals(0.25f, ChamberProcess.temperatureFactor(313.15f), 1e-5f);
+        assertEquals(1f / 16f, ChamberProcess.temperatureFactor(293.15f), 1e-5f, "A room at twenty degrees is a sixteenth");
+        assertEquals(0f, ChamberProcess.temperatureFactor(273.15f), "No mist in frost");
+        assertEquals(0f, ChamberProcess.temperatureFactor(250f));
+    }
+
+    @Test
+    void aColdChamberMakesProportionallyLessAcidAndNeverMoreThanWarm()
+    {
+        final float warm = ChamberProcess.react(SO2, OXIDES, AIR, GAS, WATER, ROOM, 1f, 333.15f).acidMoles();
+        final float cold = ChamberProcess.react(SO2, OXIDES, AIR, GAS, WATER, ROOM, 1f, 293.15f).acidMoles();
+        assertEquals(warm / 16f, cold, warm * 1e-4f, "At twenty degrees one sixteenth of the acid");
+        assertEquals(0f, ChamberProcess.react(SO2, OXIDES, AIR, GAS, WATER, ROOM, 1000f, 263.15f).acidMoles(), "Nothing at all in frost, however long");
+        assertEquals(warm, ChamberProcess.react(SO2, OXIDES, AIR, GAS, WATER, ROOM, 1f).acidMoles(), 0f, "The call without a temperature is the fitted rate");
+    }
 }
