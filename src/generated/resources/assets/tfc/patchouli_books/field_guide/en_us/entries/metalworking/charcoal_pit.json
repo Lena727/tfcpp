@@ -1,0 +1,188 @@
+{
+  "category": "tfc:metalworking",
+  "extra_recipe_mappings": {
+    "minecraft:charcoal": 0
+  },
+  "icon": "minecraft:charcoal",
+  "name": "Charcoal Pit",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The $(thing)Charcoal Pit$() makes $(thing)Charcoal$() from logs. Logs are stacked in $(thing)Log Piles$(): $(item)$(k:key.use)$() with $(item)$(k:key.sneak)$() and a log in hand places a pile. More logs go in with $(item)$(k:key.use)$() holding a log, or into the pile's window opened with any other item."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:log_pile"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "The Log Pile",
+      "text": "A log pile needs a solid block to stand on, and burns easily."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Close the piles in on every side with solid blocks that do not burn: earth is usual. Light one pile and cover it. Smoke rising from the heap shows that it caught. The charcoal you get follows the logs inside."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "0": "tfc:log_pile",
+          "D": "tfc:dirt/aridisol"
+        },
+        "pattern": [
+          [
+            "DDD",
+            "DDD",
+            "DDD"
+          ],
+          [
+            "DDD",
+            "D0D",
+            "DDD"
+          ],
+          [
+            "DDD",
+            "DDD",
+            "DDD"
+          ]
+        ]
+      },
+      "name": "A Pit",
+      "text": "One possible pit: earth all round the pile."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "charcoal_pile",
+      "text": "When the pit has burnt out and stopped smoking, $(thing)Charcoal Piles$() remain, up to 8 layers each. Dig them with a shovel for charcoal. A pile can be added to or placed with $(item)$(k:key.use)$()."
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=1]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=2]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=3]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=4]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=5]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=6]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=7]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=8]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "The charcoal pile, of 1 to 8 layers."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The pit burns without air, and is the dirtiest fire there is: up to 30% of its carbon leaves as carbon monoxide, with some methane from the wood. The turf is never airtight. Even under thick cover a tenth of the gas gets through, and people have died sleeping beside charcoal pits. Burn it in the open, and never sleep next to it.",
+      "title": "Danger"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 2
+}

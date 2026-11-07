@@ -1,0 +1,38 @@
+{
+  "category": "tfc:tfcpp",
+  "icon": "tfcpp:retort",
+  "name": "TFC++",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "TFC++ takes TerraFirmaCraft past the smithy: from ore and the forge to coal chemistry, acids and glass, and later to oil, rubber, electricity and electronics.$(br2)Every process here follows the physics and chemistry of the real one. Nothing is made easier by being made false. Where something is hard to grasp, it is this book that explains it."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)Fire needs air and gives off gas. A closed room fills with it, and some of it is invisible.$(li)Sulfide ores are roasted rather than smelted, and their fumes poison.$(li)Heat has limits. A pit kiln cannot melt copper, and iron needs a blast of air on top of good fuel.$(li)Nothing comes from nowhere. A yield is always less than the input, and waste is raw material for the next step.$(li)Things wear out: pipes corrode, linings burn through, glass cracks.",
+      "title": "What that means"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Carbon monoxide has no colour and no smell, and it kills quietly. Other hazards announce themselves: sulfur dioxide by its sharp smell, methane by the halo in a Davy lamp, steam by the hiss of a safety valve.$(br2)The chapters of this section teach the signs, the instruments and the ventilation that answer them. Learn them before you light the furnace.",
+      "title": "Danger"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The chapters of TerraFirmaCraft that TFC++ made wrong or incomplete have been rewritten, so that what they say is true in this game. This section holds what TFC++ has added.$(br2)Each chapter says what is needed, how it is done, why it is so in reality, and what can kill you.",
+      "title": "About this book"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Slow processes (corrosion, poisoning, wear) run on real time and do not follow the world calendar: a process $(bold)day$() lasts 24 minutes and an $(bold)hour$() one minute.$(br2)Chemical liquids count 1 mB as 1 litre. Molten metal counts 1 mB as 1 millilitre. Pressure is in atmospheres, temperature in °C, gas in parts per million.",
+      "title": "Time and units"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "TFC++ is built for a server with many players. One person can take the first steps, but nobody finishes it alone: prospecting and mining, metallurgy, chemical plants, ventilation and piping are separate trades, and what one trade throws away is another's raw material.",
+      "title": "A team's work"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 0
+}

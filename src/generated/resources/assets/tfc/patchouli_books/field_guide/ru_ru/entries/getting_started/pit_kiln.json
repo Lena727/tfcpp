@@ -1,0 +1,38 @@
+{
+  "category": "tfc:getting_started",
+  "icon": "tfc:textures/gui/book/icons/pit_kiln.png",
+  "name": "Земляные печи",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Земляная печь ранний способ $(l:core_mechanics/heating)нагреть$() вещи, например $(thing)обжечь$() глину в керамику. За $(cfg:pitKilnTicks) она греет то, что лежит в ней, но лишь до 900 °C: куча соломы и брёвен без тяги жарче не становится.$(br2)Этого хватает для глиняной посуды (850 °C), но не для шамота (1300 °C) и не для плавки меди (1080 °C)."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Для земляной печи нужно:$(li)до четырёх предметов для обжига$(li)восемь $(thing)соломы$()$(li)восемь $(thing)брёвен$()$(li)что-то для огня, $(l:getting_started/firepit#firestarter)огниво$() или $(thing)факел$().$(br2)$(bold)Заметка:$() брошенный на печь факел зажигает её за несколько секунд."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(bold)1.$() Положите до четырёх предметов в яму шириной в блок через $(item)$(k:tfc.key.place_block)$().$(br)$(bold)2.$() Прикройте их восемью $(thing)соломы$() или двумя блоками $(thing)соломенной кровли$().$(br)$(bold)3.$() Заполните яму восемью $(thing)брёвнами$().$(br)$(bold)4.$() Подожгите верх.$(br2)Печь горит $(cfg:pitKilnTicks) и медленно греет то, что внутри."
+    },
+    {
+      "type": "patchouli:image",
+      "border": true,
+      "images": [
+        "tfc:textures/gui/book/tutorial/pit_kiln_1.png",
+        "tfc:textures/gui/book/tutorial/pit_kiln_2.png",
+        "tfc:textures/gui/book/tutorial/pit_kiln_3.png",
+        "tfc:textures/gui/book/tutorial/pit_kiln_4.png",
+        "tfc:textures/gui/book/tutorial/pit_kiln_5.png"
+      ],
+      "text": "Как построить земляную печь."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)Глиняная посуда, формы, кирпичи, терракота: да, при 850 °C.$(li)Шамот: нет, ему нужно 1300 °C, смотрите $(l:metalworking/fire_clay)огнеупорную глину$().$(li)Медь, золото, серебро, латунь, бронза здесь не плавятся. Олово, висмут, цинк и свинец плавятся. Металлический предмет, который расплавился бы, остаётся как был.$(li)900 °C печь набирает примерно за две трети времени горения.",
+      "title": "Что она может"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 3
+}

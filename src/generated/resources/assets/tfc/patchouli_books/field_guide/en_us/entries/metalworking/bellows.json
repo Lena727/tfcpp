@@ -1,0 +1,18 @@
+{
+  "category": "tfc:metalworking",
+  "icon": "tfc:bellows",
+  "name": "Bellows",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "A $(thing)Bellows$() pushes air into the device it faces, or into one a block lower than that: a $(l:getting_started/firepit)Firepit$(), a $(l:metalworking/charcoal_forge)Charcoal Forge$(), a blast furnace. More air makes the fuel burn hotter and twice as fast, and gives off twice the gas.$(br2)The blast adds at most 500 °C to the fuel. A forge on charcoal tops out at 1600 °C, so melting steel is hard, as it should be."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/bellows",
+      "text": "Set the bellows facing the device and use it. Each push raises the highest temperature for a short while. A crankshaft can work it. On a mold table it cools the metal faster."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 10
+}

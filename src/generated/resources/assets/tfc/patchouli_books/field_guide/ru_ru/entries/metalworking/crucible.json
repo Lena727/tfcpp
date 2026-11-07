@@ -1,0 +1,79 @@
+{
+  "category": "tfc:metalworking",
+  "extra_recipe_mappings": {
+    "tfc:ceramic/unfired_crucible": 1,
+    "tfc:crucible": 2
+  },
+  "icon": "tfc:crucible",
+  "name": "Тигель",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Тигель$() это керамический горшок для плавки металла и смешивания $(l:metalworking/crucible#advanced_alloying)сплавов$() в точных долях: для этого он лучше $(l:getting_started/primitive_alloys)малого сосуда$(). Его делают из $(l:metalworking/fire_clay)огнеупорной глины$(): выбивают форму и обжигают."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_crucible",
+      "text": "Выбивание необожжённого тигля."
+    },
+    {
+      "type": "tfc:heat_recipe",
+      "recipe": "tfc:heating/crucible",
+      "text": "Обжигайте при 1300 °C: в $(l:metalworking/charcoal_forge)угольной кузнице$() с мехами, не в земляной печи. В работе ему нужен жар снизу, обычно от кузницы, или сверху, от $(l:metalworking/blast_furnace)доменной печи$()."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "0": "tfc:charcoal_forge[heat_level=7]",
+          "C": "tfc:crucible",
+          "G": "tfc:rock/bricks/granite"
+        },
+        "pattern": [
+          [
+            "   ",
+            " C ",
+            "   "
+          ],
+          [
+            "GGG",
+            "G0G",
+            "GGG"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Тигель на угольной кузнице."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "advanced_alloying",
+      "text": "Использование тигля открывает его интерфейс. Вверху показан металл внутри: первый в списке выйдет, если забрать сейчас, остальные составляют смесь.",
+      "title": "Сплавы"
+    },
+    {
+      "type": "patchouli:image",
+      "border": false,
+      "images": [
+        "tfc:textures/gui/book/gui/crucible.png"
+      ],
+      "text": "Интерфейс тигля"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Девять ячеек принимают предметы для плавки, жидкость стекает в горшок. Формы и сосуды с расплавом медленно сливаются в него, так получаются точные смеси: удерживайте $(item)$(k:key.sneak)$() над ними, чтобы ускорить. Форма или сосуд в выходной ячейке наполняются из горшка."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Самородные металлы, малахит и касситерит плавятся в металл. Сульфидные руды вместо этого обжигаются и выпускают дым там, где стоит горшок: тетраэдрит даёт мышьяковистую медь, висмутин висмут, сфалерит огарок без цинка, цинк требует реторты. Железная руда плавится только в оксид, который не отлить.",
+      "title": "Что плавится"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Шкала температуры следует за источником жара снизу или сверху. Металл можно забирать, пока он расплавлен. Разбитый тигель сохраняет содержимое, так что полный можно переносить. Кованое железо плавится при 1535 °C, сталь при 1520 °C."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 9
+}

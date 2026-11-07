@@ -1,0 +1,135 @@
+{
+  "category": "tfc:getting_started",
+  "extra_recipe_mappings": {
+    "minecraft:torch": 6,
+    "tfc:firepit": 0,
+    "tfc:flint_and_pyrite": 12,
+    "tfc:ore/pyrite": 12,
+    "tfc:torch": 6
+  },
+  "icon": "tfc:firepit",
+  "name": "Pits of Fire",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "anchor": "firestarter",
+      "text": "$(thing)Fire$() is the first great advance. You need a $(thing)Firestarter$(). Press and keep pressing $(item)$(k:key.use)$() against the ground: after a short wait smoke appears, then flame. A few tries may be needed."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/firestarter",
+      "text": "A firestarter is crafted from two sticks."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "With a firestarter you can build a $(thing)Firepit$(): one $(thing)log$(), three $(thing)sticks$() and, if you like, up to five pieces of $(thing)kindling$() (paper, straw, pinecones), each adding 10% to the chance of success. Throw all of it down onto a single block ($(item)$(k:key.drop)$()), then strike the firestarter on that block while the items hang over it.",
+      "title": "Firepit"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:firepit[lit=true]"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "If it worked, a firepit appears."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Using the firepit opens its screen. Four $(thing)fuel$() slots run down its left side. Feed them from the top slot with logs, peat or stick bundles; the lowest slot is the one burning. A gauge shows the $(thing)temperature$(), and on the right is a slot for an item to be $(l:core_mechanics/heating)heated$()."
+    },
+    {
+      "type": "patchouli:image",
+      "border": false,
+      "images": [
+        "tfc:textures/gui/book/gui/firepit.png"
+      ],
+      "text": "The firepit screen"
+    },
+    {
+      "type": "tfc:heat_recipe",
+      "recipe": "tfc:heating/torch_from_stick",
+      "text": "Much can be made by heating things in a firepit. A stick gives two $(thing)Torches$(), which burn out in time and are lit again with a firestarter or another torch."
+    },
+    {
+      "type": "tfc:heat_recipe",
+      "recipe": "tfc:heating/food/cooked_cod",
+      "text": "The firepit also cooks food. All raw meat and dough can be cooked on it, and cooked food keeps longer (see $(l:food/decay)here$())."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A shovel puts the fire out. A $(thing)Wrought Iron Grill$() turns the firepit into a $(l:food/grill)Grill$(), and a $(thing)Ceramic Pot$() into a $(l:food/pot)Pot$(). To take either off, $(item)$(k:key.use)$() while holding $(item)$(k:key.sneak)$(), and do not reach for a hot one."
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:firepit"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:grill"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:pot"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "A firepit, with a grill or a pot added."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Fuels differ in purity. An impure fuel makes a smoky fire, and a very impure one sends its smoke high into the air. Logs are the purest (pine the least pure among them). Pinecones and fallen leaves are very impure and not hot enough to cook much."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A fire burns the oxygen of its room and fills it with gas: carbon dioxide, and carbon monoxide, which has no colour or smell and kills quietly. A firepit gives off about 15 kW of heat; a bellows doubles that. Under open sky or up a flue the gas leaves. In a shut room the fire dies when the oxygen falls below 12%, and you may die before it does.",
+      "title": "Air and gas"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/flint_and_pyrite",
+      "text": "A better firestarter is made of flint and pyrite, or later of flint and steel."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 1
+}

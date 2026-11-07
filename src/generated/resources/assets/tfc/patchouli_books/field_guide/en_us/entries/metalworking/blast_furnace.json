@@ -1,0 +1,68 @@
+{
+  "category": "tfc:metalworking",
+  "icon": "tfc:blast_furnace",
+  "name": "Blast Furnace",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The $(thing)Blast Furnace$() turns iron ore into $(thing)Pig Iron$(): a shaft of ore, flux and fuel with a blast of air from below, so hot that the iron melts and runs out. Pig iron is full of carbon, runs well and breaks easily. $(l:metalworking/steel)Steel$() is made from it.$(br2)To build one you need a $(l:metalworking/crucible)Crucible$() and many $(thing)Wrought Iron Sheets$()."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/blast_furnace",
+      "text": "The crucible and the sheets make the furnace block."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Its stack is built of $(l:metalworking/fire_clay#fire_bricks)Reinforced Fire Bricks$(), made from fire bricks and wrought iron or steel sheets: plain brick would not stand the heat. The chimney is up to five layers of eight bricks, and each layer lets the furnace hold four more pieces of ore."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": true,
+      "multiblock_id": "tfc:blast_furnace",
+      "name": "A Blast Furnace",
+      "text": "A furnace with the lowest chimney."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Drop into the top of the stack $(thing)ore$() and $(l:metalworking/flux)Flux$() in equal numbers, and fuel. Ore is iron ore of any kind or iron slag. Ingots and tools do not count: they are iron already. The flux must be plain flux powder, not borax flux.$(br2)Fuel is $(thing)Charcoal$() or $(thing)Coke$(). Coal and lignite are refused: their sulfur would go into the iron, and their lumps cake and choke the blast.",
+      "title": "What goes in"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Using the furnace opens an interface with gauges of ore and fuel. Its top right slot holds a $(thing)Tuyere$(), the pipe that carries the blast in. A tuyere is forged on an $(l:metalworking/anvils)Anvil$().",
+      "title": "The interface"
+    },
+    {
+      "type": "patchouli:image",
+      "border": false,
+      "images": [
+        "tfc:textures/gui/book/gui/blast_furnace.png"
+      ],
+      "text": "The blast furnace interface"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A $(l:metalworking/bellows)Bellows$() on any of the four sides gives the blast. Without it the fuel burns at 1100 °C (charcoal) or 1250 °C (coke), and iron oxide melts at 1565 °C. With a full blast charcoal reaches 1600 °C and coke 1750 °C. Use it once the furnace has warmed.",
+      "title": "The blast"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": true,
+      "multiblock_id": "tfc:full_blast_furnace",
+      "name": "",
+      "text": "A full furnace with bellows and crucible."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Light it with a $(l:getting_started/firepit#firestarter)Fire Starter$(), $(thing)Flint and Pyrite$() or $(thing)Flint and Steel$(), and keep it fuelled. The ore warms, melts and runs out as $(thing)Pig Iron$().$(br2)The iron drips into a container for molten metal set below: a $(l:metalworking/crucible)Crucible$(), a mold, or a $(l:metalworking/steel)Bessemer converter$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)The furnace burns about 200 kW of fuel and sends three quarters of its carbon up as carbon monoxide, and the ore and the flux add carbon dioxide. Never run it in a shut room.$(li)Only a tenth of the sulfur of the fuel escapes as sulfur dioxide, as lime slag takes the rest. Each flux leaves a piece of slag.$(li)Limonite in the charge makes all the iron phosphoric: good for casting, brittle in steel.",
+      "title": "Dangers and details"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 11
+}

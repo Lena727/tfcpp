@@ -1,0 +1,31 @@
+{
+  "category": "tfc:metalworking",
+  "extra_recipe_mappings": {
+    "tfc:powder/flux": 0
+  },
+  "icon": "tfc:powder/flux",
+  "name": "Флюс",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Флюс это порошок, нужный для $(l:metalworking/anvils#welding)сварки$() и как катализатор в $(l:metalworking/blast_furnace)доменной печи$(). Обожжённый до извести, он идёт ещё на стекло, раствор, известковую воду и кожу. Это карбонатный камень или раковины, смолотые в $(l:crafting/quern)жёрнове$().$(br2)$(thing)Бура$() не флюс в этом смысле: из неё получается $(thing)флюс из буры$(), другой порошок."
+    },
+    {
+      "type": "tfc:quern_recipe",
+      "recipe": "tfc:quern/powder/flux",
+      "text": "Известняк, доломит, мел и мрамор мелются во флюс. Так же скутеллы, моллюски, ракушки и остатки панцирных."
+    },
+    {
+      "type": "tfc:quern_recipe",
+      "recipe": "tfc:quern/powder/flux_from_borax",
+      "text": "Руда буры мелется в шесть порошков $(thing)флюса из буры$(). Он годится для сварки, но не обжигается в известь, и доменная печь его не берёт. Бура ещё и бор борсиликатного стекла."
+    },
+    {
+      "type": "tfc:heat_recipe",
+      "recipe": "tfc:heating/powder/lime",
+      "text": "При 840 °C флюс обжигается в $(thing)известь$(): CaCO3 даёт CaO и CO2, и почти половина веса уходит углекислым газом. Обжигайте на открытом месте."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 1
+}

@@ -1,0 +1,76 @@
+{
+  "category": "tfc:crafting",
+  "extra_recipe_mappings": {
+    "minecraft:leather": 7,
+    "tfc:large_prepared_hide": 6,
+    "tfc:large_raw_hide": 1,
+    "tfc:large_scraped_hide": 4,
+    "tfc:large_soaked_hide": 3,
+    "tfc:medium_prepared_hide": 6,
+    "tfc:medium_raw_hide": 1,
+    "tfc:medium_scraped_hide": 4,
+    "tfc:medium_soaked_hide": 3,
+    "tfc:small_prepared_hide": 6,
+    "tfc:small_raw_hide": 1,
+    "tfc:small_scraped_hide": 4,
+    "tfc:small_soaked_hide": 3
+  },
+  "icon": "minecraft:leather",
+  "name": "Leatherworking",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Leather$() is tough material from animal hides. It is needed for $(l:mechanics/armor)Armor$(), $(thing)Saddles$() and a $(l:metalworking/bellows)Bellows$(). A $(thing)Raw Hide$() goes through $(l:crafting/leather_making#soaking)soaking$(), $(l:crafting/leather_making#scraping)scraping$(), $(l:crafting/leather_making#preparing)preparing$() and $(l:crafting/leather_making#tanning)tanning$() to become leather."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:small_raw_hide,tfc:medium_raw_hide,tfc:large_raw_hide",
+      "link_recipes": false,
+      "text": "First you need $(thing)Raw Hide$(), dropped by many $(l:the_world/wild_animals)Animals$() when slaughtered. Different animals leave hides of different size.",
+      "title": "Raw Hide"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The work needs:$(li)$(l:crafting/barrels#limewater)Limewater$(): burnt lime (the powder of $(thing)Lime$()) dissolved in water$(li)Water$(li)$(l:crafting/barrels#tannin)Tannin$(): an acid liquid steeped from certain tree bark$(li)$(thing)Raw Hides$()$(br2)With these ready, you can begin."
+    },
+    {
+      "type": "tfc:sealed_barrel_recipe",
+      "anchor": "soaking",
+      "recipe": "tfc:barrel/medium_soaked_hide",
+      "text": "First the raw hide is $(thing)soaked$() to clean it and loosen what is not wanted. Leave the hide sealed six hours or longer in a $(l:crafting/barrels#limewater)barrel of limewater$()."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "scraping",
+      "item": "tfc:small_scraped_hide,tfc:medium_scraped_hide,tfc:large_scraped_hide",
+      "link_recipes": false,
+      "text": "A soaked hide must then be $(thing)scraped$() of what is left. Lay it on the side of a $(thing)Log$(), and $(item)$(k:key.use)$() on each part of it with a $(thing)Knife$(): its texture changes.",
+      "title": "Scraping"
+    },
+    {
+      "type": "patchouli:image",
+      "border": true,
+      "images": [
+        "tfc:textures/gui/book/tutorial/soaked_hide_1.png",
+        "tfc:textures/gui/book/tutorial/soaked_hide_2.png",
+        "tfc:textures/gui/book/tutorial/soaked_hide_3.png",
+        "tfc:textures/gui/book/tutorial/soaked_hide_4.png"
+      ],
+      "text": "When the hide is fully scraped, break it to take a $(thing)Scraped Hide$()."
+    },
+    {
+      "type": "tfc:sealed_barrel_recipe",
+      "anchor": "preparing",
+      "recipe": "tfc:barrel/medium_prepared_hide",
+      "text": "Seal the scraped hide in a $(l:crafting/barrels)barrel$() of $(thing)Water$() and leave it six hours or more: a last cleaning before tanning."
+    },
+    {
+      "type": "tfc:sealed_barrel_recipe",
+      "anchor": "tanning",
+      "recipe": "tfc:barrel/medium_leather",
+      "text": "At last the prepared hide is sealed in a $(l:crafting/barrels#tannin)barrel of Tannin$(), which turns it to leather. After another six hours take the $(thing)Leather$() out."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 2
+}

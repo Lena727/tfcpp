@@ -1,0 +1,115 @@
+{
+  "category": "tfc:crafting",
+  "extra_recipe_mappings": {
+    "tag:tfc:barrels": 0
+  },
+  "icon": "tfc:wood/barrel/palm",
+  "name": "Barrels",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The $(thing)Barrel$() holds items and fluids. The middle slot is for items. Fluid shows in the tank on the left. Add it by putting a filled $(thing)bucket$() or $(thing)jug$() in the upper left slot, and take it out by putting an empty container there. $(item)$(k:key.use)$() with a bucket on the block works too."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/wood/barrel/oak",
+      "text": "A barrel is made of seven $(thing)lumber$()."
+    },
+    {
+      "type": "patchouli:image",
+      "border": false,
+      "images": [
+        "tfc:textures/gui/book/gui/barrel.png"
+      ],
+      "text": "The barrel interface."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A barrel can be $(thing)sealed$(). A sealed barrel can be broken without spilling, and it works recipes. The grey button on the right of the interface seals it, and so does $(item)$(k:key.use)$() with an empty hand while holding $(item)$(k:key.sneak)$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)Click an empty barrel on a fluid block to fill it.$(li)Rain fills barrels slowly, and melting icicles above them add water.$(li)Sealing throws out items that are not in the middle slot.$(li)Acids and other corrosive liquids do not go into a barrel: they eat the wood. Tar and the liquors of dry distillation do.",
+      "title": "Barrel Tips"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A barrel makes new things from fluids and items together. For a recipe the contents must be in its proportions. Some recipes need the barrel sealed for a time, so that the contents can change. Others work at once.",
+      "title": "Recipes"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "If the contents do not fit a recipe, the excess fluid or items are lost. For an instant recipe you must always have at least enough items to change all the fluid."
+    },
+    {
+      "type": "tfc:instant_barrel_recipe",
+      "anchor": "limewater",
+      "recipe": "tfc:barrel/limewater",
+      "text": "$(bold)Limewater$() is $(l:crafting/glassworking#lime)Lime$() in water: one powder of lime for each 500 mB of $(thing)Water$(). Raw flux will not do, it has to be burnt to lime first. Limewater serves $(l:crafting/leather_making)leather$() and mortar."
+    },
+    {
+      "type": "tfc:sealed_barrel_recipe",
+      "anchor": "tannin",
+      "recipe": "tfc:barrel/tannin",
+      "text": "$(bold)Tannin$() is an acid liquid got by steeping the bark of certain $(thing)Logs$() in $(thing)Water$(). Bark of sequoia, maple, hickory, douglas fir, chestnut, birch or oak will all do."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Some recipes mix two fluids in a set ratio: put a filled bucket of one in the fluid slot of a barrel that holds the right amount of the other. So $(thing)Milk Vinegar$() is made, one part of vinegar to nine of milk. Vinegar in the same ratio with salt water makes $(thing)Brine$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A barrel quenches hot items. Put one into $(thing)Water$(), $(thing)Olive Oil$() or $(thing)Salt Water$() and its temperature drops fast: water and salt water take off 15 °C for each mB used, oils 5 °C. Water chills hard and oil gently, as steel quenched in them does in practice."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Barrels $(l:mechanics/dye)dye$() and $(l:mechanics/dye#lye)bleach$() things. Carpet, candles, $(l:mechanics/advanced_building_materials#plaster)Plaster$() and most coloured items are dyed by sealing them in dye, and bleached by sealing them in lye. See the dye chapter."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Vinegar keeps food. To get it, seal $(thing)Fruit$() together with $(thing)Alcohol$() in a barrel. How that goes is on the $(l:food/decay#vinegar)preservation page$()."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/barrel_rack",
+      "text": "A barrel set against the side of a block works like a standing one, with limits on placing. It needs a $(thing)Barrel Rack$(), added with $(item)$(k:key.use)$(), before another sideways barrel can go above it."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:wood/barrel/kapok[facing=north,rack=false,sealed=true]",
+          "Y": "tfc:wood/barrel/kapok[facing=north,rack=true,sealed=false]"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "Y"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "Sideways Barrels",
+      "text": "A sideways barrel shows that it is sealed by its $(thing)Tap$(): a sideways tap means sealed."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "An unsealed sideways barrel pours its fluid into open barrels and other containers set under its tap. The block the tap points into must be free air for the fluid to flow."
+    },
+    {
+      "type": "patchouli:image",
+      "border": true,
+      "images": [
+        "tfc:textures/gui/book/tutorial/barrel_drip.png"
+      ],
+      "text": "A barrel dripping."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 0
+}

@@ -1,0 +1,45 @@
+{
+  "category": "tfc:metalworking",
+  "icon": "tfc:fire_clay",
+  "name": "Огнеупорная глина",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Огнеупорная глина выдерживает больше жара, чем обычная. Из неё делают то, что греется сильнее всего: тигель, огнеупорные кирпичи, огнеупорные формы для слитков, жёлоба и литейные столы. Применений немного, и каждое важно."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/fire_clay",
+      "text": "Её делают из порошка $(l:the_world/ores_and_minerals#graphite)графита$(), смолотого в $(l:crafting/quern)жёрнове$(), и порошка $(l:the_world/ores_and_minerals#kaolinite)каолинита$()."
+    },
+    {
+      "type": "tfc:heat_recipe",
+      "recipe": "tfc:heating/powder/kaolinite",
+      "text": "Порошок каолинита получают, нагревая $(l:the_world/ores_and_minerals#kaolinite)каолиновую глину$() до 500 °C, но плохо: порошком становится лишь каждый пятый кусок."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "anchor": "crucible",
+      "recipe": "tfc:knapping/ceramic/unfired_crucible",
+      "text": "Необожжённый $(l:metalworking/crucible)тигель$() выбивают из огнеупорной глины."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "anchor": "fire_bricks",
+      "recipe": "tfc:knapping/ceramic/unfired_fire_brick",
+      "text": "Шахта $(l:metalworking/blast_furnace)доменной печи$() строится только из огнеупорных кирпичей, укреплённых железом."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_fire_ingot_mold",
+      "text": "$(thing)Огнеупорная форма для слитков$() прочнее обычной $(l:getting_started/pottery#mold)формы$(): она ломается раз в 100 отливок, обычная раз в 10."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Изделия из огнеупорной глины обжигают при 1300 °C. Это жарче, чем в земляной печи (около 900 °C) и чем горит каменный уголь в кузнице без дутья (1200 °C). Обжигайте в $(l:metalworking/charcoal_forge)угольной кузнице$() с $(l:metalworking/bellows)мехами$(). Обычной керамике хватает 850 °C.",
+      "title": "Обжиг"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 12
+}

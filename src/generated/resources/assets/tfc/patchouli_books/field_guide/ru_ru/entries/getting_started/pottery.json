@@ -1,0 +1,185 @@
+{
+  "category": "tfc:getting_started",
+  "extra_recipe_mappings": {
+    "minecraft:clay": 0,
+    "tag:tfc:clay_indicators": 2,
+    "tfc:ceramic/axe_head_mold": 19,
+    "tfc:ceramic/chisel_head_mold": 18,
+    "tfc:ceramic/hammer_head_mold": 20,
+    "tfc:ceramic/hoe_head_mold": 22,
+    "tfc:ceramic/ingot_mold": 12,
+    "tfc:ceramic/jug": 8,
+    "tfc:ceramic/knife_blade_mold": 21,
+    "tfc:ceramic/pickaxe_head_mold": 15,
+    "tfc:ceramic/saw_blade_mold": 16,
+    "tfc:ceramic/scythe_blade_mold": 17,
+    "tfc:ceramic/shovel_head_mold": 23,
+    "tfc:ceramic/unfired_axe_head_mold": 19,
+    "tfc:ceramic/unfired_chisel_head_mold": 18,
+    "tfc:ceramic/unfired_hammer_head_mold": 20,
+    "tfc:ceramic/unfired_hoe_head_mold": 22,
+    "tfc:ceramic/unfired_ingot_mold": 11,
+    "tfc:ceramic/unfired_jug": 8,
+    "tfc:ceramic/unfired_knife_blade_mold": 21,
+    "tfc:ceramic/unfired_pickaxe_head_mold": 15,
+    "tfc:ceramic/unfired_propick_head_mold": 14,
+    "tfc:ceramic/unfired_saw_blade_mold": 16,
+    "tfc:ceramic/unfired_scythe_blade_mold": 17,
+    "tfc:ceramic/unfired_shovel_head_mold": 23,
+    "tfc:ceramic/unfired_vessel": 4,
+    "tfc:ceramic/vessel": 4
+  },
+  "icon": "tfc:ceramic/vessel",
+  "name": "Гончарное дело",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Глина$() удобный и неприхотливый материал для гончарного дела, но поначалу её трудно найти. Обычно она под травой, в двух видах мест. Там, где $(l:core_mechanics/climate#rainfall)годовые осадки$() не меньше 175 мм, глина лежит пятнами повсюду, часто с приметными $(thing)растениями$()."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "0": "tfc:clay_grass/aridisol",
+          "C": "#tfc:clay_indicators",
+          "X": "tfc:clay_grass/aridisol"
+        },
+        "pattern": [
+          [
+            "   ",
+            " C ",
+            "   "
+          ],
+          [
+            "XXX",
+            "X0X",
+            "XXX"
+          ]
+        ]
+      },
+      "name": "Признаки глины",
+      "text": "Глина и одно из растений, которое на неё указывает."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "knapping",
+      "text": "$(thing)Кочедыжник$(), $(thing)канна$(), $(thing)золотарник$(), $(thing)пампасная трава$(), $(thing)перовския$() и $(thing)водная канна$() указывают на глину рядом. Есть и мелкие залежи у воды: рек, озёр, прудов.$(br2)Глину выбивают как камень, пять кусков в руке. Если ошиблись, закройте экран, снова слепите глину и попробуйте ещё раз."
+    },
+    {
+      "type": "patchouli:image",
+      "border": false,
+      "images": [
+        "tfc:textures/gui/book/gui/clay_knapping.png"
+      ],
+      "text": "Экран выбивания."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "vessel",
+      "text": "Малый сосуд первое, что стоит сделать. Как и всю керамику, его надо обжечь. Обжиг греет изделие, пока глина не станет твёрдой $(thing)керамикой$(): 850 °C. Сначала это делают в $(l:getting_started/pit_kiln)земляной печи$(). Изделиям из $(l:metalworking/fire_clay)огнеупорной глины$() нужно 1300 °C.",
+      "title": "Малый сосуд"
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_vessel",
+      "text": "Выбивание малого сосуда."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(l:food/decay#large_vessels)Большой сосуд$() делают так же. Его можно ставить, у него девять ячеек. Смотрите связанную главу.",
+      "title": "Большой сосуд"
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_large_vessel",
+      "text": "Выбивание большого сосуда."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "jug",
+      "text": "Ещё одна полезная вещь $(thing)кувшин$(). Он набирает и $(thing)поит$() жидкостями, например пресной водой. Используйте его $(item)$(k:key.use)$() на жидкости в мире, затем пейте. В него входит $(thing)$(cfg:jugCapacity)$().",
+      "title": "Кувшин"
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_jug",
+      "text": "Выбивание кувшина."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "mold",
+      "text": "Из глины делают и $(thing)формы$(). Расплавленный металл, залитый в форму, застывает в её виде. Используйте форму, чтобы достать изделие, а иногда и саму форму. Проще всех форма для слитка, она дальше.",
+      "title": "Формы"
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_ingot_mold",
+      "text": "Выбивание формы для слитка."
+    },
+    {
+      "type": "tfc:heat_recipe",
+      "recipe": "tfc:heating/ceramic/ingot_mold",
+      "text": "Обожгите форму, как всякую глиняную посуду, при 850 °C, скорее всего в $(l:getting_started/pit_kiln)земляной печи$(). Затем заливайте металл и вынимайте, когда он остыл."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:ceramic/ingot_mold[tfc:fluid={id:\"tfc:metal/copper\",amount:100}]",
+      "link_recipes": false,
+      "text": "На следующих страницах выбивание форм для разных орудий.",
+      "title": "Литьё"
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_propick_head_mold",
+      "text": "$(l:metalworking/prospecting#propick)Кирка разведчика$() инструмент поиска богатой руды."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_pickaxe_head_mold",
+      "text": "$(thing)Кирка$(): повседневное орудие добычи."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_saw_blade_mold",
+      "text": "$(thing)Пила$() нужна для точных деревянных деталей, таких как $(thing)верстак$() и многие устройства, в том числе $(l:core_mechanics/support_beams)опоры$()."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_scythe_blade_mold",
+      "text": "$(thing)Коса$() срезает растения и листву в области 3x3x3."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_chisel_head_mold",
+      "text": "$(l:metalworking/chisel)Долото$() сглаживает блоки и вырезает из них много декоративных."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_axe_head_mold",
+      "text": "$(thing)Топор$() для рубки деревьев. Каменный хуже металлического."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_hammer_head_mold",
+      "text": "$(thing)Молот$() нужен для постройки и работы на $(l:metalworking/anvils)наковальнях$()."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_knife_blade_mold",
+      "text": "$(thing)Нож$() оружие и резак для растений."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_hoe_head_mold",
+      "text": "$(thing)Мотыга$() рыхлит землю и ухаживает за $(l:food/crops)посевами$()."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_shovel_head_mold",
+      "text": "$(thing)Лопата$() для копки."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 2
+}

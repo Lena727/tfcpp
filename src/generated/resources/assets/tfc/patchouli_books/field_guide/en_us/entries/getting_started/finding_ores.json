@@ -1,0 +1,93 @@
+{
+  "category": "tfc:getting_started",
+  "icon": "tfc:ore/normal_native_copper",
+  "name": "Ores, Metal, and Casting",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Besides sticks, twigs and stones, you may come across small pieces of ore lying about on the ground. They matter: before you have a pickaxe they are nearly the only source of ore and metal."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "A": "tfc:ore/small_native_copper",
+          "B": "tfc:ore/small_native_gold",
+          "C": "tfc:ore/small_hematite",
+          "D": "tfc:ore/small_native_silver",
+          "E": "tfc:ore/small_cassiterite",
+          "F": "tfc:ore/small_bismuthinite",
+          "G": "tfc:ore/small_garnierite",
+          "H": "tfc:ore/small_malachite",
+          "I": "tfc:ore/small_magnetite",
+          "J": "tfc:ore/small_limonite",
+          "K": "tfc:ore/small_sphalerite",
+          "L": "tfc:ore/small_tetrahedrite",
+          "X": "tfc:grass/entisol"
+        },
+        "pattern": [
+          [
+            "    ",
+            "  0 ",
+            "    "
+          ],
+          [
+            "ABCD",
+            "EFGH",
+            "IJKL"
+          ],
+          [
+            "XXXX",
+            "XXXX",
+            "XXXX"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "All the small ore pieces"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A small piece yields some metal and, more to the point, hints at a bigger vein close by, most likely buried not far below the surface. Mark the spot where you find one: it helps when you are $(l:metalworking/prospecting)prospecting$().$(br2)The twelve small ores, and what they give, are on the next page."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)Native Copper: $(thing)Copper$()$(li)Native Gold: $(thing)Gold$()$(li)Native Silver: $(thing)Silver$()$(li)Malachite: $(thing)Copper$()$(li)Cassiterite: $(thing)Tin$()$(li)Garnierite: $(thing)Nickel$()$(li)Bismuthinite: $(thing)Bismuth$(), roasted with fumes$(li)Tetrahedrite: arsenical $(thing)Copper$(), with poison fumes$(li)Sphalerite: only a calcine, no zinc$(li)Hematite, Magnetite, Limonite: iron oxide, no iron yet",
+      "title": "Small Ores"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "casting",
+      "text": "Metal in TerraFirmaCraft is counted in $(thing)units$(), also called $(thing)mB$() (millibuckets), and each ore piece holds a fixed amount. The small ores lying on the surface are the poorest, $(thing)10 mB$() apiece. To free the metal, melt the ore and $(thing)cast$() it in the shape you want.",
+      "title": "Casting"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "You will need:$(li)a $(l:getting_started/pottery#vessel)Small Vessel$()$(li)a heat that melts the metal: a $(l:metalworking/charcoal_forge)Charcoal Forge$() for copper (1080 °C), gold and silver. A $(l:getting_started/pit_kiln)Pit Kiln$() (about 900 °C) melts only tin, bismuth, zinc and lead$(li)one or more $(l:getting_started/pottery#mold)Molds$()$(li)at least 100 mB of a castable metal: $(thing)Copper$() in any of its ore forms$(br2)$(italic)Some $(l:getting_started/primitive_alloys)Alloys$() can be cast too.$()"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Open the vessel and put the ore in. Count the metal in it carefully. Then set the filled vessel in the forge: as it heats, the ore melts and the vessel holds liquid metal.$(br2)Take the vessel out and use it to open the $(thing)Casting$() screen."
+    },
+    {
+      "type": "patchouli:image",
+      "border": false,
+      "images": [
+        "tfc:textures/gui/book/gui/casting.png"
+      ],
+      "text": "The casting screen."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "With the screen open, put an empty fired mold in the middle slot. It fills while the vessel stays liquid. If the vessel sets, heat it again. Take the full mold out to cool. When cool, use the mold, or put it in the crafting grid, to get the item and sometimes the mold back."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/metal/pickaxe/copper",
+      "text": "With a tool head you can craft your first pickaxe. Find the copper for a head, fire a pickaxe mold, melt the ore in a forge and cast the head. Put it on a stick, and there it is."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 4
+}

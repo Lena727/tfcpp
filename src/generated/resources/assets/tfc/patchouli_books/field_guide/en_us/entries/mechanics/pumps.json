@@ -1,0 +1,34 @@
+{
+  "category": "tfc:mechanics",
+  "extra_recipe_mappings": {
+    "tfc:steel_pipe": 0,
+    "tfc:steel_pump": 0
+  },
+  "icon": "tfc:steel_pipe",
+  "name": "Pumps",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Steel Pumps$() and $(thing)Steel Pipes$() carry fluids: $(thing)Water$(), $(thing)Salt Water$(), $(thing)Spring Water$(). They move source blocks, lift them upward, which $(l:food/aqueducts)Aqueducts$() cannot do, and top up small enclosed pools.$(br2)A pump moves water, it does not make it: the block it takes leaves its source. Only a river stays as it was."
+    },
+    {
+      "type": "tfc:anvil_recipe",
+      "recipe": "tfc:anvil/steel_pipe",
+      "text": "Steel pipes are forged from $(l:metalworking/steel)Steel$() on an $(l:metalworking/anvils)Anvil$(). A $(thing)Steel Pump$() is made of some pipes and $(l:getting_started/primitive_alloys#brass)Brass Mechanisms$()."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/steel_pump",
+      "text": "A pump needs a $(l:mechanics/crankshaft)Crankshaft$() and $(l:mechanics/mechanical_power)Mechanical Power$():$(br)$(li)It joins a pipe at its $(bold)bottom$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)On its narrow side the pump stands against the working end of a crankshaft.$(li)The line of pipe is up to $(bold)16$() blocks long, and its open end must stand in the liquid. The atmosphere lifts water only about 10 m, so that end may lie no more than $(bold)10$() blocks below the pump. A deep mine needs pumps in stages.$(li)While the crank turns, liquid comes out on the wide end a block at a time."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The lift is work, and it loads the shaft: the higher the water goes, the harder the crank is to turn. A block takes tens of seconds even at the full speed of a water wheel, and a wheel that is too weak, or a lift that is too high, stops the shaft."
+    }
+  ],
+  "read_by_default": true
+}

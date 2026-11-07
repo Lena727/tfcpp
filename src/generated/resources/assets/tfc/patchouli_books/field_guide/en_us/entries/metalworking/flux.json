@@ -1,0 +1,31 @@
+{
+  "category": "tfc:metalworking",
+  "extra_recipe_mappings": {
+    "tfc:powder/flux": 0
+  },
+  "icon": "tfc:powder/flux",
+  "name": "Flux",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Flux is a powder needed for $(l:metalworking/anvils#welding)Welding$() and as the catalyst of a $(l:metalworking/blast_furnace)Blast Furnace$(). Burnt to lime, it also serves glass, mortar, limewater and leather. It is carbonate stone or shell ground in a $(l:crafting/quern)Quern$().$(br2)$(thing)Borax$() is not that kind of flux: it gives $(thing)Borax Flux$(), a different powder."
+    },
+    {
+      "type": "tfc:quern_recipe",
+      "recipe": "tfc:quern/powder/flux",
+      "text": "Limestone, dolomite, chalk and marble grind to flux. So do scutes, clams, mollusks and the remains of shellfish."
+    },
+    {
+      "type": "tfc:quern_recipe",
+      "recipe": "tfc:quern/powder/flux_from_borax",
+      "text": "Borax ore grinds to six pieces of $(thing)Borax Flux$(). It welds, but it does not burn to lime, and the blast furnace refuses it. Borax is also the boron of borosilicate glass."
+    },
+    {
+      "type": "tfc:heat_recipe",
+      "recipe": "tfc:heating/powder/lime",
+      "text": "Burnt at 840 °C, flux becomes $(thing)Lime$(): CaCO3 gives CaO and CO2, and nearly half the weight leaves as carbon dioxide. Burn it in the open."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 1
+}

@@ -1,0 +1,93 @@
+{
+  "category": "tfc:getting_started",
+  "icon": "tfc:ore/normal_native_copper",
+  "name": "Руды, металлы и литьё",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Помимо палок, веток и камней, на земле встречаются мелкие куски руды. Они важны: пока нет кирки, это почти единственный источник руды и металла."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "A": "tfc:ore/small_native_copper",
+          "B": "tfc:ore/small_native_gold",
+          "C": "tfc:ore/small_hematite",
+          "D": "tfc:ore/small_native_silver",
+          "E": "tfc:ore/small_cassiterite",
+          "F": "tfc:ore/small_bismuthinite",
+          "G": "tfc:ore/small_garnierite",
+          "H": "tfc:ore/small_malachite",
+          "I": "tfc:ore/small_magnetite",
+          "J": "tfc:ore/small_limonite",
+          "K": "tfc:ore/small_sphalerite",
+          "L": "tfc:ore/small_tetrahedrite",
+          "X": "tfc:grass/entisol"
+        },
+        "pattern": [
+          [
+            "    ",
+            "  0 ",
+            "    "
+          ],
+          [
+            "ABCD",
+            "EFGH",
+            "IJKL"
+          ],
+          [
+            "XXXX",
+            "XXXX",
+            "XXXX"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Все мелкие куски руды"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Мелкий кусок даёт металл и, что важнее, указывает на жилу побольше рядом, скорее всего под землёй неглубоко. Запоминайте, где нашли: это поможет при $(l:metalworking/prospecting)разведке$().$(br2)Двенадцать мелких руд и то, что они дают, на следующей странице."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)Самородная медь: $(thing)медь$()$(li)Самородное золото: $(thing)золото$()$(li)Самородное серебро: $(thing)серебро$()$(li)Малахит: $(thing)медь$()$(li)Касситерит: $(thing)олово$()$(li)Гарниерит: $(thing)никель$()$(li)Висмутин: $(thing)висмут$(), обжиг с дымом$(li)Тетраэдрит: мышьяковистая $(thing)медь$(), ядовитый дым$(li)Сфалерит: лишь огарок, цинка нет$(li)Гематит, магнетит, лимонит: оксид железа, железа пока нет",
+      "title": "Мелкие руды"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "casting",
+      "text": "В TerraFirmaCraft каждая руда содержит определённое число $(thing)единиц$(), или $(thing)мБ (миллибакетов)$(), металла. Мелкие поверхностные руды беднее всех и дают $(thing)10 мБ$(). Чтобы получить металл, руду плавят и $(thing)отливают$() в нужную форму.",
+      "title": "Литьё"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Понадобятся:$(li)$(l:getting_started/pottery#vessel)малый сосуд$()$(li)жар, плавящий металл: $(l:metalworking/charcoal_forge)угольная кузница$() для меди (1080 °C), золота и серебра. $(l:getting_started/pit_kiln)Земляная печь$() (около 900 °C) плавит только олово, висмут, цинк и свинец$(li)одна или несколько $(l:getting_started/pottery#mold)форм$()$(li)не меньше 100 мБ годного к литью металла: $(thing)меди$() в любом виде руды$(br2)$(italic)Отливать можно и некоторые $(l:getting_started/primitive_alloys)сплавы$().$()"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Откройте сосуд и положите руду. Внимательно сосчитайте металл в ней. Затем поставьте полный сосуд в кузницу: пока он греется, руда плавится, и в сосуде оказывается жидкий металл.$(br2)Достаньте сосуд и используйте его, чтобы открыть экран $(thing)литья$()."
+    },
+    {
+      "type": "patchouli:image",
+      "border": false,
+      "images": [
+        "tfc:textures/gui/book/gui/casting.png"
+      ],
+      "text": "Экран литья."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "На открытом экране положите пустую обожжённую форму в среднюю ячейку. Она наполняется, пока сосуд жидок. Если сосуд застыл, нагрейте его снова. Вынимайте полную форму остывать. Остывшую форму используйте или кладите в сетку крафта, чтобы получить изделие, а иногда и форму."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/metal/pickaxe/copper",
+      "text": "С головкой орудия можно сделать первую кирку. Найдите медь на головку, обожгите форму кирки, расплавьте руду в кузнице и отлейте головку. Наденьте её на палку, и готово."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 4
+}

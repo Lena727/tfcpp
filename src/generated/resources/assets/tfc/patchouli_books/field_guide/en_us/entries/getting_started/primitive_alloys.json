@@ -1,0 +1,80 @@
+{
+  "category": "tfc:getting_started",
+  "extra_recipe_mappings": {
+    "tfc:metal/ingot/bismuth_bronze": 4,
+    "tfc:metal/ingot/black_bronze": 5,
+    "tfc:metal/ingot/brass": 7,
+    "tfc:metal/ingot/bronze": 3
+  },
+  "icon": "tfc:ceramic/ingot_mold[tfc:fluid={id:\"tfc:metal/bronze\",amount:100}]",
+  "name": "Primitive Alloys",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "An $(thing)Alloy$() mixes metals into a new, stronger one. Copper makes tools, but the next step up is one of three $(thing)Bronzes$(). An alloy is made of component $(thing)metals$(), each of which must stay within its share of the whole."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Early on, alloys are made in a $(thing)Small Vessel$(), much as in $(l:getting_started/finding_ores#casting)Casting$(): put in enough ore pieces in the right ratio for a known alloy. Heat the vessel in a $(l:metalworking/charcoal_forge)Charcoal Forge$(), as a pit kiln (about 900 °C) cannot melt copper (1080 °C)."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Take $(thing)Bronze$() (on the right): a full 1000 mB needs 880-920 mB of $(thing)Copper$() together with 80-120 mB of $(thing)Tin$().$(br2)The three bronzes follow, one to a page. All make tools, $(l:mechanics/armor)Armor$() and more, differing a little in durability, speed and damage."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/bronze",
+      "link_recipes": false,
+      "text": "$(bold)Needs:$()$(br)$(li)$(thing)Copper$(), 88 to 92 %$(li)$(thing)Tin$(), 8 to 12 %",
+      "title": "Bronze"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/bismuth_bronze",
+      "link_recipes": false,
+      "text": "$(bold)Needs:$()$(br)$(li)$(thing)Zinc$(), 20 to 30 %$(li)$(thing)Copper$(), 50 to 65 %$(li)$(thing)Bismuth$(), 10 to 20 %",
+      "title": "Bismuth Bronze"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/black_bronze",
+      "link_recipes": false,
+      "text": "$(bold)Needs:$()$(br)$(li)$(thing)Copper$(), 50 to 70 %$(li)$(thing)Silver$(), 10 to 25 %$(li)$(thing)Gold$(), 10 to 25 %",
+      "title": "Black Bronze"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Three more alloys cannot make tools: $(thing)Brass$(), $(thing)Rose Gold$() and $(thing)Sterling Silver$().$(br2)Of these, $(thing)Brass$() goes into mechanisms, including $(l:mechanics/mechanical_power)Mechanical Power$(), and for the brass blowpipe of glassworking.$(br2)$(thing)Rose Gold$() and $(thing)Sterling Silver$() go into $(l:metalworking/steel#red_steel)Red Steel$() and $(l:metalworking/steel#blue_steel)Blue Steel$().",
+      "title": "Utility Alloys"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "brass",
+      "item": "tfc:metal/ingot/brass",
+      "link_recipes": false,
+      "text": "$(bold)Needs:$()$(br)$(li)$(thing)Copper$(), 62 to 72 %$(li)$(thing)Zinc$(), 28 to 38 %$(br2)Real brass for mechanisms holds about a third of zinc, and melts at 930 °C.",
+      "title": "Brass"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/rose_gold",
+      "link_recipes": false,
+      "text": "$(bold)Needs:$()$(br)$(li)$(thing)Copper$(), 15 to 30 %$(li)$(thing)Gold$(), 70 to 85 %",
+      "title": "Rose Gold"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/sterling_silver",
+      "link_recipes": false,
+      "text": "$(bold)Needs:$()$(br)$(li)$(thing)Silver$(), 90 to 95 %$(li)$(thing)Copper$(), 5 to 10 %$(br2)It melts at 890 °C.",
+      "title": "Sterling Silver"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Copper smelted from tetrahedrite holds arsenic and is $(thing)arsenical$(). It can stand in for copper in bronze, bismuth bronze, black bronze and brass. Mixed with pure copper it gives arsenical copper again: arsenic is not diluted away. Pure copper comes only from native copper and malachite.",
+      "title": "Arsenical copper"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 6
+}

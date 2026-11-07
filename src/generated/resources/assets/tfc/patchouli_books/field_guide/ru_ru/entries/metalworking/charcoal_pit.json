@@ -1,0 +1,188 @@
+{
+  "category": "tfc:metalworking",
+  "extra_recipe_mappings": {
+    "minecraft:charcoal": 0
+  },
+  "icon": "minecraft:charcoal",
+  "name": "Угольная яма",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Угольная яма$() делает $(thing)древесный уголь$() из брёвен. Брёвна складывают в $(thing)поленницы$(): $(item)$(k:key.use)$() с $(item)$(k:key.sneak)$() и бревном в руке ставит поленницу. Ещё брёвна кладут $(item)$(k:key.use)$() с бревном в руке или в окно поленницы, открытое любым другим предметом."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:log_pile"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "Поленница",
+      "text": "Поленнице нужна твёрдая опора, и она легко горит."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Закройте поленницы со всех сторон твёрдыми негорючими блоками: обычно землёй. Подожгите одну поленницу и накройте. Дым над кучей значит, что она занялась. Угля выйдет столько, сколько в ней было брёвен."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "0": "tfc:log_pile",
+          "D": "tfc:dirt/aridisol"
+        },
+        "pattern": [
+          [
+            "DDD",
+            "DDD",
+            "DDD"
+          ],
+          [
+            "DDD",
+            "D0D",
+            "DDD"
+          ],
+          [
+            "DDD",
+            "DDD",
+            "DDD"
+          ]
+        ]
+      },
+      "name": "Яма",
+      "text": "Одна из возможных ям: земля вокруг поленницы."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "charcoal_pile",
+      "text": "Когда яма выгорела и дым прекратился, остаются $(thing)кучи древесного угля$() до 8 слоёв. Копайте их лопатой, это и есть уголь. К куче можно добавлять уголь, и её можно ставить $(item)$(k:key.use)$()."
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=1]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=2]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=3]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=4]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=5]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=6]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=7]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:charcoal_pile[layers=8]"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "Куча угля, от 1 до 8 слоёв."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Яма горит без воздуха и это самый грязный из огней: до 30% её углерода уходит угарным газом, да ещё немного метана из древесины. Дёрн никогда не герметичен. Даже под толстым покрытием десятая часть газа просачивается, и люди умирали, засыпая возле угольных ям. Жгите её на открытом месте и никогда не спите рядом.",
+      "title": "Опасность"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 2
+}

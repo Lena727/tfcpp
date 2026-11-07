@@ -1,0 +1,45 @@
+{
+  "category": "tfc:metalworking",
+  "icon": "tfc:fire_clay",
+  "name": "Fire Clay",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Fire clay is clay that stands more heat. It is used for the things that get hottest: the crucible, fire bricks, fire ingot molds, channels and mold tables. There are few uses, and every one matters."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/fire_clay",
+      "text": "It is made of $(l:the_world/ores_and_minerals#graphite)Graphite$() powder ground in a $(l:crafting/quern)Quern$(), and $(l:the_world/ores_and_minerals#kaolinite)Kaolinite$() powder."
+    },
+    {
+      "type": "tfc:heat_recipe",
+      "recipe": "tfc:heating/powder/kaolinite",
+      "text": "Kaolinite powder comes from heating $(l:the_world/ores_and_minerals#kaolinite)Kaolin Clay$() to 500 °C, but badly: only one piece in five becomes powder."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "anchor": "crucible",
+      "recipe": "tfc:knapping/ceramic/unfired_crucible",
+      "text": "The unfired $(l:metalworking/crucible)Crucible$() is knapped from fire clay."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "anchor": "fire_bricks",
+      "recipe": "tfc:knapping/ceramic/unfired_fire_brick",
+      "text": "A $(l:metalworking/blast_furnace)Blast Furnace$() stack takes only fire bricks, reinforced with iron."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_fire_ingot_mold",
+      "text": "A $(thing)Fire Ingot Mold$() is the stronger $(l:getting_started/pottery#mold)Ingot Mold$(): it breaks once in 100 pours, a plain one once in 10."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Fire clay ware needs 1300 °C. That is hotter than a pit kiln gets (about 900 °C), and than coal burns in a forge without blast (1200 °C). Fire it in a $(l:metalworking/charcoal_forge)Charcoal Forge$() with a $(l:metalworking/bellows)Bellows$(). Ordinary clay ware needs only 850 °C.",
+      "title": "Firing"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 12
+}

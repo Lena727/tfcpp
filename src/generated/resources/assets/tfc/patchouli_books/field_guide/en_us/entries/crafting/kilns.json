@@ -1,0 +1,36 @@
+{
+  "category": "tfc:crafting",
+  "icon": "tfc:firebox",
+  "name": "Kilns",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The $(thing)Kiln$() heats and fires many items at once in a space you choose. You build it from one $(thing)Firebox$(), one or more $(thing)Grates$(), and walls that resist fire."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/firebox",
+      "recipe2": "tfc:crafting/metal/grate/bronze",
+      "text": ""
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The $(thing)Firebox$() has a temperature gauge and 16 slots, all for fuel, any fuel. In the open it heats nothing. Below Bright Red it heats up to 64 blocks, above that 128. The time it needs grows with the number of blocks and the temperature wanted. It is a fire like any other: it uses air and fumes up the room, with sulfur dioxide if it burns coal."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The firebox heats starting with the block above it. Its heat passes through blocks that are not solid and through Grates, so put a grate on top to let the heat up into the structure and keep access from below."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Allowed for the walls: Fireproof Doors, Tinted Glass, Fire Bricks and Clay Bricks. Plain stone bricks are refused. If the structure is broken during heating, the heating is lost and starts again once it is closed, and the timer also restarts when the temperature setting changes. Clay ware is fired at 850 °C, fire clay ware at 1300 °C."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/fireproof_door",
+      "text": "The Fireproof Door is made of wrought iron sheets."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 9
+}

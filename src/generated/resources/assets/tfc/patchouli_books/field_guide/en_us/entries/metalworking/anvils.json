@@ -1,0 +1,116 @@
+{
+  "category": "tfc:metalworking",
+  "extra_recipe_mappings": {
+    "tag:tfc:anvils": 0
+  },
+  "icon": "tfc:metal/anvil/copper",
+  "name": "Anvils",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "An anvil is the main tool of the smith: it shapes ingots and welds them. Anvils serve two jobs, $(l:metalworking/anvils#working)Working$(), which forms one piece of metal into another, and $(l:metalworking/anvils#welding)Welding$(), which fuses two pieces into one."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "#tfc:anvils"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Anvils of every metal."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/metal/anvil/copper",
+      "text": "An anvil is crafted from $(thing)Double Ingots$() of its metal. For the first one, $(l:metalworking/anvils#welding)weld$() the double ingots on a $(l:getting_started/primitive_anvils)Stone Anvil$()."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "tiers",
+      "text": "Every anvil has a $(thing)Tier$(), which says what it can work and weld. It works metals of its own tier and welds those one tier up.$(li)$(bold)VI$(): Blue and Red Steel$(li)$(bold)V$(): Black Steel$(li)$(bold)IV$(): Steel$(li)$(bold)III$(): Wrought Iron$(li)$(bold)II$(): Bronze, Black Bronze, Bismuth Bronze$(li)$(bold)I$(): Copper, also arsenical$(li)$(bold)0$(): Stone"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "working",
+      "text": "To work an item, use the anvil to open its interface. The item goes in the right input slot. You also need a hammer, in the hammer slot or in your main hand; it wears as you work.",
+      "title": "Working"
+    },
+    {
+      "type": "patchouli:image",
+      "border": false,
+      "images": [
+        "tfc:textures/gui/book/gui/anvil_empty.png"
+      ],
+      "text": "The anvil interface."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Then choose a $(thing)Plan$(), which says what item you make. $(item)$(k:key.attack)$() the scroll button and pick the item. The interface returns with the scroll showing your plan, and the $(thing)Rules$() and $(thing)Target$() filled in."
+    },
+    {
+      "type": "patchouli:image",
+      "border": false,
+      "images": [
+        "tfc:textures/gui/book/gui/anvil_in_use.png"
+      ],
+      "text": "After choosing a pickaxe."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The middle bar has two markers. The $(2)green$() one is your progress, the $(4)red$() one is the target. Bring progress onto the target with the green and red action buttons, each of which moves it by a set step.",
+      "title": "Targets"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(2)Green$() actions always move the progress $(bold)right$() and $(4)red$() ones $(bold)left$(). If it leaves the bar, the item is overworked and lost. And at the end the $(thing)rules$() must hold as well."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Rules are the two or three symbols over the bar: actions that must fall at set moments. For example $(2)Bend Second Last$() means the second action from the end has to be a $(2)Bend$().",
+      "title": "Working Rules"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Your last three actions show under the rules, and a rule turns green when met. You succeed when all are met. Mind the $(l:core_mechanics/heating)temperature$() too: metal can be worked only while the tooltip says $(bold)Can Work$(). Take it out and reheat it as often as needed."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Working takes many steps, and efficiency is rewarded. Some items, such as tool heads, made in few steps carry a $(thing)Forging Bonus$() into the tool built from them.",
+      "title": "Forging bonuses"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/pickaxe/wrought_iron[tfc:forging_bonus={type:\"perfect\"}]",
+      "link_recipes": false,
+      "text": "Best first:$(li)perfectly forged$(li)expertly forged$(li)well forged$(li)poorly forged$(br2)A bonus makes a tool last longer, dig faster or hit harder, depending on the tool.",
+      "title": "Perfectly Forged"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Cast Iron$() is brittle: it cannot be forged into rods or sheets nor welded, only cast.$(br2)Copper from tetrahedrite is $(thing)arsenical$(). It is forged and welded as copper, on a copper anvil made of its own double ingot, but what is made of it carries a mark, and melts back into arsenical copper, never into pure copper.",
+      "title": "What is not forged"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "welding",
+      "text": "Welding fuses two items into a new one. It is the same on a stone anvil as on a metal one.$(br2)Put both items on the anvil, using them on it or by the interface, in the two left slots.",
+      "title": "Welding"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "You also need at least one $(l:metalworking/flux)Flux$() on the anvil, plain or borax. Then, while both items are $(l:core_mechanics/heating)hot enough$() and the tooltip says $(bold)Can Weld$(), strike the anvil with any $(thing)Hammer$(). The items fuse. Take them out with an empty hand and $(item)$(k:key.use)$()."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 0
+}

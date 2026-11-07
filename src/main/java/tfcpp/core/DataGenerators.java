@@ -24,6 +24,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tfcpp.chemistry.ChemistryAssets;
 import tfcpp.chemistry.ChemistryData;
 import tfcpp.chemistry.CorrosiveSpill;
+import tfcpp.compat.guide.GuideData;
 import tfcpp.geology.NewOre;
 import tfcpp.geology.OreData;
 import tfcpp.metallurgy.MetallurgyAssets;
@@ -59,6 +60,8 @@ public final class DataGenerators
         event.getGenerator().addProvider(event.includeClient(), new MetallurgyAssets.BlockStates(output, event.getExistingFileHelper()));
         event.getGenerator().addProvider(event.includeClient(), new ChemistryAssets.Models(output, event.getExistingFileHelper()));
         event.getGenerator().addProvider(event.includeClient(), new ChemistryAssets.BlockStates(output, event.getExistingFileHelper()));
+
+        event.getGenerator().addProvider(event.includeClient(), new GuideData(output));
 
         event.getGenerator().addProvider(event.includeClient(), new English(output));
         event.getGenerator().addProvider(event.includeClient(), new Russian(output));

@@ -1,0 +1,85 @@
+{
+  "category": "tfc:crafting",
+  "extra_recipe_mappings": {
+    "tfc:gem_saw": 9,
+    "tfc:jacks": 8,
+    "tfc:paddle": 7,
+    "tfc:powder/lime": 2,
+    "tfc:powder/soda_ash": 3
+  },
+  "icon": "tfc:silica_glass_bottle",
+  "name": "Изготовление стекла",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Стеклоделие превращает песок в стекло. Сначала готовят $(thing)стекольную шихту$(). Её вид определяет цвет песка:$(br)$(br)$(li)чёрный песок: $(thing)вулканическая$()$(li)зелёный или бурый песок: $(thing)оливиновая$()$(li)жёлтый, красный или розовый песок: $(thing)гематитовая$()$(li)белый песок: $(thing)кремнезёмная$()"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/silica_glass_batch",
+      "text": "Шихту делают из песка одного из этих цветов, $(l:crafting/glassworking#lime)извести$() и $(l:crafting/glassworking#potash)поташа$()."
+    },
+    {
+      "type": "tfc:heat_recipe",
+      "anchor": "lime",
+      "recipe": "tfc:heating/powder/lime",
+      "text": "$(thing)Известь$() входит в шихту. Это порошок, получаемый $(l:core_mechanics/heating)нагревом$() $(l:metalworking/flux)флюса$() до 840 °C. Флюс из буры в известь не обжигается."
+    },
+    {
+      "type": "tfc:heat_recipe",
+      "anchor": "potash",
+      "recipe": "tfc:heating/powder/soda_ash_from_seaweed",
+      "text": "Нужен также $(thing)поташ$() или подобное. Годится $(thing)кальцинированная сода$(): порошок от нагрева $(thing)сушёных водорослей$() или $(thing)ламинарии$(). Можно и $(l:the_world/ores_and_minerals#saltpeter)селитру$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Стекло из шихты делают рядом шагов, и для некоторых шагов нужен инструмент:$(li)$(thing)распиливание$(): $(l:crafting/glassworking#saw)пила для самоцветов$()$(li)$(thing)защипывание$(): $(l:crafting/glassworking#jacks)щипцы$()$(li)$(thing)расплющивание$(): $(l:crafting/glassworking#paddle)лопатка$()$(li)$(thing)выдувание$() и $(thing)вытягивание$(): $(l:crafting/glassworking#blowpipe)стеклодувная трубка$()",
+      "title": "Инструменты ремесла"
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "anchor": "blowpipe",
+      "recipe": "tfc:knapping/ceramic/unfired_blowpipe",
+      "text": "Главный инструмент $(thing)стеклодувная трубка$(). Выбейте её из глины и обожгите в $(thing)керамическую трубку$()."
+    },
+    {
+      "type": "tfc:anvil_recipe",
+      "recipe": "tfc:anvil/blowpipe",
+      "text": "Керамические трубки хрупки и могут разбиться при работе. Прочнее выкованная из $(thing)латунного прута$() на наковальне, но латунь плавится при 930 °C."
+    },
+    {
+      "type": "patchouli:crafting",
+      "anchor": "paddle",
+      "recipe": "tfc:crafting/paddle",
+      "text": "$(thing)Расплющивание$() делают $(thing)лопаткой$() из дерева."
+    },
+    {
+      "type": "tfc:welding_recipe",
+      "anchor": "jacks",
+      "recipe": "tfc:welding/jacks",
+      "text": "$(thing)Защипывание$() делают $(thing)щипцами$(): две латунные палки, сваренные вместе."
+    },
+    {
+      "type": "patchouli:crafting",
+      "anchor": "saw",
+      "recipe": "tfc:crafting/gem_saw",
+      "text": "$(thing)Распиливание$() делают $(thing)пилой для самоцветов$(), ею же ломают $(thing)стеклянные блоки$() и $(thing)панели$(), чтобы забрать их."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Сначала нагрейте стекло на трубке до $(4)$(bold)тёмно-красного каления$(). Затем держите трубку и удерживайте $(item)$(k:key.use)$() на каждом шаге.$(br2)$(bold)Выдувание$(): используйте трубку, глядя прямо перед собой.$(br)$(bold)Вытягивание$(): используйте её, глядя вниз.",
+      "title": "Как работать со стеклом"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(bold)Расплющивание$(): используйте трубку с $(l:crafting/glassworking#paddle)лопаткой$() в другой руке.$(br)$(bold)Защипывание$(): с $(l:crafting/glassworking#jacks)щипцами$() в другой руке.$(br)$(bold)Распиливание$(): с $(l:crafting/glassworking#saw)пилой для самоцветов$() в другой руке.$(br)$(bold)Прокатка$(): с $(l:crafting/weaving#wool_cloth)шерстяной тканью$() в другой руке."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Стекло работают, пока трубка горяча, и не горячее, чем она выдерживает. Обычное стекло работается с $(4)тёмно-красного каления$() (480 °C). $(thing)Боросиликатному$() стеклу из песка и буры без извести нужно 1250 °C. Латунь плавится при 930 °C, поэтому ему подойдёт лишь керамическая трубка, между 1250 и 1500 °C: выше TFC возвращает пустую трубку.",
+      "title": "Какой жар"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 5
+}

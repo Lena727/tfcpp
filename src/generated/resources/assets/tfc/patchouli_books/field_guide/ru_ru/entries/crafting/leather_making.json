@@ -1,0 +1,76 @@
+{
+  "category": "tfc:crafting",
+  "extra_recipe_mappings": {
+    "minecraft:leather": 7,
+    "tfc:large_prepared_hide": 6,
+    "tfc:large_raw_hide": 1,
+    "tfc:large_scraped_hide": 4,
+    "tfc:large_soaked_hide": 3,
+    "tfc:medium_prepared_hide": 6,
+    "tfc:medium_raw_hide": 1,
+    "tfc:medium_scraped_hide": 4,
+    "tfc:medium_soaked_hide": 3,
+    "tfc:small_prepared_hide": 6,
+    "tfc:small_raw_hide": 1,
+    "tfc:small_scraped_hide": 4,
+    "tfc:small_soaked_hide": 3
+  },
+  "icon": "minecraft:leather",
+  "name": "Выделка кожи",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Кожа$() прочный материал из шкур животных. Она нужна для $(l:mechanics/armor)брони$(), $(thing)сёдел$() и $(l:metalworking/bellows)мехов$(). $(thing)Сырая шкура$() проходит $(l:crafting/leather_making#soaking)вымачивание$(), $(l:crafting/leather_making#scraping)скобление$(), $(l:crafting/leather_making#preparing)подготовку$() и $(l:crafting/leather_making#tanning)дубление$(), и становится кожей."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:small_raw_hide,tfc:medium_raw_hide,tfc:large_raw_hide",
+      "link_recipes": false,
+      "text": "Сначала нужна $(thing)сырая шкура$(), её оставляют многие $(l:the_world/wild_animals)животные$() при убое. Разные животные дают шкуры разного размера.",
+      "title": "Сырая шкура"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Для работы нужны:$(li)$(l:crafting/barrels#limewater)известковая вода$(): обожжённая известь (порошок $(thing)извести$()), растворённая в воде$(li)вода$(li)$(l:crafting/barrels#tannin)дубильная кислота$(): кислая жидкость из коры некоторых деревьев$(li)$(thing)сырые шкуры$()$(br2)Когда всё готово, можно начинать."
+    },
+    {
+      "type": "tfc:sealed_barrel_recipe",
+      "anchor": "soaking",
+      "recipe": "tfc:barrel/medium_soaked_hide",
+      "text": "Сначала сырую шкуру $(thing)вымачивают$(), чтобы очистить и разрыхлить лишнее. Запечатайте шкуру в $(l:crafting/barrels#limewater)бочке с известковой водой$() не меньше чем на шесть часов."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "scraping",
+      "item": "tfc:small_scraped_hide,tfc:medium_scraped_hide,tfc:large_scraped_hide",
+      "link_recipes": false,
+      "text": "Вымоченную шкуру затем $(thing)скоблят$(), убирая остатки. Положите её на бок $(thing)бревна$() и $(item)$(k:key.use)$() ножом по каждой части: текстура меняется.",
+      "title": "Скобление"
+    },
+    {
+      "type": "patchouli:image",
+      "border": true,
+      "images": [
+        "tfc:textures/gui/book/tutorial/soaked_hide_1.png",
+        "tfc:textures/gui/book/tutorial/soaked_hide_2.png",
+        "tfc:textures/gui/book/tutorial/soaked_hide_3.png",
+        "tfc:textures/gui/book/tutorial/soaked_hide_4.png"
+      ],
+      "text": "Когда шкура соскоблена полностью, сломайте её и заберите $(thing)соскобленную шкуру$()."
+    },
+    {
+      "type": "tfc:sealed_barrel_recipe",
+      "anchor": "preparing",
+      "recipe": "tfc:barrel/medium_prepared_hide",
+      "text": "Соскобленную шкуру запечатывают в $(l:crafting/barrels)бочке$() с $(thing)водой$() не меньше чем на шесть часов: ещё одна очистка перед дублением."
+    },
+    {
+      "type": "tfc:sealed_barrel_recipe",
+      "anchor": "tanning",
+      "recipe": "tfc:barrel/medium_leather",
+      "text": "Наконец подготовленную шкуру запечатывают в $(l:crafting/barrels#tannin)бочке с дубильной кислотой$(), и она превращается в кожу. Ещё через шесть часов заберите $(thing)кожу$()."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 2
+}

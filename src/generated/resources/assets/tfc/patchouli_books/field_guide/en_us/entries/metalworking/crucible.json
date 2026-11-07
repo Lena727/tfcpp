@@ -1,0 +1,79 @@
+{
+  "category": "tfc:metalworking",
+  "extra_recipe_mappings": {
+    "tfc:ceramic/unfired_crucible": 1,
+    "tfc:crucible": 2
+  },
+  "icon": "tfc:crucible",
+  "name": "Crucible",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "A $(thing)Crucible$() is a ceramic pot for melting metal and mixing $(l:metalworking/crucible#advanced_alloying)Alloys$() in exact proportions: it is better for that than a $(l:getting_started/primitive_alloys)Small Vessel$(). It is made of $(l:metalworking/fire_clay)Fire Clay$(), knapped to shape and then fired."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_crucible",
+      "text": "Knapping an unfired crucible."
+    },
+    {
+      "type": "tfc:heat_recipe",
+      "recipe": "tfc:heating/crucible",
+      "text": "Fire it at 1300 °C: in a $(l:metalworking/charcoal_forge)Charcoal Forge$() with bellows, not in a pit kiln. At work it needs heat from below, usually a forge, or from above, from a $(l:metalworking/blast_furnace)Blast Furnace$()."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "0": "tfc:charcoal_forge[heat_level=7]",
+          "C": "tfc:crucible",
+          "G": "tfc:rock/bricks/granite"
+        },
+        "pattern": [
+          [
+            "   ",
+            " C ",
+            "   "
+          ],
+          [
+            "GGG",
+            "G0G",
+            "GGG"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "A crucible on a charcoal forge."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "advanced_alloying",
+      "text": "Using the crucible opens its interface. The top shows the metal inside: the first named is what you would draw off now, the others make up the mix.",
+      "title": "Alloying"
+    },
+    {
+      "type": "patchouli:image",
+      "border": false,
+      "images": [
+        "tfc:textures/gui/book/gui/crucible.png"
+      ],
+      "text": "The crucible's interface"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Nine slots take items to melt, and the liquid goes into the pot. Molds and vessels of molten metal drain into it slowly, which gives exact mixes: hold $(item)$(k:key.sneak)$() over one to hurry it. A mold or vessel in the output slot is filled from the pot."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Native metals, malachite and cassiterite melt into metal. Sulfide ores roast instead, and give off fumes where the pot stands: tetrahedrite gives arsenical copper, bismuthinite gives bismuth, sphalerite gives a calcine and no zinc, which needs a retort. Iron ore melts only into an oxide that cannot be cast.",
+      "title": "What melts"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The temperature gauge follows the heat source below or above. Metal can be drawn off while it is still molten. A broken crucible keeps its contents, so a full one can be carried. Wrought iron melts at 1535 °C and steel at 1520 °C."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 9
+}

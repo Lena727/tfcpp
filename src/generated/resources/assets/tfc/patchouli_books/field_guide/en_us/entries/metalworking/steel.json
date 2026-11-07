@@ -1,0 +1,123 @@
+{
+  "category": "tfc:metalworking",
+  "extra_recipe_mappings": {
+    "tfc:metal/ingot/black_steel": 9,
+    "tfc:metal/ingot/blue_steel": 13,
+    "tfc:metal/ingot/high_carbon_black_steel": 9,
+    "tfc:metal/ingot/high_carbon_blue_steel": 13,
+    "tfc:metal/ingot/high_carbon_red_steel": 17,
+    "tfc:metal/ingot/high_carbon_steel": 0,
+    "tfc:metal/ingot/pig_iron": 0,
+    "tfc:metal/ingot/red_steel": 17,
+    "tfc:metal/ingot/steel": 0,
+    "tfc:metal/ingot/weak_blue_steel": 12,
+    "tfc:metal/ingot/weak_red_steel": 16,
+    "tfc:metal/ingot/weak_steel": 8
+  },
+  "icon": "tfc:metal/ingot/steel",
+  "name": "Steel",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Tools and $(l:mechanics/armor)Armor$() are made of $(thing)Steel$() in four grades: plain steel, then the black, red and blue steels.$(br2)It starts from iron with its carbon adjusted. $(thing)Pig Iron$() from the $(l:metalworking/blast_furnace)Blast Furnace$() holds over 4% carbon, steel from 0.2 to 1%. A hammer cannot take carbon out of iron. It must be diluted or burnt out."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Melt $(thing)Wrought Iron$() with $(thing)Pig Iron$() in a $(l:metalworking/crucible)Crucible$() and the carbon averages out by weight. Pig iron at about 4 to 24% of the mix gives $(thing)Steel$(), 24 to 52% $(thing)High Carbon Steel$(), 52 to 99% $(thing)Cast Iron$(). The pot must pass 1535 °C: charcoal with a blast, or coal.",
+      "title": "Diluting in the crucible"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The $(thing)Bessemer Converter$() burns the carbon out of liquid pig iron with air, and burns no fuel. Set it under a blast furnace, or pour iron in, and blow air through it by pipe. It wants about one mole of air a second and iron not cooler than 1350 °C, or the iron sets in the vessel. Blow too long and the iron itself burns.",
+      "title": "Burning in the converter"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/converter",
+      "text": "The converter is seven $(thing)Wrought Iron Double Sheets$() round a $(thing)Fire Brick$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)Sparks and hardly any flame: the silicon burns.$(li)A long white flame: the carbon burns.$(li)The flame shortens: stop now for steel.$(li)The flame drops and brown smoke rises: the carbon is gone and the iron burns.$(br2)Water in the blast pipe blows the vessel apart: a litre of water becomes 1700 litres of steam. The lining wears and must be relaid with fire bricks while the vessel is empty.",
+      "title": "Reading the flame"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A new converter has an acid lining of fire clay, which cannot remove phosphorus. Iron from limonite stays phosphoric, and a tap of it is brittle $(thing)Cold Short Iron$(), only fit to be cast or poured in again. Only a basic lining of dolomite bricks, with lime thrown in, takes the phosphorus out, as Thomas and Gilchrist found in 1878.",
+      "title": "Phosphorus"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Hammering does not remove carbon, so pig iron, cast iron and high carbon steel cannot be forged into steel on an anvil. $(thing)Cast Iron$() is brittle: it cannot be forged into rods or sheets, nor welded, only cast. High carbon steel becomes steel by blowing in the converter, or by melting it with wrought iron.",
+      "title": "Carbon and the hammer"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "black_steel",
+      "text": "$(thing)Black Steel$() is steel alloyed with other metals. First make $(thing)Weak Steel$() in a $(l:metalworking/crucible)Crucible$().",
+      "title": "Black Steel"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/weak_steel",
+      "link_recipes": false,
+      "text": "$(bold)Needs:$()$(li)$(thing)Steel$(), 50 to 70 %$(li)$(thing)Nickel$(), 15 to 25 %$(li)$(thing)Black Bronze$(), 15 to 25 %$(br2)The liquid $(thing)Weak Steel$() is poured into ingot molds.",
+      "title": "Weak Steel"
+    },
+    {
+      "type": "tfc:welding_recipe",
+      "recipe": "tfc:welding/metal/ingot/high_carbon_black_steel",
+      "text": "Weld $(thing)Weak Steel Ingots$() to $(thing)Pig Iron Ingots$() for $(thing)High Carbon Black Steel$(), and work that on an $(l:metalworking/anvils)Anvil$() into $(thing)Black Steel Ingots$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Black Steel$() makes tools and $(l:mechanics/armor)Armor$(), and is the base of $(l:metalworking/steel#blue_steel)Blue Steel$() and $(l:metalworking/steel#red_steel)Red Steel$()."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "blue_steel",
+      "text": "$(thing)Blue Steel$() is, with $(l:metalworking/steel#red_steel)Red Steel$(), the best metal there is. As with black steel, first make an alloy, $(thing)Weak Blue Steel$(), in a $(l:metalworking/crucible)Crucible$().",
+      "title": "Blue Steel"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/weak_blue_steel",
+      "link_recipes": false,
+      "text": "$(bold)Needs:$()$(li)$(thing)Black Steel$(), 50 to 55 %$(li)$(thing)Steel$(), 20 to 25 %$(li)$(thing)Bismuth Bronze$(), 10 to 15 %$(li)$(thing)Sterling Silver$(), 10 to 15 %",
+      "title": "Weak Blue Steel"
+    },
+    {
+      "type": "tfc:welding_recipe",
+      "recipe": "tfc:welding/metal/ingot/high_carbon_blue_steel",
+      "text": "Weld $(thing)Weak Blue Steel Ingots$() to $(l:metalworking/steel#black_steel)Black Steel Ingots$() for $(thing)High Carbon Blue Steel$(), and work that on an $(l:metalworking/anvils)Anvil$() into $(thing)Blue Steel Ingots$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Blue Steel$() yields tools, $(l:mechanics/armor)Armor$() and a bucket that holds $(cfg:metalBucketCapacity) of any liquid, $(6)Lava$() included."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "red_steel",
+      "text": "$(thing)Red Steel$() is, with $(l:metalworking/steel#blue_steel)Blue Steel$(), the best metal there is. First make an alloy, $(thing)Weak Red Steel$(), in a $(l:metalworking/crucible)Crucible$().",
+      "title": "Red Steel"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/weak_red_steel",
+      "link_recipes": false,
+      "text": "$(bold)Needs:$()$(li)$(thing)Black Steel$(), 50 to 55 %$(li)$(thing)Steel$(), 20 to 25 %$(li)$(thing)Brass$(), 10 to 15 %$(li)$(thing)Rose Gold$(), 10 to 15 %",
+      "title": "Weak Red Steel"
+    },
+    {
+      "type": "tfc:welding_recipe",
+      "recipe": "tfc:welding/metal/ingot/high_carbon_red_steel",
+      "text": "Weld $(thing)Weak Red Steel Ingots$() to $(l:metalworking/steel#black_steel)Black Steel Ingots$() for $(thing)High Carbon Red Steel$(), and work that on an $(l:metalworking/anvils)Anvil$() into $(thing)Red Steel Ingots$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Red Steel$() yields tools, $(l:mechanics/armor)Armor$() and a bucket that holds $(cfg:metalBucketCapacity) of any liquid, $(6)Lava$() included."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 8
+}

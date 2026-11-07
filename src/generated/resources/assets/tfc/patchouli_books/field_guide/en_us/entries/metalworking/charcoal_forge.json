@@ -1,0 +1,46 @@
+{
+  "category": "tfc:metalworking",
+  "icon": "tfc:textures/block/molten_lit.png",
+  "name": "Charcoal Forge",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The $(thing)Charcoal Forge$() heats and melts things. Items are heated in it for the $(l:metalworking/anvils)Anvil$(), and a $(l:metalworking/crucible)Crucible$() stands on it. You build it by ringing a $(l:metalworking/charcoal_pit#charcoal_pile)charcoal pile$() seven or eight layers deep with five blocks of $(thing)stone$(), and then lighting the pile."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": true,
+      "multiblock_id": "tfc:charcoal_forge",
+      "name": "A Charcoal Forge",
+      "text": "A finished forge, ready to light."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The block above must be air or a crucible. TFC++ asks neither for a chimney nor for the sky: a forge burns without them. But a chimney is what carries the fumes away. A forge in a shut room fills it with smoke and carbon monoxide, and with sulfur dioxide if it burns coal. Build it under open sky, or ventilate the room."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A $(l:metalworking/bellows)Bellows$() can stand one block up and beside the forge. The fire goes out when the air has less than 12% oxygen."
+    },
+    {
+      "type": "patchouli:image",
+      "border": false,
+      "images": [
+        "tfc:textures/gui/book/gui/charcoal_forge.png"
+      ],
+      "text": "The forge's interface."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The five lower slots hold fuel, and the forge burns one piece at a time:$(li)Charcoal 1100 °C$(li)Lignite 1000 °C$(li)Coal 1200 °C$(li)Lignite char 1100 °C$(li)Coke 1250 °C$(br)The five upper slots heat items up to the gauge. The slots at the side hold vessels and molds, which fill with the metal that melts.",
+      "title": "Fuel"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A bellows adds at most 500 °C to the fuel and doubles its burn: charcoal reaches 1600 °C. Iron, steel and fire clay need that. Rain falling on an open forge cools it by 300 °C and doubles the burn too.$(br2)Coal, lignite and coke carry sulfur, and every piece they burn releases sulfur dioxide.",
+      "title": "Blast and rain"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 3
+}

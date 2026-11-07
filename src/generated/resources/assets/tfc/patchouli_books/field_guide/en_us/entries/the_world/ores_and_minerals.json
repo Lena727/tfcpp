@@ -1,0 +1,1326 @@
+{
+  "category": "tfc:the_world",
+  "extra_recipe_mappings": {
+    "tfc:kaolin_clay": 30,
+    "tfc:kaolin_clay_grass": 30,
+    "tfc:ore/amethyst": 56,
+    "tfc:ore/bituminous_coal": 28,
+    "tfc:ore/borax": 44,
+    "tfc:ore/cinnabar": 34,
+    "tfc:ore/cryolite": 36,
+    "tfc:ore/diamond": 52,
+    "tfc:ore/emerald": 50,
+    "tfc:ore/graphite": 32,
+    "tfc:ore/gypsum": 46,
+    "tfc:ore/halite": 48,
+    "tfc:ore/lapis_lazuli": 54,
+    "tfc:ore/lignite": 26,
+    "tfc:ore/normal_bismuthinite": 14,
+    "tfc:ore/normal_cassiterite": 12,
+    "tfc:ore/normal_garnierite": 16,
+    "tfc:ore/normal_hematite": 18,
+    "tfc:ore/normal_limonite": 22,
+    "tfc:ore/normal_magnetite": 20,
+    "tfc:ore/normal_malachite": 10,
+    "tfc:ore/normal_native_copper": 2,
+    "tfc:ore/normal_native_gold": 4,
+    "tfc:ore/normal_native_silver": 6,
+    "tfc:ore/normal_sphalerite": 24,
+    "tfc:ore/normal_tetrahedrite": 8,
+    "tfc:ore/opal": 58,
+    "tfc:ore/poor_bismuthinite": 14,
+    "tfc:ore/poor_cassiterite": 12,
+    "tfc:ore/poor_garnierite": 16,
+    "tfc:ore/poor_hematite": 18,
+    "tfc:ore/poor_limonite": 22,
+    "tfc:ore/poor_magnetite": 20,
+    "tfc:ore/poor_malachite": 10,
+    "tfc:ore/poor_native_copper": 2,
+    "tfc:ore/poor_native_gold": 4,
+    "tfc:ore/poor_native_silver": 6,
+    "tfc:ore/poor_sphalerite": 24,
+    "tfc:ore/poor_tetrahedrite": 8,
+    "tfc:ore/pyrite": 60,
+    "tfc:ore/rich_bismuthinite": 14,
+    "tfc:ore/rich_cassiterite": 12,
+    "tfc:ore/rich_garnierite": 16,
+    "tfc:ore/rich_hematite": 18,
+    "tfc:ore/rich_limonite": 22,
+    "tfc:ore/rich_magnetite": 20,
+    "tfc:ore/rich_malachite": 10,
+    "tfc:ore/rich_native_copper": 2,
+    "tfc:ore/rich_native_gold": 4,
+    "tfc:ore/rich_native_silver": 6,
+    "tfc:ore/rich_sphalerite": 24,
+    "tfc:ore/rich_tetrahedrite": 8,
+    "tfc:ore/ruby": 62,
+    "tfc:ore/saltpeter": 38,
+    "tfc:ore/sapphire": 64,
+    "tfc:ore/small_bismuthinite": 14,
+    "tfc:ore/small_cassiterite": 12,
+    "tfc:ore/small_garnierite": 16,
+    "tfc:ore/small_hematite": 18,
+    "tfc:ore/small_limonite": 22,
+    "tfc:ore/small_magnetite": 20,
+    "tfc:ore/small_malachite": 10,
+    "tfc:ore/small_native_copper": 2,
+    "tfc:ore/small_native_gold": 4,
+    "tfc:ore/small_native_silver": 6,
+    "tfc:ore/small_sphalerite": 24,
+    "tfc:ore/small_tetrahedrite": 8,
+    "tfc:ore/sulfur": 40,
+    "tfc:ore/sylvite": 42,
+    "tfc:ore/topaz": 66,
+    "tfc:pink_kaolin_clay": 30,
+    "tfc:red_kaolin_clay": 30,
+    "tfc:white_kaolin_clay": 30
+  },
+  "icon": "tfc:ore/normal_hematite",
+  "name": "Ores and Minerals",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Ore is scarce in TFC, and unlike vanilla's it lies in huge, sparse veins, so you need $(l:metalworking/prospecting)prospecting$() to find it. Every ore keeps to certain rocks and certain heights: the right rock at the right depth is the whole secret."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Some ores are $(thing)graded$(): a block is poor, normal or rich, and each vein has its own mix. A richer vein pays more.$(br2)TFC++ treats an ore as the compound it is, and not as a lump of metal: what a fire makes of it depends on what else is in it. The next pages show each ore, where it lies, and what it gives."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "native_copper",
+      "text": "Native Copper is an ore of $(thing)Copper$(). It lies in $(l:the_world/geology#igneous_extrusive)Igneous Extrusive$() rock above y=40, and as deposits in $(thing)rivers$(), which can be $(l:getting_started/panning)panned$(). Copper melts at 1080 °C: it wants a forge, not a pit kiln.",
+      "title": "Native Copper"
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:ore/poor_native_copper/dacite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/normal_native_copper/dacite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/rich_native_copper/dacite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "Native Copper ore, in dacite."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "native_gold",
+      "text": "Native Gold is an ore of $(thing)Gold$(). It lies below y=70, larger and richer the deeper you go, in $(l:the_world/geology#igneous_extrusive)Igneous Extrusive$() and $(l:the_world/geology#igneous_intrusive)Igneous Intrusive$() rock, and in $(thing)rivers$(), where it can be $(l:getting_started/panning)panned$(). Gold melts at 1060 °C.",
+      "title": "Native Gold"
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:ore/poor_native_gold/diorite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/normal_native_gold/diorite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/rich_native_gold/diorite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "Native Gold ore, in diorite."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "native_silver",
+      "text": "Native Silver is an ore of $(thing)Silver$(). Small poor veins lie in $(thing)Granite$() or $(thing)Diorite$() of uplifts above y=90. Larger, richer ones lie in granite, diorite, $(thing)Schist$() and $(thing)Gneiss$() deep below y=20. It is also in $(thing)rivers$(), where it can be panned. Silver melts at 961 °C.",
+      "title": "Native Silver"
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:ore/poor_native_silver/granite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/normal_native_silver/granite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/rich_native_silver/granite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "Native Silver ore, in granite."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "tetrahedrite",
+      "text": "Tetrahedrite is an ore of $(thing)Copper$(): at any height, richer deeper, in $(l:the_world/geology#metamorphic)Metamorphic$() rock.$(br2)It is a sulfide with arsenic and antimony. It melts into $(thing)arsenical copper$() at 1050 °C, good for tools and bronze, and its smoke is sulfur dioxide with the oxides of arsenic and antimony: poison. Smelt it in the open or under a flue.",
+      "title": "Tetrahedrite"
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:ore/poor_tetrahedrite/schist"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/normal_tetrahedrite/schist"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/rich_tetrahedrite/schist"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "Tetrahedrite ore, in schist."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "malachite",
+      "text": "Malachite is an ore of $(thing)Copper$(). It lies mostly in $(thing)Marble$(), $(thing)Limestone$(), $(thing)Chalk$() and $(thing)Dolomite$(), at most heights, larger and richer deeper. Unlike tetrahedrite it holds no sulfur and no arsenic: it melts into clean copper.",
+      "title": "Malachite"
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:ore/poor_malachite/marble"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/normal_malachite/marble"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/rich_malachite/marble"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "Malachite ore, in marble."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "cassiterite",
+      "text": "Cassiterite is an ore of $(thing)Tin$(). It lies in $(l:the_world/geology#igneous_intrusive)Igneous Intrusive$() rock high up, above y=80 in uplifts or in dikes, and in $(thing)rivers$(), where it can be $(l:getting_started/panning)panned$(). Tin melts at 230 °C.",
+      "title": "Cassiterite"
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:ore/poor_cassiterite/diorite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/normal_cassiterite/diorite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/rich_cassiterite/diorite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "Cassiterite ore, in diorite."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "bismuthinite",
+      "text": "Bismuthinite is an ore of $(thing)Bismuth$(). It lies in $(l:the_world/geology#sedimentary)Sedimentary$() rock near the surface, and in larger, richer veins in intrusive rock deep down. It is a sulfide: at 600 °C it roasts to bismuth and gives off sulfur dioxide.",
+      "title": "Bismuthinite"
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:ore/poor_bismuthinite/shale"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/normal_bismuthinite/shale"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/rich_bismuthinite/shale"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "Bismuthinite ore, in shale."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "garnierite",
+      "text": "Garnierite is an ore of $(thing)Nickel$(). It lies below y=0, mostly in $(thing)Gabbro$() deep down, and in smaller, rarer veins in any intrusive rock. Nickel melts at 1453 °C, so it needs a forge with a blast.",
+      "title": "Garnierite"
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:ore/poor_garnierite/gabbro"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/normal_garnierite/gabbro"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/rich_garnierite/gabbro"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "Garnierite ore, in gabbro."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "hematite",
+      "text": "Hematite is an iron oxide and an ore of $(thing)Iron$(): large veins in any $(l:the_world/geology#igneous_extrusive)extrusive$() rock near the surface.$(br2)No heat alone turns an iron oxide into metal. In a forge or crucible it melts only into iron oxide (1565 °C), which cannot be cast. Carbon must take the oxygen away: in a $(l:metalworking/bloomery)Bloomery$() or a $(l:metalworking/blast_furnace)Blast Furnace$().",
+      "title": "Hematite"
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:ore/poor_hematite/andesite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/normal_hematite/andesite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/rich_hematite/andesite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "Hematite ore, in andesite."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "magnetite",
+      "text": "Magnetite is an ore of $(thing)Iron$(): large veins in any $(l:the_world/geology#sedimentary)sedimentary$() rock near the surface. It is an oxide like hematite and is smelted in the same way.",
+      "title": "Magnetite"
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:ore/poor_magnetite/limestone"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/normal_magnetite/limestone"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/rich_magnetite/limestone"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "Magnetite ore, in limestone."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "limonite",
+      "text": "Limonite is an ore of $(thing)Iron$(): large veins in any $(l:the_world/geology#sedimentary)sedimentary$() rock near the surface.$(br2)Brown iron ores carry 0.5 to 2% phosphorus. In a bloomery it goes into the slag. In a blast furnace it goes into the iron, which then breaks in the cold: it is cold short.",
+      "title": "Limonite"
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:ore/poor_limonite/chalk"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/normal_limonite/chalk"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/rich_limonite/chalk"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "Limonite ore, in chalk."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "sphalerite",
+      "text": "Sphalerite is an ore of $(thing)Zinc$(). Small poor veins lie in $(l:the_world/geology#igneous_extrusive)Igneous Extrusive$() rock near the surface, large rich ones in $(l:the_world/geology#igneous_intrusive)Igneous Intrusive$() rock deep down.$(br2)It does not melt into zinc: at 900 °C it roasts into a calcine and gives off sulfur dioxide. Zinc comes only from a retort at 1000 °C. It boils at 907 °C, and in the open it burns to white smoke that gives metal fume fever.",
+      "title": "Sphalerite"
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:ore/poor_sphalerite/quartzite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/normal_sphalerite/quartzite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:ore/rich_sphalerite/quartzite"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "Sphalerite ore, in quartzite."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "lignite",
+      "item": "tfc:ore/lignite",
+      "link_recipes": false,
+      "text": "Lignite is a low-grade $(thing)Coal$(): very large flat beds in $(l:the_world/geology#sedimentary)Sedimentary$() rock near the surface. It burns at 1000 °C, carries sulfur, and its beds hold gas that comes out when they are mined.",
+      "title": "Lignite"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:lignite"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Lignite."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "bituminous_coal",
+      "item": "tfc:ore/bituminous_coal",
+      "link_recipes": false,
+      "text": "Bituminous Coal is a medium-grade $(thing)Coal$(): very large flat beds in $(l:the_world/geology#sedimentary)Sedimentary$() rock near the surface. It burns at 1200 °C. Its seams hold methane, which explodes, and its dust burns too.",
+      "title": "Bituminous Coal"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:bituminous_coal"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Bituminous Coal."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "kaolinite",
+      "item": "tfc:kaolin_clay",
+      "link_recipes": false,
+      "text": "Kaolinite is a soft $(thing)Mineral$() for $(l:metalworking/fire_clay)Fire Clay$(). It forms at height, on Highlands, Rolling Hills, Old Mountains and Plateaus, where the $(l:core_mechanics/climate#temperature)temperature$() is at least $(cfg:temperature:18) and the $(l:core_mechanics/climate#rainfall)rainfall$() at least 300 mm. $(thing)Blood Lily$() grows on it.",
+      "title": "Kaolinite"
+    },
+    {
+      "type": "tfc:multimultiblock",
+      "multiblocks": [
+        {
+          "mapping": {
+            "X": "tfc:plant/blood_lily",
+            "Y": "tfc:kaolin_clay_grass"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "Y"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:plant/blood_lily",
+            "Y": "tfc:red_kaolin_clay"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "Y"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:plant/blood_lily",
+            "Y": "tfc:white_kaolin_clay"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "Y"
+            ],
+            [
+              "0"
+            ]
+          ]
+        },
+        {
+          "mapping": {
+            "X": "tfc:plant/blood_lily",
+            "Y": "tfc:pink_kaolin_clay"
+          },
+          "pattern": [
+            [
+              "X"
+            ],
+            [
+              "Y"
+            ],
+            [
+              "0"
+            ]
+          ]
+        }
+      ],
+      "text": "Kinds of kaolin clay."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "graphite",
+      "item": "tfc:ore/graphite",
+      "link_recipes": false,
+      "text": "Graphite is a $(thing)Mineral$() used for $(l:metalworking/fire_clay)Fire Clay$() and gunpowder. It lies in $(thing)Gneiss$(), $(thing)Marble$(), $(thing)Quartzite$() and $(thing)Schist$() below y=60.",
+      "title": "Graphite"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/graphite/gneiss"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Graphite in gneiss."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "cinnabar",
+      "item": "tfc:ore/cinnabar",
+      "link_recipes": false,
+      "text": "Cinnabar is the ore of $(thing)Mercury$(), not of redstone. It lies in veins deep down or high in the mountains, in gneiss, schist, phyllite, granite and quartzite. Fired in the open it loses its mercury as poisonous vapour. A retort with a condenser at 600 °C catches it as liquid metal.",
+      "title": "Cinnabar"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/cinnabar/quartzite"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Cinnabar in quartzite."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "cryolite",
+      "item": "tfc:ore/cryolite",
+      "link_recipes": false,
+      "text": "Cryolite is a mineral of aluminium and fluorine, found in veins deep down, in granite and diorite. Redstone cannot be made of it, and it has no use in the game yet.",
+      "title": "Cryolite"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/cryolite/granite"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Cryolite in granite."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "saltpeter",
+      "item": "tfc:ore/saltpeter",
+      "link_recipes": false,
+      "text": "Saltpeter is a $(thing)Mineral$() ground in the $(l:crafting/quern)Quern$() for $(thing)Gunpowder$(), for fertilizer, and for the nitrous fumes of acid making. It lies in very large flat beds near the surface in $(l:the_world/geology#sedimentary)Sedimentary$() rock.",
+      "title": "Saltpeter"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/saltpeter/shale"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Saltpeter in shale."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "sulfur",
+      "item": "tfc:ore/sulfur",
+      "link_recipes": false,
+      "text": "Sulfur is a $(thing)Mineral$() ground in the $(l:crafting/quern)Quern$() for $(thing)Gunpowder$(), and burnt to sulfur dioxide as the start of sulfuric acid. It lies near lava level deep down, in sparse, large, rich veins, in any metamorphic or intrusive rock.",
+      "title": "Sulfur"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/sulfur/gabbro"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Sulfur in gabbro."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "sylvite",
+      "item": "tfc:ore/sylvite",
+      "link_recipes": false,
+      "text": "Sylvite is a $(thing)Mineral$() ground in the quern for $(l:food/fertilizers)Fertilizer$(). It lies in very large flat beds near the surface in $(thing)Chert$(), $(thing)Claystone$() and $(thing)Shale$().",
+      "title": "Sylvite"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/sylvite/chert"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Sylvite in chert."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "borax",
+      "item": "tfc:ore/borax",
+      "link_recipes": false,
+      "text": "Borax is a $(thing)Mineral$() ground in the quern into six $(thing)Borax Flux$(), a flux for welding (see $(l:metalworking/flux)Flux$()), and it is the boron of borosilicate glass. It lies in very large flat beds near the surface in $(thing)Shale$(), $(thing)Limestone$() and $(thing)Claystone$().",
+      "title": "Borax"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/borax/shale"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Borax in shale."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "gypsum",
+      "item": "tfc:ore/gypsum",
+      "link_recipes": false,
+      "text": "Gypsum is a decorative $(thing)Mineral$() for making $(l:mechanics/advanced_building_materials#plaster)Plaster$(). It lies in very large flat beds near the surface in $(l:the_world/geology#sedimentary)Sedimentary$() rock.",
+      "title": "Gypsum"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/gypsum/chalk"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Gypsum in chalk."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "halite",
+      "item": "tfc:ore/halite",
+      "link_recipes": false,
+      "text": "Halite is a $(thing)Mineral$() ground in the $(l:crafting/quern)Quern$() into $(thing)Salt$(), an important $(l:food/decay#salting)Preservative$(). It lies in very large flat beds near the surface in $(l:the_world/geology#sedimentary)Sedimentary$() rock.",
+      "title": "Halite"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:halite"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Halite."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "emerald",
+      "item": "tfc:ore/emerald",
+      "link_recipes": false,
+      "text": "Emerald is a $(l:mechanics/gems)Gemstone$(), prized for trade. It forms thin vertical veins up to a hundred blocks tall, in $(l:the_world/geology#igneous_intrusive)Igneous Intrusive$() rock or by hot springs.",
+      "title": "Emerald"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/emerald/diorite"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Emerald in diorite."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "diamond",
+      "item": "tfc:ore/diamond",
+      "link_recipes": false,
+      "text": "Kimberlite is a priceless, purely decorative $(l:mechanics/gems)Gemstone$(). It forms in thin vertical $(l:https://en.wikipedia.org/wiki/Volcanic_pipe)kimberlite pipes$() up to a hundred blocks tall, only in $(thing)Gabbro$(), and rarely in volcanic fissures.",
+      "title": "Kimberlite"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/diamond/gabbro"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Kimberlite in gabbro."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "lapis_lazuli",
+      "item": "tfc:ore/lapis_lazuli",
+      "link_recipes": false,
+      "text": "Lapis Lazuli is a decorative $(l:mechanics/gems)Gemstone$() for $(l:mechanics/dye)blue dye$(). Its veins are large but far apart, in $(thing)Marble$() and $(thing)Limestone$(), from y=-20 up to y=80.",
+      "title": "Lapis Lazuli"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/lapis_lazuli/marble"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Lapis lazuli in marble."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "amethyst",
+      "item": "tfc:ore/amethyst",
+      "link_recipes": false,
+      "text": "Amethyst is a decorative $(l:mechanics/gems)Gemstone$() that also serves $(l:crafting/glassworking)Glass$(). It lies in geodes below y=30, or under rivers above y=40, in $(thing)Metamorphic$() and $(thing)Sedimentary$() rock.",
+      "title": "Amethyst"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/amethyst/marble"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Amethyst in marble."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "opal",
+      "item": "tfc:ore/opal",
+      "link_recipes": false,
+      "text": "Opal is a decorative $(l:mechanics/gems)Gemstone$(). It lies under rivers above y=40, in $(thing)Igneous Extrusive$() and $(thing)Sedimentary$() rock.",
+      "title": "Opal"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/opal/basalt"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Opal in basalt."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "pyrite",
+      "item": "tfc:ore/pyrite",
+      "link_recipes": false,
+      "text": "Pyrite, fool's gold, is a $(l:mechanics/gems)Gemstone$() that strikes sparks from flint, for $(l:getting_started/firepit#firestarter)fire$(). It lies in intrusive and extrusive rock below y=70.",
+      "title": "Pyrite"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/pyrite/granite"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Pyrite in granite."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "ruby",
+      "item": "tfc:ore/ruby",
+      "link_recipes": false,
+      "text": "Ruby is a decorative $(l:mechanics/gems)Gemstone$(), rare in $(thing)Marble$() below y=-10, and commoner in marble veins of collisional mountains.",
+      "title": "Ruby"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/ruby/marble"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Ruby in marble."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "sapphire",
+      "item": "tfc:ore/sapphire",
+      "link_recipes": false,
+      "text": "Sapphire is a decorative $(l:mechanics/gems)Gemstone$(), found in the fissures of $(thing)Hot Springs$().",
+      "title": "Sapphire"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/sapphire/gabbro"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Sapphire in gabbro."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "topaz",
+      "item": "tfc:ore/topaz",
+      "link_recipes": false,
+      "text": "Topaz is a decorative $(l:mechanics/gems)Gemstone$(), found in the fissures of volcanoes.",
+      "title": "Topaz"
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:ore/topaz/schist"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "",
+      "text": "Topaz in schist."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 1
+}

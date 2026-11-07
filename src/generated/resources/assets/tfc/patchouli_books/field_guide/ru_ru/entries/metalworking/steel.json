@@ -1,0 +1,123 @@
+{
+  "category": "tfc:metalworking",
+  "extra_recipe_mappings": {
+    "tfc:metal/ingot/black_steel": 9,
+    "tfc:metal/ingot/blue_steel": 13,
+    "tfc:metal/ingot/high_carbon_black_steel": 9,
+    "tfc:metal/ingot/high_carbon_blue_steel": 13,
+    "tfc:metal/ingot/high_carbon_red_steel": 17,
+    "tfc:metal/ingot/high_carbon_steel": 0,
+    "tfc:metal/ingot/pig_iron": 0,
+    "tfc:metal/ingot/red_steel": 17,
+    "tfc:metal/ingot/steel": 0,
+    "tfc:metal/ingot/weak_blue_steel": 12,
+    "tfc:metal/ingot/weak_red_steel": 16,
+    "tfc:metal/ingot/weak_steel": 8
+  },
+  "icon": "tfc:metal/ingot/steel",
+  "name": "Сталь",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Из $(thing)стали$() делают орудия и $(l:mechanics/armor)броню$() в четырёх сортах: обычная сталь, затем чёрная, красная и синяя.$(br2)Она начинается с железа, у которого подогнан углерод. В $(thing)передельном чугуне$() из $(l:metalworking/blast_furnace)доменной печи$() больше 4% углерода, в стали от 0,2 до 1%. Молотом углерод из железа не выбить. Его разбавляют или выжигают."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Расплавьте $(thing)кованое железо$() с $(thing)передельным чугуном$() в $(l:metalworking/crucible)тигле$(), и углерод усреднится по массе. Чугуна от 4 до 24% смеси даёт $(thing)сталь$(), от 24 до 52% $(thing)высокоуглеродистую сталь$(), от 52 до 99% $(thing)литейный чугун$(). Тигель должен пройти 1535 °C: нужен древесный уголь с дутьём или каменный уголь.",
+      "title": "Разбавление в тигле"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Конвертер Бессемера$() выжигает углерод из жидкого чугуна воздухом и не тратит топлива. Поставьте его под доменную печь или влейте железо и продувайте воздухом по трубе. Нужно около моля воздуха в секунду и железо не холоднее 1350 °C, иначе оно застынет в сосуде. Если продувать слишком долго, сгорит само железо.",
+      "title": "Выжигание в конвертере"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/converter",
+      "text": "Конвертер: семь $(thing)двойных листов кованого железа$() вокруг $(thing)огнеупорного кирпича$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)Искры и почти нет пламени: горит кремний.$(li)Длинное белое пламя: горит углерод.$(li)Пламя укорачивается: для стали пора остановиться.$(li)Пламя падает и идёт бурый дым: углерода нет, горит железо.$(br2)Вода в трубе дутья разнесёт сосуд: литр воды даёт 1700 литров пара. Футеровка изнашивается, её меняют огнеупорными кирпичами в пустом сосуде.",
+      "title": "Как читать пламя"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "У нового конвертера кислая футеровка из огнеупорной глины, и фосфор она не убирает. Железо из лимонита остаётся фосфористым, и выпуск из него это хрупкое $(thing)хладноломкое железо$(), которое можно лишь отлить или залить снова. Фосфор забирает только основная футеровка из доломитовых кирпичей с известью, как нашли Томас и Гилкрист в 1878 году.",
+      "title": "Фосфор"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Ковка углерод не убирает, поэтому передельный чугун, литейный чугун и высокоуглеродистую сталь на наковальне в сталь не перековать. $(thing)Литейный чугун$() хрупок: из него не выковать прутья и листы и не сварить, его только отливают. Высокоуглеродистая сталь становится сталью продувкой в конвертере или сплавлением с кованым железом.",
+      "title": "Углерод и молот"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "black_steel",
+      "text": "$(thing)Чёрная сталь$() это сталь, сплавленная с другими металлами. Сначала в $(l:metalworking/crucible)тигле$() делают $(thing)слабую сталь$().",
+      "title": "Чёрная сталь"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/weak_steel",
+      "link_recipes": false,
+      "text": "$(bold)Нужно:$()$(li)$(thing)сталь$(), 50–70 %$(li)$(thing)никель$(), 15–25 %$(li)$(thing)чёрная бронза$(), 15–25 %$(br2)Жидкую $(thing)слабую сталь$() разливают в формы для слитков.",
+      "title": "Слабая сталь"
+    },
+    {
+      "type": "tfc:welding_recipe",
+      "recipe": "tfc:welding/metal/ingot/high_carbon_black_steel",
+      "text": "Сварите $(thing)слитки слабой стали$() со $(thing)слитками передельного чугуна$(): выйдет $(thing)высокоуглеродистая чёрная сталь$(). На $(l:metalworking/anvils)наковальне$() из неё куют $(thing)слитки чёрной стали$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Из $(thing)чёрной стали$() делают орудия и $(l:mechanics/armor)броню$(), и она основа $(l:metalworking/steel#blue_steel)синей стали$() и $(l:metalworking/steel#red_steel)красной стали$()."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "blue_steel",
+      "text": "$(thing)Синяя сталь$() вместе с $(l:metalworking/steel#red_steel)красной сталью$() лучший из металлов. Как и с чёрной, сначала в $(l:metalworking/crucible)тигле$() делают сплав, $(thing)слабую синюю сталь$().",
+      "title": "Синяя сталь"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/weak_blue_steel",
+      "link_recipes": false,
+      "text": "$(bold)Нужно:$()$(li)$(thing)чёрная сталь$(), 50–55 %$(li)$(thing)сталь$(), 20–25 %$(li)$(thing)висмутовая бронза$(), 10–15 %$(li)$(thing)стерлинговое серебро$(), 10–15 %",
+      "title": "Слабая синяя сталь"
+    },
+    {
+      "type": "tfc:welding_recipe",
+      "recipe": "tfc:welding/metal/ingot/high_carbon_blue_steel",
+      "text": "Сварите $(thing)слитки слабой синей стали$() со $(l:metalworking/steel#black_steel)слитками чёрной стали$(): выйдет $(thing)высокоуглеродистая синяя сталь$(). На $(l:metalworking/anvils)наковальне$() из неё куют $(thing)слитки синей стали$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Синяя сталь$() даёт орудия, $(l:mechanics/armor)броню$() и ведро, в которое входит $(cfg:metalBucketCapacity) любой жидкости, в том числе $(6)лавы$()."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "red_steel",
+      "text": "$(thing)Красная сталь$() вместе с $(l:metalworking/steel#blue_steel)синей сталью$() лучший из металлов. Сначала в $(l:metalworking/crucible)тигле$() делают сплав, $(thing)слабую красную сталь$().",
+      "title": "Красная сталь"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/weak_red_steel",
+      "link_recipes": false,
+      "text": "$(bold)Нужно:$()$(li)$(thing)чёрная сталь$(), 50–55 %$(li)$(thing)сталь$(), 20–25 %$(li)$(thing)латунь$(), 10–15 %$(li)$(thing)розовое золото$(), 10–15 %",
+      "title": "Слабая красная сталь"
+    },
+    {
+      "type": "tfc:welding_recipe",
+      "recipe": "tfc:welding/metal/ingot/high_carbon_red_steel",
+      "text": "Сварите $(thing)слитки слабой красной стали$() со $(l:metalworking/steel#black_steel)слитками чёрной стали$(): выйдет $(thing)высокоуглеродистая красная сталь$(). На $(l:metalworking/anvils)наковальне$() из неё куют $(thing)слитки красной стали$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Красная сталь$() даёт орудия, $(l:mechanics/armor)броню$() и ведро, в которое входит $(cfg:metalBucketCapacity) любой жидкости, в том числе $(6)лавы$()."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 8
+}

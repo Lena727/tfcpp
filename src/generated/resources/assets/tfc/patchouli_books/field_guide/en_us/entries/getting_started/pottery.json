@@ -1,0 +1,185 @@
+{
+  "category": "tfc:getting_started",
+  "extra_recipe_mappings": {
+    "minecraft:clay": 0,
+    "tag:tfc:clay_indicators": 2,
+    "tfc:ceramic/axe_head_mold": 19,
+    "tfc:ceramic/chisel_head_mold": 18,
+    "tfc:ceramic/hammer_head_mold": 20,
+    "tfc:ceramic/hoe_head_mold": 22,
+    "tfc:ceramic/ingot_mold": 12,
+    "tfc:ceramic/jug": 8,
+    "tfc:ceramic/knife_blade_mold": 21,
+    "tfc:ceramic/pickaxe_head_mold": 15,
+    "tfc:ceramic/saw_blade_mold": 16,
+    "tfc:ceramic/scythe_blade_mold": 17,
+    "tfc:ceramic/shovel_head_mold": 23,
+    "tfc:ceramic/unfired_axe_head_mold": 19,
+    "tfc:ceramic/unfired_chisel_head_mold": 18,
+    "tfc:ceramic/unfired_hammer_head_mold": 20,
+    "tfc:ceramic/unfired_hoe_head_mold": 22,
+    "tfc:ceramic/unfired_ingot_mold": 11,
+    "tfc:ceramic/unfired_jug": 8,
+    "tfc:ceramic/unfired_knife_blade_mold": 21,
+    "tfc:ceramic/unfired_pickaxe_head_mold": 15,
+    "tfc:ceramic/unfired_propick_head_mold": 14,
+    "tfc:ceramic/unfired_saw_blade_mold": 16,
+    "tfc:ceramic/unfired_scythe_blade_mold": 17,
+    "tfc:ceramic/unfired_shovel_head_mold": 23,
+    "tfc:ceramic/unfired_vessel": 4,
+    "tfc:ceramic/vessel": 4
+  },
+  "icon": "tfc:ceramic/vessel",
+  "name": "Pottery",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Clay$() is a handy and balanced material for pottery, but hard to find at first. It is usually under grass, in two kinds of place. Where the $(l:core_mechanics/climate#rainfall)annual rainfall$() is at least 175 mm, clay lies in patches everywhere, often marked by certain $(thing)plants$()."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "0": "tfc:clay_grass/aridisol",
+          "C": "#tfc:clay_indicators",
+          "X": "tfc:clay_grass/aridisol"
+        },
+        "pattern": [
+          [
+            "   ",
+            " C ",
+            "   "
+          ],
+          [
+            "XXX",
+            "X0X",
+            "XXX"
+          ]
+        ]
+      },
+      "name": "Clay Indicators",
+      "text": "Clay, and one of the plants that may show it."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "knapping",
+      "text": "Clay is betrayed by $(thing)Goldenrod$(), $(thing)Perovskia$(), $(thing)Canna$(), $(thing)Water Canna$(), $(thing)Pampas Grass$() and $(thing)Athyrium Fern$() growing close to it. There is also clay in small beds by water: rivers, lakes, ponds.$(br2)Clay can be knapped like stone, with five pieces in hand. If you err, you can close the screen, reshape the clay and try again."
+    },
+    {
+      "type": "patchouli:image",
+      "border": false,
+      "images": [
+        "tfc:textures/gui/book/gui/clay_knapping.png"
+      ],
+      "text": "The knapping screen."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "vessel",
+      "text": "The small vessel is the first thing to make. Like all pottery it must be fired before use. Firing heats the item until the clay becomes hard $(thing)ceramic$(): 850 °C. Early on that is done in a $(l:getting_started/pit_kiln)Pit Kiln$(). Ware of $(l:metalworking/fire_clay)Fire Clay$() needs 1300 °C instead.",
+      "title": "Small Vessel"
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_vessel",
+      "text": "Knapping a small vessel."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The $(l:food/decay#large_vessels)Large Vessel$() is knapped the same way. It can be set down as a block and holds nine stacks. The linked chapter says more.",
+      "title": "Large Vessel"
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_large_vessel",
+      "text": "Knapping a large vessel."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "jug",
+      "text": "Another useful piece is the $(thing)Jug$(). It picks up and $(thing)drinks$() liquids such as fresh water. $(item)$(k:key.use)$() it on the liquid in the world, then use it to drink. It holds $(thing)$(cfg:jugCapacity)$() of liquid.",
+      "title": "Jug"
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_jug",
+      "text": "Knapping a jug."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "mold",
+      "text": "Clay also makes $(thing)Molds$(). Molten metal poured into a mold sets into its shape. Use the mold to take out the item, and sometimes the mold too. The simplest is the ingot mold, shown next.",
+      "title": "Molds"
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_ingot_mold",
+      "text": "Knapping an ingot mold."
+    },
+    {
+      "type": "tfc:heat_recipe",
+      "recipe": "tfc:heating/ceramic/ingot_mold",
+      "text": "Fire the mold like any clay ware at 850 °C, likely in a $(l:getting_started/pit_kiln)Pit Kiln$(). Then pour metal in, and take it out when it has cooled enough."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:ceramic/ingot_mold[tfc:fluid={id:\"tfc:metal/copper\",amount:100}]",
+      "link_recipes": false,
+      "text": "The next pages show knapping patterns for several tools.",
+      "title": "Casting"
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_propick_head_mold",
+      "text": "A $(l:metalworking/prospecting#propick)Prospector's Pick$() is the tool for finding rich ore."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_pickaxe_head_mold",
+      "text": "A $(thing)Pickaxe$(): the everyday mining tool."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_saw_blade_mold",
+      "text": "A $(thing)Saw$() is needed for fine wooden parts, such as a $(thing)Workbench$() and many other devices, $(l:core_mechanics/support_beams)Supports$() among them."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_scythe_blade_mold",
+      "text": "A $(thing)Scythe$() cuts plants and leaves in a 3x3x3 area."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_chisel_head_mold",
+      "text": "A $(l:metalworking/chisel)Chisel$() smooths blocks and carves many decorative ones."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_axe_head_mold",
+      "text": "An $(thing)Axe$() for felling trees. A stone axe is worse than a metal one."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_hammer_head_mold",
+      "text": "A $(thing)Hammer$() is needed for making and working $(l:metalworking/anvils)Anvils$()."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_knife_blade_mold",
+      "text": "A $(thing)Knife$() is a weapon and a cutter of plants."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_hoe_head_mold",
+      "text": "A $(thing)Hoe$() tills and tends $(l:food/crops)Crops$()."
+    },
+    {
+      "type": "tfc:knapping_recipe",
+      "recipe": "tfc:knapping/ceramic/unfired_shovel_head_mold",
+      "text": "A $(thing)Shovel$() for digging."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 2
+}

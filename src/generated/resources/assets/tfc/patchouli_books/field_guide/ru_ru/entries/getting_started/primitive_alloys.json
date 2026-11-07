@@ -1,0 +1,80 @@
+{
+  "category": "tfc:getting_started",
+  "extra_recipe_mappings": {
+    "tfc:metal/ingot/bismuth_bronze": 4,
+    "tfc:metal/ingot/black_bronze": 5,
+    "tfc:metal/ingot/brass": 7,
+    "tfc:metal/ingot/bronze": 3
+  },
+  "icon": "tfc:ceramic/ingot_mold[tfc:fluid={id:\"tfc:metal/bronze\",amount:100}]",
+  "name": "Примитивные сплавы",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Сплав$() смешивает металлы в новый, более прочный. Из меди делают орудия, но следующая ступень это одна из трёх $(thing)бронз$(). Сплав состоит из $(thing)металлов$(), каждый из которых должен укладываться в свою долю целого."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Сначала сплавы делают в $(thing)малом сосуде$(), так же как $(l:getting_started/finding_ores#casting)литьё$(): положите достаточно кусков руды в нужной пропорции для известного сплава. Сосуд греют в $(l:metalworking/charcoal_forge)угольной кузнице$(), потому что земляная печь (около 900 °C) медь (1080 °C) не расплавит."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Возьмём $(thing)бронзу$() (справа): полные 1000 мБ требуют 880-920 мБ $(thing)меди$() вместе с 80-120 мБ $(thing)олова$().$(br2)Три бронзы идут дальше, по странице на каждую. Из всех делают орудия, $(l:mechanics/armor)броню$() и прочее, а различаются они немного прочностью, скоростью и уроном."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/bronze",
+      "link_recipes": false,
+      "text": "$(bold)Нужно:$()$(br)$(li)$(thing)медь$(), 88–92 %$(li)$(thing)олово$(), 8–12 %",
+      "title": "Бронза"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/bismuth_bronze",
+      "link_recipes": false,
+      "text": "$(bold)Нужно:$()$(br)$(li)$(thing)цинк$(), 20–30 %$(li)$(thing)медь$(), 50–65 %$(li)$(thing)висмут$(), 10–20 %",
+      "title": "Висмутовая бронза"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/black_bronze",
+      "link_recipes": false,
+      "text": "$(bold)Нужно:$()$(br)$(li)$(thing)медь$(), 50–70 %$(li)$(thing)серебро$(), 10–25 %$(li)$(thing)золото$(), 10–25 %",
+      "title": "Чёрная бронза"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Ещё три сплава на орудия не идут: $(thing)латунь$(), $(thing)розовое золото$() и $(thing)стерлинговое серебро$().$(br2)Из них $(thing)латунь$() нужна для механизмов, в том числе $(l:mechanics/mechanical_power)механическую энергию$(), и на латунную трубку стеклодува.$(br2)$(thing)Розовое золото$() и $(thing)стерлинговое серебро$() нужны для $(l:metalworking/steel#red_steel)красной стали$() и $(l:metalworking/steel#blue_steel)синей стали$().",
+      "title": "Прикладные сплавы"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "brass",
+      "item": "tfc:metal/ingot/brass",
+      "link_recipes": false,
+      "text": "$(bold)Нужно:$()$(br)$(li)$(thing)медь$(), 62–72 %$(li)$(thing)цинк$(), 28–38 %$(br2)Настоящая латунь для механизмов содержит около трети цинка и плавится при 930 °C.",
+      "title": "Латунь"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/rose_gold",
+      "link_recipes": false,
+      "text": "$(bold)Нужно:$()$(br)$(li)$(thing)медь$(), 15–30 %$(li)$(thing)золото$(), 70–85 %",
+      "title": "Розовое золото"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tfc:metal/ingot/sterling_silver",
+      "link_recipes": false,
+      "text": "$(bold)Нужно:$()$(br)$(li)$(thing)серебро$(), 90–95 %$(li)$(thing)медь$(), 5–10 %$(br2)Плавится при 890 °C.",
+      "title": "Стерлинговое серебро"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Медь, выплавленная из тетраэдрита, содержит мышьяк и $(thing)мышьяковистая$(). Она может заменить медь в бронзе, висмутовой бронзе, чёрной бронзе и латуни. Смешанная с чистой медью она остаётся мышьяковистой: мышьяк не разбавляется. Чистая медь выходит только из самородной меди и малахита.",
+      "title": "Мышьяковистая медь"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 6
+}

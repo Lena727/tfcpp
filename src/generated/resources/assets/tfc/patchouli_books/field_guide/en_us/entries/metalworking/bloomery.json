@@ -1,0 +1,79 @@
+{
+  "category": "tfc:metalworking",
+  "extra_recipe_mappings": {
+    "tfc:raw_iron_bloom": 7,
+    "tfc:refined_iron_bloom": 8
+  },
+  "icon": "tfc:bloomery",
+  "name": "Bloomery",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The $(thing)Bloomery$() reduces iron ore to a spongy lump of iron, a $(thing)Bloom$(), without melting it. The ores are $(l:the_world/ores_and_minerals#hematite)Hematite$(), $(l:the_world/ores_and_minerals#limonite)Limonite$() and $(l:the_world/ores_and_minerals#magnetite)Magnetite$().$(br2)Only ore goes in, and slag left by earlier smelts. Iron ingots and tools do not: they are iron already, and melt back into iron. Ore on its own melts only into oxide, which gives no metal. The carbon of charcoal has to take the oxygen away."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfc:crafting/bloomery",
+      "text": "The bloomery is built of 8 $(thing)Bronze Double Sheets$()."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": true,
+      "multiblock_id": "tfc:bloomery",
+      "name": "A Bloomery",
+      "text": "A bloomery of the least size. $(item)$(k:key.use)$() opens and closes its door."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The bloomery takes up to $(cfg:bloomeryTotalCapacity) $(thing)items$(), $(cfg:bloomeryCapacity) for each layer of chimney. Add a layer by stacking two more rings of stone. Climb to the top and drop ore and charcoal down the chimney: a column of grey ore builds up."
+    },
+    {
+      "type": "patchouli:image",
+      "border": true,
+      "images": [
+        "tfc:textures/gui/book/tutorial/bloomery_hole.png"
+      ],
+      "text": "Dropping a load in from the top."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Making a bloom takes 150 mB of iron oxide and 2 $(thing)Charcoal$(). Ore gives its oxide by size: small 10 mB, poor 15, normal 25, rich 35. Light the bloomery and wait 12 hours. It leaves a $(thing)Bloom$() block: mine it with a pickaxe, again and again, for $(thing)Raw Iron Blooms$().$(br2)Ore beyond a whole bloom is not lost. It comes out as slag, 25 mB a piece, which can be loaded again."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "X": "tfc:bloom[layers=8]"
+        },
+        "pattern": [
+          [
+            "X"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "The Bloom Block",
+      "text": "A large $(thing)Bloom$()."
+    },
+    {
+      "type": "tfc:anvil_recipe",
+      "recipe": "tfc:anvil/refined_iron_bloom",
+      "text": "A $(thing)Raw Iron Bloom$() still holds slag. Forge it on an $(l:metalworking/anvils)anvil$() into a $(thing)Refined Iron Bloom$()."
+    },
+    {
+      "type": "tfc:anvil_recipe",
+      "recipe": "tfc:anvil/metal/ingot/wrought_iron",
+      "text": "Forge the refined bloom again into $(thing)Wrought Iron Ingots$(). A bloom also melts straight into wrought iron, never into cast iron."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)The oxygen of the ore leaves as carbon dioxide, and the fire itself makes carbon monoxide: over a third of its carbon. A bloomery shut in a room poisons it. Build it in the open.$(li)The phosphorus of limonite goes into the slag, not the bloom, so a bloom is plain iron. That slag stays phosphoric.$(li)Overfilling spits items out of the front.$(li)To get items back from a cold bloomery, break the bloomery block, not the tower of ore.",
+      "title": "Dangers and details"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 7
+}
