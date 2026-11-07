@@ -1,11 +1,9 @@
 package tfcpp.pneumatics.pipes;
 
-import java.util.List;
 import java.util.Map;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -13,9 +11,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.phys.Vec3;
 
 /** A straight length of pipe, joining whatever pipe fittings stand next to it. */
 public final class PipeBlock extends net.minecraft.world.level.block.PipeBlock implements PipeMember
@@ -68,6 +63,12 @@ public final class PipeBlock extends net.minecraft.world.level.block.PipeBlock i
     }
 
     @Override
+    public boolean reaches(BlockState state, Direction side)
+    {
+        return state.getValue(SIDES.get(side));
+    }
+
+    @Override
     public BlockState getStateForPlacement(BlockPlaceContext context)
     {
         BlockState state = defaultBlockState();
@@ -87,13 +88,6 @@ public final class PipeBlock extends net.minecraft.world.level.block.PipeBlock i
     private static boolean joins(Direction side, BlockState neighbour)
     {
         return neighbour.getBlock() instanceof PipeMember member && member.connects(neighbour, side.getOpposite());
-    }
-
-    @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params)
-    {
-        final Vec3 origin = params.getOptionalParameter(LootContextParams.ORIGIN);
-        return origin != null && PipeTracker.get(params.getLevel()).isWornOut(BlockPos.containing(origin)) ? List.of() : super.getDrops(state, params);
     }
 
     @Override

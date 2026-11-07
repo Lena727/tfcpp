@@ -1212,7 +1212,9 @@ public final class GasGameTests
 
         helper.runAtTickTime(5, () -> networkAt(helper, 2, 1, 1).contents().air = PipePhysics.moles(5f, 293f, 0.5f));
         helper.runAtTickTime(40, () -> {
-            helper.assertBlockPresent(Blocks.AIR, new BlockPos(2, 1, 2));
+            final BlockState state = helper.getBlockState(new BlockPos(2, 1, 2));
+            helper.assertTrue(state.is(Pipes.MANOMETER.get()) && state.getValue(tfcpp.pneumatics.pipes.ManometerBlock.BLOWN), "The tube should be blown and stay as a leak");
+            helper.assertTrue(networkAt(helper, 2, 1, 1) != null, "The line is not torn open");
             helper.assertTrue(totalInBox(helper, 3, 2, Gas.MERCURY_VAPOR) > 0f, "The mercury should be in the room");
             helper.succeed();
         });

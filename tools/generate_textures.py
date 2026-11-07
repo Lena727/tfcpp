@@ -192,6 +192,16 @@ for y in range(9, 15):
         manometer[y][x] = shade((176, 180, 188), 0)  # Mercury
 write_png(ROOT / 'block/mercury_manometer.png', manometer)
 
+blown = noise(66, (150, 124, 90), 6)
+for y in range(5, 15):
+    for x in (5, 10):
+        blown[y][x] = shade((206, 226, 232), 0)  # What is left of the glass: the tops of the arms are broken off
+for x in range(5, 11):
+    blown[14][x] = shade((206, 226, 232), 0)
+for x in range(4, 12):
+    blown[13][x] = shade((176, 180, 188), 0) if x in (6, 8) else blown[13][x]  # A last drop of mercury in the bend
+write_png(ROOT / 'block/mercury_manometer_blown.png', blown)
+
 vessel = noise(67, (92, 92, 96), 6)
 for i in range(16):
     for j in (2, 13):

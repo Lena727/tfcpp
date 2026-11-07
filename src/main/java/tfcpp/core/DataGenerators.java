@@ -30,6 +30,7 @@ import tfcpp.metallurgy.MetallurgyAssets;
 import tfcpp.metallurgy.MetallurgyData;
 import tfcpp.pneumatics.gas.Breathing;
 import tfcpp.pneumatics.gas.GasIgnition;
+import tfcpp.pneumatics.pipes.SteamBurst;
 
 @EventBusSubscriber(modid = TFCpp.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public final class DataGenerators
@@ -46,6 +47,7 @@ public final class DataGenerators
                 context.register(Breathing.TOXIC_GAS, new DamageType("tfcpp.toxic_gas", 0f));
                 context.register(GasIgnition.BLAST, new DamageType("tfcpp.blast", 0.1f));
                 context.register(CorrosiveSpill.CORROSIVE, new DamageType("tfcpp.corrosive", 0f));
+                context.register(SteamBurst.SCALD, new DamageType("tfcpp.scald", 0f));
             }), Set.of(TFCpp.MOD_ID)));
 
         event.getGenerator().addProvider(event.includeServer(), new DamageTags(output, datapack.getRegistryProvider(), event.getExistingFileHelper()));
@@ -107,6 +109,7 @@ public final class DataGenerators
             add("death.attack.tfcpp.carbon_monoxide", "%1$s fell asleep and never woke up");
             add("death.attack.tfcpp.toxic_gas", "%1$s choked on toxic fumes");
             add("death.attack.tfcpp.corrosive", "%1$s was scalded by a splash of acid");
+            add("death.attack.tfcpp.scald", "%1$s was scalded by the steam of a burst boiler");
             add("tfcpp.gas.smell.sulfur_dioxide", "A sharp, choking smell of burning sulfur catches your throat");
             add("tfcpp.gas.smell.hydrogen_sulfide", "The air stinks of rotten eggs");
             add("tfcpp.gas.smell.ammonia", "A pungent smell of ammonia stings your eyes");
@@ -258,11 +261,18 @@ public final class DataGenerators
             add("tfcpp.pipe.opened", "Opened");
             add("tfcpp.pipe.closed", "Closed");
             add("tfcpp.manometer.reading", "%s mm of mercury. The air outside is 760");
-            add("tfcpp.info.pipes", "A run of pipe is one volume at one pressure, and bursts at its weakest wall or joint. Hemp and tallow joints hold 10 atm at most. Corrosion thins the walls: copper suffers from ammonia and mercury, iron from brine and chlorine, and wood chars when hot. Breaking a pipe lets out everything in the run, so close a valve first.");
+            add("tfcpp.manometer.truncated", "The line runs on past loaded land");
+            add("tfcpp.manometer.blown", "The tube is blown, and the line leaks through it");
+            add("tfcpp.pipe.valve_wait", "The hand wheel is still turning");
+            add("tfcpp.pipe.too_worn", "The wall is too far gone to give anything back");
+            add("tfcpp.pump.status.truncated", "The line in front runs on past loaded land: the pump does not deliver into it");
+            add("tfcpp.pump.status.no_output", "Nothing open in front of the pump");
+            add("tfcpp.pump.status.ready", "The pump is ready to deliver");
+            add("tfcpp.info.pipes", "A run of pipe is one volume at one pressure, and bursts at its weakest wall or joint. Hemp and tallow joints hold 10 atm at most. Corrosion thins the walls: copper suffers from ammonia and mercury, iron from brine and chlorine, and wood chars when hot. Breaking a pipe lets out everything in the run, so close a valve first. Two different liquids never join: pipes that carry them touch without opening to each other, and a pipe put between them takes the side whose liquid comes first in the alphabet. Liquid weighs: a tall column presses on its foot with 1 atm for every 10 m of water, and that pressure is added to what the lowest joint must hold. Hot water in a boiler that bursts flashes to steam at once, adds its energy to the blast and scalds everyone within four blocks. A pipe whose wall is gone by more than a twentieth gives nothing back when it is broken.");
             add("tfcpp.info.pressure_vessel", "Half a cubic metre that joins any pipe touching it. A fire below heats everything in its network. Gas gains pressure in proportion to its absolute temperature, water adds its vapour pressure, and a vessel full of liquid with no room to expand gives way almost at once. Fit a safety valve.");
-            add("tfcpp.info.piston_pump", "Driven by a shaft from the side. It takes in from the back, from a pipe, a barrel, standing water or the air, and delivers into a pipe at the front. Every turn sweeps the same volume, and the shaft pays for the difference in pressure.");
+            add("tfcpp.info.piston_pump", "Driven by a shaft from the side. It takes in from the back, from a pipe, a barrel, standing water or the air, and delivers into a pipe at the front. Every turn sweeps the same volume, and the shaft pays for the difference in pressure and for lifting the liquid to the height of its surface in the pipe in front. The atmosphere pushes water up a suction pipe by 10.3 m at most, so a pump cannot draw from deeper. It does not take lava or molten metal, and it does not deliver into a line that runs on past loaded land. Right-click it to see which.");
             add("tfcpp.info.safety_valve", "Lifts at 8 atm above the air outside and seats again at 7, with a loud hiss. It cannot be held shut.");
-            add("tfcpp.info.manometer", "Right-click to read the pressure. Above 3 atm over the air outside the mercury is blown out of the tube, into the room.");
+            add("tfcpp.info.manometer", "Right-click to read the pressure. Above 3 atm over the air outside the mercury is blown out of the tube, into the room, once. The tube then leaks a hundredth of the bore, and the pipes keep their pressure otherwise.");
             add("tfcpp.info.mine_fan", "Driven by a shaft at its back, it blows out of its front and draws air in through its other sides, along the open spaces leading to it. Air moves quickly along a narrow drift and hardly at all across a large chamber. It only moves air that has somewhere to come from: in a dead end or a room with no other opening to the sky it does nothing but stir, and the second shaft is what makes a working ventilable. Right-click it to see what it found. The fan loads the shaft more the faster it turns.");
             add("tfcpp.info.shaft_load", "Every machine on a shaft takes torque from its source. The more it has to drive, the slower it turns, and past what the source can start against it stops. A water wheel gives its best power at half of its free speed. Pumps take more torque the higher they lift. Water itself no longer multiplies, and a pump moves it from its intake to its outlet.");
             add("tfcpp.info.coal", "Coal seams hold methane, more of it the deeper they lie, and some rock next to them holds gas under pressure. Mining lets it out. A flame lights air holding 5% to 15% of it, and the blast is followed by afterdamp full of carbon monoxide.");
@@ -400,6 +410,7 @@ public final class DataGenerators
             add("death.attack.tfcpp.carbon_monoxide", "%1$s уснул и больше не проснулся");
             add("death.attack.tfcpp.toxic_gas", "%1$s отравился ядовитыми испарениями");
             add("death.attack.tfcpp.corrosive", "%1$s обжёгся брызгами кислоты");
+            add("death.attack.tfcpp.scald", "%1$s обварился паром лопнувшего котла");
             add("tfcpp.gas.smell.sulfur_dioxide", "Резкий удушливый запах горелой серы перехватывает горло");
             add("tfcpp.gas.smell.hydrogen_sulfide", "В воздухе стоит запах тухлых яиц");
             add("tfcpp.gas.smell.ammonia", "Едкий запах нашатыря щиплет глаза");
@@ -552,11 +563,18 @@ public final class DataGenerators
             add("tfcpp.pipe.opened", "Открыто");
             add("tfcpp.pipe.closed", "Закрыто");
             add("tfcpp.manometer.reading", "%s мм ртутного столба. Снаружи воздух даёт 760");
-            add("tfcpp.info.pipes", "Участок труб это один объём с одним давлением, и он рвётся в самом слабом месте. Стыки из пеньки с салом держат не больше 10 атм. Коррозия утончает стенки: медь страдает от аммиака и ртути, железо от рассола и хлора, а дерево обугливается при нагреве. Если сломать трубу, выйдет всё содержимое участка, поэтому сначала закройте задвижку.");
+            add("tfcpp.manometer.truncated", "Линия уходит за границу загруженной земли");
+            add("tfcpp.manometer.blown", "Трубка выбита, и линия травит через неё");
+            add("tfcpp.pipe.valve_wait", "Маховик ещё вращается");
+            add("tfcpp.pipe.too_worn", "Стенка слишком изъедена, чтобы что-то отдать");
+            add("tfcpp.pump.status.truncated", "Линия впереди уходит за границу загруженной земли: насос в неё не подаёт");
+            add("tfcpp.pump.status.no_output", "Впереди насоса нет открытого прохода");
+            add("tfcpp.pump.status.ready", "Насос готов подавать");
+            add("tfcpp.info.pipes", "Участок труб это один объём с одним давлением, и он рвётся в самом слабом месте. Стыки из пеньки с салом держат не больше 10 атм. Коррозия утончает стенки: медь страдает от аммиака и ртути, железо от рассола и хлора, а дерево обугливается при нагреве. Если сломать трубу, выйдет всё содержимое участка, поэтому сначала закройте задвижку. Две разные жидкости не соединяются: трубы с ними соприкасаются, не открываясь друг в друга, а труба между ними идёт к той, чья жидкость раньше по алфавиту. Жидкость весит: высокий столб давит на основание 1 атм на каждые 10 м воды, и это давление прибавляется к тому, что должен держать нижний стык. Горячая вода лопнувшего котла мгновенно вскипает, прибавляет свою энергию к взрыву и обваривает всех в четырёх блоках. Труба, стенка которой истончилась больше чем на двадцатую долю, при поломке ничего не отдаёт.");
             add("tfcpp.info.pressure_vessel", "Половина кубометра, соединяется с любой трубой рядом. Огонь снизу нагревает всю сеть. Давление газа растёт пропорционально абсолютной температуре, вода добавляет давление своего пара, а сосуд, полный жидкости без места для расширения, рвётся почти сразу. Поставьте предохранительный клапан.");
-            add("tfcpp.info.piston_pump", "Вал подводится сбоку. Насос берёт сзади, из трубы, бочки, стоячей воды или воздуха, и подаёт в трубу спереди. Каждый оборот вытесняет один и тот же объём, а вал оплачивает разность давлений.");
+            add("tfcpp.info.piston_pump", "Вал подводится сбоку. Насос берёт сзади, из трубы, бочки, стоячей воды или воздуха, и подаёт в трубу спереди. Каждый оборот вытесняет один и тот же объём, а вал оплачивает разность давлений и подъём жидкости до высоты её поверхности в трубе впереди. Атмосфера поднимает воду по всасывающей трубе не выше 10,3 м, глубже насос не берёт. Он не берёт лаву и расплавленный металл и не подаёт в линию, которая уходит за границу загруженной земли. Правый клик покажет, что из этого.");
             add("tfcpp.info.safety_valve", "Открывается при 8 атм сверх наружного давления и садится обратно при 7, с громким шипением. Удержать его закрытым нельзя.");
-            add("tfcpp.info.manometer", "Правый клик показывает давление. При 3 атм сверх наружного ртуть выбрасывает из трубки прямо в помещение.");
+            add("tfcpp.info.manometer", "Правый клик показывает давление. При 3 атм сверх наружного ртуть один раз выбрасывает из трубки прямо в помещение. После этого трубка травит сотую долю сечения, а давление в трубах в остальном сохраняется.");
             add("tfcpp.info.mine_fan", "Приводится валом с задней стороны, выдувает вперёд, а воздух тянет через остальные стороны по ведущим к нему выработкам. По узкому штреку воздух идёт быстро, а через большую полость почти незаметно. Воздух движется, только если ему есть откуда прийти: в тупике или в комнате без другого выхода к поверхности вентилятор лишь перемешивает его, а второй ствол и делает выработку проветриваемой. Правый клик покажет, что он нашёл. Чем быстрее вентилятор вращается, тем сильнее он нагружает вал.");
             add("tfcpp.info.shaft_load", "Каждая машина на валу отбирает момент у источника. Чем больше нагрузка, тем медленнее вал, а сверх предела источник останавливается. Водяное колесо даёт наибольшую мощность на половине свободной скорости. Насос нагружает вал тем сильнее, чем выше поднимает воду. Вода больше не размножается сама, а насос перемещает её от входа к выходу.");
             add("tfcpp.info.coal", "Угольные пласты содержат метан, и чем глубже, тем больше, а порода рядом с ними может держать газ под давлением. При добыче он выходит наружу. Пламя поджигает воздух с 5–15% метана, а после взрыва остаётся смесь с большим количеством угарного газа.");

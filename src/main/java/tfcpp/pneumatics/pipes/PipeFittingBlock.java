@@ -67,6 +67,11 @@ public abstract class PipeFittingBlock extends DirectionalBlock implements PipeM
     {
         if (level instanceof ServerLevel server)
         {
+            if (turnedTooRecently(server, pos))
+            {
+                player.displayClientMessage(Component.translatable("tfcpp.pipe.valve_wait"), true);
+                return InteractionResult.sidedSuccess(false);
+            }
             final BlockState next = state.cycle(OPEN);
             level.setBlock(pos, next, Block.UPDATE_ALL);
             level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6f, 0.8f);
@@ -77,6 +82,12 @@ public abstract class PipeFittingBlock extends DirectionalBlock implements PipeM
     }
 
     protected void onToggled(ServerLevel level, BlockPos pos) {}
+
+    /** @return {@code true} if the hand wheel was turned less than a second ago and is not to be turned again; only a valve, which rebuilds its network at every turn, is kept to this */
+    protected boolean turnedTooRecently(ServerLevel level, BlockPos pos)
+    {
+        return false;
+    }
 
     @Override
     protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving)
@@ -118,6 +129,12 @@ public abstract class PipeFittingBlock extends DirectionalBlock implements PipeM
         protected void onToggled(ServerLevel level, BlockPos pos)
         {
             PipeTracker.get(level).onConnectionChanged(level, pos);
+        }
+
+        @Override
+        protected boolean turnedTooRecently(ServerLevel level, BlockPos pos)
+        {
+            return !PipeTracker.get(level).mayTurnValve(level, pos);
         }
     }
 

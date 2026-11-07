@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "blown=false": {
       "model": "tfcpp:block/mercury_manometer"
+    },
+    "blown=true": {
+      "model": "tfcpp:block/mercury_manometer_blown"
     }
   }
 }

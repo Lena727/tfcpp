@@ -14,6 +14,7 @@ import tfcpp.geology.Ores;
 import tfcpp.metallurgy.Metallurgy;
 import tfcpp.pneumatics.gas.GasAttachments;
 import tfcpp.pneumatics.gas.GasEvents;
+import tfcpp.pneumatics.pipes.PipeEvents;
 import tfcpp.pneumatics.instruments.Instruments;
 import tfcpp.pneumatics.pipes.Pipes;
 
@@ -39,6 +40,7 @@ public final class TFCpp
         Chemistry.register(modBus);
 
         NeoForge.EVENT_BUS.register(GasEvents.class);
+        NeoForge.EVENT_BUS.register(PipeEvents.class);
         NeoForge.EVENT_BUS.addListener(WaterBodies::onCreateFluidSource);
         NeoForge.EVENT_BUS.addListener(OreSurvey::onServerStarted);
     }

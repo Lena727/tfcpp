@@ -20,6 +20,7 @@ import tfcpp.geology.Ores;
 import tfcpp.pneumatics.instruments.DavyLampBlock;
 import tfcpp.pneumatics.instruments.GoldLeafIndicatorBlock;
 import tfcpp.pneumatics.instruments.Instruments;
+import tfcpp.pneumatics.pipes.ManometerBlock;
 import tfcpp.pneumatics.pipes.Pipes;
 
 public final class MetallurgyAssets
@@ -142,7 +143,10 @@ public final class MetallurgyAssets
             fitting("pipe_vent", Pipes.VENT.get(), "block/pipe_fitting", "block/pipe_vent");
             fitting("pipe_tap", Pipes.TAP.get(), "block/pipe_fitting", "block/pipe_tap");
             fitting("safety_valve", Pipes.SAFETY_VALVE.get(), "block/pipe_fitting", "block/safety_valve");
-            simpleBlockWithItem(Pipes.MANOMETER.get(), models().cubeAll("mercury_manometer", modLoc("block/mercury_manometer")));
+            final ModelFile manometer = models().cubeAll("mercury_manometer", modLoc("block/mercury_manometer"));
+            final ModelFile blownManometer = models().cubeAll("mercury_manometer_blown", modLoc("block/mercury_manometer_blown"));
+            getVariantBuilder(Pipes.MANOMETER.get()).forAllStates(state -> ConfiguredModel.builder().modelFile(state.getValue(ManometerBlock.BLOWN) ? blownManometer : manometer).build());
+            simpleBlockItem(Pipes.MANOMETER.get(), manometer);
             simpleBlockWithItem(Pipes.PRESSURE_VESSEL.get(), models().cubeAll("pressure_vessel", modLoc("block/pressure_vessel")));
             horizontalBlock(Pipes.PISTON_PUMP.get(), models().orientable("piston_pump", modLoc("block/pipe_fitting"), modLoc("block/piston_pump"), modLoc("block/pipe_fitting")));
             simpleBlockItem(Pipes.PISTON_PUMP.get(), models().getExistingFile(modLoc("block/piston_pump")));

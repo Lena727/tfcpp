@@ -188,4 +188,94 @@ class PipePhysicsTest
         assertEquals(0.32f, torque, 0.01f, "dp V / 2 pi: 1 atm over a sweep of 20 litres");
         assertEquals(0f, PipePhysics.pistonTorque(0.02f, -1f), "Flow helped along by pressure gives no work back through a piston without a motor");
     }
+
+    @Test
+    void aColumnOfLiquidPressesOnItsFoot()
+    {
+        assertEquals(0.968f, PipePhysics.head(1000f, 10f) / PipePhysics.PASCALS_PER_ATM, 0.005f, "10 m of water is about 1 atm");
+        assertEquals(-PipePhysics.head(1000f, 3f), PipePhysics.head(1000f, -3f), 1e-3f, "A negative height is a column that has to be lifted");
+        assertEquals(1.8f * PipePhysics.head(1000f, 7f), PipePhysics.head(1800f, 7f), 1e-2f, "and it goes with the density of the liquid");
+        final float torque = PipePhysics.pistonTorque(0.02f, PipePhysics.head(1000f, 100f) / PipePhysics.PASCALS_PER_ATM);
+        assertEquals(3.1f, torque, 0.1f, "Lifting water 100 m costs 3.1 kN m a turn, where the difference in pressure alone said 0.02");
+    }
+
+    @Test
+    void theAtmosphereLiftsWaterTenMetresAndNoMore()
+    {
+        assertEquals(10.33f, PipePhysics.suctionLift(1f, 1000f), 0.01f);
+        assertEquals(PipePhysics.MAX_SUCTION_METRES_OF_WATER, PipePhysics.suctionLift(1f, 1000f), 1e-4f);
+        assertTrue(PipePhysics.suctionLift(1f, 1800f) < 6f, "Acid is heavier, and goes up less");
+        assertEquals(0f, PipePhysics.suctionLift(0f, 1000f), "A vacuum over the liquid lifts nothing");
+        assertEquals(2f * PipePhysics.suctionLift(1f, 1000f), PipePhysics.suctionLift(2f, 1000f), 1e-3f, "Twice the pressure over it, twice the lift");
+    }
+
+    @Test
+    void theTopOfTheLiquidIsFoundFromTheBottomUp()
+    {
+        final float[] layers = {0.015f, 0.02f};
+        assertEquals(1f, PipePhysics.surfaceHeight(layers, 1, 0f), 1e-6f, "No liquid: the bottom of the lowest level");
+        assertEquals(1f + 0.002f / 0.015f, PipePhysics.surfaceHeight(layers, 1, 0.002f), 1e-4f, "2 litres lie in the foot of the lowest level");
+        assertEquals(2.5f, PipePhysics.surfaceHeight(layers, 1, 0.025f), 1e-4f, "and a fuller pipe fills the lowest level, then half of the next");
+        assertEquals(3f, PipePhysics.surfaceHeight(layers, 1, 1f), 1e-6f, "More than there is room for stands at the top");
+    }
+
+    @Test
+    void boilingPointFollowsPressureBothWays()
+    {
+        assertEquals(373.15f, PipePhysics.saturationTemperature(1f), 0.6f);
+        assertEquals(423.15f, PipePhysics.saturationTemperature(4.7f), 1f, "150 C");
+        assertEquals(354.4f, PipePhysics.saturationTemperature(0.5f), 1f, "Water boils at 81 C under half an atmosphere");
+        for (float celsius : new float[] {60f, 99f, 100f, 130f, 170f, 220f, 300f})
+        {
+            assertEquals(celsius + 273.15f, PipePhysics.saturationTemperature(PipePhysics.waterVapourPressure(celsius + 273.15f)), 0.8f, "Round trip at " + celsius);
+        }
+    }
+
+    @Test
+    void aBoilerThatBurstsFlashesToSteam()
+    {
+        final float temperature = PipePhysics.saturationTemperature(11f);
+        final float megajoules = PipePhysics.flashEnergy(450f, temperature) / 1000f;
+        assertEquals(27f, megajoules, 1.5f, "0.5 m3 of water, 90% full, at 11 atm: about 27 MJ, where the steam above it holds under 2");
+        assertEquals(0f, PipePhysics.flashEnergy(450f, 373f), "Water that is not above its boiling point has no flash");
+        assertEquals(0f, PipePhysics.flashEnergy(0f, 450f));
+        assertEquals(2f * PipePhysics.flashEnergy(100f, 450f), PipePhysics.flashEnergy(200f, 450f), 1e-2f, "It goes with the mass");
+        float last = 0f;
+        for (float celsius = 105f; celsius <= 370f; celsius += 15f)
+        {
+            final float energy = PipePhysics.flashEnergy(1f, celsius + 273.15f);
+            assertTrue(energy > last, "Hotter water flashes harder: " + celsius);
+            last = energy;
+        }
+        assertTrue(PipePhysics.flashEnergy(450f, temperature) > 10f * PipePhysics.burstEnergy(11f, 0.05f), "The water is most of the energy of a boiler");
+    }
+
+    @Test
+    void aScaldTakesMoreFromAGreaterFlash()
+    {
+        assertEquals(0.05f, PipePhysics.scaldShare(60f), "The least is a little burn");
+        assertEquals(0.6f, PipePhysics.scaldShare(27000f), "and the most of a boiler is a little over half of one's health");
+        assertTrue(PipePhysics.scaldShare(6000f) > PipePhysics.scaldShare(2000f));
+    }
+
+    @Test
+    void aSlowTapStillGivesAMillilitreInTheEnd()
+    {
+        float credit = 0f;
+        int given = 0;
+        for (int second = 0; second < 10; second++)
+        {
+            final PipePhysics.Drip owed = PipePhysics.drip(credit, 0.35f, 100f);
+            given += owed.whole();
+            credit = PipePhysics.creditAfter(owed, owed.whole());
+        }
+        assertEquals(3, given, "3.5 litres in ten seconds, a litre at a time as they add up");
+        assertEquals(0.5f, credit, 1e-4f);
+
+        final PipePhysics.Drip owed = PipePhysics.drip(0.6f, 0.6f, 100f);
+        assertEquals(1, owed.whole());
+        assertEquals(0.2f, owed.credit(), 1e-4f);
+        assertEquals(0.999f, PipePhysics.creditAfter(owed, 0), 1e-6f, "A receiver that took nothing leaves it all owed, but never a whole millilitre");
+        assertEquals(0, PipePhysics.drip(0f, 50f, 0.4f).whole(), "Less than a millilitre left in the pipe is not given: it is a film");
+    }
 }

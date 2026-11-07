@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import org.jetbrains.annotations.Nullable;
 
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasMath;
@@ -16,9 +17,14 @@ public final class PipeContents
 {
     public final float[] gases = new float[Gas.COUNT];
     public float air;
-    /** The id of the one liquid held, or empty. Two liquids in one pipe are not modelled: what is the lesser of them is lost when pipes join. */
+    /** The id of the one liquid held, or empty. Two liquids in one pipe are not modelled: networks of different liquids do not join, and {@link #add} returns what a clash would leave over. */
     public String liquid = "";
     public float litres;
+    /** Less than this much liquid cannot be drained through a tap, and counts as the wet of the walls, not as a liquid that keeps another out. */
+    public static final float FILM_LITRES = PipePhysics.WHOLE_MILLILITRE;
+    /** Liquid that has run over at an opening and waits there for a whole block to be placed. It takes no room in the pipe and no part in its pressure, and it is kept through every rebuild and save, so that nothing is lost on the way. */
+    public float runoff;
+    public String runoffLiquid = "";
     public float temperature = PipePhysics.ROOM_TEMPERATURE;
 
     /** @return the contents of a new, empty length of pipe, which is to say full of air */
@@ -73,14 +79,66 @@ public final class PipeContents
         return gasMoles() * molarMass() / 1000f / freeVolume(volume);
     }
 
+    /** @return {@code true} for liquids that boil as water does, which for their vapour pressure includes brine: salt lowers it, and that is left out */
     public boolean isWater()
     {
-        return liquid.equals("minecraft:water") || liquid.equals("tfc:salt_water") || liquid.equals("tfc:spring_water");
+        return liquid.equals("minecraft:water") || liquid.equals("tfc:salt_water") || liquid.equals("tfc:spring_water") || liquid.equals("tfc:brine");
     }
 
-    /** Takes in another amount, which comes out empty. Heat mixes by the amounts. */
-    public void add(PipeContents other)
+    /** @return the temperature in kelvin below which this liquid freezes solid: seawater just under 0 C, saturated brine at its eutectic of -21 C */
+    public float freezingPoint()
     {
+        return liquid.equals("tfc:brine") ? 252f : 268f;
+    }
+
+    /** @return {@code true} if this holds no liquid that a different one could not be put on: nothing, or a film */
+    public boolean takesLiquid(String id)
+    {
+        return litres < FILM_LITRES || liquid.isEmpty() || liquid.equals(id);
+    }
+
+    /** Sets the liquid down to nothing if there is none left, leaving the runoff its own name. */
+    public void tidy()
+    {
+        if (litres <= 0f)
+        {
+            litres = 0f;
+            liquid = "";
+        }
+    }
+
+    /**
+     * Takes in another amount, which comes out empty. Heat mixes by the amounts.
+     * <p>
+     * Two different liquids are not mixed: the lesser is not taken in, and is returned. Networks of different liquids are kept apart, so this is only a fallback for what should not happen, and the caller spills what comes back.
+     *
+     * @return the liquid that was left over by a clash of liquids, or {@code null}
+     */
+    @Nullable
+    public PipeContents add(PipeContents other)
+    {
+        PipeContents rejected = null;
+        if (litres > 0f && other.litres > 0f && !liquid.equals(other.liquid))
+        {
+            rejected = new PipeContents();
+            if (other.litres > litres)
+            {
+                rejected.liquid = liquid;
+                rejected.litres = litres;
+                rejected.temperature = temperature;
+                liquid = "";
+                litres = 0f;
+            }
+            else
+            {
+                rejected.liquid = other.liquid;
+                rejected.litres = other.litres;
+                rejected.temperature = other.temperature;
+                other.liquid = "";
+                other.litres = 0f;
+            }
+        }
+
         final float mine = heatCapacity(), theirs = other.heatCapacity();
         if (mine + theirs > 0f)
         {
@@ -94,21 +152,35 @@ public final class PipeContents
         air += other.air;
         other.air = 0f;
 
-        if (liquid.isEmpty() || liquid.equals(other.liquid))
-        {
-            if (other.litres > 0f)
-            {
-                liquid = other.liquid;
-            }
-            litres += other.litres;
-        }
-        else if (other.litres > litres)
+        if (other.litres > 0f)
         {
             liquid = other.liquid;
-            litres = other.litres;
+            litres += other.litres;
         }
         other.litres = 0f;
         other.liquid = "";
+
+        if (other.runoff > 0f)
+        {
+            if (runoff > 0f && !runoffLiquid.equals(other.runoffLiquid))
+            {
+                if (rejected == null)
+                {
+                    rejected = new PipeContents();
+                    rejected.temperature = other.temperature;
+                }
+                rejected.runoff = other.runoff; // The lesser stands aside as well
+                rejected.runoffLiquid = other.runoffLiquid;
+            }
+            else
+            {
+                runoffLiquid = other.runoffLiquid;
+                runoff += other.runoff;
+            }
+            other.runoff = 0f;
+            other.runoffLiquid = "";
+        }
+        return rejected;
     }
 
     /** @return this share of everything in here, which is removed from it */
@@ -126,9 +198,14 @@ public final class PipeContents
         taken.litres = litres * share;
         litres -= taken.litres;
         taken.liquid = taken.litres > 0f ? liquid : "";
-        if (litres <= 0f)
+        tidy();
+        taken.runoff = runoff * share;
+        runoff -= taken.runoff;
+        taken.runoffLiquid = taken.runoff > 0f ? runoffLiquid : "";
+        if (runoff <= 0f)
         {
-            liquid = "";
+            runoff = 0f;
+            runoffLiquid = "";
         }
         return taken;
     }
@@ -148,12 +225,25 @@ public final class PipeContents
         return taken;
     }
 
-    /** Takes in liquid of this kind, with the heat it brings. */
-    public void addLiquid(String id, float amount, float sourceTemperature)
+    /**
+     * Takes in liquid of this kind, with the heat it brings. A film of another liquid is washed out ahead of it (less than one mB, which no tap could have given back); more than a film keeps it out.
+     *
+     * @return {@code false} if another liquid is in the way, and nothing was taken in
+     */
+    public boolean addLiquid(String id, float amount, float sourceTemperature)
     {
+        if (!takesLiquid(id))
+        {
+            return false;
+        }
+        if (!liquid.equals(id))
+        {
+            litres = 0f;
+        }
         mixHeat(amount * 4.186f, sourceTemperature);
         liquid = id;
         litres += amount;
+        return true;
     }
 
     /** Takes in gas that has already been counted, at this temperature. */
@@ -178,6 +268,8 @@ public final class PipeContents
         copy.air = air * share;
         copy.litres = litres * share;
         copy.liquid = copy.litres > 0f ? liquid : "";
+        copy.runoff = runoff * share;
+        copy.runoffLiquid = copy.runoff > 0f ? runoffLiquid : "";
         return copy;
     }
 
@@ -206,6 +298,11 @@ public final class PipeContents
         tag.putFloat("air", air);
         tag.putString("liquid", liquid);
         tag.putFloat("litres", litres);
+        if (runoff > 0f)
+        {
+            tag.putFloat("runoff", runoff);
+            tag.putString("runoffLiquid", runoffLiquid);
+        }
         tag.putFloat("temperature", temperature);
         return tag;
     }
@@ -226,6 +323,8 @@ public final class PipeContents
         contents.air = tag.getFloat("air");
         contents.liquid = tag.getString("liquid");
         contents.litres = tag.getFloat("litres");
+        contents.runoff = tag.getFloat("runoff");
+        contents.runoffLiquid = contents.runoff > 0f ? tag.getString("runoffLiquid") : "";
         contents.temperature = tag.contains("temperature") ? tag.getFloat("temperature") : PipePhysics.ROOM_TEMPERATURE;
         return contents;
     }

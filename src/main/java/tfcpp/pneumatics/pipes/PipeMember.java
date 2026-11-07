@@ -15,6 +15,14 @@ public interface PipeMember
     /** @return {@code true} if this opens toward that side, which it needs to do as well as the block on that side, to join it */
     boolean connects(BlockState state, Direction side);
 
+    /**
+     * Whether this has a joint on that side, as far as it can tell without looking at what is there. A pipe knows from the arms it has grown; the other blocks open wherever {@link #connects} says. It tells the network whether a pipe may run on into a chunk that is not loaded.
+     */
+    default boolean reaches(BlockState state, Direction side)
+    {
+        return connects(state, side);
+    }
+
     /** @return kW per kelvin lost to the air around this */
     default float heatLoss(BlockState state)
     {
