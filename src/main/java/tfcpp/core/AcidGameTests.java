@@ -2,12 +2,18 @@ package tfcpp.core;
 
 import java.util.UUID;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 import com.mojang.authlib.GameProfile;
+import net.dries007.tfc.common.blockentities.FirepitBlockEntity;
+import net.dries007.tfc.common.blockentities.rotation.CreativeRotationBlockEntity;
 import net.dries007.tfc.common.blocks.rock.Ore;
+import net.dries007.tfc.common.blocks.wood.Wood;
 import net.dries007.tfc.common.items.TFCItems;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.gametest.framework.AfterBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -19,6 +25,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -42,6 +52,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import tfcpp.chemistry.Distillation;
 import tfcpp.chemistry.DistillationRecipe;
 import tfcpp.chemistry.DistillationTable;
+import tfcpp.chemistry.GasBurnerBlock;
 import tfcpp.chemistry.GlassRetortBlockEntity;
 import tfcpp.chemistry.SandBath;
 import tfcpp.chemistry.SandBathBlock;
@@ -63,6 +74,9 @@ import tfcpp.chemistry.SulfurBurnerBlockEntity;
 import tfcpp.chemistry.SulfurBurning;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.pipes.PipeContents;
+import tfcpp.pneumatics.pipes.PipeFittingBlock;
+import tfcpp.pneumatics.pipes.PipePort;
+import tfcpp.pneumatics.pipes.PipeSegment;
 import tfcpp.pneumatics.pipes.PipeMaterial;
 import tfcpp.pneumatics.pipes.PipeNetwork;
 import tfcpp.pneumatics.pipes.PipePhysics;
@@ -689,13 +703,15 @@ public final class AcidGameTests
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 500, batch = GLASS_BATCH)
-    public static void aRetortConcentratesChamberAcidIntoOilOfVitriol(GameTestHelper helper)
+    public static void aRetortConcentratesChamberAcidByBoilingTheWaterOffAndKeepsTheStrongAcidInTheFlask(GameTestHelper helper)
     {
         final DistillationTable.Row row = DistillationTable.CONCENTRATE_SULFURIC_ACID;
         final GlassRetortBlockEntity retort = retortInBox(helper, true);
         charge(helper, retort, row, false);
         runRow(helper, retort, row, () -> {
-            helper.assertTrue(Math.abs(inReceiver(retort, row.output()) - 0.59) < 1e-3, "0.59 L of sulfuric acid, got " + inReceiver(retort, row.output()));
+            helper.assertTrue(row.output() == null && row.residue().equals("tfcpp:sulfuric_acid"), "The table keeps the strong acid as the residue, and nothing comes over");
+            helper.assertTrue(Math.abs(inResidue(retort, row.residue()) - 0.59) < 1e-3, "0.59 L of sulfuric acid stays in the flask, got " + inResidue(retort, row.residue()));
+            helper.assertTrue(retort.receiver().isEmpty(), "And none is in the receiver");
             helper.assertTrue(Math.abs(retort.input().litres() - 4.0) < 1e-3, "A litre of chamber acid is taken, got " + retort.input().litres());
             helper.assertTrue(retort.product().isEmpty() && !retort.isActive(), "No powder is left, and the batch is over");
             assertNoGas(helper, Gas.NITROGEN_OXIDES, Gas.HYDROGEN_CHLORIDE);
@@ -786,16 +802,17 @@ public final class AcidGameTests
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 500, batch = GLASS_BATCH)
-    public static void withoutACondenserOilOfVitriolGivesOnlySteam(GameTestHelper helper)
+    public static void concentratingNeedsNoCondenserAndLosesNoAcidToTheRoom(GameTestHelper helper)
     {
         final DistillationTable.Row row = DistillationTable.CONCENTRATE_SULFURIC_ACID;
         final GlassRetortBlockEntity retort = retortInBox(helper, false);
         charge(helper, retort, row, false);
         runRow(helper, retort, row, () -> {
-            helper.assertTrue(retort.receiver().isEmpty(), "Nothing is caught");
+            helper.assertTrue(Math.abs(inResidue(retort, row.residue()) - 0.59) < 1e-3, "The strong acid is in the flask all the same, got " + inResidue(retort, row.residue()));
+            helper.assertTrue(retort.receiver().isEmpty(), "Nothing is caught, as nothing came over");
             for (Gas gas : Gas.VALUES)
             {
-                helper.assertTrue(totalInBox(helper, 5, 4, gas) < 1e-3f, "Only steam goes into the room, but there is " + gas.id());
+                helper.assertTrue(totalInBox(helper, 5, 4, gas) < 1e-3f, "Only steam goes off, and the gas of the mod has none, but there is " + gas.id());
             }
         });
     }
@@ -866,21 +883,21 @@ public final class AcidGameTests
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = GLASS_BATCH)
-    public static void aFullReceiverHoldsTheBatchBackAndTakesNothing(GameTestHelper helper)
+    public static void aFlaskFullOfResidueHoldsTheBatchBackAndTakesNothing(GameTestHelper helper)
     {
         final DistillationTable.Row row = DistillationTable.CONCENTRATE_SULFURIC_ACID;
         final GlassRetortBlockEntity retort = retortInBox(helper, true);
         charge(helper, retort, row, false);
-        retort.receiver().fill(new FluidStack(fluidOf("tfcpp:sulfuric_acid"), 25), IFluidHandler.FluidAction.EXECUTE);
+        retort.residue().fill(new FluidStack(fluidOf("tfcpp:sulfuric_acid"), 25), IFluidHandler.FluidAction.EXECUTE);
         helper.runAtTickTime(2, () -> {
             retort.warmTo(300f);
             retort.step(helper.getLevel(), 100f);
-            helper.assertTrue(retort.lastReason() == Distillation.Reason.NO_ROOM && !retort.isActive(), "A full receiver stops the batch before it starts");
-            helper.assertTrue(Math.abs(retort.input().litres() - 5.0) < 1e-6, "And the acid is not taken");
+            helper.assertTrue(retort.lastReason() == Distillation.Reason.NO_ROOM && !retort.isActive(), "A flask full of the strong acid stops the batch before it starts");
+            helper.assertTrue(Math.abs(retort.input().litres() - 5.0) < 1e-6, "And the chamber acid is not taken");
 
-            retort.receiver().setFluid(new FluidStack(fluidOf("tfcpp:nitric_acid"), 3));
+            retort.residue().setFluid(new FluidStack(fluidOf("tfcpp:nitric_acid"), 3));
             retort.step(helper.getLevel(), 100f);
-            helper.assertTrue(retort.lastReason() == Distillation.Reason.NO_ROOM, "Another liquid in the receiver stops it too");
+            helper.assertTrue(retort.lastReason() == Distillation.Reason.NO_ROOM, "Another liquid in the flask stops it too");
             helper.succeed();
         });
     }
@@ -894,7 +911,7 @@ public final class AcidGameTests
         final @Nullable IFluidHandler above = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, Direction.UP);
         final @Nullable IFluidHandler below = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, Direction.DOWN);
         helper.assertTrue(above != null && below != null, "The top and the bottom have handlers");
-        helper.assertTrue(level.getCapability(Capabilities.FluidHandler.BLOCK, pos, Direction.NORTH) == null, "The sides have none");
+        helper.assertTrue(level.getCapability(Capabilities.FluidHandler.BLOCK, pos, Direction.NORTH) != null, "The sides are the receiver's, and have one");
 
         helper.assertTrue(above.fill(new FluidStack(acid(), 3), IFluidHandler.FluidAction.EXECUTE) == 3, "Chamber acid goes in from above");
         helper.assertTrue(above.fill(new FluidStack(fluidOf("tfcpp:coal_tar"), 3), IFluidHandler.FluidAction.EXECUTE) == 0, "A liquid no recipe takes is refused");
@@ -1051,20 +1068,21 @@ public final class AcidGameTests
             helper.assertTrue(concentrator.canUse(filledA) && concentrator.interact(filledA, player, InteractionHand.MAIN_HAND), "The carboy is poured into the retort");
             helper.assertTrue(concentrator.input().wholeMillibuckets() == 8 && FluidHelpers.getContainedFluid(player.getItemInHand(InteractionHand.MAIN_HAND)).isEmpty(), "All eight litres went in, got " + concentrator.input().wholeMillibuckets());
 
-            // Four batches of a litre each, at the heat of the table, give 2.36 L of oil of vitriol: two whole litres in the receiver
+            // Four batches of a litre each, at the heat of the table, give 2.36 L of oil of vitriol: two whole litres in the flask, left there by the water that went off
             concentrator.warmTo(315f);
             for (int batch = 0; batch < 4; batch++)
             {
                 concentrator.step(helper.getLevel(), 100f);
             }
             helper.assertTrue(Math.abs(concentrator.input().litres() - 4.0) < 1e-3, "Four litres of chamber acid are used, got " + concentrator.input().litres());
-            helper.assertTrue(concentrator.receiver().getFluidAmount() == 2 && concentrator.receiver().getFluid().getFluid() == fluidOf("tfcpp:sulfuric_acid"), "Two whole litres of oil of vitriol are in the receiver, got " + concentrator.receiver().getFluidAmount());
-            helper.assertTrue(Math.abs(inReceiver(concentrator, "tfcpp:sulfuric_acid") - 4 * 0.59) < 1e-3, "And the rest of the 2.36 L waits as a fraction, got " + inReceiver(concentrator, "tfcpp:sulfuric_acid"));
+            helper.assertTrue(concentrator.residue().getFluidAmount() == 2 && concentrator.residue().getFluid().getFluid() == fluidOf("tfcpp:sulfuric_acid"), "Two whole litres of oil of vitriol are in the flask, got " + concentrator.residue().getFluidAmount());
+            helper.assertTrue(Math.abs(inResidue(concentrator, "tfcpp:sulfuric_acid") - 4 * 0.59) < 1e-3, "And the rest of the 2.36 L waits as a fraction, got " + inResidue(concentrator, "tfcpp:sulfuric_acid"));
+            helper.assertTrue(concentrator.receiver().isEmpty(), "Nothing came over into the receiver");
 
             // The oil of vitriol into a second carboy, and into the second retort with fifty-six powders of saltpeter
             final ItemStack carboyB = new ItemStack(Chemistry.GLASS_CARBOY.get());
             player.setItemInHand(InteractionHand.MAIN_HAND, carboyB);
-            helper.assertTrue(concentrator.interact(carboyB, player, InteractionHand.MAIN_HAND), "The receiver is tapped into a carboy");
+            helper.assertTrue(concentrator.interact(carboyB, player, InteractionHand.MAIN_HAND), "The flask is tapped into a carboy");
             final ItemStack filledB = player.getItemInHand(InteractionHand.MAIN_HAND);
             helper.assertTrue(FluidHelpers.getContainedFluid(filledB).getAmount() == 2, "Two litres are tapped");
             helper.assertTrue(nitrator.interact(filledB, player, InteractionHand.MAIN_HAND), "The second carboy is poured into the second retort");
@@ -1365,6 +1383,443 @@ public final class AcidGameTests
         helper.assertTrue(manager.byKey(TFCpp.id("crafting/marsh_apparatus")).isPresent(), "The marsh apparatus must be craftable");
         helper.assertTrue(manager.byKey(TFCpp.id("crafting/gold_leaf_indicator")).isPresent(), "The gold leaf indicator must be craftable");
         helper.succeed();
+    }
+
+    // --- Batch 4 of the review: fittings, the pump, the retort and the chamber --------------------------------------------------------------------------------------------------
+
+    /** Apart from the others, as it runs the calendar fast to bring a whole plant through its work. */
+    private static final String PLANT_BATCH = "tfcpp_acid_plant";
+    /** Calendar ticks to each game tick: it is coprime to the twenty of a second, so a worker's turn comes up once in every second. */
+    private static final float PLANT_RATE = 3f;
+    private static final float DEFAULT_RATE = 20f / 24f;
+
+    @AfterBatch(batch = PLANT_BATCH)
+    public static void afterPlant(ServerLevel level)
+    {
+        Calendars.SERVER.setCalendarTickRate(DEFAULT_RATE);
+    }
+
+    /** Uses the block the way the game does for a person who stands there: through the game mode, which is what decides whether a block is used at all when the person is crouching. */
+    private static void useAsPlayer(GameTestHelper helper, FakePlayer player, BlockPos pos)
+    {
+        final BlockPos absolute = helper.absolutePos(pos);
+        final BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(absolute), Direction.UP, absolute, false);
+        player.gameMode.useItemOn(player, helper.getLevel(), player.getMainHandItem(), InteractionHand.MAIN_HAND, hit);
+    }
+
+    private static BlockState fittingState(Supplier<Block> block, Direction facing, boolean open)
+    {
+        return block.get().defaultBlockState().setValue(PipeFittingBlock.FACING, facing).setValue(PipeFittingBlock.OPEN, open);
+    }
+
+    private static final List<Map<PipeMaterial, Supplier<Block>>> FITTING_KINDS = List.of(Pipes.VALVES, Pipes.VENTS, Pipes.TAPS, Pipes.SAFETY_VALVES);
+    private static final List<String> FITTING_NAMES = List.of("pipe_valve", "pipe_vent", "pipe_tap", "safety_valve");
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 40, batch = BATCH)
+    public static void everyFittingComesInIronLeadAndStonewareWithItsOwnMaterialAndRecipe(GameTestHelper helper)
+    {
+        for (int kind = 0; kind < FITTING_KINDS.size(); kind++)
+        {
+            for (PipeMaterial material : Pipes.FITTING_MATERIALS)
+            {
+                final String name = Pipes.fittingName(FITTING_NAMES.get(kind), material);
+                final Supplier<Block> block = FITTING_KINDS.get(kind).get(material);
+                helper.assertTrue(block != null, name + " is registered");
+                helper.assertTrue(BuiltInRegistries.BLOCK.getKey(block.get()).equals(TFCpp.id(name)), name + " has its name, got " + BuiltInRegistries.BLOCK.getKey(block.get()));
+                helper.assertTrue(((PipeFittingBlock) block.get()).material(block.get().defaultBlockState()) == material, name + " is of " + material);
+                helper.assertTrue(BuiltInRegistries.ITEM.containsKey(TFCpp.id(name)), name + " has an item");
+                helper.assertTrue(helper.getLevel().getRecipeManager().byKey(TFCpp.id("crafting/" + name)).isPresent(), name + " has a recipe");
+            }
+        }
+        helper.assertTrue(Pipes.FITTING_MATERIALS.containsAll(List.of(PipeMaterial.WROUGHT_IRON, PipeMaterial.LEAD, PipeMaterial.CERAMIC)), "Iron, lead and stoneware are all there");
+        helper.assertTrue(Pipes.VALVE.get() == Pipes.VALVES.get(PipeMaterial.WROUGHT_IRON).get(), "The old names are the iron ones");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 1500, batch = TIME_BATCH)
+    public static void aValveOfStonewareStandsChamberAcidAndOneOfLeadHoldsItWhereIronDoesNot(GameTestHelper helper)
+    {
+        Calendars.SERVER.setPlayersLoggedOn(true);
+        Calendars.SERVER.setCalendarTickRate(REAL_TIME_RATE);
+        final PipeMaterial[] materials = {PipeMaterial.WROUGHT_IRON, PipeMaterial.LEAD, PipeMaterial.CERAMIC};
+        final BlockPos[] starts = {new BlockPos(1, 1, 1), new BlockPos(1, 1, 4), new BlockPos(1, 1, 7)};
+        for (int i = 0; i < materials.length; i++)
+        {
+            helper.setBlock(starts[i], Pipes.PIPES.get(materials[i]).get());
+            helper.setBlock(starts[i].east(), fittingState(Pipes.VALVES.get(materials[i]), Direction.EAST, true));
+        }
+        helper.runAtTickTime(5, () -> {
+            for (BlockPos start : starts)
+            {
+                helper.assertTrue(networkAt(helper, start) != null && networkAt(helper, start) == networkAt(helper, start.east()), "The pipe and its open valve join");
+                networkAt(helper, start).contents().addLiquid(ACID, 8f, PipePhysics.ROOM_TEMPERATURE); // Not more than the 15 litres of the run: a full run is compressed liquid
+            }
+        });
+        helper.runAtTickTime(1300, () -> {
+            final float[] lost = new float[materials.length];
+            for (int i = 0; i < materials.length; i++)
+            {
+                final @Nullable PipeNetwork network = networkAt(helper, starts[i].east());
+                helper.assertTrue(network != null, "The run of " + materials[i] + " is whole");
+                float integrity = -1f;
+                for (PipeSegment segment : network.segments())
+                {
+                    if (segment.pos.equals(helper.absolutePos(starts[i].east())))
+                    {
+                        integrity = segment.integrity;
+                    }
+                }
+                helper.assertTrue(integrity >= 0f, "The valve is a segment of its run");
+                lost[i] = 1f - integrity;
+                if (materials[i] == PipeMaterial.WROUGHT_IRON)
+                {
+                    final float expected = PipeMaterial.WROUGHT_IRON.corrosion(ACID) * network.contents().liquidVolume() / network.volume() * 1200f / LocalTime.TICKS_PER_DAY;
+                    helper.assertTrue(lost[i] > expected * 0.5f && lost[i] < expected * 2f, "An iron valve in chamber acid wears by " + expected + " in the minute, got " + lost[i]);
+                }
+            }
+            helper.assertTrue(lost[1] * 10f < lost[0], "The lead valve holds the cool acid: it loses " + lost[1] + " against the iron's " + lost[0]);
+            helper.assertTrue(lost[2] == 0f, "The stoneware valve loses nothing, got " + lost[2]);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = BATCH)
+    public static void aSafetyValveOfStonewareLiftsBeforeItsBodyBurstsAndAnIronOneHoldsAtTheSamePressure(GameTestHelper helper)
+    {
+        final BlockPos iron = new BlockPos(1, 1, 1), ceramic = new BlockPos(1, 1, 5);
+        helper.setBlock(iron, Pipes.PIPES.get(PipeMaterial.WROUGHT_IRON).get());
+        helper.setBlock(iron.east(), fittingState(Pipes.SAFETY_VALVES.get(PipeMaterial.WROUGHT_IRON), Direction.UP, false));
+        helper.setBlock(ceramic, Pipes.PIPES.get(PipeMaterial.CERAMIC).get());
+        helper.setBlock(ceramic.east(), fittingState(Pipes.SAFETY_VALVES.get(PipeMaterial.CERAMIC), Direction.UP, false));
+        helper.runAtTickTime(5, () -> {
+            for (BlockPos start : new BlockPos[] {iron, ceramic})
+            {
+                final PipeNetwork network = networkAt(helper, start);
+                network.contents().temperature = PipePhysics.ROOM_TEMPERATURE;
+                network.contents().air = PipePhysics.moles(4.2f, PipePhysics.ROOM_TEMPERATURE, network.volume()); // 3.2 atm above the air outside
+                final BlockPos valve = helper.absolutePos(start.east());
+                final BlockState state = helper.getLevel().getBlockState(valve);
+                ((PipePort) state.getBlock()).stepPort(network, helper.getLevel(), valve, state, 1f);
+            }
+            helper.assertFalse(helper.getBlockState(iron.east()).getValue(PipeFittingBlock.OPEN), "At 3.2 atm gauge an iron valve set for 8 stays shut");
+            helper.assertTrue(helper.getBlockState(ceramic.east()).getValue(PipeFittingBlock.OPEN), "A stoneware valve is set for 2.8 and lifts, below the 3.5 its body holds");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = BATCH)
+    public static void aClickWithAnItemInTheHandDoesNotWorkTheBlocksThatTakeAnEmptyHand(GameTestHelper helper)
+    {
+        final List<Block> blocks = List.of(Chemistry.GAS_BURNER.get(), Chemistry.LEAD_CHAMBER.get(), Chemistry.SULFUR_BURNER.get(), Chemistry.COKE_OVEN.get(), Metallurgy.CONDENSATION_TOWER.get(),
+            Metallurgy.CONVERTER.get(), Metallurgy.CUPEL_HEARTH.get(), Metallurgy.RETORT.get(), Instruments.SETTLING_BAFFLE.get(), Pipes.MANOMETER.get(),
+            Pipes.VALVE.get(), Pipes.TAP.get(), Pipes.VENT.get(), Pipes.VALVES.get(PipeMaterial.LEAD).get(), Pipes.TAPS.get(PipeMaterial.CERAMIC).get());
+        final FakePlayer player = player(helper);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STICK)); // A pipe is held to be put down beside the block
+        for (int i = 0; i < blocks.size(); i++)
+        {
+            final BlockPos pos = new BlockPos(1 + i % 7, 1, 1 + 2 * (i / 7));
+            helper.setBlock(pos, blocks.get(i));
+            final BlockPos absolute = helper.absolutePos(pos);
+            final BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(absolute), Direction.UP, absolute, false);
+            final BlockState before = helper.getLevel().getBlockState(absolute);
+            helper.assertTrue(before.useWithoutItem(helper.getLevel(), player, hit) == net.minecraft.world.InteractionResult.PASS, blocks.get(i).getName().getString() + " lets a click with an item through");
+            helper.assertTrue(helper.getLevel().getBlockState(absolute) == before, blocks.get(i).getName().getString() + " is not worked by it");
+        }
+
+        // An open gas burner is the one that fills a room: it is turned by an empty hand and not by a click that places a block
+        final BlockPos burner = new BlockPos(1, 1, 7);
+        helper.setBlock(burner, Chemistry.GAS_BURNER.get());
+        useAsPlayer(helper, player, burner);
+        helper.assertFalse(helper.getBlockState(burner).getValue(GasBurnerBlock.OPEN), "A click with a stick through the game mode does not open the burner");
+        player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        useAsPlayer(helper, player, burner);
+        helper.assertTrue(helper.getBlockState(burner).getValue(GasBurnerBlock.OPEN), "An empty hand turns the wheel");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = BATCH)
+    public static void aPumpTakesOnlyFromTheTankOfAChamberAndNothingFromItsWaterOrGas(GameTestHelper helper)
+    {
+        helper.setBlock(CHAMBER, Chemistry.LEAD_CHAMBER.get());
+        final LeadChamberBlockEntity chamber = helper.getBlockEntity(CHAMBER);
+        final BlockPos pump = CHAMBER.east(), outlet = CHAMBER.east(2);
+        helper.setBlock(pump, Pipes.PISTON_PUMP.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.EAST));
+        for (int i = 0; i < 3; i++)
+        {
+            helper.setBlock(outlet.east(i), Pipes.PIPES.get(PipeMaterial.LEAD).get());
+        }
+        final float[] before = new float[2];
+        helper.runAtTickTime(5, () -> {
+            final PipeNetwork chamberNetwork = networkAt(helper, CHAMBER);
+            chamberNetwork.contents().addLiquid(WATER, 3f, PipePhysics.ROOM_TEMPERATURE); // The process water of the chamber
+            chamberNetwork.contents().gases[Gas.SULFUR_DIOXIDE.ordinal()] = 0.5f;
+            before[0] = chamberNetwork.contents().litres;
+            before[1] = chamberNetwork.contents().gases[Gas.SULFUR_DIOXIDE.ordinal()];
+        });
+        helper.runAtTickTime(10, () -> {
+            final PistonPumpBlockEntity piston = helper.getBlockEntity(pump);
+            helper.assertTrue(chamber.tank().isEmpty(), "The tank is empty");
+            piston.pump(helper.getLevel(), PistonPumpBlockEntity.SWEPT_VOLUME);
+            final PipeNetwork out = networkAt(helper, outlet);
+            final PipeNetwork chamberNetwork = networkAt(helper, CHAMBER);
+            helper.assertTrue(out.contents().litres == 0f, "With nothing in the tank the pump draws no liquid into the acid line, got " + out.contents().litres + " L of " + out.contents().liquid);
+            helper.assertTrue(out.contents().gases[Gas.SULFUR_DIOXIDE.ordinal()] == 0f, "Nor the gas of the chamber, got " + out.contents().gases[Gas.SULFUR_DIOXIDE.ordinal()]);
+            helper.assertTrue(chamberNetwork.contents().litres == before[0] && chamberNetwork.contents().gases[Gas.SULFUR_DIOXIDE.ordinal()] == before[1], "The chamber keeps its water and gas");
+
+            chamber.tank().fill(new FluidStack(acid(), 2), IFluidHandler.FluidAction.EXECUTE);
+            piston.pump(helper.getLevel(), PistonPumpBlockEntity.SWEPT_VOLUME);
+            helper.assertTrue(ACID.equals(out.contents().liquid) && Math.abs(out.contents().litres - 2f) < 1e-3f, "With acid in the tank the stroke takes exactly that, got " + out.contents().litres + " L of " + out.contents().liquid);
+            helper.assertTrue(chamberNetwork.contents().litres == before[0], "And still none of the water");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = GLASS_BATCH)
+    public static void aCrouchingEmptyHandTakesTheChargeAndTheProductOutOfARetortThroughTheGameMode(GameTestHelper helper)
+    {
+        final GlassRetortBlockEntity retort = retortInBox(helper, true);
+        final DistillationTable.Row row = DistillationTable.NITRIC_ACID;
+        final FakePlayer player = player(helper);
+        helper.runAtTickTime(2, () -> {
+            retort.fluids(Direction.UP).fill(new FluidStack(fluidOf(row.fluid()), 5), IFluidHandler.FluidAction.EXECUTE);
+            helper.assertTrue(retort.interact(new ItemStack(itemOf(row.item()), 11), player(helper), InteractionHand.MAIN_HAND), "Eleven powders of saltpeter go into the slot");
+            retort.warmTo(150f);
+            retort.step(helper.getLevel(), 100f);
+            helper.assertTrue(retort.product().getCount() == 8 && retort.charge().getCount() == 3, "A batch takes eight and leaves three that no batch will take: the slot is stuck with them, got " + retort.charge().getCount());
+
+            player.setShiftKeyDown(false);
+            useAsPlayer(helper, player, RETORT);
+            helper.assertTrue(retort.charge().getCount() == 3 && player.getInventory().isEmpty(), "A plain click with an empty hand only reads the retort");
+
+            player.setShiftKeyDown(true);
+            useAsPlayer(helper, player, RETORT);
+            helper.assertTrue(retort.charge().isEmpty() && retort.product().isEmpty(), "Crouching takes both out");
+            helper.assertTrue(player.getInventory().countItem(itemOf(row.item())) == 3 && player.getInventory().countItem(Chemistry.POTASSIUM_BISULFATE.get()) == 8, "Three of saltpeter and eight of potassium bisulfate are in the hands of the person, nothing lost");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = GLASS_BATCH)
+    public static void aCrouchingCarboyTipsTheFlaskOutAndRinsesTheLastFilmSoTheNextRecipeCanRun(GameTestHelper helper)
+    {
+        final GlassRetortBlockEntity retort = retortInBox(helper, true);
+        final FakePlayer player = player(helper);
+        helper.runAtTickTime(2, () -> {
+            final ItemStack carboy = new ItemStack(Chemistry.GLASS_CARBOY.get());
+            helper.assertTrue(carboy.doesSneakBypassUse(helper.getLevel(), helper.absolutePos(RETORT), player), "A carboy is used on a retort even by a person who is crouching");
+            helper.assertFalse(carboy.doesSneakBypassUse(helper.getLevel(), helper.absolutePos(RETORT).above(3), player), "And on nothing else");
+
+            // Leftover that no batch takes: three litres and two fifths of acid in the flask
+            retort.input().set(acid(), 3.4);
+            player.setItemInHand(InteractionHand.MAIN_HAND, carboy);
+            player.setShiftKeyDown(true);
+            useAsPlayer(helper, player, RETORT);
+            final FluidStack held = FluidHelpers.getContainedFluid(player.getItemInHand(InteractionHand.MAIN_HAND));
+            helper.assertTrue(held.getFluid() == acid() && held.getAmount() == 3, "The carboy takes the three whole litres, got " + held);
+            helper.assertTrue(Math.abs(retort.input().litres() - 0.4) < 1e-6, "And the film of 0.4 L stays, which no container can take, got " + retort.input().litres());
+
+            // The film cannot be poured out, and with it there the flask holds chamber acid for ever
+            useAsPlayer(helper, player, RETORT);
+            helper.assertTrue(retort.input().isEmpty(), "A second crouching use rinses it out, got " + retort.input().litres());
+
+            // And the flask now does what another recipe says
+            final DistillationTable.Row row = DistillationTable.NITRIC_ACID;
+            retort.fluids(Direction.UP).fill(new FluidStack(fluidOf(row.fluid()), 2), IFluidHandler.FluidAction.EXECUTE);
+            helper.assertTrue(retort.interact(new ItemStack(itemOf(row.item()), 8), player(helper), InteractionHand.MAIN_HAND), "The powder goes in");
+            retort.warmTo(150f);
+            retort.step(helper.getLevel(), 100f);
+            helper.assertTrue(retort.product().getCount() == 8, "A batch of nitric acid runs in the cleared flask, got " + retort.product());
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = GLASS_BATCH)
+    public static void aCarboyOnlyTakesALiquidItCanHoldWhenTippingOutAFlask(GameTestHelper helper)
+    {
+        final GlassRetortBlockEntity retort = retortInBox(helper, true);
+        final FakePlayer player = player(helper);
+        helper.runAtTickTime(2, () -> {
+            retort.input().set(acid(), 5.0);
+            final ItemStack carboy = new ItemStack(Chemistry.GLASS_CARBOY.get());
+            carboy.getCapability(Capabilities.FluidHandler.ITEM).fill(new FluidStack(fluidOf("tfcpp:nitric_acid"), 4), IFluidHandler.FluidAction.EXECUTE);
+            player.setItemInHand(InteractionHand.MAIN_HAND, carboy);
+            player.setShiftKeyDown(true);
+            useAsPlayer(helper, player, RETORT);
+            helper.assertTrue(Math.abs(retort.input().litres() - 5.0) < 1e-6, "A carboy of nitric acid takes no chamber acid, and the flask keeps it all, got " + retort.input().litres());
+            final FluidStack held = FluidHelpers.getContainedFluid(player.getItemInHand(InteractionHand.MAIN_HAND));
+            helper.assertTrue(held.getFluid() == fluidOf("tfcpp:nitric_acid") && held.getAmount() == 4, "And the carboy keeps its own, got " + held);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = GLASS_BATCH)
+    public static void waterPipedToTheSideOfTheRetortGoesIntoTheReceiverWaterAndNothingElseDoes(GameTestHelper helper)
+    {
+        final GlassRetortBlockEntity retort = retortInBox(helper, true);
+        final BlockPos tap = RETORT.west(), pipe = RETORT.west(2);
+        helper.setBlock(tap, fittingState(Pipes.TAPS.get(PipeMaterial.WROUGHT_IRON), Direction.EAST, true));
+        helper.setBlock(pipe, Pipes.PIPES.get(PipeMaterial.WROUGHT_IRON).get());
+        helper.runAtTickTime(5, () -> {
+            final PipeNetwork network = networkAt(helper, pipe);
+            helper.assertTrue(network != null, "The pipe is a network");
+            network.contents().addLiquid(WATER, 3f, PipePhysics.ROOM_TEMPERATURE);
+            network.flowThroughTap(helper.getLevel(), helper.absolutePos(tap), Direction.EAST, 5f);
+            helper.assertTrue(Math.abs(retort.water().litres() - 3.0) < 1e-6, "The water from the side tap is in the receiver's water, got " + retort.water().litres());
+            helper.assertTrue(retort.input().isEmpty() && retort.reagent().isEmpty(), "Not in the flask");
+
+            final var level = helper.getLevel();
+            final BlockPos retortPos = helper.absolutePos(RETORT);
+            for (Direction side : Direction.Plane.HORIZONTAL)
+            {
+                final @Nullable IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, retortPos, side);
+                helper.assertTrue(handler != null, "Every side is open");
+                helper.assertTrue(handler.fill(new FluidStack(acid(), 1), IFluidHandler.FluidAction.EXECUTE) == 0, "No acid is poured in from the side");
+                helper.assertTrue(handler.fill(new FluidStack(fluidOf("tfcpp:coal_tar"), 1), IFluidHandler.FluidAction.EXECUTE) == 0, "Nor any other liquid");
+            }
+            retort.receiver().fill(new FluidStack(fluidOf("tfcpp:nitric_acid"), 4), IFluidHandler.FluidAction.EXECUTE);
+            final FluidStack drawn = level.getCapability(Capabilities.FluidHandler.BLOCK, retortPos, Direction.NORTH).drain(10, IFluidHandler.FluidAction.EXECUTE);
+            helper.assertTrue(drawn.getAmount() == 4 && drawn.getFluid() == fluidOf("tfcpp:nitric_acid"), "What has condensed runs out of the side too, got " + drawn);
+            helper.assertTrue(Math.abs(retort.water().litres() - 3.0) < 1e-6, "And the water stays");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 1500, batch = TIME_BATCH)
+    public static void aLeadChamberWearsUnderItsAcidInProportionToItsFillAndTwentyTimesFasterAboveEightyDegrees(GameTestHelper helper)
+    {
+        Calendars.SERVER.setPlayersLoggedOn(true);
+        Calendars.SERVER.setCalendarTickRate(REAL_TIME_RATE);
+        final BlockPos cool = new BlockPos(2, 1, 2), hot = new BlockPos(2, 1, 6), empty = new BlockPos(6, 1, 2), full = new BlockPos(6, 1, 6);
+        for (BlockPos pos : new BlockPos[] {cool, hot, empty, full})
+        {
+            helper.setBlock(pos, Chemistry.LEAD_CHAMBER.get());
+        }
+        helper.runAtTickTime(2, () -> {
+            ((LeadChamberBlockEntity) helper.getBlockEntity(cool)).tank().fill(new FluidStack(acid(), 50), IFluidHandler.FluidAction.EXECUTE);
+            ((LeadChamberBlockEntity) helper.getBlockEntity(hot)).tank().fill(new FluidStack(acid(), 50), IFluidHandler.FluidAction.EXECUTE);
+            ((LeadChamberBlockEntity) helper.getBlockEntity(full)).tank().fill(new FluidStack(acid(), 100), IFluidHandler.FluidAction.EXECUTE);
+        });
+        helper.onEachTick(() -> {
+            // The gas of the networks is held at a temperature, as a network cools to the weather with a time of about nine seconds
+            for (BlockPos pos : new BlockPos[] {cool, empty, full})
+            {
+                final @Nullable PipeNetwork network = networkAt(helper, pos);
+                if (network != null)
+                {
+                    network.contents().temperature = PipePhysics.ROOM_TEMPERATURE;
+                }
+            }
+            final @Nullable PipeNetwork network = networkAt(helper, hot);
+            if (network != null)
+            {
+                network.contents().temperature = 400f;
+            }
+        });
+        helper.runAtTickTime(1300, () -> {
+            final float days = 1200f / LocalTime.TICKS_PER_DAY;
+            final float rate = PipeMaterial.LEAD.corrosion(ACID, PipePhysics.ROOM_TEMPERATURE);
+            final float lostCool = 1f - networkAt(helper, cool).segments().getFirst().integrity;
+            final float lostHot = 1f - networkAt(helper, hot).segments().getFirst().integrity;
+            final float lostEmpty = 1f - networkAt(helper, empty).segments().getFirst().integrity;
+            final float lostFull = 1f - networkAt(helper, full).segments().getFirst().integrity;
+            helper.assertTrue(lostEmpty == 0f, "A chamber with no acid in its tank does not wear, got " + lostEmpty);
+            helper.assertTrue(lostCool > rate * 0.5f * 0.5f * days && lostCool < rate * 0.5f * 2f * days, "Half full and cool it wears by " + rate * 0.5f * days + " in the minute, got " + lostCool);
+            helper.assertTrue(Math.abs(lostFull - 2f * lostCool) < 0.1f * lostFull, "A full tank wears twice as fast as a half full one, got " + lostFull + " against " + lostCool);
+            helper.assertTrue(Math.abs(lostHot - PipeMaterial.HOT_ACID_FACTOR * lostCool) < 0.1f * lostHot, "Above 80 C the film is gone and it wears " + PipeMaterial.HOT_ACID_FACTOR + " times as fast, got " + lostHot + " against " + lostCool);
+            helper.succeed();
+        });
+    }
+
+    /**
+     * The whole of the acid plant in one test, made only of what a person would build and do: the shaft turns the pump, the pump draws chamber acid from the tank of a chamber into a lead line, a lead tap lets it into a retort, and a charcoal fire under a sand bath concentrates it. The test puts in nothing of the physics but the acid in the tank, the water of the chamber's network and the charcoal.
+     */
+    @GameTest(template = TEMPLATE, timeoutTicks = 4200, batch = PLANT_BATCH)
+    public static void aWholePlantTakesChamberAcidFromTheChamberToConcentratedAcidInTheFlask(GameTestHelper helper)
+    {
+        Calendars.SERVER.setPlayersLoggedOn(true);
+        Calendars.SERVER.setCalendarTickRate(PLANT_RATE);
+        final BlockPos chamberPos = new BlockPos(1, 5, 2), pumpPos = new BlockPos(2, 5, 2), axlePos = new BlockPos(2, 5, 3), motorPos = new BlockPos(2, 5, 4);
+        final BlockPos firePos = new BlockPos(6, 1, 2), bathPos = firePos.above(), retortPos = bathPos.above(), tapPos = retortPos.above(), topPipe = tapPos.above();
+        final Block axle = TFCBlocks.WOODS.get(Wood.OAK).get(Wood.BlockType.AXLE).get();
+
+        // The shaft: a motor that turns at the speed of a full water wheel, and an axle to the side of the pump
+        helper.setBlock(motorPos, TFCBlocks.CREATIVE_MOTOR.get().defaultBlockState().setValue(BlockStateProperties.AXIS, Direction.Axis.Z));
+        final CreativeRotationBlockEntity motor = helper.getBlockEntity(motorPos);
+        for (int step = 0; step < CreativeRotationBlockEntity.MAX_STEPS; step++)
+        {
+            motor.incrementSpeed();
+        }
+        helper.setBlock(axlePos, axle.defaultBlockState().setValue(BlockStateProperties.AXIS, Direction.Axis.Z));
+        helper.setBlock(pumpPos, Pipes.PISTON_PUMP.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.EAST));
+
+        // The chamber behind the pump, and a lead line from the pump to the tap over the retort
+        helper.setBlock(chamberPos, Chemistry.LEAD_CHAMBER.get());
+        for (int x = 3; x <= topPipe.getX(); x++)
+        {
+            helper.setBlock(new BlockPos(x, 5, 2), Pipes.PIPES.get(PipeMaterial.LEAD).get());
+        }
+        helper.setBlock(tapPos, fittingState(Pipes.TAPS.get(PipeMaterial.LEAD), Direction.DOWN, false));
+
+        // The fire, the sand bath, and the retort with no condenser: it boils water off
+        helper.setBlock(firePos, TFCBlocks.FIREPIT.get());
+        helper.setBlock(bathPos, Chemistry.SAND_BATH.get());
+        helper.setBlock(retortPos, Chemistry.GLASS_RETORT.get());
+        final LeadChamberBlockEntity chamber = helper.getBlockEntity(chamberPos);
+        final GlassRetortBlockEntity retort = helper.getBlockEntity(retortPos);
+        final FirepitBlockEntity firepit = helper.getBlockEntity(firePos);
+        final SandBathBlockEntity bath = helper.getBlockEntity(bathPos);
+        final FakePlayer player = player(helper);
+        final BlockPos absoluteFire = helper.absolutePos(firePos);
+
+        final boolean[] done = new boolean[1], received = new boolean[1];
+        final float[] peak = new float[1];
+        helper.runAtTickTime(2, () -> {
+            for (int slot = 0; slot < 4; slot++)
+            {
+                firepit.getInventory().setStackInSlot(slot, new ItemStack(Items.CHARCOAL));
+            }
+            helper.assertTrue(firepit.light(helper.getLevel().getBlockState(absoluteFire)), "The firepit takes the charcoal and lights");
+            // A charcoal firepit stands at 1100 C, and the sand at its default depth of 4 passes up only 236 C of that, short of the 280 C the acid needs: the person crouches and takes a layer off, which gives 290 C
+            player.setShiftKeyDown(true);
+            useAsPlayer(helper, player, bathPos);
+            player.setShiftKeyDown(false);
+            helper.assertTrue(helper.getBlockState(bathPos).getValue(SandBathBlock.DEPTH) == 3, "Crouching with an empty hand takes a layer of sand off");
+            chamber.tank().fill(new FluidStack(acid(), 2), IFluidHandler.FluidAction.EXECUTE); // What the chamber has made
+            final PipeNetwork chamberNetwork = networkAt(helper, chamberPos);
+            helper.assertTrue(chamberNetwork != null, "The chamber is a network of its own");
+            chamberNetwork.contents().addLiquid(WATER, 3f, PipePhysics.ROOM_TEMPERATURE); // Its process water: it must not be drawn into the acid line
+            // The tap is opened by hand, the way a person does it
+            useAsPlayer(helper, player, tapPos);
+            helper.assertTrue(helper.getBlockState(tapPos).getValue(PipeFittingBlock.OPEN), "The hand wheel of the tap opens it");
+        });
+
+        // The acid goes from the tank through the pump, the line and the tap into the flask, the water of the chamber stays, and nothing is left on the way
+        helper.runAtTickTime(250, () -> {
+            final PipeNetwork line = networkAt(helper, topPipe);
+            helper.assertTrue(line != null && line != networkAt(helper, chamberPos), "The line is a network of its own");
+            helper.assertTrue(chamber.tank().isEmpty(), "The pump has drawn the tank empty, got " + chamber.tank().getFluidAmount());
+            helper.assertTrue(Math.abs(networkAt(helper, chamberPos).contents().litres - 3f) < 1e-3f, "The water of the chamber's network was not drawn, got " + networkAt(helper, chamberPos).contents().litres);
+            helper.assertTrue(line.contents().litres < 1e-3f, "The line is empty again: the tap let it all through, got " + line.contents().litres + " L of " + line.contents().liquid);
+            helper.assertTrue(retort.input().fluid() == acid() && Math.abs(retort.input().litres() - 2.0) < 1e-3, "Two litres of chamber acid are in the flask, got " + retort.input().litres());
+            helper.assertTrue(retort.reagent().isEmpty() && retort.water().isEmpty(), "And nothing else is in the retort");
+        });
+
+        // The sand bath brings the flask to the working range, and two batches of a minute each boil the water off
+        helper.onEachTick(() -> {
+            peak[0] = Math.max(peak[0], retort.getTemperature());
+            received[0] |= !retort.input().isEmpty();
+            if (received[0] && !done[0] && retort.input().isEmpty() && !retort.isActive())
+            {
+                done[0] = true;
+                helper.assertTrue(helper.getBlockState(retortPos).is(Chemistry.GLASS_RETORT.get()), "The flask did not crack");
+                helper.assertTrue(Math.abs(inResidue(retort, "tfcpp:sulfuric_acid") - 2 * 0.59) < 1e-3, "Two batches leave 1.18 L of oil of vitriol in the flask, got " + inResidue(retort, "tfcpp:sulfuric_acid"));
+                helper.assertTrue(retort.receiver().isEmpty() && retort.product().isEmpty(), "And nothing came over");
+                helper.assertTrue(peak[0] <= DistillationTable.CONCENTRATE_SULFURIC_ACID.maxTemperature(), "The flask stayed in the working range, peak " + peak[0]);
+                helper.succeed();
+            }
+        });
+        helper.runAtTickTime(4150, () -> helper.assertTrue(done[0], "The plant did not finish: flask " + Math.round(retort.getTemperature()) + " C (peak " + Math.round(peak[0]) + "), sand " + Math.round(bath.getTemperature()) + " C, fire " + Math.round(firepit.getTemperature()) + " C, "
+            + retort.input().litres() + " L of chamber acid left, batch " + retort.isActive() + " at " + retort.progress() + " s, last reason " + retort.lastReason() + ", residue " + inResidue(retort, "tfcpp:sulfuric_acid")));
     }
 
     private AcidGameTests() {}

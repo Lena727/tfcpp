@@ -15,6 +15,9 @@
 | CERAMIC: прочность (`strength`) | `1.2f` | МПа | Fired clay is proof against nearly everything, but it is brittle and its joints are weak. |
 | CERAMIC: толщина стенки (`wall`) | `15f` | мм | Fired clay is proof against nearly everything, but it is brittle and its joints are weak. |
 | CERAMIC: максимальная температура (`maximumTemperature`) | `1400f` | ? | Fired clay is proof against nearly everything, but it is brittle and its joints are weak. |
+| CERAMIC (химическая керамика, штайнцойг) | прочность `1.2f` МПа, стенка `15f` мм: по Барлоу 3,55 атм избыточного | атм | Стойка к серной, азотной и соляной кислоте любой крепости при любой температуре; плавиковая кислота и горячая крепкая щёлочь её берут. Хрупкая, слабая на разрыв, раструбные стыки слабее. Химическая керамическая труба продаётся на рабочее давление около 2–4 бар: источник по памяти из справочников химического оборудования, порядок величины. Те же числа и у фитингов керамики. |
+| Горячий щёлок для керамики (`HOT_ALKALI_KELVIN`, `HOT_ALKALI_CERAMIC`) | выше `353f` К: `0.05f` доли стенки в сутки; холодный `0f` | К, доля в сутки | Горячая крепкая щёлочь снимает глазурь, потом разъедает черепок. Игровая цифра: медленно, но не нулевая. |
+| Установка предохранительного клапана (`safetyValveSetting`, `SAFETY_VALVE_SET_SHARE`) | `min(8, 0.8 * рейтинг нового корпуса)` атм избыточного; седло на 1 атм ниже | атм | Клапан должен поднять до разрыва своего корпуса: железо 8, свинец 4,7, керамика 2,8. Игровая цифра: четыре пятых. |
 | COPPER: прочность (`strength`) | `70f` | МПа | — |
 | COPPER: толщина стенки (`wall`) | `4f` | мм | — |
 | COPPER: максимальная температура (`maximumTemperature`) | `700f` | ? | — |
@@ -497,9 +500,11 @@
 |---|---|---|---|
 | Объём (`VOLUME`) | `1f` | м³ | A chamber a metre across, and open: the whole of the block is gas space. |
 | Материал (`PipeMaterial.LEAD`) | — | — | Lead: 5 МПа, стенка 6 мм, размягчается около 150 °C. Холодная камерная кислота держится под плёнкой сульфата (`leadUnderAcid`). |
+| Свинцовый корпус фитинга | рейтинг 5,9 атм, плавится при 327 °C, ползёт под нагрузкой; серная кислота до 70% и до 80 °C держится под плёнкой PbSO₄, азотная разъедает (`0.5f`) | атм, °C | Свинцовые фитинги те же, что свинцовая труба: свинец мягкий, поэтому давление ниже железа. |
 | Теплопотери (`HEAT_LOSS`) | `0.02f` | кВт/К | Real chambers were built big and thin, to lose their heat. A thin lead sheet on air gives its heat away faster than brick (0,012). A game figure, not measured. |
 | Соединение | все стороны | — | Joins pipe on every side, as a chamber is a room of the network. |
 | Вода в реакции | `contents.litres`, если жидкость сети вода, иначе 0 | л | Only water in the network makes acid: a chamber with brine or nothing else makes none. |
+| Износ свинцовых стен камеры (`tankCorrosion`) | `corrosion(жидкость бака, T сети) * заполнение бака` долей стенки в сутки, на тех же календарных сутках и тем же путём, что у трубы | доля в сутки | Кислота лежит в баке блока и сети её не видит, поэтому износ считается по заполнению бака (мБ / 100). До 80 °C `0.001f`, выше 80 °C в `HOT_ACID_FACTOR` = 20 раз быстрее: плёнка сульфата растворяется. Игровая цифра 20. |
 
 ## chemistry/LeadChamberBlockEntity
 | Величина | Значение | Единицы | Источник из комментария |
@@ -549,7 +554,8 @@
 ## chemistry/DistillationTable
 | Величина | Значение | Единицы | Источник из комментария |
 |---|---|---|---|
-| Концентрирование: 1 л `chamber_acid`, 280–350, 60 с | 0.59 л `sulfuric_acid` | л, °C, с | Value of the design. 1 L at 1.55 kg/L and 65% is 1.01 kg of acid, which is 0.59 L at 93%, 1.83 kg/L. |
+| Концентрирование: 1 л `chamber_acid`, 280–350, 60 с | остаток в колбе 0.59 л `sulfuric_acid`, из колбы уходит вода, приёмник и конденсатор не нужны | л, °C, с | Value of the design, поправлено в пакете 4 ревью: крепкая кислота нелетуча, кипит вода. Баланс ниже. |
+| Баланс концентрирования | 1 л камерной кислоты 1,55 кг · 65% = 1,0075 кг H₂SO₄. При 93% и 1,83 кг/л: 1,0075 / 0,93 = 1,083 кг раствора = 0,592 л. Вода: 1,55 − 1,083 = 0,467 кг = 0,467 л = 25,9 моль, на кипение около 1,05 МДж | кг, л, моль | Сходится с 0,59 л. Кислота не теряется: 1,0075 кг входит и остаётся. Водяного пара в газовой сетке мода нет, вода уходит без записи в сетку. Температура окна 280–350 °C это точка кипения готовой кислоты (около 290 °C при 93%): пока колба холоднее, вода ещё не вся ушла. |
 | Азотная кислота: 8 селитры + 0.23 л `sulfuric_acid`, 120–200, 60 с | 0.175 л `nitric_acid`, 8 `potassium_bisulfate`, NOx 0.2 моль | л, моль | Value of the design. |
 | Соляная кислота: 8 соли + 0.39 л `sulfuric_acid`, вода приёмника 0.53 л, 150–300, 60 с | 0.67 л `hydrochloric_acid`, 8 `sodium_bisulfate` | л | Value of the design. The 0.53 L of water is taken by the batch and ends up in the acid (0.67 L at 1.16 kg/L and 32%). |
 | Древесный спирт: 1 л `pyroligneous_liquor`, 70–100, 30 с | 0.02 л `wood_spirit` в приёмнике, 0.9 л `tfc:vinegar` остаётся в колбе | л | Value of the design. Two liquids from one batch: the vinegar is a residue and needs a tank of its own (a decision of the implementation). |
@@ -584,6 +590,9 @@
 | Растрескивание | проверка каждый такт, `temperature > 550` | °C | In its own tick, with no `PipeTracker`: the block is destroyed without a drop. |
 | Разлив при разрушении | едкая жидкость → `CorrosiveSpill.at`; жидкости как пары по `AcidVapour`; порошок на землю | — | Same on a crack and on breaking by hand. The unreacted share of a running batch goes back as powder and fume; the reacted share has already come out. |
 | Нет воды или нет конденсатора для рецепта с водой приёмника | вся HCl в воздух, вода не расходуется | — | `DistillationRecipe.unabsorbed()`: output 0, gas HCl `10` mol per litre of the output it would have had. |
+| Боковые стороны реторты (`Side`) | вода в бак воды приёмника, слив приёмника и остатка; другие жидкости не принимаются | — | Приёмник открыт по бокам, чтобы воду подвести трубой с крана; сверху заливается колба, снизу сливается, как прежде. Решение реализации. |
+| Остаток под литр (`rinseDregs`) | при присевшей бутыли плёнка меньше 1 л в колбе смывается на пол: пары по `AcidVapour`, едкая жидкость обжигает рядом (`CorrosiveSpill`) | л | Бутыль берёт целые литры, плёнка меньше литра не берётся ничем и навсегда занимает бак. Вещество не пропадает: оно уходит в воздух комнаты. Решение реализации. |
+| Порошок | присев с пустой рукой, игрок получает и продукт, и не взятую заряд-порошок | шт | Раньше забирался только продукт. |
 
 ## chemistry/GlassCarboyItem
 | Величина | Значение | Единицы | Источник из комментария |

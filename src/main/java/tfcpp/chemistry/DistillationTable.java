@@ -46,8 +46,11 @@ public final class DistillationTable
         return "tfcpp:" + liquid.id();
     }
 
+    /**
+     * Chamber acid, about 65% sulfuric acid, is concentrated by boiling WATER off it: the acid is far the less volatile of the two, so the strong acid stays in the flask as the residue and what goes off is steam, which nothing condenses, so neither a condenser nor a receiver is wanted. The mass balance is in the ledger: 1 L at 1.55 kg/L and 65% holds 1.0075 kg of acid, which at 93% and 1.83 kg/L is 0.592 L, and 0.467 kg of water goes off. The gas of the mod has no water vapour, so the water is let go with no gas entered in the grid: it leaves.
+     */
     public static final Row CONCENTRATE_SULFURIC_ACID = new Row("concentrate_sulfuric_acid", null, 0, id(Liquid.CHAMBER_ACID), 1f, null, 0f, 280f, 350f, 60f,
-        id(Liquid.SULFURIC_ACID), 0.59f, null, 0f, 0f, Map.of(), null, 0);
+        null, 0f, id(Liquid.SULFURIC_ACID), 0.59f, 0f, Map.of(), null, 0);
 
     public static final Row NITRIC_ACID = new Row("nitric_acid", "tfc:powder/saltpeter", 8, id(Liquid.SULFURIC_ACID), 0.23f, null, 0f, 120f, 200f, 60f,
         id(Liquid.NITRIC_ACID), 0.175f, null, 0f, 0f, Map.of(Gas.NITROGEN_OXIDES, 0.2f), "tfcpp:powder/potassium_bisulfate", 8);

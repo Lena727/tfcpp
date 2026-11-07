@@ -96,6 +96,10 @@ public final class ConverterBlock extends Block implements EntityBlock, PipeMemb
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit)
     {
+        if (!player.getMainHandItem().isEmpty())
+        {
+            return InteractionResult.PASS; // What is in the hand is not for this block: it may be placed beside it
+        }
         if (level.getBlockEntity(pos) instanceof ConverterBlockEntity converter && !level.isClientSide)
         {
             converter.showStatus(player);

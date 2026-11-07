@@ -1,5 +1,7 @@
 package tfcpp.metallurgy;
 
+import java.util.Map;
+import java.util.function.Supplier;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.dries007.tfc.common.blocks.rock.Rock;
 import net.minecraft.data.PackOutput;
@@ -21,6 +23,7 @@ import tfcpp.pneumatics.instruments.DavyLampBlock;
 import tfcpp.pneumatics.instruments.GoldLeafIndicatorBlock;
 import tfcpp.pneumatics.instruments.Instruments;
 import tfcpp.pneumatics.pipes.ManometerBlock;
+import tfcpp.pneumatics.pipes.PipeMaterial;
 import tfcpp.pneumatics.pipes.Pipes;
 
 public final class MetallurgyAssets
@@ -139,10 +142,13 @@ public final class MetallurgyAssets
             simpleBlockItem(Instruments.MINE_FAN.get(), models().getExistingFile(modLoc("block/mine_fan")));
 
             Pipes.PIPES.forEach((material, block) -> pipe(material.id(), block.get()));
-            fitting("pipe_valve", Pipes.VALVE.get(), "block/pipe_fitting", "block/pipe_valve");
-            fitting("pipe_vent", Pipes.VENT.get(), "block/pipe_fitting", "block/pipe_vent");
-            fitting("pipe_tap", Pipes.TAP.get(), "block/pipe_fitting", "block/pipe_tap");
-            fitting("safety_valve", Pipes.SAFETY_VALVE.get(), "block/pipe_fitting", "block/safety_valve");
+            for (PipeMaterial material : Pipes.FITTING_MATERIALS)
+            {
+                fittingOf("pipe_valve", Pipes.VALVES, material);
+                fittingOf("pipe_vent", Pipes.VENTS, material);
+                fittingOf("pipe_tap", Pipes.TAPS, material);
+                fittingOf("safety_valve", Pipes.SAFETY_VALVES, material);
+            }
             final ModelFile manometer = models().cubeAll("mercury_manometer", modLoc("block/mercury_manometer"));
             final ModelFile blownManometer = models().cubeAll("mercury_manometer_blown", modLoc("block/mercury_manometer_blown"));
             getVariantBuilder(Pipes.MANOMETER.get()).forAllStates(state -> ConfiguredModel.builder().modelFile(state.getValue(ManometerBlock.BLOWN) ? blownManometer : manometer).build());
@@ -157,6 +163,14 @@ public final class MetallurgyAssets
                 final String lit = state.getValue(DavyLampBlock.LIT) ? "_on" : "_off";
                 return ConfiguredModel.builder().modelFile(new ModelFile.UncheckedModelFile("tfc:block/metal/lamp/copper" + hanging + lit)).build();
             });
+        }
+
+        /** A fitting of one material: the side and the face are the textures of that material, and the iron ones keep the plain names. */
+        private void fittingOf(String name, Map<PipeMaterial, Supplier<Block>> blocks, PipeMaterial material)
+        {
+            final String registered = Pipes.fittingName(name, material);
+            final String side = material == PipeMaterial.WROUGHT_IRON ? "block/pipe_fitting" : "block/pipe_fitting_" + material.id();
+            fitting(registered, blocks.get(material).get(), side, "block/" + registered);
         }
 
         private void fitting(String name, Block block, String side, String front)

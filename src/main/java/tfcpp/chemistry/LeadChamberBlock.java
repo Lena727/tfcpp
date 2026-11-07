@@ -2,6 +2,7 @@ package tfcpp.chemistry;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -69,6 +70,20 @@ public final class LeadChamberBlock extends Block implements EntityBlock, PipeMe
         return true;
     }
 
+    /**
+     * The acid sits in the tank of the block and not in the network, so the lead of the walls wears under it by the same rule as a pipe full of it: in proportion to how full the tank is, and twenty times faster while the gas is above 80 C and has taken the film of sulfate off the lead.
+     */
+    @Override
+    public float tankCorrosion(ServerLevel level, BlockPos pos, BlockState state, float kelvin)
+    {
+        if (!(level.getBlockEntity(pos) instanceof LeadChamberBlockEntity chamber) || chamber.tank().isEmpty())
+        {
+            return 0f;
+        }
+        final String liquid = BuiltInRegistries.FLUID.getKey(chamber.tank().getFluid().getFluid()).toString();
+        return material(state).corrosion(liquid, kelvin) * chamber.tank().getFluidAmount() / LeadChamberBlockEntity.TANK_MILLIBUCKETS;
+    }
+
     @Override
     public void stepPort(PipeNetwork network, ServerLevel level, BlockPos pos, BlockState state, float seconds)
     {
@@ -102,6 +117,10 @@ public final class LeadChamberBlock extends Block implements EntityBlock, PipeMe
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit)
     {
+        if (!player.getMainHandItem().isEmpty())
+        {
+            return InteractionResult.PASS; // What is in the hand is not for this block: it may be placed beside it
+        }
         if (level.getBlockEntity(pos) instanceof LeadChamberBlockEntity chamber && !level.isClientSide)
         {
             chamber.showStatus(player);

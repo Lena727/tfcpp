@@ -2,6 +2,7 @@ package tfcpp.compat.emi;
 
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import dev.emi.emi.api.EmiEntrypoint;
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
@@ -64,10 +65,10 @@ public final class TFCppEmiPlugin implements EmiPlugin
         info(registry, "phosphoric_iron_slag", "tfcpp.info.phosphoric_iron_slag", Metallurgy.PHOSPHORIC_IRON_SLAG.get());
         info(registry, "thomas_slag", "tfcpp.info.thomas_slag", Metallurgy.THOMAS_SLAG.get());
         info(registry, "basic_brick", "tfcpp.info.basic_brick", Metallurgy.BASIC_BRICK.get());
-        info(registry, "pipes", "tfcpp.info.pipes", Pipes.PIPE_ITEMS.values().stream().map(Supplier::get).toArray(Item[]::new));
+        info(registry, "pipes", "tfcpp.info.pipes", Stream.of(Pipes.PIPE_ITEMS, Pipes.VALVE_ITEMS, Pipes.VENT_ITEMS, Pipes.TAP_ITEMS).flatMap(items -> items.values().stream()).map(Supplier::get).toArray(Item[]::new));
         info(registry, "pressure_vessel", "tfcpp.info.pressure_vessel", Pipes.PRESSURE_VESSEL.get().asItem());
         info(registry, "piston_pump", "tfcpp.info.piston_pump", Pipes.PISTON_PUMP.get().asItem());
-        info(registry, "safety_valve", "tfcpp.info.safety_valve", Pipes.SAFETY_VALVE.get().asItem());
+        info(registry, "safety_valve", "tfcpp.info.safety_valve", Pipes.SAFETY_VALVE_ITEMS.values().stream().map(Supplier::get).toArray(Item[]::new));
         info(registry, "manometer", "tfcpp.info.manometer", Pipes.MANOMETER.get().asItem());
         info(registry, "shaft_load", "tfcpp.info.shaft_load", TFCBlocks.STEEL_PUMP.get().asItem());
         info(registry, "coal", "tfcpp.info.coal", BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("tfc", "ore/bituminous_coal")), BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("tfc", "ore/lignite")));

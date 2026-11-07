@@ -323,6 +323,7 @@ public final class PipeNetwork
                         }
                     }
                 }
+                rate += member.tankCorrosion(level, segment.pos, state, contents.temperature);
                 final float before = segment.integrity;
                 segment.integrity = Math.max(0f, before - rate * days);
                 changed |= segment.integrity != before;

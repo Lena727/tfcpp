@@ -87,6 +87,10 @@ public final class SulfurBurnerBlock extends Block implements EntityBlock, PipeM
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit)
     {
+        if (!player.getMainHandItem().isEmpty())
+        {
+            return InteractionResult.PASS; // What is in the hand is not for this block: it may be placed beside it
+        }
         if (level.getBlockEntity(pos) instanceof SulfurBurnerBlockEntity burner && !level.isClientSide)
         {
             burner.showStatus(player);

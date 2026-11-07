@@ -2,8 +2,11 @@ package tfcpp.chemistry;
 
 import net.dries007.tfc.common.fluids.FluidHelpers;
 import net.dries007.tfc.common.items.FluidContainerItem;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +24,15 @@ public final class GlassCarboyItem extends FluidContainerItem
     public GlassCarboyItem(Properties properties)
     {
         super(properties.stacksTo(1), () -> CAPACITY_MILLIBUCKETS, Chemistry.USABLE_IN_CARBOY, false, () -> false);
+    }
+
+    /**
+     * A person who is crouching and has something in the hand does not use the block they click at all, unless the item says so. A carboy says so for a glass retort, where crouching with it is what tips the liquid out of the flask: without this that use never reached the retort in the real game.
+     */
+    @Override
+    public boolean doesSneakBypassUse(ItemStack stack, LevelReader level, BlockPos pos, Player player)
+    {
+        return level.getBlockState(pos).getBlock() instanceof GlassRetortBlock;
     }
 
     /** The bar shows how full it is, in the colour of what it holds. */

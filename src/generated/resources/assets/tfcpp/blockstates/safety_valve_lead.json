@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "facing=down,open=false": {
+      "model": "tfcpp:block/safety_valve_lead",
+      "x": 180
+    },
+    "facing=down,open=true": {
+      "model": "tfcpp:block/safety_valve_lead",
+      "x": 180
+    },
+    "facing=east,open=false": {
+      "model": "tfcpp:block/safety_valve_lead",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,open=true": {
+      "model": "tfcpp:block/safety_valve_lead",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north,open=false": {
+      "model": "tfcpp:block/safety_valve_lead",
+      "x": 90
+    },
+    "facing=north,open=true": {
+      "model": "tfcpp:block/safety_valve_lead",
+      "x": 90
+    },
+    "facing=south,open=false": {
+      "model": "tfcpp:block/safety_valve_lead",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,open=true": {
+      "model": "tfcpp:block/safety_valve_lead",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up,open=false": {
+      "model": "tfcpp:block/safety_valve_lead"
+    },
+    "facing=up,open=true": {
+      "model": "tfcpp:block/safety_valve_lead"
+    },
+    "facing=west,open=false": {
+      "model": "tfcpp:block/safety_valve_lead",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,open=true": {
+      "model": "tfcpp:block/safety_valve_lead",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

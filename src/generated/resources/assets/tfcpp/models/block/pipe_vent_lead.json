@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "tfcpp:block/pipe_vent_lead",
+    "side": "tfcpp:block/pipe_fitting_lead",
+    "top": "tfcpp:block/pipe_fitting_lead"
+  }
+}

@@ -123,6 +123,7 @@ public final class GlassRetortBlockEntity extends BlockEntity implements IHeatCo
     /** Fractions of a millibucket that each product has left over, for the next time. */
     private final Map<String, Remainder> carry = new HashMap<>();
     private final IFluidHandler above = new Pour();
+    private final IFluidHandler beside = new Side();
     private final IFluidHandler below = new Draw(false);
     private final IFluidHandler whole = new Draw(true);
 
@@ -204,7 +205,7 @@ public final class GlassRetortBlockEntity extends BlockEntity implements IHeatCo
         return lastReason;
     }
 
-    /** @return the fluid handler that the capability gives on this side: it takes liquid from above, gives it from below, and is closed on the other sides */
+    /** @return the fluid handler that the capability gives on this side: it takes liquid from above, gives it from below, and on the sides it is the receiver, which takes water in and gives what has condensed */
     @Nullable
     public IFluidHandler fluids(@Nullable Direction side)
     {
@@ -216,7 +217,7 @@ public final class GlassRetortBlockEntity extends BlockEntity implements IHeatCo
         {
             case UP -> above;
             case DOWN -> below;
-            default -> null;
+            default -> beside;
         };
     }
 
@@ -235,6 +236,17 @@ public final class GlassRetortBlockEntity extends BlockEntity implements IHeatCo
     private Remainder remainder(Fluid fluid)
     {
         return carry.computeIfAbsent(key(fluid), k -> new Remainder());
+    }
+
+    /** @return {@code true} unless the charge is one that makes nothing to catch: concentrating acid boils off water, which nothing is meant to condense */
+    private boolean needsCondenser()
+    {
+        if (!(level instanceof ServerLevel server))
+        {
+            return true;
+        }
+        final @Nullable RecipeHolder<DistillationRecipe> holder = currentRecipe(server);
+        return holder == null || holder.value().output().isPresent();
     }
 
     public boolean hasCondenser()
@@ -626,8 +638,48 @@ public final class GlassRetortBlockEntity extends BlockEntity implements IHeatCo
             giveBack(stack, handler.getContainer(), player, hand);
             return true;
         }
+        if (player.isShiftKeyDown() && rinseDregs(player))
+        {
+            return true;
+        }
         player.displayClientMessage(Component.translatable("tfcpp.glass_retort.nothing_to_tap"), true);
         return false;
+    }
+
+    /**
+     * A flask tipped out into a carboy is left with a film of liquid, under a whole litre, that no container takes: and while it clings there, the flask holds a liquid and will take no other, and no recipe matches a stray one. It is rinsed out onto the floor, where it gives off what it would, and a corrosive one splashes whoever stands by.
+     *
+     * @return {@code true} if a flask held such dregs
+     */
+    private boolean rinseDregs(Player player)
+    {
+        if (!(level instanceof ServerLevel server))
+        {
+            return false;
+        }
+        final float[] gases = new float[Gas.COUNT];
+        boolean corrosive = false, found = false;
+        for (FloatTank tank : new FloatTank[] {input, reagent})
+        {
+            if (!tank.isEmpty() && tank.wholeMillibuckets() == 0)
+            {
+                found = true;
+                corrosive |= addVapour(gases, tank.fluid(), tank.litres());
+                tank.clear();
+            }
+        }
+        if (!found)
+        {
+            return false;
+        }
+        setChanged();
+        player.displayClientMessage(Component.translatable("tfcpp.glass_retort.rinsed"), true);
+        if (corrosive)
+        {
+            CorrosiveSpill.at(server, worldPosition);
+        }
+        release(server, worldPosition, gases);
+        return true;
     }
 
     private static void giveBack(ItemStack stack, ItemStack result, Player player, InteractionHand hand)
@@ -669,23 +721,33 @@ public final class GlassRetortBlockEntity extends BlockEntity implements IHeatCo
         stack.shrink(moved);
         setChanged();
         player.displayClientMessage(Component.translatable("tfcpp.glass_retort.loaded", charge.getCount(), charge.getHoverName()), true);
-        if (!hasCondenser())
+        if (!hasCondenser() && needsCondenser())
         {
             player.displayClientMessage(Component.translatable("tfcpp.glass_retort.no_condenser"), true);
         }
         return true;
     }
 
-    /** Takes out the powder that the last batches left. */
-    public void takeProduct(Player player)
+    /**
+     * Takes out the powder: what the last batches left, and the charge that was put in and has not been taken by a batch. Without this a powder that no batch will take, or one that is not the next recipe's, would hold the retort for ever.
+     */
+    public void takePowder(Player player)
     {
-        if (product.isEmpty())
+        if (product.isEmpty() && charge.isEmpty())
         {
             player.displayClientMessage(Component.translatable("tfcpp.glass_retort.nothing"), true);
             return;
         }
-        ItemHandlerHelper.giveItemToPlayer(player, product);
-        product = ItemStack.EMPTY;
+        if (!product.isEmpty())
+        {
+            ItemHandlerHelper.giveItemToPlayer(player, product);
+            product = ItemStack.EMPTY;
+        }
+        if (!charge.isEmpty())
+        {
+            ItemHandlerHelper.giveItemToPlayer(player, charge);
+            charge = ItemStack.EMPTY;
+        }
         setChanged();
     }
 
@@ -718,7 +780,7 @@ public final class GlassRetortBlockEntity extends BlockEntity implements IHeatCo
         {
             player.displayClientMessage(Component.translatable("tfcpp.glass_retort.ready", product.getCount(), product.getHoverName()), false);
         }
-        if (!hasCondenser())
+        if (!hasCondenser() && needsCondenser())
         {
             player.displayClientMessage(Component.translatable("tfcpp.glass_retort.no_condenser"), false);
         }
@@ -928,6 +990,59 @@ public final class GlassRetortBlockEntity extends BlockEntity implements IHeatCo
         public FluidStack drain(int maxDrain, FluidAction action)
         {
             return FluidStack.EMPTY;
+        }
+    }
+
+    /**
+     * The receiver on the sides: water runs in, into the tank that the receiver takes its hydrogen chloride up with, and what has condensed runs out, as it does from below. Nothing else goes in.
+     */
+    private final class Side implements IFluidHandler
+    {
+        @Override
+        public int getTanks()
+        {
+            return 3;
+        }
+
+        @Override
+        public FluidStack getFluidInTank(int index)
+        {
+            return switch (index)
+            {
+                case 0 -> receiver.getFluid();
+                case 1 -> residue.getFluid();
+                default -> water.getFluidInTank(0);
+            };
+        }
+
+        @Override
+        public int getTankCapacity(int index)
+        {
+            return index == 0 ? RECEIVER_MILLIBUCKETS : index == 1 ? FLASK_MILLIBUCKETS : WATER_MILLIBUCKETS;
+        }
+
+        @Override
+        public boolean isFluidValid(int index, FluidStack stack)
+        {
+            return index == 2 && water.accepts(stack.getFluid());
+        }
+
+        @Override
+        public int fill(FluidStack resource, FluidAction action)
+        {
+            return water.fill(resource, action);
+        }
+
+        @Override
+        public FluidStack drain(FluidStack resource, FluidAction action)
+        {
+            return below.drain(resource, action);
+        }
+
+        @Override
+        public FluidStack drain(int maxDrain, FluidAction action)
+        {
+            return below.drain(maxDrain, action);
         }
     }
 

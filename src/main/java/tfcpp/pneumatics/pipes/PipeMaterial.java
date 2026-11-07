@@ -11,10 +11,12 @@ public enum PipeMaterial
 {
     /** Bored logs and bound staves were the water mains of old cities. They char once hot. */
     WOOD(1.5f, 30f, 450f),
-    /** Fired clay is proof against nearly everything, but it is brittle and its joints are weak. */
+    /**
+     * Fired clay, the chemical stoneware of the acid works. It is proof against sulfuric, nitric and hydrochloric acid at any strength, and only hydrofluoric acid and hot strong alkali attack its glaze. It is brittle and weak in tension, and its socket joints are weaker still: the 1.2 MPa is the working strength a few MPa of breaking strength leaves after the factor of safety a brittle body needs, and gives 3.5 atm in a wall of 15 mm, which is what chemical stoneware pipe is sold for.
+     */
     CERAMIC(1.2f, 15f, 1400f),
     COPPER(70f, 4f, 700f),
-    /** Lead is weak and creeps under load, but it is proof against sulfuric acid, which is why chamber acid was made in lead. It softens at about 150 C. */
+    /** Lead is weak and creeps under load, and it melts at 327 C and softens at about 150 C. It is proof against sulfuric acid below about 70% and below 80 C, which is why chamber acid was made in lead, and nitric acid eats it. */
     LEAD(5f, 6f, 423f),
     WROUGHT_IRON(180f, 4f, 900f),
     STEEL(350f, 4f, 1000f);
@@ -22,10 +24,18 @@ public enum PipeMaterial
     /** Joints sealed with hemp and tallow. These are what give way first, however strong the metal is, until rubber gaskets. */
     public static final float JOINT_LIMIT_ATM = 10f;
 
+    /** The share of the rating of a new body at which the weight of its safety valve is set: four fifths. */
+    public static final float SAFETY_VALVE_SET_SHARE = 0.8f;
+
     /** Above this, sulfuric acid and chamber acid dissolve the film of lead sulfate that holds them off lead: 80 C. */
     public static final float HOT_ACID_KELVIN = 353f;
     /** How much faster lead corrodes under hot sulfuric acid or chamber acid than under cool, once the film is gone. A game figure, not measured. */
     public static final float HOT_ACID_FACTOR = 20f;
+
+    /** Above this lye and other strong alkali take the glaze off stoneware: 80 C. */
+    public static final float HOT_ALKALI_KELVIN = 353f;
+    /** Share of a stoneware wall lost per day to lye above {@link #HOT_ALKALI_KELVIN}. A game figure: slow, but not nothing. */
+    public static final float HOT_ALKALI_CERAMIC = 0.05f;
 
     private final float strength, wall, maximumTemperature;
 
@@ -41,10 +51,34 @@ public enum PipeMaterial
         return name().toLowerCase(Locale.ROOT);
     }
 
+    /** @return the material of this id, as {@link #id()} gives it, or wrought iron for one that is not known */
+    public static PipeMaterial byId(String id)
+    {
+        for (PipeMaterial material : values())
+        {
+            if (material.id().equals(id))
+            {
+                return material;
+            }
+        }
+        return WROUGHT_IRON;
+    }
+
     /** @return the pressure above atmospheric this holds, in atm */
     public float rating(float integrity, float temperature)
     {
         return temperature > maximumTemperature ? 0f : Math.min(JOINT_LIMIT_ATM, PipePhysics.barlow(strength, wall) * integrity);
+    }
+
+    /**
+     * A safety valve has to lift below what its own body holds, or it would never lift: the weight is set to this share of the rating of a new body, up to the pressure that the valve is made for.
+     *
+     * @param ceiling the gauge pressure in atm that a valve of iron is set at, and that none is set above
+     * @return the gauge pressure in atm at which a safety valve with a body of this material lifts
+     */
+    public float safetyValveSetting(float ceiling)
+    {
+        return Math.min(ceiling, rating(1f, PipePhysics.ROOM_TEMPERATURE) * SAFETY_VALVE_SET_SHARE);
     }
 
     /** @return share of the wall lost per calendar day in this gas, pure */
@@ -113,7 +147,9 @@ public enum PipeMaterial
                 case WROUGHT_IRON, STEEL, COPPER -> 0.05f;
                 default -> 0f;
             };
-            case "minecraft:water", "tfc:spring_water", "tfc:limewater", "tfc:lye" -> this == WROUGHT_IRON ? 0.002f : this == STEEL ? 0.002f : 0f;
+            // Hot strong alkali dissolves the glaze of stoneware and then the body; cold or weak, it does nothing to it
+            case "tfc:lye" -> this == WROUGHT_IRON || this == STEEL ? 0.002f : this == CERAMIC && kelvin > HOT_ALKALI_KELVIN ? HOT_ALKALI_CERAMIC : 0f;
+            case "minecraft:water", "tfc:spring_water", "tfc:limewater" -> this == WROUGHT_IRON ? 0.002f : this == STEEL ? 0.002f : 0f;
             // Chamber acid is about 65% sulfuric acid. Strong sulfuric and nitric acids passivate iron, which is why steel carried oil of vitriol, and dilute acid ate it. Lead holds chamber acid under a film of sulfate.
             case "tfcpp:chamber_acid" -> switch (this)
             {

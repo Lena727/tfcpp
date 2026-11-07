@@ -79,7 +79,10 @@ public final class TFCppJeiPlugin implements IModPlugin
         Pipes.PIPE_ITEMS.values().forEach(pipe -> info(registration, new ItemStack(pipe.get()), "tfcpp.info.pipes"));
         info(registration, new ItemStack(Pipes.PRESSURE_VESSEL.get()), "tfcpp.info.pressure_vessel");
         info(registration, new ItemStack(Pipes.PISTON_PUMP.get()), "tfcpp.info.piston_pump");
-        info(registration, new ItemStack(Pipes.SAFETY_VALVE.get()), "tfcpp.info.safety_valve");
+        Pipes.VALVE_ITEMS.values().forEach(item -> info(registration, new ItemStack(item.get()), "tfcpp.info.pipes"));
+        Pipes.VENT_ITEMS.values().forEach(item -> info(registration, new ItemStack(item.get()), "tfcpp.info.pipes"));
+        Pipes.TAP_ITEMS.values().forEach(item -> info(registration, new ItemStack(item.get()), "tfcpp.info.pipes"));
+        Pipes.SAFETY_VALVE_ITEMS.values().forEach(item -> info(registration, new ItemStack(item.get()), "tfcpp.info.safety_valve"));
         info(registration, new ItemStack(Pipes.MANOMETER.get()), "tfcpp.info.manometer");
         info(registration, new ItemStack(TFCBlocks.STEEL_PUMP.get()), "tfcpp.info.shaft_load");
         info(registration, new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("tfc", "ore/bituminous_coal"))), "tfcpp.info.coal");

@@ -57,7 +57,7 @@ public final class GlassRetortBlock extends Block implements EntityBlock
         return ItemInteractionResult.sidedSuccess(level.isClientSide);
     }
 
-    /** An empty hand reads the retort, and an empty hand while crouching takes out the powder it left. */
+    /** An empty hand reads the retort, and an empty hand while crouching takes out the powder: what it left, and the charge that no batch has taken. A carboy used while crouching tips out the liquid in the flask, which is {@link GlassCarboyItem#doesSneakBypassUse}. */
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit)
     {
@@ -69,7 +69,7 @@ public final class GlassRetortBlock extends Block implements EntityBlock
         {
             if (player.isShiftKeyDown())
             {
-                retort.takeProduct(player);
+                retort.takePowder(player);
             }
             else
             {

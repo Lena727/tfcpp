@@ -22,6 +22,9 @@ import net.minecraft.world.item.DyeColor;
 import net.neoforged.fml.ModList;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.pneumatics.pipes.PipeMaterial;
+import tfcpp.pneumatics.pipes.Pipes;
+
 /**
  * Generates tfcpp's recipes and data, and its overrides of TFC's own. Where a whole family of TFC's recipes changes in the same way, this reads them from the TFC jar and patches them, so nothing is listed by hand and nothing gets missed.
  */
@@ -1210,6 +1213,15 @@ public final class MetallurgyData implements DataProvider
         fitting("pipe_vent", "tfc:metal/rod/wrought_iron", "tfc:metal/sheet/wrought_iron");
         fitting("pipe_tap", "tfc:metal/rod/copper", "tfc:metal/sheet/wrought_iron");
         fitting("safety_valve", "tfc:brass_mechanisms", "tfc:metal/ingot/wrought_iron");
+        // Lead and stoneware bodies. What the acid touches is of the body's own material, and so is the plug of a vent and a tap. The mechanism of a valve works outside, in the dry, and stays brass.
+        fitting("pipe_valve_lead", "tfc:brass_mechanisms", "tfcpp:metal/sheet/lead");
+        fitting("pipe_vent_lead", "tfcpp:metal/ingot/lead", "tfcpp:metal/sheet/lead");
+        fitting("pipe_tap_lead", "tfcpp:metal/ingot/lead", "tfcpp:metal/sheet/lead");
+        fitting("safety_valve_lead", "tfc:brass_mechanisms", "tfcpp:metal/ingot/lead");
+        fitting("pipe_valve_ceramic", "tfc:brass_mechanisms", "tfc:ceramic/fire_brick");
+        fitting("pipe_vent_ceramic", "tfc:ceramic/fire_brick", "tfc:ceramic/fire_brick");
+        fitting("pipe_tap_ceramic", "tfc:ceramic/fire_brick", "tfc:ceramic/fire_brick");
+        fitting("safety_valve_ceramic", "tfc:brass_mechanisms", "tfc:ceramic/fire_brick");
         fitting("mercury_manometer", "tfcpp:mercury_bulb", "minecraft:glass_pane");
         fitting("piston_pump", "tfc:brass_mechanisms", "tfc:metal/double_sheet/wrought_iron");
 
@@ -1217,7 +1229,14 @@ public final class MetallurgyData implements DataProvider
         vessel.getAsJsonObject("key").add("S", item("tfc:metal/double_sheet/wrought_iron"));
         put("data/tfcpp/recipe/crafting/pressure_vessel.json", vessel);
 
-        final List<String> blocks = new ArrayList<>(List.of("pipe_valve", "pipe_vent", "pipe_tap", "safety_valve", "mercury_manometer", "pressure_vessel", "piston_pump"));
+        final List<String> blocks = new ArrayList<>(List.of("mercury_manometer", "pressure_vessel", "piston_pump"));
+        for (String fitting : List.of("pipe_valve", "pipe_vent", "pipe_tap", "safety_valve"))
+        {
+            for (PipeMaterial material : Pipes.FITTING_MATERIALS)
+            {
+                blocks.add(Pipes.fittingName(fitting, material));
+            }
+        }
         final List<String> pickaxe = new ArrayList<>();
         blocks.forEach(block -> pickaxe.add("tfcpp:" + block));
         for (String material : List.of("wood", "ceramic", "copper", "lead", "wrought_iron", "steel"))

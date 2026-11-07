@@ -141,8 +141,9 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
         }
 
         final BlockPos inletPos = worldPosition.relative(facing.getOpposite());
-        // A device such as an oven is a block of a network too, but its tanks are the only thing open toward the pump
-        final @Nullable PipeNetwork input = opensToward(level, inletPos, facing) && !takenFromTank(level, inletPos, facing) ? pipes.networkAt(inletPos) : null;
+        // A device such as a lead chamber is a block of a network too, but its tank is the only thing open toward the pump: the water and the gas of its network are what it works with, and are not for drawing out into an acid line. With the tank empty the pump takes nothing
+        final boolean tankOnly = isTankOnly(level, inletPos, facing);
+        final @Nullable PipeNetwork input = opensToward(level, inletPos, facing) && !tankOnly ? pipes.networkAt(inletPos) : null;
         final float inletPressure = input == null ? 1f : input.pressure();
         final float pressureLoad = output.pressure() - inletPressure;
         final float outletY = worldPosition.relative(facing).getY(), inletY = inletPos.getY();
@@ -163,7 +164,7 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
         else
         {
             moved = fromLiquid(level, inletPos, facing, output, litres);
-            if (!moved.liquid())
+            if (!moved.liquid() && !tankOnly)
             {
                 fromAir(level, inletPos, output, swept);
             }
@@ -183,27 +184,11 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
         return state.getBlock() instanceof PipeMember member && member.connects(state, side);
     }
 
-    /** @return {@code true} if the block here keeps liquid in a tank that a pump on this side takes before anything in its network, and the tank holds some */
-    private static boolean takenFromTank(ServerLevel level, BlockPos pos, Direction side)
+    /** @return {@code true} if the block here keeps liquid in a tank of its own that a pump on this side draws from, and from nothing else: not from its network, and not from the air of its cell */
+    private static boolean isTankOnly(ServerLevel level, BlockPos pos, Direction side)
     {
         final BlockState state = level.getBlockState(pos);
-        if (!(state.getBlock() instanceof PipeMember member) || !member.tankOpenToPump(state))
-        {
-            return false;
-        }
-        final @Nullable IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, side);
-        if (handler == null)
-        {
-            return false;
-        }
-        for (int tank = 0; tank < handler.getTanks(); tank++)
-        {
-            if (!handler.getFluidInTank(tank).isEmpty())
-            {
-                return true;
-            }
-        }
-        return false;
+        return state.getBlock() instanceof PipeMember member && member.tankOpenToPump(state) && member.connects(state, side);
     }
 
     private static Moved fromNetwork(PipeNetwork input, PipeNetwork output, float swept, float litres, float inletY)

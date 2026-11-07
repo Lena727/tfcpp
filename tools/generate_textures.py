@@ -166,8 +166,8 @@ fitting_side = noise(60, iron, 6)
 write_png(ROOT / 'block/pipe_fitting.png', fitting_side)
 
 
-def fitting_face(seed, mark, draw):
-    face = noise(seed, iron, 6)
+def fitting_face(seed, mark, draw, base=iron):
+    face = noise(seed, base, 6)
     for y in range(16):
         for x in range(16):
             if draw(x - 7.5, y - 7.5):
@@ -175,10 +175,19 @@ def fitting_face(seed, mark, draw):
     return face
 
 
-write_png(ROOT / 'block/pipe_valve.png', fitting_face(61, (176, 60, 44), lambda x, y: 4 < (x * x + y * y) ** 0.5 < 6.5 or abs(x) < 1 or abs(y) < 1))  # A red hand wheel
-write_png(ROOT / 'block/pipe_vent.png', fitting_face(62, (36, 32, 30), lambda x, y: (x * x + y * y) ** 0.5 < 6))  # An open throat
-write_png(ROOT / 'block/pipe_tap.png', fitting_face(63, (190, 112, 74), lambda x, y: (x * x + y * y) ** 0.5 < 3 or (abs(x) < 1 and y > 0 and y < 7)))  # A copper spout
-write_png(ROOT / 'block/safety_valve.png', fitting_face(64, (60, 58, 54), lambda x, y: abs(y + 3) < 1 or (x * x + (y - 2) ** 2) ** 0.5 < 3))  # Lever and weight
+# The same four fittings in each body: the marks stay, the body takes the colour of its pipe. Seeds are offset so that the grain differs.
+FITTINGS = {
+    'pipe_valve': (61, (176, 60, 44), lambda x, y: 4 < (x * x + y * y) ** 0.5 < 6.5 or abs(x) < 1 or abs(y) < 1),  # A red hand wheel
+    'pipe_vent': (62, (36, 32, 30), lambda x, y: (x * x + y * y) ** 0.5 < 6),  # An open throat
+    'pipe_tap': (63, (190, 112, 74), lambda x, y: (x * x + y * y) ** 0.5 < 3 or (abs(x) < 1 and y > 0 and y < 7)),  # A copper spout
+    'safety_valve': (64, (60, 58, 54), lambda x, y: abs(y + 3) < 1 or (x * x + (y - 2) ** 2) ** 0.5 < 3),  # Lever and weight
+}
+for name, (seed, mark, draw) in FITTINGS.items():
+    write_png(ROOT / f'block/{name}.png', fitting_face(seed, mark, draw))
+for offset, (material, body) in enumerate({'lead': (116, 120, 130), 'ceramic': (176, 120, 88)}.items(), start=1):
+    write_png(ROOT / f'block/pipe_fitting_{material}.png', noise(60 + 10 * offset, body, 6))
+    for name, (seed, mark, draw) in FITTINGS.items():
+        write_png(ROOT / f'block/{name}_{material}.png', fitting_face(seed + 10 * offset, mark, draw, body))
 write_png(ROOT / 'block/piston_pump.png', fitting_face(65, (190, 112, 74), lambda x, y: 3 < (x * x + y * y) ** 0.5 < 6))  # The cylinder head
 
 manometer = noise(66, (150, 124, 90), 6)

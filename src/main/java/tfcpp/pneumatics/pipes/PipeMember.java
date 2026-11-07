@@ -1,6 +1,8 @@
 package tfcpp.pneumatics.pipes;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 
 /** A block that is part of a pipe network. */
@@ -37,5 +39,16 @@ public interface PipeMember
     default boolean tankOpenToPump(BlockState state)
     {
         return false;
+    }
+
+    /**
+     * A block that keeps liquid in a tank of its own wears under that liquid as a pipe does under what it carries, and the network cannot see it. The network adds what this gives to the wear of the wall of the block, on top of its own, over the same calendar days.
+     *
+     * @param kelvin the temperature of the network, which is the temperature of the acid on the walls
+     * @return share of the wall of this block lost per calendar day to the liquid in its tank, in the units of {@link PipeMaterial#corrosion(String, float)}: that rate in a full tank, in proportion to how full the tank is
+     */
+    default float tankCorrosion(ServerLevel level, BlockPos pos, BlockState state, float kelvin)
+    {
+        return 0f;
     }
 }

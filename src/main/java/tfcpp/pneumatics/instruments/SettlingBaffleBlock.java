@@ -37,6 +37,10 @@ public final class SettlingBaffleBlock extends Block implements EntityBlock
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit)
     {
+        if (!player.getMainHandItem().isEmpty())
+        {
+            return InteractionResult.PASS; // What is in the hand is not for this block: it may be placed beside it
+        }
         if (!level.isClientSide && level.getBlockEntity(pos) instanceof SettlingBaffleBlockEntity baffle)
         {
             baffle.scrape(player);

@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "tfcpp:metal/sheet/lead"
+    },
+    "C": {
+      "item": "tfcpp:metal/ingot/lead"
+    }
+  },
+  "pattern": [
+    " C ",
+    "BBB"
+  ],
+  "result": {
+    "count": 1,
+    "id": "tfcpp:pipe_vent_lead"
+  }
+}
