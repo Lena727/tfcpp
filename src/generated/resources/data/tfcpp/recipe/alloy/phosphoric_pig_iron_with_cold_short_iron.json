@@ -1,0 +1,11 @@
+{
+  "type": "tfc:alloy",
+  "contents": [
+    {
+      "fluid": "tfcpp:metal/phosphoric_pig_iron",
+      "max": 1.0,
+      "min": 0.0
+    }
+  ],
+  "result": "tfcpp:metal/cold_short_iron"
+}

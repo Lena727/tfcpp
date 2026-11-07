@@ -1,0 +1,11 @@
+{
+  "type": "tfc:alloy",
+  "contents": [
+    {
+      "fluid": "tfc:metal/high_carbon_steel",
+      "max": 1.0,
+      "min": 0.0
+    }
+  ],
+  "result": "tfc:metal/steel"
+}

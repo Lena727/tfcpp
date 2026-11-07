@@ -36,6 +36,7 @@ import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.chemistry.Remainder;
 import tfcpp.core.TickClock;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasEmission;
@@ -89,10 +90,57 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
         }
     };
 
+    private final IFluidHandler outlet = new IFluidHandler()
+    {
+        @Override
+        public int getTanks()
+        {
+            return 1;
+        }
+
+        @Override
+        public FluidStack getFluidInTank(int index)
+        {
+            return tank.getFluid();
+        }
+
+        @Override
+        public int getTankCapacity(int index)
+        {
+            return tank.getCapacity();
+        }
+
+        @Override
+        public boolean isFluidValid(int index, FluidStack stack)
+        {
+            return false;
+        }
+
+        @Override
+        public int fill(FluidStack resource, FluidAction action)
+        {
+            return 0;
+        }
+
+        @Override
+        public FluidStack drain(FluidStack resource, FluidAction action)
+        {
+            return tank.drain(resource, action);
+        }
+
+        @Override
+        public FluidStack drain(int maxDrain, FluidAction action)
+        {
+            return tank.drain(maxDrain, action);
+        }
+    };
+
     private float temperature;
     private float targetTemperature;
     private int heatStabilityTicks;
     private float carbon;
+    /** Liquid that has condensed but is less than a millibucket, which the tank cannot hold. */
+    private final Remainder leftover = new Remainder();
     private final TickClock clock = new TickClock();
 
     public RetortBlockEntity(BlockPos pos, BlockState state)
@@ -114,7 +162,11 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
             {
                 // Without a condenser, a recipe that does not need one still runs into the tank: its vapour is what would have escaped
                 final boolean toTank = hasCondenser() || !recipe.needsCondenser();
-                if (toTank && tank.fill(recipe.result(), IFluidHandler.FluidAction.SIMULATE) < recipe.result().getAmount())
+                // The fraction of a millibucket that one piece gives stays in the retort as liquid until a whole one has gathered
+                final double fraction = recipe.exactMillibuckets() - recipe.result().getAmount();
+                final int whole = toTank ? leftover.wholeFor(fraction) : 0;
+                final FluidStack poured = recipe.result().copyWithAmount(recipe.result().getAmount() + whole);
+                if (toTank && tank.fill(poured, IFluidHandler.FluidAction.SIMULATE) < poured.getAmount())
                 {
                     continue; // Full, or holding a different liquid. The charge just waits, and nothing is wasted.
                 }
@@ -123,7 +175,9 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
                 RetortRecipe.addTo(gases, recipe.byproducts());
                 if (toTank)
                 {
-                    tank.fill(recipe.result(), IFluidHandler.FluidAction.EXECUTE);
+                    tank.fill(poured, IFluidHandler.FluidAction.EXECUTE);
+                    leftover.add(fraction);
+                    leftover.take(whole);
                 }
                 else
                 {
@@ -323,10 +377,10 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
             }
             else if (fluid == Metallurgy.LEAD.get())
             {
-                // Lead sets into ingots, and the part short of a whole ingot goes up as litharge smoke
+                // Lead sets into ingots, and the part short of a whole ingot, with the drops that no tank could hold, goes up as litharge smoke
                 final int ingots = millibuckets / MILLIBUCKETS_PER_INGOT;
                 Containers.dropItemStack(level, x, y, z, new ItemStack(Metallurgy.LEAD_INGOT.get(), ingots));
-                gases[Gas.LEAD_OXIDE_FUME.ordinal()] = (millibuckets - ingots * MILLIBUCKETS_PER_INGOT) * CupellationBath.MOLES_LEAD_PER_MILLIBUCKET;
+                gases[Gas.LEAD_OXIDE_FUME.ordinal()] = (millibuckets - ingots * MILLIBUCKETS_PER_INGOT + (float) leftover.pending()) * CupellationBath.MOLES_LEAD_PER_MILLIBUCKET;
             }
             else if (fluid == TFCFluids.METALS.get(Metal.ZINC).getSource())
             {
@@ -342,6 +396,12 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
     public FluidTank tank()
     {
         return tank;
+    }
+
+    /** What the world sees of the tank: liquid can be taken out of a retort, but nothing can be poured into it, as only its own reactions fill it. */
+    public IFluidHandler outlet()
+    {
+        return outlet;
     }
 
     /** Loads a retort directly, without a player. */
@@ -378,6 +438,7 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
         tag.putFloat("temperature", temperature);
         tag.putFloat("targetTemperature", targetTemperature);
         tag.putFloat("carbon", carbon);
+        tag.putDouble("leftover", leftover.pending());
     }
 
     @Override
@@ -389,5 +450,7 @@ public final class RetortBlockEntity extends BlockEntity implements IHeatConsume
         temperature = tag.getFloat("temperature");
         targetTemperature = tag.getFloat("targetTemperature");
         carbon = tag.getFloat("carbon");
+        leftover.take(Integer.MAX_VALUE);
+        leftover.add(tag.getDouble("leftover"));
     }
 }

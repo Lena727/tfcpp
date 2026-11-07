@@ -13,32 +13,45 @@ public final class ConverterBath
 {
     /**
      * What iron is called according to how much carbon it holds, with the point in weight percent where each kind ends.
-     * An ingot does not remember how much it holds, so each kind counts as the least it can hold. Pouring iron back can then lose carbon, as it does in reality to the air, but never gain it.
+     * An ingot does not remember how much it holds, so each kind counts as the least of each element that any tap of it can hold: carbon, silicon and phosphorus. Pouring iron back can then lose them, as it does in reality to the air and the slag, but never gain any.
+     * The melting point is what TFC's fluid of that iron melts at. It must not be below the liquidus of the composition the kind counts as, or iron poured at its own melting point would set in the vessel at once.
      */
     public enum Grade
     {
-        WROUGHT_IRON("tfc:metal/wrought_iron", 0.2f, 0.03f, 0f, 0f),
-        STEEL("tfc:metal/steel", 1.0f, 0.2f, 0f, 0f),
-        HIGH_CARBON_STEEL("tfc:metal/high_carbon_steel", 2.1f, 1.0f, 0f, 0f),
-        CAST_IRON("tfc:metal/cast_iron", 4.0f, 2.1f, 0f, 0f),
-        PIG_IRON("tfc:metal/pig_iron", Float.MAX_VALUE, 4.0f, 1.0f, 0f),
-        /** Pig iron from a brown ore, which carries phosphorus. It is not named by carbon: only {@link #ofFluid} finds it. */
-        PHOSPHORIC_PIG_IRON("tfcpp:metal/phosphoric_pig_iron", Float.MAX_VALUE, 4.0f, 1.0f, 1.5f),
-        /** What phosphorus makes of iron whatever its carbon. It counts as the least carbon so that pouring it back never gains any; the 0.2% is the most a tap of it can hold. */
-        COLD_SHORT_IRON("tfcpp:metal/cold_short_iron", 0.2f, 0.03f, 0f, 1.5f);
+        WROUGHT_IRON("tfc:metal/wrought_iron", 0.2f, 0.03f, 0f, 0f, 1535f),
+        STEEL("tfc:metal/steel", 1.0f, 0.2f, 0f, 0f, 1520f),
+        HIGH_CARBON_STEEL("tfc:metal/high_carbon_steel", 2.1f, 1.0f, 0f, 0f, 1450f),
+        /** Melts where its lightest iron does, at 2.1% carbon. A heavier tap of it melts lower, which pouring never needs. */
+        CAST_IRON("tfc:metal/cast_iron", 4.0f, 2.1f, 0f, 0f, 1350f),
+        /** Counts as the 1% silicon of a blast furnace tap, so only a bath that still holds that much is tapped as it: see {@link ConverterBath#tapGrade()}. */
+        PIG_IRON("tfc:metal/pig_iron", Float.MAX_VALUE, 4.0f, 1.0f, 0f, 1200f),
+        /** Pig iron from a brown ore, which carries phosphorus. It is not named by carbon: only {@link #ofFluid} finds it, and a bath is tapped as it only if it holds all that it counts as. */
+        PHOSPHORIC_PIG_IRON("tfcpp:metal/phosphoric_pig_iron", Float.MAX_VALUE, 4.0f, 1.0f, 1.5f, 1200f),
+        /**
+         * What phosphorus makes of iron whatever its carbon. It counts as the least of everything that a tap of it can hold: the lowest carbon, no silicon, and exactly the 0.1% from which iron is cold short.
+         * A tap that held more of any of them loses the difference on the way, as real iron lost it to the slag and the air.
+         */
+        COLD_SHORT_IRON("tfcpp:metal/cold_short_iron", 0.2f, 0.03f, 0f, PHOSPHORUS_LIMIT_PERCENT, 1535f);
 
         private static final Grade[] VALUES = values();
 
         private final String fluid;
-        private final float upTo, carbon, silicon, phosphorus;
+        private final float upTo, carbon, silicon, phosphorus, melt;
 
-        Grade(String fluid, float upTo, float carbon, float silicon, float phosphorus)
+        Grade(String fluid, float upTo, float carbon, float silicon, float phosphorus, float melt)
         {
             this.fluid = fluid;
             this.upTo = upTo;
             this.carbon = carbon;
             this.silicon = silicon;
             this.phosphorus = phosphorus;
+            this.melt = melt;
+        }
+
+        /** @return the temperature in C at which TFC's fluid of this iron melts, which is what a mould or crucible pours it at */
+        public float melt()
+        {
+            return melt;
         }
 
         public String fluid()
@@ -76,6 +89,13 @@ public final class ConverterBath
                 }
             }
             return PIG_IRON;
+        }
+
+        /** Names phosphorus-free iron by what it holds. Iron with the carbon of pig iron and less silicon than a pig iron counts as, which a blow or a blend leaves, is cast iron: it is never taken to hold more than that. */
+        static Grade ofComposition(float carbon, float silicon)
+        {
+            final Grade byCarbon = ofCarbon(carbon);
+            return byCarbon == PIG_IRON && silicon + ROUNDING < PIG_IRON.silicon ? CAST_IRON : byCarbon;
         }
 
         @Nullable
@@ -121,7 +141,10 @@ public final class ConverterBath
     private static final float GRAMS_PER_MOL_CARBON = 12.011f, GRAMS_PER_MOL_SILICON = 28.086f, GRAMS_PER_MOL_IRON = 55.845f, GRAMS_PER_MOL_PHOSPHORUS = 30.974f;
     /** Heats of Si + O2 -> SiO2, C + 1/2 O2 -> CO and Fe + 1/2 O2 -> FeO, in kJ per mole of the element. */
     private static final float SILICON_HEAT = 911f, CARBON_HEAT = 110.5f, IRON_HEAT = 272f;
-    /** Heat of 2 P + 5/2 O2 -> P2O5 as it is taken up by lime in 4 CaO.P2O5, in kJ per mole of phosphorus. */
+    /**
+     * Heat of 2 P + 5/2 O2 -> P2O5 in kJ per mole of phosphorus: 2984 kJ for P4 + 5 O2 -> P4O10, over four.
+     * It leaves out the heat that lime gives as it takes up the P2O5 in 4 CaO.P2O5, some 350 kJ more for each mole of phosphorus, so the afterblow of a real Thomas blow is hotter than this one.
+     */
     private static final float PHOSPHORUS_HEAT = 745f;
     /** Moles of O2 for a mole of P: 2 P + 5/2 O2 -> P2O5. */
     private static final float OXYGEN_PER_PHOSPHORUS = 1.25f;
@@ -131,7 +154,7 @@ public final class ConverterBath
     public static final float LIME_MOLES_PER_POWDER = 7.5f;
     /** Molar heat of CaO, in kJ/mol/K. Lime goes in cold, and heating it to the temperature of the bath is a real cost of the Thomas process. */
     private static final float LIME_HEAT_CAPACITY = 0.048f;
-    /** Above this much phosphorus, in weight percent, iron is cold short. */
+    /** From this much phosphorus, in weight percent, iron is cold short. Iron within the rounding of it counts: see {@link #isPhosphoric()}. */
     public static final float PHOSPHORUS_LIMIT_PERCENT = 0.1f;
     /** Phosphorus burns only once the carbon no longer competes for the air. At twice the floor the carbon still takes a tenth of the oxygen, and less as it falls. */
     private static final float AFTERBLOW_CARBON_PERCENT = 0.06f;
@@ -146,8 +169,11 @@ public final class ConverterBath
     /** Molar heat of the nitrogen and CO that leave, in kJ/mol/K. */
     private static final float GAS_HEAT_CAPACITY = 0.030f;
     private static final float IRON_HEAT_CAPACITY = 0.82f;
-    /** A small vessel with its mouth open, far larger against its charge than a five tonne one: 3 kW at the temperature of steel. */
-    private static final float LOSS_KILOWATTS_PER_KELVIN = 0.002f;
+    /**
+     * A small vessel with its mouth open, far larger against its charge than a five tonne one: radiation from a mouth of 0.03 m2 at 1750 K alone is some 16 kW, and the shell loses more, so 0.01 kW/K gives 15 kW at the temperature of steel.
+     * A blast has to bring in more heat than this to keep the iron liquid, which a pump on a water wheel does and a bellows in light wind does not.
+     */
+    private static final float LOSS_KILOWATTS_PER_KELVIN = 0.01f;
     private static final float LINING_HEAT_CAPACITY = 5f;
     private static final float LIQUIDUS_PURE_IRON = 1538f;
     /** The iron-carbon liquidus, from 1538 C for pure iron to the eutectic of 1147 C at 4.3% carbon, which is nearly straight. */
@@ -170,10 +196,10 @@ public final class ConverterBath
     /** Moles of phosphorus that have gone to slag as 4 CaO.P2O5, which is Thomas slag. For the vessel to turn into items and reset. */
     public float thomasSlagPhosphorus;
 
-    /** @return the temperature in C at which iron of this much carbon starts to set */
+    /** @return the temperature in whole degrees C, as TFC states its melting points, at which iron of this much carbon starts to set */
     public static float liquidus(float carbonPercent)
     {
-        return Math.max(LIQUIDUS_PURE_IRON - LIQUIDUS_PER_CARBON_PERCENT * carbonPercent, EUTECTIC);
+        return (float) Math.floor(Math.max(LIQUIDUS_PURE_IRON - LIQUIDUS_PER_CARBON_PERCENT * carbonPercent, EUTECTIC));
     }
 
     public boolean isMolten()
@@ -181,21 +207,30 @@ public final class ConverterBath
         return metal > 0f && temperature >= liquidus(carbon);
     }
 
-    /** @return the grade by carbon alone, which ignores phosphorus: use {@link #tapGrade()} for what a tap gives */
+    /** @return the grade by carbon and silicon, which ignores phosphorus: use {@link #tapGrade()} for what a tap gives */
     public Grade grade()
     {
-        return Grade.ofCarbon(carbon);
+        return Grade.ofComposition(carbon, silicon);
+    }
+
+    /** @return {@code true} if the iron holds enough phosphorus to be cold short, counting what is within the rounding of the limit */
+    public boolean isPhosphoric()
+    {
+        return phosphorus + ROUNDING >= PHOSPHORUS_LIMIT_PERCENT;
     }
 
     /**
-     * @return what a tap gives. With more than 0.1% phosphorus it is never named by carbon: iron that still holds the carbon of pig iron (2.1% or more) is phosphoric pig iron, which a converter can take again, and anything below that is cold short iron.
-     * Without phosphorus the grade goes by carbon.
+     * @return what a tap gives. Every grade counts as the least of carbon, silicon and phosphorus that a tap of it holds, so that pouring it back can never give a bath more of them than it had.
+     * With phosphorus it is cold short iron, unless the bath still holds everything that phosphoric pig iron counts as (4% carbon, 1% silicon, 1.5% phosphorus), which only a blast furnace gives and a blow or a blend takes away.
+     * Without phosphorus the grade goes by carbon and silicon.
      */
     public Grade tapGrade()
     {
-        if (phosphorus > PHOSPHORUS_LIMIT_PERCENT)
+        if (isPhosphoric())
         {
-            return carbon >= Grade.CAST_IRON.carbon() ? Grade.PHOSPHORIC_PIG_IRON : Grade.COLD_SHORT_IRON;
+            final Grade pig = Grade.PHOSPHORIC_PIG_IRON;
+            final boolean holdsAll = carbon + ROUNDING >= pig.carbon && silicon + ROUNDING >= pig.silicon && phosphorus + ROUNDING >= pig.phosphorus;
+            return holdsAll ? pig : Grade.COLD_SHORT_IRON;
         }
         return grade();
     }

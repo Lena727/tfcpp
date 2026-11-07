@@ -1,6 +1,6 @@
 {
-  "forging_temperature": 900.00006,
-  "heat_capacity": 8.549609,
+  "forging_temperature": 912.00006,
+  "heat_capacity": 8.520386,
   "ingredient": [
     {
       "item": "tfc:metal/fish_hook/steel"
@@ -27,5 +27,5 @@
       "item": "tfc:metal/unfinished_boots/steel"
     }
   ],
-  "welding_temperature": 1200.0
+  "welding_temperature": 1216.0
 }

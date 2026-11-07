@@ -34,18 +34,22 @@ public final class MetallurgyData implements DataProvider
     private static final String[] ORE_GRADES = {"small", "poor", "normal", "rich"};
     private static final float CINNABAR_MERCURY_MOLES = Sulfide.CINNABAR.metalMoles(25f);
 
-    private static final float CAST_IRON_MELT = 1200f;
+    /** What the converter counts each grade as, and not below its liquidus: see {@link ConverterBath.Grade}. */
+    private static final float CAST_IRON_MELT = ConverterBath.Grade.CAST_IRON.melt(), PIG_IRON_MELT = ConverterBath.Grade.PIG_IRON.melt();
     private static final float ORIGINAL_CAST_IRON_MELT = 1535f;
     /** Hematite melts at about 1565 C, and goes on being an oxide. */
     private static final float IRON_OXIDE_MELT = 1565f;
-    private static final float STEEL_MELT = 1500f, HIGH_CARBON_STEEL_MELT = 1450f, ORIGINAL_STEEL_MELT = 1540f;
+    private static final float STEEL_MELT = ConverterBath.Grade.STEEL.melt(), HIGH_CARBON_STEEL_MELT = ConverterBath.Grade.HIGH_CARBON_STEEL.melt(), ORIGINAL_STEEL_MELT = 1540f;
     /** A bloomery loses a third of its iron to slag. */
     private static final int BLOOMERY_CHARGE_PER_BLOOM = 150;
     private static final float GALENA_SMELTS = 800f;
     /** 2 PbO + C -> 2 Pb + CO2. A powder of litharge holds 0.25 mol of PbO, so it takes this much carbon and gives this much CO2. */
     private static final float LITHARGE_CARBON = 0.125f;
-    /** Lead in one powder of litharge is 4.57 mL, and a tank holds whole millibuckets, so the 4 mB that come out are rounded down. */
+    /** Lead in one powder of litharge is 4.57 mL, and a tank holds whole millibuckets, so 4 mB come out at once and the retort keeps the 0.57 mL as liquid until a whole millibucket has gathered. */
     private static final int LITHARGE_LEAD_MILLIBUCKETS = 4;
+    private static final float LITHARGE_LEAD_EXACT_MILLIBUCKETS = 0.25f / CupellationBath.MOLES_LEAD_PER_MILLIBUCKET;
+    /** One piece of bloomery slag, in millibuckets of the iron oxide that it melts to. */
+    private static final int OXIDE_PER_SLAG = IronSmelting.MILLIBUCKETS_PER_SLAG;
     /** Litharge is reduced by carbon above the melting point of lead, and well below the 1000 C that zinc needs. */
     private static final float LITHARGE_REDUCTION_TEMPERATURE = 800f;
     /** Bone meal burns to bone ash, the calcium phosphate of the bone, once its organic matter is gone. */
@@ -60,6 +64,8 @@ public final class MetallurgyData implements DataProvider
     private static final float STERLING_SILVER_MELT = 890f, ORIGINAL_STERLING_SILVER_MELT = 950f;
     private static final float WATER_QUENCH = 15f, OIL_QUENCH = 5f;
     private static final int TALLOW_MILLIBUCKETS = 400;
+    /** What an ingot mould holds. */
+    private static final int MILLIBUCKETS_PER_MOLD = 100;
 
     private final Path root;
     private final Map<String, JsonElement> files = new LinkedHashMap<>();
@@ -81,6 +87,8 @@ public final class MetallurgyData implements DataProvider
             noMoreRedstone();
             ironTemperatures();
             ironAndSteel();
+            dirtierMixes();
+            castOxide();
             lead();
             boneAsh();
             phosphoricIron();
@@ -182,12 +190,10 @@ public final class MetallurgyData implements DataProvider
                     recipe.add("fluid", tagged);
                     put("data/tfc/recipe/casting/" + name, recipe);
 
-                    final String part = recipe.getAsJsonObject("result").get("id").getAsString().split("/")[1];
-                    remeltsImpure(part);
-                    remeltsImpure(part.replace("_head", "").replace("_blade", ""));
                 }
             }
         }
+        forgeArsenicalCopper();
 
         final JsonObject fireIngot = read(tfcFile("data/tfc/recipe/casting/copper_fire_ingot.json"));
         fireIngot.add("fluid", fluid("tfcpp:metal/arsenical_copper", fireIngot.getAsJsonObject("fluid").get("amount").getAsInt()));
@@ -211,18 +217,119 @@ public final class MetallurgyData implements DataProvider
     }
 
     /**
-     * A tool cast from arsenical copper is the same item as one cast from pure copper, so melting it down has to give the impure metal. Otherwise casting and remelting would remove arsenic for nothing, which takes electrolysis in reality.
-     * Scrap tools being of unknown purity is also how scrap copper really behaves.
+     * Arsenical bronze tools were the first metal tools, hammered cold and hot, so arsenical copper can be forged and welded. It makes a double ingot, which is what a copper anvil is built from: without it a start on tetrahedrite alone would never leave the stone anvil.
+     * <p>
+     * A tool or sheet made of arsenical copper is the same item as one made of pure copper, so melting any of them down has to give the impure metal. Otherwise forging and remelting would remove arsenic for nothing, which takes electrolysis in reality. Only the ingots and double ingots, which are separate items, keep their own metal. Scrap copper being of unknown purity is also how it really behaves.
      */
-    private void remeltsImpure(String part) throws IOException
+    private void forgeArsenicalCopper() throws IOException
     {
-        final Path path = tfcFile("data/tfc/recipe/heating/metal/" + part + "/copper.json");
-        if (Files.exists(path))
+        final String ingot = "tfcpp:metal/ingot/arsenical_copper", doubleIngot = "tfcpp:metal/double_ingot/arsenical_copper";
+
+        final JsonObject doubleHeat = new JsonObject();
+        doubleHeat.add("ingredient", item(doubleIngot));
+        doubleHeat.addProperty("heat_capacity", MetalHeat.COPPER.ingotCapacity() * 2f);
+        doubleHeat.addProperty("forging_temperature", 630f);
+        doubleHeat.addProperty("welding_temperature", 840f);
+        put("data/tfcpp/tfc/item_heat/arsenical_copper_double_ingot.json", doubleHeat);
+        put("data/tfcpp/recipe/heating/arsenical_copper_double_ingot.json", heatingToFluid(item(doubleIngot), "tfcpp:metal/arsenical_copper", 200, 1050f));
+
+        // Two ingots welded on the anvil, as TFC does for any metal
+        final JsonObject weld = new JsonObject();
+        weld.addProperty("type", "tfc:welding");
+        weld.add("first_input", item(ingot));
+        weld.add("second_input", item(ingot));
+        weld.add("result", stack(doubleIngot, 1));
+        put("data/tfcpp/recipe/welding/arsenical_copper_double_ingot.json", weld);
+
+        // The copper anvil takes the double ingot of either. It is not put in the tag of copper's, as that would also hand it copper's own heat data and melting recipe, and the pure metal back.
+        final JsonObject anvil = read(tfcFile("data/tfc/recipe/crafting/metal/anvil/copper.json"));
+        anvil.getAsJsonObject("key").add("#", eitherOf(tagIngredient("c:double_ingots/copper"), item(doubleIngot)));
+        put("data/tfc/recipe/crafting/metal/anvil/copper.json", anvil);
+
+        // Whatever copper is hammered into at the anvil, arsenical copper is as well. The result is the copper item, and remelts as arsenical copper.
+        final Path anvils = tfcFile("data/tfc/recipe/anvil");
+        try (Stream<Path> paths = Files.walk(anvils))
         {
-            final JsonObject recipe = read(path);
-            recipe.getAsJsonObject("result_fluid").addProperty("id", "tfcpp:metal/arsenical_copper");
-            put("data/tfc/recipe/heating/metal/" + part + "/copper.json", recipe);
+            for (Path path : (Iterable<Path>) paths::iterator)
+            {
+                final String relative = anvils.relativize(path).toString().replace('\\', '/');
+                if (relative.endsWith(".json"))
+                {
+                    final JsonObject recipe = read(path);
+                    if (replaceCopperIngot(recipe, ingot, doubleIngot))
+                    {
+                        put("data/tfcpp/recipe/anvil/arsenical/" + relative, recipe);
+                    }
+                }
+            }
         }
+
+        final Path heating = tfcFile("data/tfc/recipe/heating/metal");
+        try (Stream<Path> paths = Files.walk(heating))
+        {
+            for (Path path : (Iterable<Path>) paths::iterator)
+            {
+                final String relative = heating.relativize(path).toString().replace('\\', '/');
+                if (relative.endsWith("/copper.json") && !relative.startsWith("ingot/") && !relative.startsWith("double_ingot/"))
+                {
+                    final JsonObject recipe = read(path);
+                    recipe.getAsJsonObject("result_fluid").addProperty("id", "tfcpp:metal/arsenical_copper");
+                    put("data/tfc/recipe/heating/metal/" + relative, recipe);
+                }
+            }
+        }
+
+        addToTag("data/c/tags/item/double_ingots/arsenical_copper.json", doubleIngot);
+        addToTag("data/c/tags/item/double_ingots.json", "#c:double_ingots/arsenical_copper"); // TFC sizes double ingots by this parent tag
+    }
+
+    private static JsonObject tagIngredient(String tag)
+    {
+        final JsonObject json = new JsonObject();
+        json.addProperty("tag", tag);
+        return json;
+    }
+
+    private static JsonObject eitherOf(JsonObject... ingredients)
+    {
+        final JsonArray list = new JsonArray();
+        for (JsonObject ingredient : ingredients)
+        {
+            list.add(ingredient);
+        }
+        final JsonObject json = new JsonObject();
+        json.addProperty("type", "neoforge:compound");
+        json.add("ingredients", list);
+        return json;
+    }
+
+    /** Swaps the ingredients that are ingots or double ingots of copper for those of arsenical copper. @return {@code true} if anything was swapped */
+    private static boolean replaceCopperIngot(JsonElement json, String ingot, String doubleIngot)
+    {
+        boolean replaced = false;
+        if (json.isJsonArray())
+        {
+            for (JsonElement element : json.getAsJsonArray())
+            {
+                replaced |= replaceCopperIngot(element, ingot, doubleIngot);
+            }
+        }
+        else if (json.isJsonObject())
+        {
+            final JsonObject object = json.getAsJsonObject();
+            final String tag = object.has("tag") ? object.get("tag").getAsString() : "";
+            if (tag.equals("c:ingots/copper") || tag.equals("c:double_ingots/copper"))
+            {
+                object.remove("tag");
+                object.addProperty("item", tag.equals("c:ingots/copper") ? ingot : doubleIngot);
+                return true;
+            }
+            for (Map.Entry<String, JsonElement> entry : object.entrySet())
+            {
+                replaced |= replaceCopperIngot(entry.getValue(), ingot, doubleIngot);
+            }
+        }
+        return replaced;
     }
 
     private void retort()
@@ -259,6 +366,7 @@ public final class MetallurgyData implements DataProvider
         lead.addProperty("carbon", LITHARGE_CARBON);
         lead.addProperty("temperature", LITHARGE_REDUCTION_TEMPERATURE);
         lead.add("result", fluidStack("tfcpp:metal/lead", LITHARGE_LEAD_MILLIBUCKETS));
+        lead.addProperty("result_millibuckets", LITHARGE_LEAD_EXACT_MILLIBUCKETS);
         lead.add("vapor", new JsonObject());
         lead.add("byproducts", gases("carbon_dioxide", LITHARGE_CARBON));
         lead.addProperty("needs_condenser", false);
@@ -286,7 +394,10 @@ public final class MetallurgyData implements DataProvider
         put("data/tfc/recipe/crafting/thermometer.json", thermometer);
     }
 
-    /** With no redstone in the world, the mechanisms that TFC built from it are built from brass clockwork instead. */
+    /**
+     * With no redstone in the world, the mechanisms that TFC built from it are built from brass clockwork instead, and so are those of the base game: the piston, the repeater, the comparator, the clock and the rest.
+     * What would make redstone is gone too: its block would turn clockwork into dust, and no ore is left to smelt.
+     */
     private void noMoreRedstone() throws IOException
     {
         final Path recipes = tfcFile("data/tfc/recipe");
@@ -305,6 +416,55 @@ public final class MetallurgyData implements DataProvider
                 }
             }
         }
+
+        // The recipes of the base game, and TFC's own versions of some of them, which stand in for the base game's
+        final Path vanilla = ModList.get().getModFileById("minecraft").getFile().findResource("data/minecraft/recipe");
+        final Path overridden = tfcFile("data/minecraft/recipe");
+        for (Path folder : List.of(vanilla, overridden))
+        {
+            try (Stream<Path> paths = Files.walk(folder))
+            {
+                for (Path path : (Iterable<Path>) paths::iterator)
+                {
+                    final String relative = folder.relativize(path).toString().replace('\\', '/');
+                    if (relative.endsWith(".json") && (folder == overridden || !Files.exists(overridden.resolve(relative))))
+                    {
+                        final JsonObject recipe = read(path);
+                        if (makesRedstone(recipe))
+                        {
+                            put("data/minecraft/recipe/" + relative, neverLoaded());
+                        }
+                        else if (replaceRedstone(recipe))
+                        {
+                            put("data/minecraft/recipe/" + relative, recipe);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /** @return {@code true} if this recipe gives redstone or a block of it */
+    private static boolean makesRedstone(JsonObject recipe)
+    {
+        if (!recipe.has("result") || !recipe.get("result").isJsonObject() || !recipe.getAsJsonObject("result").has("id"))
+        {
+            return false;
+        }
+        final String id = recipe.getAsJsonObject("result").get("id").getAsString();
+        return id.equals("minecraft:redstone") || id.equals("minecraft:redstone_block");
+    }
+
+    /** A recipe that is never loaded, which is how a datapack removes one. */
+    private static JsonObject neverLoaded()
+    {
+        final JsonObject disabled = new JsonObject();
+        final JsonArray conditions = new JsonArray();
+        final JsonObject never = new JsonObject();
+        never.addProperty("type", "neoforge:false");
+        conditions.add(never);
+        disabled.add("neoforge:conditions", conditions);
+        return disabled;
     }
 
     private static boolean replaceRedstone(JsonElement json)
@@ -336,13 +496,19 @@ public final class MetallurgyData implements DataProvider
         return replaced;
     }
 
-    /** Carbon lowers the melting point of iron by close to 400 C, which is why cast iron could flow from a furnace when pure iron could not. */
+    /** @return where this iron melts: carbon lowers the melting point of iron by close to 400 C, which is why cast iron could flow from a furnace when pure iron could not */
+    private static float meltOf(String name)
+    {
+        return name.contains("pig_iron") ? PIG_IRON_MELT : CAST_IRON_MELT;
+    }
+
+    /** Pig iron melts at the 4% carbon of a blast furnace tap, and cast iron at its lightest 2.1%: each at the liquidus of what it counts as. */
     private void ironTemperatures() throws IOException
     {
         for (String metal : List.of("cast_iron", "pig_iron"))
         {
             final JsonObject heat = read(tfcFile("data/tfc/tfc/fluid_heat/" + metal + ".json"));
-            heat.addProperty("melt_temperature", CAST_IRON_MELT);
+            heat.addProperty("melt_temperature", meltOf(metal));
             put("data/tfc/tfc/fluid_heat/" + metal + ".json", heat);
         }
 
@@ -360,7 +526,7 @@ public final class MetallurgyData implements DataProvider
                     {
                         if (definition.has(field))
                         {
-                            definition.addProperty(field, definition.get(field).getAsFloat() * CAST_IRON_MELT / ORIGINAL_CAST_IRON_MELT);
+                            definition.addProperty(field, definition.get(field).getAsFloat() * meltOf(relative) / ORIGINAL_CAST_IRON_MELT);
                         }
                     }
                     put("data/tfc/tfc/item_heat/" + relative, definition);
@@ -377,7 +543,7 @@ public final class MetallurgyData implements DataProvider
                 if (relative.endsWith(".json") && (relative.contains("cast_iron") || relative.contains("pig_iron")))
                 {
                     final JsonObject recipe = read(path);
-                    recipe.addProperty("temperature", CAST_IRON_MELT);
+                    recipe.addProperty("temperature", meltOf(relative));
                     put("data/tfc/recipe/heating/" + relative, recipe);
                 }
             }
@@ -487,6 +653,25 @@ public final class MetallurgyData implements DataProvider
         put("data/tfc/recipe/anvil/metal/ingot/high_carbon_steel.json", disabled);
         put("data/tfc/recipe/anvil/metal/ingot/steel.json", disabled);
 
+        // Cast iron is brittle: a hammer breaks it, and a weld needs a metal that yields. It is cast, as phosphoric iron is. The rods and sheets that TFC forged from it for its stove, door and shelf are forged from wrought iron instead.
+        put("data/tfc/recipe/anvil/metal/rod/cast_iron.json", disabled);
+        put("data/tfc/recipe/anvil/metal/sheet/cast_iron.json", disabled);
+        put("data/tfc/recipe/welding/metal/double_ingot/cast_iron.json", disabled);
+        put("data/tfc/recipe/welding/metal/double_sheet/cast_iron.json", disabled);
+        for (String recipe : List.of("stove", "fireproof_door", "fire_brick_shelf"))
+        {
+            final JsonObject patched = read(tfcFile("data/tfc/recipe/crafting/" + recipe + ".json"));
+            for (Map.Entry<String, JsonElement> entry : patched.getAsJsonObject("key").entrySet())
+            {
+                final JsonObject ingredient = entry.getValue().getAsJsonObject();
+                if (ingredient.has("tag") && ingredient.get("tag").getAsString().endsWith("/cast_iron"))
+                {
+                    ingredient.addProperty("tag", ingredient.get("tag").getAsString().replace("/cast_iron", "/wrought_iron"));
+                }
+            }
+            put("data/tfc/recipe/crafting/" + recipe + ".json", patched);
+        }
+
         // Melting wrought iron with high-carbon iron shares the carbon out by weight, as Indian crucible steel did, and as an open hearth still does. These shares are worked out from the carbon each one holds.
         for (String source : List.of("pig_iron", "cast_iron"))
         {
@@ -584,6 +769,104 @@ public final class MetallurgyData implements DataProvider
     }
 
     /**
+     * Iron oxide that is melted with nothing to reduce it can be cast into slag, which is what it is: the pieces take 25 mB each and melt back to the same oxide.
+     * Otherwise it could not be got out of a crucible or a vessel, and was lost in a forge.
+     */
+    private void castOxide() throws IOException
+    {
+        for (String kind : List.of("iron", "phosphoric_iron"))
+        {
+            final String oxide = "tfcpp:metal/" + kind + "_oxide", slag = "tfcpp:slag/" + kind;
+            final JsonObject casting = new JsonObject();
+            casting.addProperty("type", "tfc:casting");
+            casting.addProperty("break_chance", 0.1f);
+            casting.add("fluid", fluid(oxide, MILLIBUCKETS_PER_MOLD));
+            casting.add("mold", item("tfc:ceramic/ingot_mold"));
+            casting.add("result", stack(slag, MILLIBUCKETS_PER_MOLD / OXIDE_PER_SLAG));
+            put("data/tfcpp/recipe/casting/" + kind + "_oxide_slag.json", casting);
+
+            final JsonObject fire = read(tfcFile("data/tfc/recipe/casting/copper_fire_ingot.json"));
+            final int amount = fire.getAsJsonObject("fluid").get("amount").getAsInt();
+            if (amount % OXIDE_PER_SLAG != 0)
+            {
+                throw new IOException("A fire ingot mould holds " + amount + " mB, which is not whole pieces of slag");
+            }
+            fire.add("fluid", fluid(oxide, amount));
+            fire.add("result", stack(slag, amount / OXIDE_PER_SLAG));
+            put("data/tfcpp/recipe/casting/" + kind + "_oxide_slag_fire.json", fire);
+        }
+    }
+
+    /**
+     * Mixes that TFC's crucible takes for an unknown metal, though they only ever give one thing. A crucible knows only what is in it, not how much of an impurity, so the mix is what its dirtier part makes it, in any share:
+     * arsenic cannot be diluted out of copper nor silver out of work lead, and anything that holds phosphorus is cold short. Where the iron grades meet, the result is the one that the least carbon of each makes, as the converter counts them, so no mix gives more carbon than it was given.
+     * <p>
+     * TFC drops the result of an alloy from the contents before it matches the rest, so a mix whose result is one of its parts is written with the other part alone, for any share.
+     */
+    private void dirtierMixes()
+    {
+        final String copper = "tfc:metal/copper", arsenical = "tfcpp:metal/arsenical_copper", lead = "tfcpp:metal/lead", workLead = "tfcpp:metal/work_lead";
+        final String wrought = "tfc:metal/wrought_iron", steel = "tfc:metal/steel", highCarbon = "tfc:metal/high_carbon_steel", cast = "tfc:metal/cast_iron", pig = "tfc:metal/pig_iron";
+        final String phosphoricPig = "tfcpp:metal/phosphoric_pig_iron", coldShort = "tfcpp:metal/cold_short_iron";
+
+        // Arsenical copper and work lead stay what they are, whatever is added to them
+        anyShare("copper_with_arsenical_copper", arsenical, copper);
+        anyShare("lead_with_work_lead", workLead, lead);
+
+        // Iron by its carbon, counted at the least each holds: 4.0 pig iron, 2.1 cast iron, 1.0 high-carbon steel, 0.2 steel, 0.03 wrought iron
+        anyShare("pig_iron_with_cast_iron", cast, pig);
+        anyShare("cast_iron_with_high_carbon_steel", highCarbon, cast);
+        anyShare("high_carbon_steel_with_steel", steel, highCarbon);
+        anyShare("steel_with_wrought_iron", wrought, steel);
+
+        // Pig iron that carries phosphorus stays it when pig iron is added. Below 4% carbon, phosphorus makes iron cold short, and cold short iron stays so.
+        anyShare("pig_iron_with_phosphoric_pig_iron", phosphoricPig, pig);
+        for (String clean : List.of(cast, highCarbon, steel, wrought))
+        {
+            twoShares(clean.substring(clean.lastIndexOf('/') + 1) + "_with_phosphoric_pig_iron", coldShort, clean, phosphoricPig);
+        }
+        for (String other : List.of(pig, cast, highCarbon, steel, wrought, phosphoricPig))
+        {
+            anyShare(other.substring(other.lastIndexOf('/') + 1) + "_with_cold_short_iron", coldShort, other);
+        }
+    }
+
+    /** A mix of the result and this one other metal, in any share, for which TFC matches the other metal alone. */
+    private void anyShare(String name, String result, String other)
+    {
+        final JsonArray contents = new JsonArray();
+        contents.add(range(other, 0f, 1f));
+        alloy(name, result, contents);
+    }
+
+    /** A mix of two metals, neither of them the result, from a hundredth of either to ninety-nine. */
+    private void twoShares(String name, String result, String first, String second)
+    {
+        final JsonArray contents = new JsonArray();
+        contents.add(range(first, 0.01f, 0.99f));
+        contents.add(range(second, 0.01f, 0.99f));
+        alloy(name, result, contents);
+    }
+
+    private static JsonObject range(String fluid, float min, float max)
+    {
+        final JsonObject json = new JsonObject();
+        json.addProperty("fluid", fluid);
+        json.addProperty("max", max);
+        json.addProperty("min", min);
+        return json;
+    }
+
+    private void alloy(String name, String result, JsonArray contents)
+    {
+        final JsonObject alloy = new JsonObject();
+        alloy.addProperty("type", "tfc:alloy");
+        alloy.add("contents", contents);
+        alloy.addProperty("result", result);
+        put("data/tfcpp/recipe/alloy/" + name + ".json", alloy);
+    }
+
+    /**
      * Galena gives up lead readily: it needs only a fire well short of copper's, and no carbon, as part of the sulfide roasting to oxide then reacts with the rest. What it gives is work lead, which holds silver. Plain lead comes only from reducing litharge in a retort, and cupellation takes the silver out of work lead.
      */
     private void lead() throws IOException
@@ -602,6 +885,8 @@ public final class MetallurgyData implements DataProvider
         put("data/tfcpp/recipe/heating/lead_ingot.json", heatingToFluid(item("tfcpp:metal/ingot/lead"), "tfcpp:metal/lead", 100, MetalHeat.LEAD.melt()));
         // A sheet is the metal of one ingot, so it melts back to the same 100 mB
         put("data/tfcpp/recipe/heating/lead_sheet.json", heatingToFluid(item("tfcpp:metal/sheet/lead"), "tfcpp:metal/lead", 100, MetalHeat.LEAD.melt()));
+        // Work lead beaten flat is work lead still, with its silver, and runs back to it. It is no way to clean it, and no lead pipe is made of it.
+        put("data/tfcpp/recipe/heating/work_lead_sheet.json", heatingToFluid(item("tfcpp:metal/sheet/work_lead"), "tfcpp:metal/work_lead", 100, MetalHeat.LEAD.melt()));
 
         final JsonObject casting = new JsonObject();
         casting.addProperty("type", "tfc:casting");
@@ -632,13 +917,16 @@ public final class MetallurgyData implements DataProvider
         sheetHeat.addProperty("heat_capacity", MetalHeat.LEAD.ingotCapacity());
         sheetHeat.addProperty("forging_temperature", 0f);
         put("data/tfcpp/tfc/item_heat/lead_sheet.json", sheetHeat);
+        final JsonObject workSheetHeat = sheetHeat.deepCopy();
+        workSheetHeat.add("ingredient", item("tfcpp:metal/sheet/work_lead"));
+        put("data/tfcpp/tfc/item_heat/work_lead_sheet.json", workSheetHeat);
 
         for (String ingot : List.of("lead", "work_lead"))
         {
             final JsonObject sheet = new JsonObject();
             sheet.addProperty("type", "tfc:anvil");
             sheet.add("ingredient", item("tfcpp:metal/ingot/" + ingot));
-            sheet.add("result", stack("tfcpp:metal/sheet/lead", 1));
+            sheet.add("result", stack("tfcpp:metal/sheet/" + ingot, 1));
             final JsonArray rules = new JsonArray();
             rules.add("hit_last");
             rules.add("hit_second_last");
@@ -1047,8 +1335,9 @@ public final class MetallurgyData implements DataProvider
 
     private void tags()
     {
-        addToTag("data/tfc/tags/fluid/molten_metals.json", "tfcpp:metal/arsenical_copper", "tfcpp:metal/lead", "tfcpp:metal/work_lead", "tfcpp:metal/phosphoric_pig_iron", "tfcpp:metal/cold_short_iron"); // Not iron oxide: this is what lets a mould take it, and nothing can be cast from it
-        addToTag("data/tfc/tags/fluid/usable_in_ingot_mold.json", "tfcpp:metal/arsenical_copper");
+        addToTag("data/tfc/tags/fluid/molten_metals.json", "tfcpp:metal/arsenical_copper", "tfcpp:metal/lead", "tfcpp:metal/work_lead", "tfcpp:metal/phosphoric_pig_iron", "tfcpp:metal/cold_short_iron");
+        // Iron oxide is not a metal, and goes in no other tag of metals, but an ingot mould takes it: it sets into pieces of slag that go back in a furnace. See castOxide.
+        addToTag("data/tfc/tags/fluid/usable_in_ingot_mold.json", "tfcpp:metal/arsenical_copper", "tfcpp:metal/iron_oxide", "tfcpp:metal/phosphoric_iron_oxide");
         addToTag("data/tfc/tags/fluid/usable_in_tool_head_mold.json", "tfcpp:metal/arsenical_copper");
         addToTag("data/tfc/tags/fluid/usable_in_jug.json", "tfcpp:mercury"); // Glazed pottery and glass both hold mercury, which attacks neither
 

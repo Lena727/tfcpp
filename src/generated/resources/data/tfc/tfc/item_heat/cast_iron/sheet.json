@@ -1,8 +1,8 @@
 {
-  "forging_temperature": 720.00006,
-  "heat_capacity": 7.4914694,
+  "forging_temperature": 810.00006,
+  "heat_capacity": 7.263978,
   "ingredient": {
     "tag": "c:sheets/cast_iron"
   },
-  "welding_temperature": 960.0
+  "welding_temperature": 1080.0
 }

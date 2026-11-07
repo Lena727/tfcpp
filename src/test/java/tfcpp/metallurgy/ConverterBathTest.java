@@ -86,20 +86,34 @@ class ConverterBathTest
     }
 
     @Test
-    void aFullBlowWithOnePumpHeatsTheBathByAboutARealAmount()
+    void aFullBlowWithAStrongBlastHeatsTheBathByAboutARealAmount()
     {
-        // About 0.2 mol of air a second is one piston pump on one water wheel
-        final ConverterBath bath = pigIron(2000f, 1350f);
+        // 1 mol of air a second is five piston pumps on water wheels, or a receiver that holds the 140 mol of a blow. With the open mouth losing 15 kW, anything much weaker sets the iron first.
+        final ConverterBath bath = pigIron(2000f, 1400f);
         int seconds = 0;
         while (bath.carbon > 0.5f && seconds < 7200)
+        {
+            second(bath, 1.0f);
+            seconds++;
+        }
+        assertTrue(seconds > 100 && seconds < 1500, "A blow takes minutes, took " + seconds + " s");
+        assertTrue(bath.isMolten(), "The iron should still be liquid at " + bath.temperature + " C");
+        final float rise = bath.temperature - 1400f;
+        assertTrue(rise > 50f && rise < 400f, "Real blows gain up to about 350 K, got " + rise);
+        assertEquals(Grade.STEEL, bath.grade());
+    }
+
+    @Test
+    void aBlastOfOnePumpCannotCarryAChargeBecauseTheMouthLosesTooMuch()
+    {
+        final ConverterBath bath = pigIron(2000f, 1400f);
+        int seconds = 0;
+        while (bath.isMolten() && bath.carbon > 0.5f && seconds < 7200)
         {
             second(bath, 0.2f);
             seconds++;
         }
-        assertTrue(seconds > 300 && seconds < 1500, "A blow takes minutes, took " + seconds + " s");
-        final float rise = bath.temperature - 1350f;
-        assertTrue(rise > 50f && rise < 400f, "Real blows gain up to about 350 K, got " + rise);
-        assertEquals(Grade.STEEL, bath.grade());
+        assertFalse(bath.isMolten(), "It sets at " + bath.temperature + " C with " + bath.carbon + "% carbon");
     }
 
     @Test
@@ -178,9 +192,39 @@ class ConverterBathTest
     {
         final ConverterBath bath = pigIron(2000f, 1400f);
         bath.cool(600f);
-        assertTrue(bath.temperature < 1320f && bath.temperature > 1200f, "Ten minutes idle, now " + bath.temperature);
+        assertTrue(bath.temperature < 1050f && bath.temperature > 950f, "Ten minutes idle with an open mouth, now " + bath.temperature);
         bath.cool(1e7f);
         assertEquals(ConverterBath.AMBIENT, bath.temperature, 0.5f);
+    }
+
+    @Test
+    void anOpenMouthLosesAboutWhatItRadiates()
+    {
+        // Radiation from a mouth of 0.03 m2 at 1750 K is some 16 kW, and this vessel also loses through its shell: 15 kW at 1500 C
+        final ConverterBath bath = new ConverterBath();
+        bath.add(2000f, Grade.STEEL, 1520f);
+        final float capacity = 2000f * ConverterBath.KG_PER_MILLIBUCKET * 0.82f + 5f;
+        bath.cool(1f);
+        final float kilowatts = (1520f - bath.temperature) * capacity;
+        assertEquals(15f, kilowatts, 0.5f);
+    }
+
+    @Test
+    void theHeatOfAStrongBlastBeatsTheLossFromAnOpenMouth()
+    {
+        // The pouring threshold: iron from a blast furnace arrives at 1400 C or more, and even a blast of 1.5 mol/s only finishes the blow liquid if the iron went in above about 1350 C
+        final ConverterBath cool = pigIron(2000f, 1300f), hot = pigIron(2000f, 1450f);
+        for (final ConverterBath bath : new ConverterBath[] {cool, hot})
+        {
+            int seconds = 0;
+            while (bath.isMolten() && bath.carbon > 0.5f && seconds < 7200)
+            {
+                second(bath, 1.5f);
+                seconds++;
+            }
+        }
+        assertFalse(cool.isMolten(), "Iron poured in at 1300 C sets before it is steel, with a blast of 1.5 mol/s");
+        assertTrue(hot.isMolten(), "Iron poured in at 1450 C comes out steel");
     }
 
     @Test
@@ -267,7 +311,8 @@ class ConverterBathTest
         assertEquals(1.5f, Grade.PHOSPHORIC_PIG_IRON.phosphorus());
         assertEquals(4f, Grade.PHOSPHORIC_PIG_IRON.carbon());
         assertEquals(1f, Grade.PHOSPHORIC_PIG_IRON.silicon());
-        assertEquals(1.5f, Grade.COLD_SHORT_IRON.phosphorus());
+        assertEquals(ConverterBath.PHOSPHORUS_LIMIT_PERCENT, Grade.COLD_SHORT_IRON.phosphorus(), "Cold short iron counts as the least phosphorus that makes iron cold short");
+        assertEquals(0f, Grade.COLD_SHORT_IRON.silicon());
         assertTrue(Grade.COLD_SHORT_IRON.carbon() <= 0.2f);
         for (float carbon = 0f; carbon < 6f; carbon += 0.01f)
         {
@@ -292,17 +337,105 @@ class ConverterBathTest
         final ConverterBath bath = new ConverterBath();
         bath.add(100f, Grade.STEEL, 1600f);
         assertEquals(Grade.STEEL, bath.tapGrade());
+        bath.phosphorus = ConverterBath.PHOSPHORUS_LIMIT_PERCENT - 0.002f;
+        assertEquals(Grade.STEEL, bath.tapGrade(), "A little under the limit is clean");
         bath.phosphorus = ConverterBath.PHOSPHORUS_LIMIT_PERCENT;
-        assertEquals(Grade.STEEL, bath.tapGrade(), "Exactly at the limit is not over it");
+        assertEquals(Grade.COLD_SHORT_IRON, bath.tapGrade(), "Cold short iron counts as exactly the limit, so the limit has to be cold short for it to pour back as itself");
         bath.phosphorus = 0.11f;
         assertEquals(Grade.COLD_SHORT_IRON, bath.tapGrade());
-        bath.carbon = 2.09f;
-        assertEquals(Grade.COLD_SHORT_IRON, bath.tapGrade(), "Below the carbon of cast iron, phosphorus makes it cold short");
         bath.carbon = 2.1f;
-        assertEquals(Grade.PHOSPHORIC_PIG_IRON, bath.tapGrade(), "Iron that still holds the carbon of pig iron is phosphoric pig iron, which a converter can take again");
+        assertEquals(Grade.COLD_SHORT_IRON, bath.tapGrade(), "Phosphoric iron under 4% carbon is cold short iron");
         bath.carbon = 3.5f;
-        assertEquals(Grade.PHOSPHORIC_PIG_IRON, bath.tapGrade());
+        assertEquals(Grade.COLD_SHORT_IRON, bath.tapGrade());
         assertEquals(Grade.CAST_IRON, bath.grade(), "grade() still goes by carbon alone");
+    }
+
+    @Test
+    void onlyABathHoldingAllThatPhosphoricPigIronCountsAsIsTappedAsIt()
+    {
+        final ConverterBath bath = phosphoric(false, 0f);
+        assertEquals(Grade.PHOSPHORIC_PIG_IRON, bath.tapGrade(), "A blast furnace tap, as it came");
+        bath.silicon = 0.5f;
+        assertEquals(Grade.COLD_SHORT_IRON, bath.tapGrade(), "Silicon burned, so it counts as no more than cold short iron");
+        bath.silicon = 1f;
+        bath.phosphorus = 0.5f;
+        assertEquals(Grade.COLD_SHORT_IRON, bath.tapGrade(), "Diluted, so the 1.5% would be more phosphorus than it has");
+        bath.phosphorus = 1.5f;
+        bath.carbon = 3.9f;
+        assertEquals(Grade.COLD_SHORT_IRON, bath.tapGrade(), "A phosphoric tap below 4% carbon");
+    }
+
+    @Test
+    void pigIronOfAnotherKindThanABlastFurnaceMakesIsCastIron()
+    {
+        final ConverterBath bath = pigIron(1000f, 1400f);
+        assertEquals(Grade.PIG_IRON, bath.tapGrade());
+        bath.silicon = 0.4f; // Part of the silicon burned, none of the carbon
+        assertEquals(Grade.CAST_IRON, bath.tapGrade(), "Pouring it back as pig iron would give it back the silicon, and the heat of burning it");
+    }
+
+    @Test
+    void everyKindOfIronIsLiquidAtItsOwnMeltingPoint()
+    {
+        for (Grade grade : Grade.values())
+        {
+            final ConverterBath bath = new ConverterBath();
+            bath.add(500f, grade, grade.melt());
+            assertTrue(bath.isMolten(), grade + " poured at its melting point of " + grade.melt() + " C would set at once, as it counts as iron that sets at " + ConverterBath.liquidus(bath.carbon));
+            assertTrue(ConverterBath.liquidus(grade.carbon()) <= grade.melt(), grade.toString());
+        }
+    }
+
+    /** Every pour of every kind of iron after a blow of any length, with either lining, gives back no more carbon, silicon or phosphorus than the tap held. */
+    @Test
+    void noPourBlowTapCycleMakesCarbonSiliconOrPhosphorus()
+    {
+        final float tolerance = 0.2f; // grams: the rounding of 0.001% in a full vessel
+        for (Grade start : Grade.values())
+        {
+            for (boolean basic : new boolean[] {false, true})
+            {
+                for (int seconds : new int[] {0, 5, 20, 60, 120, 240, 400, 800, 1500})
+                {
+                    final ConverterBath bath = new ConverterBath();
+                    bath.basic = basic;
+                    bath.addLime(basic ? ENOUGH_LIME : 0f);
+                    bath.add(2000f, start, 1500f);
+                    for (int i = 0; i < seconds; i++)
+                    {
+                        second(bath, 0.4f);
+                    }
+                    final float carbon = grams(bath, bath.carbon), silicon = grams(bath, bath.silicon), phosphorus = grams(bath, bath.phosphorus);
+                    final Grade tapped = bath.tapGrade();
+                    final int amount = bath.tap((int) bath.metal);
+
+                    final ConverterBath again = new ConverterBath();
+                    again.add(amount, tapped, 1500f);
+                    final String what = start + (basic ? " basic " : " acid ") + seconds + " s, tapped as " + tapped;
+                    assertTrue(grams(again, again.carbon) <= carbon + tolerance, "Carbon from nothing: " + what);
+                    assertTrue(grams(again, again.silicon) <= silicon + tolerance, "Silicon from nothing: " + what);
+                    assertTrue(grams(again, again.phosphorus) <= phosphorus + tolerance, "Phosphorus from nothing: " + what);
+                }
+            }
+        }
+    }
+
+    @Test
+    void acidBlownPhosphoricIronPoursBackAsLittlePhosphorusAsItsTapCouldHold()
+    {
+        // The case that made 6.7 mol of phosphorus and 280 K of heat a cycle out of nothing
+        final ConverterBath bath = phosphoric(false, 0f);
+        final float before = phosphorusGrams(bath);
+        blowThrough(bath, 0);
+        final Grade tapped = bath.tapGrade();
+        assertEquals(Grade.COLD_SHORT_IRON, tapped);
+        final int amount = bath.tap((int) bath.metal);
+
+        final ConverterBath again = new ConverterBath();
+        again.add(amount, tapped, 1500f);
+        assertTrue(phosphorusGrams(again) < before / 5f, "Poured back it holds " + phosphorusGrams(again) + " g of the " + before + " g it had");
+        assertEquals(0f, again.silicon, "No silicon to burn for heat again");
+        assertEquals(Grade.COLD_SHORT_IRON, again.tapGrade(), "It is still cold short iron, as the tap was");
     }
 
     @Test

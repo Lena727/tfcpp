@@ -1,0 +1,15 @@
+{
+  "type": "tfc:anvil",
+  "ingredient": {
+    "item": "tfcpp:metal/ingot/arsenical_copper"
+  },
+  "result": {
+    "count": 16,
+    "id": "tfc:metal/chain/copper"
+  },
+  "rules": [
+    "hit_any",
+    "draw_not_last"
+  ],
+  "tier": 1
+}

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": {
+      "item": "tfc:brass_mechanisms"
+    },
+    "R": {
+      "tag": "c:rods/gold"
+    },
+    "S": {
+      "tag": "c:rods/wooden"
+    }
+  },
+  "pattern": [
+    "R R",
+    "RSR",
+    "RDR"
+  ],
+  "result": {
+    "count": 16,
+    "id": "minecraft:powered_rail"
+  }
+}

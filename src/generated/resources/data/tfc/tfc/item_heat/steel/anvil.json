@@ -1,8 +1,8 @@
 {
-  "forging_temperature": 900.00006,
-  "heat_capacity": 59.847263,
+  "forging_temperature": 912.00006,
+  "heat_capacity": 59.6427,
   "ingredient": {
     "item": "tfc:metal/anvil/steel"
   },
-  "welding_temperature": 1200.0
+  "welding_temperature": 1216.0
 }

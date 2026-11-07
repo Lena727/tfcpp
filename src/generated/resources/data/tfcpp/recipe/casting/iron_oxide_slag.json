@@ -1,0 +1,15 @@
+{
+  "type": "tfc:casting",
+  "break_chance": 0.1,
+  "fluid": {
+    "amount": 100,
+    "fluid": "tfcpp:metal/iron_oxide"
+  },
+  "mold": {
+    "item": "tfc:ceramic/ingot_mold"
+  },
+  "result": {
+    "count": 4,
+    "id": "tfcpp:slag/iron"
+  }
+}

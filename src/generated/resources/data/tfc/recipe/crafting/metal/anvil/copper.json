@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "type": "neoforge:compound",
+      "ingredients": [
+        {
+          "tag": "c:double_ingots/copper"
+        },
+        {
+          "item": "tfcpp:metal/double_ingot/arsenical_copper"
+        }
+      ]
+    }
+  },
+  "pattern": [
+    "###",
+    " # ",
+    "###"
+  ],
+  "result": {
+    "count": 1,
+    "id": "tfc:metal/anvil/copper"
+  }
+}

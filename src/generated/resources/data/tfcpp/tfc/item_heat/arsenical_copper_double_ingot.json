@@ -1,0 +1,8 @@
+{
+  "forging_temperature": 630.0,
+  "heat_capacity": 8.566,
+  "ingredient": {
+    "item": "tfcpp:metal/double_ingot/arsenical_copper"
+  },
+  "welding_temperature": 840.0
+}

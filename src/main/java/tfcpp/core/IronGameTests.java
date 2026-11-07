@@ -147,14 +147,14 @@ public final class IronGameTests
         assertMelts(helper, TFCItems.RAW_IRON_BLOOM.asItem(), metal(Metal.WROUGHT_IRON), 1535f);
         assertMelts(helper, TFCItems.REFINED_IRON_BLOOM.asItem(), metal(Metal.WROUGHT_IRON), 1535f);
         assertMelts(helper, ingot(Metal.PIG_IRON), metal(Metal.PIG_IRON), 1200f);
-        assertMelts(helper, ingot(Metal.CAST_IRON), metal(Metal.CAST_IRON), 1200f);
-        assertMelts(helper, ingot(Metal.HIGH_CARBON_STEEL), metal(Metal.HIGH_CARBON_STEEL), 1450f);
-        assertMelts(helper, ingot(Metal.STEEL), metal(Metal.STEEL), 1500f);
-        assertMelts(helper, TFCItems.METAL_ITEMS.get(Metal.STEEL).get(Metal.ItemType.PICKAXE).asItem(), metal(Metal.STEEL), 1500f);
+        assertMelts(helper, ingot(Metal.CAST_IRON), metal(Metal.CAST_IRON), ConverterBath.Grade.CAST_IRON.melt());
+        assertMelts(helper, ingot(Metal.HIGH_CARBON_STEEL), metal(Metal.HIGH_CARBON_STEEL), ConverterBath.Grade.HIGH_CARBON_STEEL.melt());
+        assertMelts(helper, ingot(Metal.STEEL), metal(Metal.STEEL), ConverterBath.Grade.STEEL.melt());
+        assertMelts(helper, TFCItems.METAL_ITEMS.get(Metal.STEEL).get(Metal.ItemType.PICKAXE).asItem(), metal(Metal.STEEL), ConverterBath.Grade.STEEL.melt());
         assertMelts(helper, TFCItems.METAL_ITEMS.get(Metal.WROUGHT_IRON).get(Metal.ItemType.PICKAXE).asItem(), metal(Metal.WROUGHT_IRON), 1535f);
 
         final FluidHeat steel = FluidHeat.get(metal(Metal.STEEL));
-        helper.assertTrue(steel != null && steel.meltTemperature() == 1500f, "Steel must melt at 1500 C");
+        helper.assertTrue(steel != null && steel.meltTemperature() == 1520f, "Steel must melt at 1520 C, the liquidus of 0.2% carbon, which is the least that steel counts as in the converter");
         final FluidHeat highCarbon = FluidHeat.get(metal(Metal.HIGH_CARBON_STEEL));
         helper.assertTrue(highCarbon != null && highCarbon.meltTemperature() == 1450f, "High carbon steel must melt at 1450 C");
         helper.succeed();
@@ -458,7 +458,9 @@ public final class IronGameTests
         converter.wearLining(1e6f);
         helper.runAtTickTime(60, () -> {
             helper.assertBlockNotPresent(Metallurgy.CONVERTER.get(), pos);
-            helper.assertTrue(itemsAround(helper, pos, ingot(Metal.PIG_IRON)) > 0, "The metal should run out, to be dug up afterward");
+            // The first second of the blast burned some silicon, so what is left is no longer the pig iron it was poured as
+            final int iron = itemsAround(helper, pos, ingot(Metal.PIG_IRON)) + itemsAround(helper, pos, ingot(Metal.CAST_IRON));
+            helper.assertTrue(iron > 0, "The metal should run out, to be dug up afterward");
             helper.succeed();
         });
     }
@@ -509,7 +511,7 @@ public final class IronGameTests
         helper.setBlock(pos, Metallurgy.CONVERTER.get());
         final ConverterBlockEntity converter = helper.getBlockEntity(pos);
         converter.wearLining(4000f);
-        helper.assertTrue(converter.isScrap(), "A vessel a third worn should not be worth carrying away");
+        helper.assertTrue(converter.isScrap(), "A vessel a third worn counts as worn out, and its lining goes with it as an item");
 
         // A crumb left from tapping must not stop it being relined
         converter.tank().fill(new FluidStack(metal(Metal.PIG_IRON), 1), IFluidHandler.FluidAction.EXECUTE);

@@ -73,6 +73,7 @@ import tfcpp.mechanics.ShaftPhysics;
 import tfcpp.mechanics.ShaftSource;
 import tfcpp.mechanics.ShaftTracker;
 import tfcpp.mechanics.WaterBodies;
+import tfcpp.metallurgy.ConverterBath;
 import tfcpp.metallurgy.CupellationBath;
 import tfcpp.metallurgy.Metallurgy;
 import tfcpp.metallurgy.RetortBlockEntity;
@@ -462,7 +463,7 @@ public final class GasGameTests
         helper.assertTrue(recipes.byKey(TFCpp.id("alloy/arsenical_bronze")).isPresent(), "The arsenical bronze alloy must load");
 
         final FluidHeat castIron = FluidHeat.get(TFCFluids.METALS.get(Metal.CAST_IRON).getSource());
-        helper.assertTrue(castIron != null && castIron.meltTemperature() == 1200f, "Cast iron must melt at 1200 C");
+        helper.assertTrue(castIron != null && castIron.meltTemperature() == ConverterBath.Grade.CAST_IRON.melt(), "Cast iron must melt where the converter counts its lightest kind to, at " + ConverterBath.Grade.CAST_IRON.melt() + " C");
         helper.assertTrue(FluidHeat.get(Metallurgy.ARSENICAL_COPPER.get()) != null, "Arsenical copper needs its melting data");
         helper.succeed();
     }
@@ -511,7 +512,7 @@ public final class GasGameTests
     }
 
     @GameTest(template = TEMPLATE)
-    public static void nothingIsLeftNeedingRedstoneAndCastIronCanStillBeWelded(GameTestHelper helper)
+    public static void nothingIsLeftNeedingRedstoneAndCastIronKeepsItsOwnHeat(GameTestHelper helper)
     {
         final var recipes = helper.getLevel().getRecipeManager();
         for (var holder : recipes.getRecipes())
@@ -526,7 +527,7 @@ public final class GasGameTests
         }
 
         final HeatDefinition castIron = HeatCapability.getDefinition(new ItemStack(TFCItems.METAL_ITEMS.get(Metal.CAST_IRON).get(Metal.ItemType.INGOT).get()));
-        helper.assertTrue(castIron != null && castIron.weldingTemperature() < 1200f, "Cast iron must be weldable below its melting point");
+        helper.assertTrue(castIron != null && castIron.weldingTemperature() < ConverterBath.Grade.CAST_IRON.melt(), "Cast iron keeps working temperatures below its melting point, though no recipe forges or welds it");
 
         final HeatingRecipe tool = HeatingRecipe.getRecipe(new ItemStack(TFCItems.METAL_ITEMS.get(Metal.COPPER).get(Metal.ItemType.AXE_HEAD).get()));
         helper.assertTrue(tool != null && tool.getDisplayOutputFluid().getFluid() == Metallurgy.ARSENICAL_COPPER.get(), "Remelting a cast tool must not purify it");

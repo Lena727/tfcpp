@@ -180,7 +180,7 @@ public final class PhosphorusGameTests
             final ConverterBath bath = ((ConverterBlockEntity) helper.getBlockEntity(new BlockPos(4, 1, 4))).bath();
             helper.assertTrue(bath.metal >= 65f, "Two pieces of rich ore should give 70 mB, got " + bath.metal);
             helper.assertTrue(bath.phosphorus == 0f, "Hematite is poor in phosphorus, got " + bath.phosphorus);
-            helper.assertTrue(bath.tapGrade() == ConverterBath.Grade.PIG_IRON, "It should tap as pig iron, got " + bath.tapGrade());
+            helper.assertTrue(bath.tapGrade() == ConverterBath.Grade.PIG_IRON, "It should tap as pig iron, got " + bath.tapGrade() + " with " + bath.carbon + "% carbon and " + bath.silicon + "% silicon");
             helper.succeed();
         });
     }
@@ -459,8 +459,9 @@ public final class PhosphorusGameTests
     public static void phosphoricPigIronCannotBeAlloyedIntoSteel(GameTestHelper helper)
     {
         assertMix(helper, new BlockPos(1, 1, 1), List.of(pig(), IronGameTests.metal(Metal.WROUGHT_IRON)), List.of(10, 90), IronGameTests.metal(Metal.STEEL)); // The control
-        assertMix(helper, new BlockPos(3, 1, 1), List.of(phosphoricPig(), IronGameTests.metal(Metal.WROUGHT_IRON)), List.of(10, 90), IronGameTests.metal(Metal.UNKNOWN));
-        assertMix(helper, new BlockPos(5, 1, 1), List.of(Metallurgy.COLD_SHORT_IRON.get(), IronGameTests.metal(Metal.WROUGHT_IRON)), List.of(10, 90), IronGameTests.metal(Metal.UNKNOWN));
+        // Wrought iron mixed with it is cold short iron, which is not steel or wrought iron and cannot be made into either
+        assertMix(helper, new BlockPos(3, 1, 1), List.of(phosphoricPig(), IronGameTests.metal(Metal.WROUGHT_IRON)), List.of(10, 90), Metallurgy.COLD_SHORT_IRON.get());
+        assertMix(helper, new BlockPos(5, 1, 1), List.of(Metallurgy.COLD_SHORT_IRON.get(), IronGameTests.metal(Metal.WROUGHT_IRON)), List.of(10, 90), Metallurgy.COLD_SHORT_IRON.get());
         assertMix(helper, new BlockPos(7, 1, 1), List.of(pig(), phosphoricPig(), IronGameTests.metal(Metal.WROUGHT_IRON)), List.of(5, 5, 90), IronGameTests.metal(Metal.UNKNOWN));
         helper.succeed();
     }

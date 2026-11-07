@@ -12,6 +12,7 @@
     "amount": 4,
     "id": "tfcpp:metal/lead"
   },
+  "result_millibuckets": 4.567901,
   "temperature": 800.0,
   "vapor": {}
 }

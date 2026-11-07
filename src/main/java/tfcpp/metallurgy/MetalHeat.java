@@ -52,9 +52,9 @@ public final class MetalHeat
     public static final Metal LEAD = new Metal("lead", 11.34f, 0.129f, 23f, 327f);
     public static final Metal WROUGHT_IRON = new Metal("wrought_iron", 7.87f, 0.449f, 247f, 1535f);
     /** Not in {@link #METALS}. Phosphoric pig iron melts like pig iron: the carbon sets the melting point, and a percent of phosphorus changes it little. */
-    public static final Metal PHOSPHORIC_PIG_IRON = new Metal("phosphoric_pig_iron", 7.2f, 0.46f, 200f, 1200f);
+    public static final Metal PHOSPHORIC_PIG_IRON = new Metal("phosphoric_pig_iron", 7.2f, 0.46f, 200f, ConverterBath.Grade.PHOSPHORIC_PIG_IRON.melt());
     /** Not in {@link #METALS}. Cold short iron melts like wrought iron, as it holds hardly any carbon. */
-    public static final Metal COLD_SHORT_IRON = new Metal("cold_short_iron", 7.87f, 0.449f, 247f, 1535f);
+    public static final Metal COLD_SHORT_IRON = new Metal("cold_short_iron", 7.87f, 0.449f, 247f, ConverterBath.Grade.COLD_SHORT_IRON.melt());
 
     private static final float STEEL_DENSITY = 7.85f, STEEL_SPECIFIC_HEAT = 0.49f, STEEL_LATENT_HEAT = 250f;
 
@@ -71,10 +71,10 @@ public final class MetalHeat
         new Metal("brass", 8.5f, 0.38f, 168f, 930f),
         new Metal("rose_gold", 15f, 0.2f, 90f, 960f),
         new Metal("sterling_silver", 10.4f, 0.24f, 110f, 890f),
-        new Metal("cast_iron", 7.2f, 0.46f, 200f, 1200f),
-        new Metal("pig_iron", 7.2f, 0.46f, 200f, 1200f),
-        new Metal("steel", STEEL_DENSITY, STEEL_SPECIFIC_HEAT, STEEL_LATENT_HEAT, 1500f),
-        new Metal("high_carbon_steel", STEEL_DENSITY, STEEL_SPECIFIC_HEAT, STEEL_LATENT_HEAT, 1450f),
+        new Metal("cast_iron", 7.2f, 0.46f, 200f, ConverterBath.Grade.CAST_IRON.melt()),
+        new Metal("pig_iron", 7.2f, 0.46f, 200f, ConverterBath.Grade.PIG_IRON.melt()),
+        new Metal("steel", STEEL_DENSITY, STEEL_SPECIFIC_HEAT, STEEL_LATENT_HEAT, ConverterBath.Grade.STEEL.melt()),
+        new Metal("high_carbon_steel", STEEL_DENSITY, STEEL_SPECIFIC_HEAT, STEEL_LATENT_HEAT, ConverterBath.Grade.HIGH_CARBON_STEEL.melt()),
         new Metal("weak_steel", STEEL_DENSITY, STEEL_SPECIFIC_HEAT, STEEL_LATENT_HEAT, 1540f),
         new Metal("weak_blue_steel", STEEL_DENSITY, STEEL_SPECIFIC_HEAT, STEEL_LATENT_HEAT, 1540f),
         new Metal("weak_red_steel", STEEL_DENSITY, STEEL_SPECIFIC_HEAT, STEEL_LATENT_HEAT, 1540f),

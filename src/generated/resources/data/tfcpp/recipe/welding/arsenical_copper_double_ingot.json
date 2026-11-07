@@ -1,0 +1,13 @@
+{
+  "type": "tfc:welding",
+  "first_input": {
+    "item": "tfcpp:metal/ingot/arsenical_copper"
+  },
+  "result": {
+    "count": 1,
+    "id": "tfcpp:metal/double_ingot/arsenical_copper"
+  },
+  "second_input": {
+    "item": "tfcpp:metal/ingot/arsenical_copper"
+  }
+}

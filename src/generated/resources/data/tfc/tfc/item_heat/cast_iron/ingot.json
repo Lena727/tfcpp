@@ -1,8 +1,8 @@
 {
-  "forging_temperature": 720.00006,
-  "heat_capacity": 3.7457347,
+  "forging_temperature": 810.00006,
+  "heat_capacity": 3.631989,
   "ingredient": {
     "tag": "c:ingots/cast_iron"
   },
-  "welding_temperature": 960.0
+  "welding_temperature": 1080.0
 }

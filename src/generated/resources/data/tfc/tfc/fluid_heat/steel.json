@@ -1,5 +1,5 @@
 {
   "fluid": "tfc:metal/steel",
-  "melt_temperature": 1500.0,
-  "specific_heat_capacity": 0.012824413
+  "melt_temperature": 1520.0,
+  "specific_heat_capacity": 0.01278058
 }

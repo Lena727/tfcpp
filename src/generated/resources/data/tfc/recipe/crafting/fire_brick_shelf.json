@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": {
+      "item": "tfc:ceramic/fire_brick"
+    },
+    "S": {
+      "tag": "c:rods/wrought_iron"
+    }
+  },
+  "pattern": [
+    "LLL",
+    "L L",
+    "S S"
+  ],
+  "result": {
+    "count": 4,
+    "id": "tfc:fire_brick_shelf"
+  }
+}

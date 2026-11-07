@@ -1,0 +1,11 @@
+{
+  "type": "tfc:heating",
+  "ingredient": {
+    "item": "tfcpp:metal/sheet/work_lead"
+  },
+  "result_fluid": {
+    "amount": 100,
+    "id": "tfcpp:metal/work_lead"
+  },
+  "temperature": 327.0
+}

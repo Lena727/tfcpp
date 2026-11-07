@@ -52,11 +52,15 @@ public final class Metallurgy
     public static final Supplier<Item> WORK_LEAD_INGOT = ITEMS.register("metal/ingot/work_lead", () -> new Item(new Item.Properties()));
     /** Lead beaten flat in the cold, as lead does not harden when it is worked: it recrystallises at room temperature. */
     public static final Supplier<Item> LEAD_SHEET = ITEMS.register("metal/sheet/lead", () -> new Item(new Item.Properties()));
+    /** Work lead beaten flat. It is still work lead, with its silver, and melts back to it: a sheet is no way to clean it. */
+    public static final Supplier<Item> WORK_LEAD_SHEET = ITEMS.register("metal/sheet/work_lead", () -> new Item(new Item.Properties()));
     /** Calcium phosphate left when bone is burned. It is the floor of a cupellation hearth, which takes up litharge and holds it. */
     public static final Supplier<Item> BONE_ASH = ITEMS.register("powder/bone_ash", () -> new Item(new Item.Properties()));
     /** Raw rock phosphate. It feeds a field slowly, as little of it dissolves until it meets acid, which comes with chemistry. */
     public static final Supplier<Item> APATITE_POWDER = ITEMS.register("powder/apatite", () -> new Item(new Item.Properties()));
     public static final Supplier<Item> ARSENICAL_COPPER_INGOT = ITEMS.register("metal/ingot/arsenical_copper", () -> new Item(new Item.Properties()));
+    /** Two arsenical copper ingots welded: what a copper anvil is made of, so that a start on tetrahedrite alone can reach one. */
+    public static final Supplier<Item> ARSENICAL_COPPER_DOUBLE_INGOT = ITEMS.register("metal/double_ingot/arsenical_copper", () -> new Item(new Item.Properties()));
     /** Zinc oxide left by roasting sphalerite, one for each grade of ore, as a single piece must carry all the zinc of the ore it came from. */
     public static final Map<String, Supplier<Item>> ZINC_CALCINES = Stream.of("small", "poor", "normal", "rich").collect(Collectors.toMap(
         grade -> grade,
@@ -154,9 +158,11 @@ public final class Metallurgy
             .icon(() -> new ItemStack(RETORT_ITEM.get()))
             .displayItems((parameters, output) -> {
                 output.accept(ARSENICAL_COPPER_INGOT.get());
+                output.accept(ARSENICAL_COPPER_DOUBLE_INGOT.get());
                 output.accept(LEAD_INGOT.get());
                 output.accept(WORK_LEAD_INGOT.get());
                 output.accept(LEAD_SHEET.get());
+                output.accept(WORK_LEAD_SHEET.get());
                 output.accept(BONE_ASH.get());
                 output.accept(APATITE_POWDER.get());
                 Ores.addToTab(output);
@@ -242,7 +248,7 @@ public final class Metallurgy
     private static void registerCapabilities(RegisterCapabilitiesEvent event)
     {
         event.registerBlockEntity(BlockCapabilities.HEAT, RETORT_ENTITY.get(), (entity, side) -> entity);
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, RETORT_ENTITY.get(), (entity, side) -> entity.tank());
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, RETORT_ENTITY.get(), (entity, side) -> entity.outlet());
         event.registerBlockEntity(BlockCapabilities.HEAT, CONVERTER_ENTITY.get(), (entity, side) -> entity);
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, CONVERTER_ENTITY.get(), (entity, side) -> entity.tank());
         event.registerBlockEntity(BlockCapabilities.HEAT, CUPEL_HEARTH_ENTITY.get(), (entity, side) -> entity);

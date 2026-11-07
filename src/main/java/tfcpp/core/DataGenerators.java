@@ -134,6 +134,8 @@ public final class DataGenerators
             add("fluid_type.tfcpp.metal.work_lead", "Molten Work Lead");
             add("item.tfcpp.metal.ingot.work_lead", "Work Lead Ingot");
             add("item.tfcpp.metal.sheet.lead", "Lead Sheet");
+            add("item.tfcpp.metal.sheet.work_lead", "Work Lead Sheet");
+            add("item.tfcpp.metal.double_ingot.arsenical_copper", "Arsenical Copper Double Ingot");
             add("item.tfcpp.powder.bone_ash", "Bone Ash");
             add("item.tfcpp.powder.lead_oxide", "Litharge");
             add("item.tfcpp.powder.apatite", "Ground Apatite");
@@ -444,6 +446,8 @@ public final class DataGenerators
             add("fluid_type.tfcpp.metal.work_lead", "Расплав веркблея");
             add("item.tfcpp.metal.ingot.work_lead", "Слиток веркблея");
             add("item.tfcpp.metal.sheet.lead", "Свинцовый лист");
+            add("item.tfcpp.metal.sheet.work_lead", "Лист веркблея");
+            add("item.tfcpp.metal.double_ingot.arsenical_copper", "Двойной слиток мышьяковистой меди");
             add("item.tfcpp.powder.bone_ash", "Костяная зола");
             add("item.tfcpp.powder.lead_oxide", "Глёт");
             add("item.tfcpp.powder.apatite", "Молотый апатит");

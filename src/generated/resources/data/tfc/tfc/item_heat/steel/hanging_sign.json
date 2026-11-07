@@ -1,6 +1,6 @@
 {
-  "forging_temperature": 900.00006,
-  "heat_capacity": 0.17099218,
+  "forging_temperature": 912.00006,
+  "heat_capacity": 0.17040771,
   "ingredient": [
     {
       "item": "tfc:wood/hanging_sign/steel/acacia"
@@ -63,5 +63,5 @@
       "item": "tfc:wood/hanging_sign/steel/willow"
     }
   ],
-  "welding_temperature": 1200.0
+  "welding_temperature": 1216.0
 }

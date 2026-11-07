@@ -110,7 +110,13 @@ public final class ConverterBlock extends Block implements EntityBlock, PipeMemb
     @Override
     protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params)
     {
-        return params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) instanceof ConverterBlockEntity converter && converter.isScrap() ? List.of() : super.getDrops(state, params);
+        final List<ItemStack> drops = super.getDrops(state, params);
+        if (params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) instanceof ConverterBlockEntity converter)
+        {
+            // The vessel comes away with the lining it had, worn or not: breaking it is no way to a new one
+            drops.forEach(converter::withLining);
+        }
+        return drops;
     }
 
     @Override

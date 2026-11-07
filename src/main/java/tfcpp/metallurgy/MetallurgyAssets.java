@@ -39,6 +39,7 @@ public final class MetallurgyAssets
         protected void registerModels()
         {
             flatItem(Metallurgy.ARSENICAL_COPPER_INGOT.get());
+            flatItem(Metallurgy.ARSENICAL_COPPER_DOUBLE_INGOT.get());
             Metallurgy.ZINC_CALCINES.values().forEach(calcine -> flatItem(calcine.get()));
             flatItem(Metallurgy.IRON_SLAG.get());
             flatItem(Metallurgy.FURNACE_SLAG.get());
@@ -54,6 +55,7 @@ public final class MetallurgyAssets
             flatItem(Metallurgy.LEAD_INGOT.get());
             flatItem(Metallurgy.WORK_LEAD_INGOT.get());
             flatItem(Metallurgy.LEAD_SHEET.get());
+            flatItem(Metallurgy.WORK_LEAD_SHEET.get());
             flatItem(Metallurgy.BONE_ASH.get());
             flatItem(Metallurgy.APATITE_POWDER.get());
             flatItem(Instruments.LEAD_OXIDE.get());

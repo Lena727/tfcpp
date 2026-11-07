@@ -14,6 +14,8 @@ import net.dries007.tfc.util.data.FluidHeat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -25,6 +27,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -78,7 +81,7 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
     /** A breath of steam in a bath of iron is the most violent thing in a steelworks: a litre of water takes up 1700 litres as steam, at once. */
     private static final float EXPLOSION_KILOJOULES_PER_LITRE = 500f, EXPLOSION_MAX_LITRES = 50f, EXPLOSION_KILOPASCALS = 150f;
     private static final float LEAST_LITRES_TO_EXPLODE = 1f;
-    /** A vessel this far gone is scrap, so that breaking and replacing it does not make a new lining. */
+    /** A vessel this far gone is called worn. Its lining goes with it as an item, so that breaking and replacing it does not make a new lining. */
     private static final float LINING_SCRAP = 0.25f;
     private static final float CLEAN_FLAME_CARBON_MONOXIDE = 0.05f;
     private static final int MILLIBUCKETS_PER_INGOT = 100;
@@ -301,7 +304,7 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
         {
             final int pieces = (int) (bath.slag / IronSmelting.MILLIBUCKETS_PER_SLAG);
             bath.slag -= pieces * IronSmelting.MILLIBUCKETS_PER_SLAG;
-            Helpers.spawnItem(level, worldPosition.above(), new ItemStack(IronSmelting.slagOf(bath.phosphorus > ConverterBath.PHOSPHORUS_LIMIT_PERCENT), pieces));
+            Helpers.spawnItem(level, worldPosition.above(), new ItemStack(IronSmelting.slagOf(bath.isPhosphoric()), pieces));
             setChanged();
         }
         if (bath.thomasSlagPhosphorus >= PHOSPHORUS_PER_THOMAS_PIECE)
@@ -450,11 +453,15 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
         bath.tap(filled);
         setChanged();
 
+        // Heating a vessel can melt what is inside it, which counts as happening here: a sulfide in it gives off its fumes at the converter
+        assert level != null;
+        MeltContext.enter(level, worldPosition);
         final @Nullable IHeat heat = HeatCapability.get(single);
         if (heat != null)
         {
             heat.addTemperatureFromSourceWithHeatCapacity(temperature, FluidHeat.getOrUnknown(new FluidStack(fluid, filled)).heatCapacity(filled));
         }
+        MeltContext.exit();
         hand(stack, player, hand, handler.getContainer());
     }
 
@@ -531,7 +538,7 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
         final int slag = (int) ((bath.slag + (bath.metal - ingots * MILLIBUCKETS_PER_INGOT)) / IronSmelting.MILLIBUCKETS_PER_SLAG);
         if (slag > 0)
         {
-            Helpers.spawnItem(level, worldPosition, new ItemStack(IronSmelting.slagOf(bath.phosphorus > ConverterBath.PHOSPHORUS_LIMIT_PERCENT), slag));
+            Helpers.spawnItem(level, worldPosition, new ItemStack(IronSmelting.slagOf(bath.isPhosphoric()), slag));
         }
         bath.metal = 0f;
         bath.slag = 0f;
@@ -615,6 +622,42 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
             heatStabilityTicks = HEAT_STABILITY_TICKS;
             setChanged();
         }
+    }
+
+    /** The lining goes with the vessel when it is picked up: a worn one stays worn, and a basic one stays basic. Nothing is written for a new acid vessel, so that those stack. */
+    @Override
+    protected void collectImplicitComponents(DataComponentMap.Builder components)
+    {
+        super.collectImplicitComponents(components);
+        if (liningWorn > 0f || bath.basic || basicBricks > 0)
+        {
+            final CompoundTag lining = new CompoundTag();
+            lining.putFloat("lining", liningWorn);
+            lining.putBoolean("basic", bath.basic);
+            lining.putInt("basicBricks", basicBricks);
+            components.set(DataComponents.CUSTOM_DATA, CustomData.of(lining));
+        }
+    }
+
+    @Override
+    protected void applyImplicitComponents(DataComponentInput input)
+    {
+        super.applyImplicitComponents(input);
+        final @Nullable CustomData data = input.get(DataComponents.CUSTOM_DATA);
+        if (data != null && data.contains("lining"))
+        {
+            final CompoundTag lining = data.copyTag();
+            liningWorn = lining.getFloat("lining");
+            bath.basic = lining.getBoolean("basic");
+            basicBricks = lining.getInt("basicBricks");
+        }
+    }
+
+    /** Puts this vessel's lining on the item that it drops. */
+    public ItemStack withLining(ItemStack stack)
+    {
+        stack.applyComponents(collectComponents());
+        return stack;
     }
 
     @Override

@@ -5,7 +5,7 @@
   },
   "result": {
     "count": 1,
-    "id": "tfcpp:metal/sheet/lead"
+    "id": "tfcpp:metal/sheet/work_lead"
   },
   "rules": [
     "hit_last",

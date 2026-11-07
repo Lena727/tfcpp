@@ -52,6 +52,19 @@ def ingot(seed, base):
     return pixels
 
 
+def double_ingot(seed, base):
+    """Two ingots welded one on the other, as TFC draws its double ingots."""
+    rng = random.Random(seed)
+    pixels = [[(0, 0, 0, 0)] * 16 for _ in range(16)]
+    for top in (3, 8):
+        for y in range(top, top + 5):
+            inset = (top + 4 - y) // 2
+            for x in range(2 + inset, 14 - inset):
+                highlight = 26 if y == top else (-34 if y == top + 4 or x == 13 - inset else 0)
+                pixels[y][x] = shade(base, highlight + rng.randint(-6, 6))
+    return pixels
+
+
 def sheet(seed, base):
     """A flat plate of metal in the hand, with its edges shaded."""
     rng = random.Random(seed)
@@ -85,6 +98,7 @@ def bulb(seed, base, alpha):
 
 
 write_png(ROOT / 'item/metal/ingot/arsenical_copper.png', ingot(1, (168, 120, 82)))
+write_png(ROOT / 'item/metal/double_ingot/arsenical_copper.png', double_ingot(151, (168, 120, 82)))
 for index, (grade, color) in enumerate({'small': (214, 212, 198), 'poor': (196, 190, 170), 'normal': (206, 204, 190), 'rich': (226, 226, 216)}.items()):
     write_png(ROOT / f'item/calcine/{grade}_zinc.png', heap(10 + index, color))
 write_png(ROOT / 'item/glass_bulb.png', bulb(20, (196, 222, 226), 150))
@@ -225,6 +239,7 @@ write_png(ROOT / 'item/powder/apatite.png', heap(77, (138, 186, 170)))
 write_png(ROOT / 'item/metal/ingot/lead.png', ingot(78, (116, 120, 130)))
 write_png(ROOT / 'item/metal/ingot/work_lead.png', ingot(148, (98, 104, 116)))  # A little darker: the silver in it
 write_png(ROOT / 'item/metal/sheet/lead.png', sheet(149, (116, 120, 130)))
+write_png(ROOT / 'item/metal/sheet/work_lead.png', sheet(152, (98, 104, 116)))
 write_png(ROOT / 'item/powder/bone_ash.png', heap(150, (222, 218, 206)))  # Off-white, as the bone it came from
 
 

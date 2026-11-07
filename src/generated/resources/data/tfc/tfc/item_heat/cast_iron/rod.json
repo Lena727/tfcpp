@@ -1,8 +1,8 @@
 {
-  "forging_temperature": 720.00006,
-  "heat_capacity": 1.8728673,
+  "forging_temperature": 810.00006,
+  "heat_capacity": 1.8159945,
   "ingredient": {
     "tag": "c:rods/cast_iron"
   },
-  "welding_temperature": 960.0
+  "welding_temperature": 1080.0
 }

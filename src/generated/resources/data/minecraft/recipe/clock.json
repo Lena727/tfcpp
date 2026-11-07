@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": {
+      "tag": "c:sheets/gold"
+    },
+    "M": {
+      "item": "tfc:brass_mechanisms"
+    },
+    "R": {
+      "item": "tfc:brass_mechanisms"
+    }
+  },
+  "pattern": [
+    "GRG",
+    "RMR",
+    "GRG"
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:clock"
+  }
+}

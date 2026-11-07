@@ -1,8 +1,8 @@
 {
-  "forging_temperature": 900.00006,
-  "heat_capacity": 51.297653,
+  "forging_temperature": 912.00006,
+  "heat_capacity": 51.122314,
   "ingredient": {
     "item": "tfc:metal/horse_armor/steel"
   },
-  "welding_temperature": 1200.0
+  "welding_temperature": 1216.0
 }

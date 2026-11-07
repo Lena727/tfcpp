@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "R": {
+      "item": "tfc:brass_mechanisms"
+    },
+    "S": {
+      "tag": "c:stones/raw"
+    },
+    "T": {
+      "item": "minecraft:redstone_torch"
+    }
+  },
+  "pattern": [
+    "TRT",
+    "SSS"
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:repeater"
+  }
+}

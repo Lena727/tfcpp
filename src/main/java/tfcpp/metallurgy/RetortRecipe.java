@@ -31,8 +31,9 @@ import tfcpp.pneumatics.gas.Gas;
  * @param vapor       what escapes in its place if there is no condenser, in moles of each gas id
  * @param byproducts  what always leaves through the retort's vent, in moles of each gas id
  * @param needsCondenser {@code false} if the result runs into the tank whether or not there is a condenser, and the vapour is then ignored: lead does not boil at the heat that reduces it
+ * @param resultMillibuckets how much liquid the reaction really gives, when that is not a whole number of millibuckets: the retort pays out the whole ones and keeps the rest as liquid for the next piece. Zero means exactly the amount of {@code result}.
  */
-public record RetortRecipe(Ingredient input, float carbon, float temperature, FluidStack result, Map<String, Float> vapor, Map<String, Float> byproducts, boolean needsCondenser) implements Recipe<SingleRecipeInput>
+public record RetortRecipe(Ingredient input, float carbon, float temperature, FluidStack result, Map<String, Float> vapor, Map<String, Float> byproducts, boolean needsCondenser, float resultMillibuckets) implements Recipe<SingleRecipeInput>
 {
     private static final Codec<Map<String, Float>> GASES = Codec.unboundedMap(Codec.STRING, Codec.FLOAT);
     private static final StreamCodec<RegistryFriendlyByteBuf, Map<String, Float>> GASES_STREAM = ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.FLOAT);
@@ -44,7 +45,8 @@ public record RetortRecipe(Ingredient input, float carbon, float temperature, Fl
         FluidStack.CODEC.fieldOf("result").forGetter(RetortRecipe::result),
         GASES.fieldOf("vapor").forGetter(RetortRecipe::vapor),
         GASES.optionalFieldOf("byproducts", Map.of()).forGetter(RetortRecipe::byproducts),
-        Codec.BOOL.optionalFieldOf("needs_condenser", true).forGetter(RetortRecipe::needsCondenser)
+        Codec.BOOL.optionalFieldOf("needs_condenser", true).forGetter(RetortRecipe::needsCondenser),
+        Codec.FLOAT.optionalFieldOf("result_millibuckets", 0f).forGetter(RetortRecipe::resultMillibuckets)
     ).apply(i, RetortRecipe::new));
 
     /** Written by hand, as {@link StreamCodec#composite} takes at most six fields. */
@@ -59,6 +61,7 @@ public record RetortRecipe(Ingredient input, float carbon, float temperature, Fl
         GASES_STREAM.encode(buf, recipe.vapor());
         GASES_STREAM.encode(buf, recipe.byproducts());
         ByteBufCodecs.BOOL.encode(buf, recipe.needsCondenser());
+        ByteBufCodecs.FLOAT.encode(buf, recipe.resultMillibuckets());
     }
 
     private static RetortRecipe read(RegistryFriendlyByteBuf buf)
@@ -70,7 +73,14 @@ public record RetortRecipe(Ingredient input, float carbon, float temperature, Fl
         final Map<String, Float> vapor = GASES_STREAM.decode(buf);
         final Map<String, Float> byproducts = GASES_STREAM.decode(buf);
         final boolean needsCondenser = ByteBufCodecs.BOOL.decode(buf);
-        return new RetortRecipe(input, carbon, temperature, result, vapor, byproducts, needsCondenser);
+        final float resultMillibuckets = ByteBufCodecs.FLOAT.decode(buf);
+        return new RetortRecipe(input, carbon, temperature, result, vapor, byproducts, needsCondenser, resultMillibuckets);
+    }
+
+    /** @return the millibuckets that one piece really gives, whole or not */
+    public float exactMillibuckets()
+    {
+        return resultMillibuckets > 0f ? resultMillibuckets : result.getAmount();
     }
 
     /** Adds a map of gases to an array indexed by {@link Gas}. */
