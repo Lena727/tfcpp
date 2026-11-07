@@ -650,7 +650,7 @@
     {
       "type": "patchouli:text",
       "anchor": "sphalerite",
-      "text": "Sphalerite is an ore of $(thing)Zinc$(). Small poor veins lie in $(l:the_world/geology#igneous_extrusive)Igneous Extrusive$() rock near the surface, large rich ones in $(l:the_world/geology#igneous_intrusive)Igneous Intrusive$() rock deep down.$(br2)It does not melt into zinc: at 900 °C it roasts into a calcine and gives off sulfur dioxide. Zinc comes only from a retort at 1000 °C. It boils at 907 °C, and in the open it burns to white smoke that gives metal fume fever.",
+      "text": "Sphalerite is an ore of $(thing)Zinc$(). Small poor veins lie in $(l:the_world/geology#igneous_extrusive)Igneous Extrusive$() rock near the surface, large rich ones in $(l:the_world/geology#igneous_intrusive)Igneous Intrusive$() rock deep down.$(br2)Galena, the lead ore, lies beside it: see $(l:tfcpp/lead_silver#galena)Lead and Silver$().$(br2)It does not melt into zinc: at 900 °C it roasts into a calcine and gives off sulfur dioxide. Zinc comes only from a retort at 1000 °C. It boils at 907 °C, and in the open it burns to white smoke that gives metal fume fever.",
       "title": "Sphalerite"
     },
     {

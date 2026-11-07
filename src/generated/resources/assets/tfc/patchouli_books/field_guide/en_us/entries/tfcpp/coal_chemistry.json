@@ -1,0 +1,103 @@
+{
+  "category": "tfc:tfcpp",
+  "extra_recipe_mappings": {
+    "tfcpp:coke": 6,
+    "tfcpp:coke_oven": 1,
+    "tfcpp:gas_burner": 12,
+    "tfcpp:lignite_char": 6
+  },
+  "icon": "tfcpp:coke_oven",
+  "name": "Coal Chemistry",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Coal heated in air burns to ash. Heated with the air shut out, it only gives up its $(thing)volatile matter$(): gas, tar and ammoniacal water. What is left is nearly pure carbon, $(thing)coke$(). This is $(bold)dry distillation$(), and the coke oven does it.$(br2)Darby ran his furnace on coke in 1709, because raw coal caked and carried sulfur into the iron. A century later the oven gas lit the streets, and its tar and liquor became the raw material of dyes, drugs and fertilizer.",
+      "title": "Coal without air"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/coke_oven",
+      "recipe2": "tfcpp:crafting/retort_condenser",
+      "text": "The $(thing)Coke Oven$() is eight fire bricks round a wrought iron sheet. Its $(thing)Condenser$() is the retort's own (see $(l:tfcpp/sulfides#retort)Sulfide Ores$())."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "oven",
+      "text": "$(li)Put heat under it: a forge, a firepit or a $(l:tfcpp/coal_chemistry#burner)gas burner$().$(li)Set a condenser against one of its four sides.$(li)Put a pipe above it, or its gas goes into the room.$(li)Right-click with coal, lignite or logs: up to 64 of one kind.$(li)An empty hand reads its state. A crouching empty hand takes what it made.",
+      "title": "Setting up the oven"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The charge cooks as one batch. Once it has begun to change nothing can be added, and the product must be taken out before the next charge goes in.$(br2)The batch moves only while the oven is at its temperature or hotter: a cold charge keeps its place and loses nothing. It runs on process time, where an $(bold)hour$() is one real minute, and it stands still on an empty server, as the fuel of a fire does.",
+      "title": "A batch"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "coal",
+      "text": "Coal needs $(bold)950 °C$() and 18 hours, which is 18 minutes. Each piece (3 kg) gives:$(li)0.70 piece of $(thing)coke$()$(li)0.10 L of coal tar$(li)0.30 L of ammoniacal liquor$(li)41.5 mol of gas: hydrogen 21, methane 14, carbon monoxide 3, carbon dioxide 1, nitrogen 2, ammonia 0.3, hydrogen sulfide 0.2$(br)Nothing is made or lost: 3 kg become 2.1 kg of coke, 0.12 of tar, 0.30 of liquor and 0.46 of gas.",
+      "title": "Coal"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Lignite$() chars at 700 °C in 18 hours and does not cake. Each piece gives 0.4 piece of $(thing)lignite char$(), 0.24 L of tar, 0.4 L of liquor and 15 mol of gas, mostly carbon dioxide. The char is a fuel, but no charge for the blast furnace.$(br2)$(thing)Logs$() are done at 400 °C in 12 hours. Each 5 kg log gives 0.5 piece of charcoal (30% of its mass), 0.25 L of wood tar, 2 L of $(thing)pyroligneous liquor$() and 30 mol of gas, mostly carbon dioxide and monoxide.",
+      "title": "Lignite and wood"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "coke",
+      "item": "tfcpp:coke",
+      "link_recipes": false,
+      "text": "Coke burns at $(bold)1250 °C$() for 2200 ticks and feeds the $(l:metalworking/blast_furnace)blast furnace$(): hard enough to bear the ore, open enough to pass the blast. Raw coal is refused there. It carries less sulfur too: 0.9 mol of sulfur dioxide a piece, against 1.4 for coal.",
+      "title": "Coke"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Lignite char burns at 1100 °C for 1500 ticks and gives 1.0 mol of sulfur dioxide a piece. The blast furnace refuses it: it is crumbly and ashy.$(br2)A quern grinds coke into 4 coke powders and raises 2 g of coal dust into the air (see $(l:tfcpp/mine_safety#dust)Mine Safety$())."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "liquids",
+      "text": "Tar and liquor condense only if a $(thing)condenser$() stands beside the oven. The oven keeps 50 mB of tar and 200 mB of liquor. Without a condenser their vapours are lost, though the gas is not any less for it. When a tank is full the batch waits and loses nothing.$(br2)Right-click the oven with a wooden bucket or a barrel to draw them off. They do not eat wood. A jug does not take them.",
+      "title": "Tar and liquor"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)$(thing)Coal tar$() with burnt dolomite makes the $(thing)Basic Brick$() that lines a converter taking phosphorus (see $(l:tfcpp/iron_phosphorus#basic_lining)Iron and Phosphorus$()).$(li)$(thing)Ammoniacal liquor$() with a little oil of vitriol makes ammonium sulfate, a fertilizer (see $(l:tfcpp/acids#retort)Acids$()).$(li)$(thing)Pyroligneous liquor$() gives wood spirit and vinegar in the glass retort.$(li)$(thing)Wood tar$() has no use yet.",
+      "title": "What they are for"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "gas",
+      "text": "The gas leaves hot, at the heat of the oven, up into the pipe above, or into the room over the oven if there is none. A full charge of 64 coal gives 2.5 mol a second for 18 minutes: a cell of the room is full of it in 17 seconds.$(br2)It is half hydrogen and a third methane, and burns or explodes in air from about 5 to 33% of gas (Le Chatelier's rule). 7% of it is carbon monoxide, which is 72 000 ppm, and there is hydrogen sulfide and ammonia besides. Never let it into a room (see $(l:tfcpp/gases)Gases$()).",
+      "title": "The gas"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The gas enters the pipe at the heat of the oven. A pipe hotter than its limit holds nothing: wood fails at 177 °C, lead at 150, wrought iron at 627, and only fired clay goes to 1127 °C (see $(l:tfcpp/pipes#walls)Pipes and Pressure$()).$(br2)The oven itself is fire brick, half a cubic metre that gives way at 3.5 atm, so a line that is shut at the far end bursts it.",
+      "title": "Hot gas, hot pipe"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/gas_burner",
+      "text": "The $(thing)Gas Burner$() is three sheets of wrought iron under a brass mechanism."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "burner",
+      "text": "Join the burner to the line by any side but the top, and set what is to be heated on it. An empty hand turns the hand wheel. Light it with flint and steel, flint and pyrite or a fire starter. The gas needs 0.005 atm of push to pass the nozzle.$(br2)It burns hydrogen (242 kJ a mole), methane (802) and carbon monoxide (283) in the oxygen of the room, up to 400 kW; hydrogen sulfide becomes sulfur dioxide. The flame is 1100 °C if the mixture gives 150 kJ a mole, cooler if it is thinner.",
+      "title": "Burning the gas"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "What stands on the burner is heated to the point where it loses by radiation as much as it receives, and that rises only as the fourth root of the power: 200 kW brings it to the full 1100 °C, 50 kW to about 780 °C.$(br2)A piece of coal gives 17 MJ in its gas. A battery of ovens can heat itself from its own output, as real works did: about a third of the yield of a batch is enough.",
+      "title": "Power and heat"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)An open burner that is not lit lets the gas into the room, as town gas killed people.$(li)If the pipe holds a burnable mixture of gas and air (a new pipe is full of air) and the burner is lit, the flame runs back and the line explodes. Fill the line with gas first, and keep the burner shut until then.$(li)A poor joint leaks carbon monoxide and hydrogen sulfide.$(li)Burnt, the gas makes carbon dioxide and sulfur dioxide in the room: ventilate.",
+      "title": "How it kills"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 7
+}

@@ -77,7 +77,7 @@
     {
       "type": "patchouli:text",
       "anchor": "pump",
-      "text": "The pump takes in from its back (a pipe, a barrel, standing water or the air) and delivers into a pipe at its front. Each turn sweeps 0.1 cubic metre, and the shaft pays for the pressure difference and the lift of the liquid in the front pipe.$(br2)The air pushes water up a suction pipe 10.3 m at most, acid of density 1800 only 5.7 m. A pump takes no lava or molten metal, and delivers into no line that runs on into unloaded land. Right-click it to see why it stands. See $(l:mechanics/pumps)Pumps$().",
+      "text": "The pump takes in from its back (a pipe, a barrel, standing water or the air) and delivers into a pipe at its front. Each turn sweeps 20 litres, and the shaft pays for the pressure difference and the lift of the liquid in the front pipe.$(br2)The air pushes water up a suction pipe 10.3 m at most, acid of density 1800 only 5.7 m. A pump takes no lava or molten metal, and delivers into no line that runs on into unloaded land. Right-click it to see why it stands. See $(l:mechanics/pumps)Pumps$().",
       "title": "The pump"
     },
     {
@@ -92,13 +92,14 @@
     },
     {
       "type": "patchouli:text",
+      "anchor": "gauge",
       "text": "Right-click it to read the pressure in millimetres of mercury: 760 is the air outside. It also says when the line runs on past loaded land.$(br2)Above 3 atm over the air outside the mercury is blown out of the tube into the room, once (and mercury is poison: see $(l:tfcpp/poisons#mercury)Poisons$()). The tube then leaks a hundredth of the bore, and the pipes keep their pressure otherwise.",
       "title": "Reading the gauge"
     },
     {
       "type": "patchouli:text",
       "anchor": "corrosion",
-      "text": "Corrosion eats a share of the wall each process day (24 minutes) in a full pipe. Iron or steel, copper, lead, wood:$(li)chamber acid: 0.5, 0.2, 0.001, 0.5$(li)sulfuric acid: 0.01, 0.1, 0.1, 1.0$(li)nitric acid: 0.02, 2.0, 0.5, 1.0$(li)hydrochloric acid: 2.0, 0.1, 0.1, 0.02$(br)Fired clay takes none of these. Strong acid passivates iron, but dilute eats it, and chloride never lets it. Lead holds sulfuric acid under a film of sulfate until 80 °C, then loses 20 times faster.",
+      "text": "Corrosion eats a share of the wall each process day (24 minutes) in a full pipe. Iron or steel, copper, lead, wood:$(li)$(l:tfcpp/acids#tank)chamber acid$(): 0.5, 0.2, 0.001, 0.5$(li)sulfuric acid: 0.01, 0.1, 0.1, 1.0$(li)nitric acid: 0.02, 2.0, 0.5, 1.0$(li)hydrochloric acid: 2.0, 0.1, 0.1, 0.02$(br)Fired clay takes none of these. Strong acid passivates iron, but dilute eats it, and chloride never lets it. Lead holds sulfuric acid under a film of sulfate until 80 °C, then loses 20 times faster.",
       "title": "Corrosion by liquids"
     },
     {

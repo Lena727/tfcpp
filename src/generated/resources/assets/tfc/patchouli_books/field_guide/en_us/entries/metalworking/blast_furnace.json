@@ -25,7 +25,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "Drop into the top of the stack $(thing)ore$() and $(l:metalworking/flux)Flux$() in equal numbers, and fuel. Ore is iron ore of any kind or iron slag. Ingots and tools do not count: they are iron already. The flux must be plain flux powder, not borax flux.$(br2)Fuel is $(thing)Charcoal$() or $(thing)Coke$(). Coal and lignite are refused: their sulfur would go into the iron, and their lumps cake and choke the blast.",
+      "text": "Drop into the top of the stack $(thing)ore$() and $(l:metalworking/flux)Flux$() in equal numbers, and fuel. Ore is iron ore of any kind or iron slag. Ingots and tools do not count: they are iron already. The flux must be plain flux powder, not borax flux.$(br2)Fuel is $(thing)Charcoal$() or $(l:tfcpp/coal_chemistry#coke)Coke$(). Coal and lignite are refused: their sulfur would go into the iron, and their lumps cake and choke the blast.",
       "title": "What goes in"
     },
     {

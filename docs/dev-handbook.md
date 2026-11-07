@@ -69,7 +69,7 @@ bash tools/verify.sh --client   # то же, плюс настоящий кли�
 | Розжиг серной горелки, окно камеры по температуре | `SulfurBurning.burning`, `SulfurBurnerBlockEntity.light/isLit`, `ChamberProcess.temperatureFactor` и перегрузка `react(..., kelvin)`; тесты `AcidGameTests` (`keepAt` держит температуру сети каждый такт) |
 | Метка мышьяковистой меди в крафте деталей | `MetallurgyData.markedCrafting`; тесты `MetalDataGameTests.aToolMadeOfAMarkedHeadAndAStickIsMarkedAndMeltsBackToArsenicalCopper` |
 | Перечень миксинов | таблица в `README.md`, каждый новый добавляется туда и в `tfcpp.mixins.json` |
-| Справочник в игре: заменённые разделы TFC, категория TFC++, новый раздел | провайдер `compat/guide/GuideData`, реестр `GuideBook`, страницы `Pages`, раздел `Entry`, двуязычная строка `L`; тексты по категориям: `MetalworkingGuide`, `GettingStartedGuide`, `CraftingGuide`, `MechanicsGuide`, `WorldGuide`, свои разделы в `TfcppGuide` (введение), `GasesGuide`, `SulfidesGuide`, `PipesGuide`; тест `GuideDataTest`; список глав части 2 с фактами в `docs/guide-audit.md` |
+| Справочник в игре: заменённые разделы TFC, категория TFC++, новый раздел | провайдер `compat/guide/GuideData`, реестр `GuideBook`, страницы `Pages`, раздел `Entry`, двуязычная строка `L`; тексты по категориям: `MetalworkingGuide`, `GettingStartedGuide`, `CraftingGuide`, `MechanicsGuide`, `WorldGuide`, свои разделы в `TfcppGuide` (введение), `GasesGuide`, `SulfidesGuide`, `PipesGuide`, `CoalGuide`, `LeadGuide`, `AcidsGuide`, `GlassGuide`, `TestsGuide`; тест `GuideDataTest`; список глав части 2 с фактами в `docs/guide-audit.md` |
 
 ## Факты о TFC, которые стоили времени
 

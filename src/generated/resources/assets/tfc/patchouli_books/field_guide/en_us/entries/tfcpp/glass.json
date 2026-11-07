@@ -1,0 +1,59 @@
+{
+  "category": "tfc:tfcpp",
+  "extra_recipe_mappings": {
+    "tfcpp:borosilicate_glass_batch": 1,
+    "tfcpp:glass_bulb": 7,
+    "tfcpp:glass_carboy": 5,
+    "tfcpp:glass_retort": 4
+  },
+  "icon": "tfcpp:glass_retort",
+  "name": "Borosilicate Glass",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "anchor": "why",
+      "text": "Ordinary glass, of sand, lime and potash, cracks when one side is hot and the other cold. For the laboratory Otto Schott made a glass of sand and borax: about 81% silica, 13% boric oxide, 4% soda and almost no lime. It expands a third as much as ordinary glass, so it takes a boiling flask, and acids do not touch it.$(br2)Only this glass makes a retort or a carboy.",
+      "title": "Why borosilicate"
+    },
+    {
+      "type": "patchouli:crafting",
+      "anchor": "batch",
+      "recipe": "tfcpp:crafting/borosilicate_glass_batch",
+      "text": "One borax flux and two white sand make 4 $(thing)Borosilicate Glass Batch$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Borax gives both the boron and the soda, so the batch has no lime and no potash. $(l:metalworking/flux)Borax flux$() is not the plain flux of the blast furnace, and it does not burn to lime.$(br2)The sand must be white, silica sand. Coloured sand has iron in it, and the glass would not be clear."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "heat",
+      "text": "Borosilicate softens at about 820 °C and is worked from 1250 °C up to 1500 °C: hotter than that, TFC takes the glass off the pipe. A charcoal forge at 1100 °C never gets there, and with a $(l:metalworking/bellows)bellows$() it reaches 1600 °C.$(br2)Only a $(thing)ceramic$() blowpipe will serve. Brass melts at 930 °C, and a brass pipe refuses the batch, by hand and in the recipe. Sawing the glass off needs no heat.",
+      "title": "The heat and the pipe"
+    },
+    {
+      "type": "tfc:glassworking_recipe",
+      "anchor": "retort",
+      "recipe": "tfcpp:glassworking/glass_retort",
+      "text": "The $(thing)Glass Retort$(): blow, stretch, pinch with jacks, saw."
+    },
+    {
+      "type": "tfc:glassworking_recipe",
+      "anchor": "carboy",
+      "recipe": "tfcpp:glassworking/glass_carboy",
+      "text": "The $(thing)Glass Carboy$(): blow twice, roll with wool cloth, saw."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Borosilicate takes every acid of this book, hot, and a flask that boils. What it will not take is a steep gradient: above 550 °C a retort cracks, whatever is in it. Heat it through a $(l:tfcpp/acids#retort)sand bath$().$(br2)Glass breaks. A retort or a carboy lets out what it holds when it is broken, and an acid splashes. The use of both is in $(l:tfcpp/acids)Acids$().",
+      "title": "What it holds"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/glass_bulb",
+      "text": "A $(thing)Glass Bulb$() is a pane of glass. It takes 5 mB of mercury (see $(l:tfcpp/sulfides#mercury)Sulfide Ores$()), for a thermometer or a manometer."
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 10
+}

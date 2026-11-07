@@ -28,6 +28,11 @@ final class TfcppGuide
         entries.addAll(GasesGuide.entries());
         entries.addAll(SulfidesGuide.entries());
         entries.addAll(PipesGuide.entries());
+        entries.addAll(CoalGuide.entries());
+        entries.addAll(LeadGuide.entries());
+        entries.addAll(AcidsGuide.entries());
+        entries.addAll(GlassGuide.entries());
+        entries.addAll(TestsGuide.entries());
         return entries;
     }
 

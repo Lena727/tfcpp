@@ -1,0 +1,130 @@
+{
+  "category": "tfc:tfcpp",
+  "extra_recipe_mappings": {
+    "tfcpp:glass_carboy": 17,
+    "tfcpp:glass_retort": 9,
+    "tfcpp:lead_chamber": 3,
+    "tfcpp:sand_bath": 10,
+    "tfcpp:sulfur_burner": 1
+  },
+  "icon": "tfcpp:lead_chamber",
+  "name": "Acids",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Sulfuric acid is the base of the chemical industry. Nitric and hydrochloric acids, fertilizers, pickling baths and batteries come from it. Roebuck built the first lead chambers at Birmingham in 1746.$(br2)The road is long: burn sulfur to $(thing)sulfur dioxide$(), turn it into dilute $(thing)chamber acid$() in lead chambers, concentrate that in glass to $(thing)oil of vitriol$(), and from the oil make the other acids.",
+      "title": "Oil of vitriol"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/sulfur_burner",
+      "text": "The $(thing)Sulfur Burner$() is eight fire bricks round a hollow, a trough open at the top."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "burner",
+      "text": "Drop powder of sulfur (50 g, 1.56 mol) into the burner, up to 64 powders. It burns at 2 g a second, a powder in 25 seconds, and takes the oxygen of the air in its network: S and O2 give SO2 and 297 kJ a mole.$(br2)Sulfur has to be lit, with flint and steel, flint and pyrite or a fire starter, which wears. In a pipe hotter than 250 °C it lights by itself. It goes out when the sulfur is gone or the oxygen falls below 5%.",
+      "title": "Burning sulfur"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/lead_chamber",
+      "text": "The $(thing)Lead Chamber$() is eight $(l:tfcpp/lead_silver#sheet)sheets of lead$() round a hollow: a cubic metre of lead room that joins pipe on every side."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "chamber",
+      "text": "Sulfur dioxide, oxygen and water make sulfuric acid, but only with $(thing)nitrogen oxides$() to carry the oxygen: they hand it to the sulfur dioxide and take it again from the air, and are hardly used up.$(br2)Each block of chamber is a cubic metre and works in the gas of its network: N blocks make N times the acid. At 7% sulfur dioxide a block makes 2.5 kg of acid in a process day. A burner feeds about three blocks.",
+      "title": "The chamber process"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)$(thing)Sulfur dioxide$() from a burner or a roast.$(li)$(thing)Air$(): oxygen above 6% of the gas. The acid thins the gas, and a vent lets air in.$(li)$(thing)Water$(): liquid water in the network, 0.071 L for each mole of acid.$(li)$(thing)Nitrogen oxides$(): right-click the chamber with saltpeter powder, half a mole each. Below 0.2% of the gas the rate falls with them.$(br)An empty hand reads the temperature, the tank and the share of each gas.",
+      "title": "What it needs"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A chamber is at full speed from 60 °C. Each 10 °C colder halves it: at 20 °C it makes a sixteenth, and at freezing nothing, for there is no mist. The flame of the sulfur and the reaction itself (230 kJ a mole) warm it.$(br2)Above 80 °C the film of lead sulfate that guards the wall dissolves, and the wall wears 20 times faster. Keep the chamber between 60 and 80 °C.",
+      "title": "Warmth"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The nitrogen of the air is left behind and builds up. A vent is the way in for air and the way out for nitrogen, and with the nitrogen go some of the nitrogen oxides, 0.01 mol for each mole of acid: top them up with saltpeter. A closed plant starves for oxygen.$(br2)For each mole of acid: 1 mol of SO2, 0.5 of O2, 0.071 L of water, and 230 kJ of heat. Nothing is made from nothing.",
+      "title": "Tail gas"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "tank",
+      "text": "Chamber acid is 65% sulfuric acid, 1.55 kg a litre, and each mole of it is 0.0975 L: a powder of sulfur makes 0.15 L. It gathers in the 100 L tank of the block, which is no part of the network.$(br2)Right-click with a $(thing)carboy$() to draw it off, or set a piston pump with its back to the chamber: it takes the tank and nothing else. Chamber acid eats wood and iron: never a barrel or a bucket.",
+      "title": "Chamber acid"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "retort",
+      "item": "tfcpp:glass_retort",
+      "link_recipes": false,
+      "text": "A flask of $(l:tfcpp/glass#retort)borosilicate glass$() over a $(thing)sand bath$(), with a condenser beside it as its receiver. Pour in liquids from a full container or a tap above, put powder in with a right click. A batch runs only while the flask is in the range of its recipe.",
+      "title": "The Glass Retort"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/sand_bath",
+      "text": "The $(thing)Sand Bath$() is an iron tray: five sheets of wrought iron and sand."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "An empty hand adds a layer of sand, from 1 to 8; a crouching hand takes one off. Of what a fire has above the room only 1 part in (1 + depth) reaches the flask: 20 + (T - 20) / (1 + depth).$(br2)A charcoal fire of 1100 °C gives 236 °C at depth 4 and 290 °C at depth 3, which is why oil of vitriol, at 280 to 350 °C, wants the sand thinned. Sand evens the heat out: glass cannot take a fire.",
+      "title": "Choosing the depth"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A recipe takes its liquid and powder at its start, and goes on only while the flask is within its range of temperature: outside it, it waits, and loses nothing. What boils over runs into the receiver, and the rest stays in the flask. A batch that has nowhere to put its output waits.$(br2)A recipe that gives something over needs a condenser beside the flask. Without one that something goes into the room as fume.",
+      "title": "A batch"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)$(thing)Oil of vitriol$(): 1 L of chamber acid at 280-350 °C for a minute leaves 0.59 L, 93%, in the flask. Water boils off; no condenser is needed.$(li)$(thing)Aqua fortis$(): 8 powders of saltpeter and 0.23 L of oil of vitriol at 120-200 °C give 0.175 L of nitric acid in the receiver and 8 potassium bisulfate, with 0.2 mol of nitrogen oxides lost to the air.",
+      "title": "Oil of vitriol, aqua fortis"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "8 powders of salt and 0.39 L of oil of vitriol at 150-300 °C give 0.67 L of $(thing)hydrochloric acid$() in the receiver and 8 sodium bisulfate. The hydrogen chloride has to be taken up by water: pour 0.53 L of water into the receiver first.$(br2)With no water, or no condenser, 6.7 mol of hydrogen chloride goes into the room, and it is deadly at 1300 ppm.",
+      "title": "Spirit of salt"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)$(thing)Wood spirit$(): 1 L of $(l:tfcpp/coal_chemistry#liquids)pyroligneous liquor$() at 70-100 °C for half a minute gives 0.02 L in the receiver, crude methanol and acetone, and 0.9 L of vinegar stays in the flask.$(li)$(thing)Superphosphate$(): 8 powders of ground apatite and 0.27 L of chamber acid below 100 °C give 13 powders of fertilizer.$(li)$(thing)Ammonium sulfate$(): 1 L of $(l:tfcpp/coal_chemistry#liquids)ammoniacal liquor$() and 0.02 L of oil of vitriol below 100 °C give a powder of fertilizer.",
+      "title": "From wood and from liquor"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Borosilicate takes acids, but not too steep a gradient: above 550 °C the flask cracks. It breaks, all it held goes into the room as fume, an acid splashes everyone within 3 blocks, and the powder lies on the floor. Players within 12 blocks are told. Breaking the flask by hand does the same.$(br2)Choose the depth of the sand for the recipe, and watch the flask.",
+      "title": "When the glass cracks"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "anchor": "carboy",
+      "item": "tfcpp:glass_carboy",
+      "link_recipes": false,
+      "text": "The $(l:tfcpp/glass#carboy)carboy$() holds 25 litres of acid or another chemical liquid, and nothing else, and does not stack. A full one pours into the flask; an empty one draws off the receiver, then the residue. Crouching, it draws the flask itself dry.",
+      "title": "The Glass Carboy"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Acids are not ingredients of TFC's containers: barrels, buckets and jugs refuse them, for they would eat the wood. They go into the carboy, the tank of a chamber, the flask, and pipe of lead or fired clay.$(br2)Iron passivates in strong acid and is eaten by weak, and hydrochloric acid eats it at any strength (see $(l:tfcpp/pipes#corrosion)Pipes and Pressure$()). A film under a litre that no container takes is rinsed onto the floor.",
+      "title": "Where acids may go"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A cracked flask, a broken chamber, a burst pipe and an overflow splash a corrosive liquid on everyone within 3 blocks: 30% of their health, armour helping a little.$(br2)And it fumes: hydrochloric acid gives 10 mol of hydrogen chloride a litre, nitric acid 5 mol of nitrogen oxides, sulfuric acid hardly any. See $(l:tfcpp/poisons#lungs)Poisons$().",
+      "title": "Spilled acid"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)A burner and a chamber on one line, with a vent for air, water in the line, saltpeter in the chamber.$(li)A pump with its back to the chamber draws the acid into a lead line.$(li)The lead tap over a glass retort lets it into the flask.$(li)A fire under a sand bath, the sand set for 280-350 °C.$(li)An empty carboy takes the oil of vitriol: two litres need two batches of a minute.",
+      "title": "The whole plant"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 9
+}

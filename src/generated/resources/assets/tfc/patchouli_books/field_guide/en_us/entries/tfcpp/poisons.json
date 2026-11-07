@@ -63,7 +63,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "A player who dies keeps his slow poisons, up to the level of incapacity and no higher: death cannot be used as a cure, and a body is not killed again on rising. The blood is fresh, and mercury still in the gut is lost.$(br2)A poisoned man is helped only by clean air and time. Learn the signs: the weakness and the tremor, the icons of the effects, the message of a smell. Then build ventilation and condensers, and warn others.",
+      "text": "A player who dies keeps his slow poisons, up to the level of incapacity and no higher: death cannot be used as a cure, and a body is not killed again on rising. The blood is fresh, and mercury still in the gut is lost.$(br2)A poisoned man is helped only by clean air and time. Learn the signs: the weakness and the tremor, the icons of the effects, the message of a smell. Test the air with $(l:tfcpp/tests)the apparatus and the leaf$(), build ventilation and condensers, and warn others.",
       "title": "A death does not cure"
     },
     {

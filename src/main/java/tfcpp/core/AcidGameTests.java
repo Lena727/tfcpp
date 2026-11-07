@@ -164,10 +164,13 @@ public final class AcidGameTests
         return TFCItems.ORE_POWDERS.get(Ore.SULFUR).asItem();
     }
 
-    /** Puts the gas, air and water of a network into it, as a test wants them. */
+    /**
+     * Puts the gas, air and water of a network into it, as a test wants them, and leaves its temperature as it was. The water comes in at room temperature, and 20 L of it outweighs the gas in heat capacity by seventy to one, so it would drag the network to room temperature for as long as it takes the next tick's {@link #keepAt} to pin it again. A step of the network falling in that one tick works the chamber at 20 C instead of the frost the test pinned: the chance is one in twenty, and it was the flake of {@code aChamberInFrostMakesNoAcid...}.
+     */
     private static void charge(PipeNetwork network, float air, float sulfurDioxide, float oxides, float water)
     {
         final PipeContents contents = network.contents();
+        final float temperature = contents.temperature;
         contents.air = air;
         contents.gases[Gas.SULFUR_DIOXIDE.ordinal()] = sulfurDioxide;
         contents.gases[Gas.NITROGEN_OXIDES.ordinal()] = oxides;
@@ -175,6 +178,7 @@ public final class AcidGameTests
         {
             contents.addLiquid(WATER, water, PipePhysics.ROOM_TEMPERATURE);
         }
+        contents.temperature = temperature;
     }
 
     /** @return litres of acid per second that the chamber process makes in this network, for the gas it holds now and the blocks of chamber in it */

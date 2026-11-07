@@ -65,7 +65,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "$(thing)Bismuthinite$() roasts at 600 °C into liquid bismuth and 1.5 moles of sulfur dioxide for each mole of bismuth: 1.8 moles from a normal piece.$(br2)$(thing)Galena$(), the lead ore of TFC++, roasts at 800 °C into work lead (lead with 0.3% silver in it) and sulfur dioxide, and 3% of its lead goes up as an oxide smoke (see $(l:tfcpp/poisons#chronic)Poisons$()). The refining of lead and silver is a chapter of its own, later in this book.",
+      "text": "$(thing)Bismuthinite$() roasts at 600 °C into liquid bismuth and 1.5 moles of sulfur dioxide for each mole of bismuth: 1.8 moles from a normal piece.$(br2)$(thing)Galena$(), the lead ore of TFC++, roasts at 800 °C into work lead (lead with 0.3% silver in it) and sulfur dioxide, and 3% of its lead goes up as an oxide smoke (see $(l:tfcpp/poisons#chronic)Poisons$()). Refining lead and silver is the chapter $(l:tfcpp/lead_silver)Lead and Silver$().",
       "title": "Bismuth and galena"
     },
     {
@@ -79,6 +79,11 @@
       "anchor": "catching",
       "text": "Dust of arsenic, antimony, zinc and lead oxide settles by itself when the gas cools. A $(thing)baffle$() in a closed chamber that the fumes cross takes 5% of the dust in the gas each second. Scrape it with an empty hand: it gives powder (0.25 mole, about 50 g), but 5% of what you scrape rises into the air again.$(br2)A $(thing)tower$() sits in a run of pipe and does the same below 250 °C, and also condenses mercury below 100 °C into its tank of 100 mB. Sulfur dioxide passes through both. Several in a row catch more.",
       "title": "Catching the fumes"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A baffle needs no pipe: it takes dust from the six cells around it. A tower stands in a line of pipe, and nothing carries the fume into the line by itself.$(br2)A $(thing)piston pump$() with its back to the cell over the furnace or the crucible draws that cell's air into the pipe in front of it: smoke, the oxides of arsenic, antimony, zinc and lead, mercury vapour and sulfur dioxide, though not coal dust. It enters at room temperature, and the tower can take it. See $(l:tfcpp/lead_silver#intake)Lead and Silver$().",
+      "title": "Drawing the fumes in"
     },
     {
       "type": "patchouli:text",

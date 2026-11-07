@@ -1,0 +1,66 @@
+{
+  "category": "tfc:tfcpp",
+  "extra_recipe_mappings": {
+    "tfcpp:gold_leaf_indicator": 5,
+    "tfcpp:marsh_apparatus": 1,
+    "tfcpp:mercury_manometer": 8
+  },
+  "icon": "tfcpp:marsh_apparatus",
+  "name": "Tests and Indicators",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Each danger has its test:$(li)Carbon monoxide: a $(l:tfcpp/poisons#carbon_monoxide)caged animal$(), which falls first.$(li)Firedamp and low oxygen: the $(l:tfcpp/mine_safety#lamp)Davy lamp$().$(li)Sulfur dioxide, chlorine, hydrogen chloride, ammonia: the nose, by a message of a smell, see $(l:tfcpp/poisons#lungs)Poisons$().$(li)Arsenic and antimony: the $(l:tfcpp/tests#marsh)Marsh apparatus$().$(li)Mercury: the $(l:tfcpp/tests#leaf)gold leaf$().$(li)Pressure: the $(l:tfcpp/pipes#gauge)mercury manometer$().",
+      "title": "Seeing what cannot be seen"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/marsh_apparatus",
+      "text": "The $(thing)Marsh Apparatus$() is a bottle of silica glass and an ingot of zinc."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A new apparatus has no tests in it. Hold it with a $(thing)carboy$() of oil of vitriol or chamber acid in the other hand and right-click: it takes 1 L of the acid and holds 8 tests.$(br2)Zinc and acid make hydrogen, and with arsenic in the sample, arsine, which heat breaks up into a mirror of metal on the glass. That was the test of James Marsh in 1836, and it found arsenic in the bodies of the poisoned.",
+      "title": "Charging it"
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "marsh",
+      "text": "Right-click with the apparatus, the other hand empty or holding the carboy: it tests the air at your eye. The answer is a message:$(li)$(thing)no mirror$(): under 1 mg/m³ of arsenic or antimony oxide$(li)$(thing)a faint mirror$(): from 1 mg/m³, which is 0.02 mg in a sample of 20 L$(li)$(thing)a dense mirror$(): from 20 mg/m³, air that a man should leave$(br)Arsenic and antimony add up and look alike: the mirror does not say which it is.",
+      "title": "The air"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "With a sample in the other hand it tests the sample:$(li)tetrahedrite, white arsenic and antimony oxide give a dense mirror$(li)an ingot of arsenical copper gives a faint one$(li)anything else gives none$(br2)The flask is vented, and the test lets a little of its arsine into the air at your eye: 5 mg of the oxide from a dense sample, a tenth of that from a faint one. Test in clean air, not in a closed room.",
+      "title": "A sample"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/gold_leaf_indicator",
+      "text": "One sheet of gold, beaten thin, makes 8 $(thing)Gold Leaf Indicators$(). Place one where you want to watch the air."
+    },
+    {
+      "type": "patchouli:text",
+      "anchor": "leaf",
+      "text": "Mercury vapour takes gold into an amalgam that whitens it, and it does not wash off. Once a second the leaf breathes the air of its own cell and keeps the dose, in mg/m³ times hours (an hour is a process hour, a minute):$(li)stage 0: clean$(li)stage 1: traces, from 1$(li)stage 2: exposed, from 10$(li)stage 3: heavily poisoned, from 100$(br)An empty hand names the stage. In air as full of mercury as it can be, 13 mg/m³, a leaf is at stage 1 in 5 seconds and at stage 3 in 8 minutes.",
+      "title": "Mercury on gold"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The whitening is for good, and the dose does not go with the leaf: a clean leaf breaks into a leaf again, a whitened one is lost. At stage 3 it reads no more. It is a plate a sixteenth of a block thick, and gas passes through it.$(br2)Put leaves where mercury may be: over the retort, at the tower, in the room where cinnabar roasts (see $(l:tfcpp/sulfides#mercury)Sulfide Ores$()). A leaf that stays clean is the news you wanted.",
+      "title": "A leaf is for life"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "tfcpp:crafting/mercury_manometer",
+      "text": "The $(thing)Mercury Manometer$() tests a line for pressure, in millimetres of mercury (see $(l:tfcpp/pipes#gauge)Pipes and Pressure$()). TFC's thermometer takes a mercury bulb too (see $(l:mechanics/redstone_devices)Redstone Devices$())."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Carbon monoxide has no colour, no smell and no instrument but the caged animal: it takes in the gas twenty times faster than you do. Low oxygen has none either, but the Davy lamp goes out below 16%, and a fire dies below 12%.$(br2)Where a test is missing, ventilate first. A test shows a danger that is there. It does not show that none is.",
+      "title": "What has no test"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 11
+}

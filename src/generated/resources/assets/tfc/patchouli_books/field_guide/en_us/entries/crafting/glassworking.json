@@ -76,7 +76,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "Glass is worked while the pipe is hot, and not hotter than the pipe stands. Ordinary glass works from $(4)Faint Red$() (480 °C). $(thing)Borosilicate$() glass, made of sand and borax with no lime, needs 1250 °C. Brass melts at 930 °C, so only a ceramic pipe will do for it, between 1250 and 1500 °C: above that TFC returns the pipe empty.",
+      "text": "Glass is worked while the pipe is hot, and not hotter than the pipe stands. Ordinary glass works from $(4)Faint Red$() (480 °C). $(thing)Borosilicate$() glass, made of sand and borax with no lime, needs 1250 °C. Brass melts at 930 °C, so only a ceramic pipe will do for it, between 1250 and 1500 °C: above that TFC returns the pipe empty. See $(l:tfcpp/glass)Borosilicate Glass$().",
       "title": "How hot"
     }
   ],

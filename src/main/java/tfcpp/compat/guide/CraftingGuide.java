@@ -118,8 +118,8 @@ final class CraftingGuide
                     "$(bold)Расплющивание$(): используйте трубку с $(l:crafting/glassworking#paddle)лопаткой$() в другой руке.$(br)$(bold)Защипывание$(): с $(l:crafting/glassworking#jacks)щипцами$() в другой руке.$(br)$(bold)Распиливание$(): с $(l:crafting/glassworking#saw)пилой для самоцветов$() в другой руке.$(br)$(bold)Прокатка$(): с $(l:crafting/weaving#wool_cloth)шерстяной тканью$() в другой руке."))
             .titled(
                 L.of("How hot", "Какой жар"),
-                L.of("Glass is worked while the pipe is hot, and not hotter than the pipe stands. Ordinary glass works from $(4)Faint Red$() (480 °C). $(thing)Borosilicate$() glass, made of sand and borax with no lime, needs 1250 °C. Brass melts at 930 °C, so only a ceramic pipe will do for it, between 1250 and 1500 °C: above that TFC returns the pipe empty.",
-                    "Стекло работают, пока трубка горяча, и не горячее, чем она выдерживает. Обычное стекло работается с $(4)тёмно-красного каления$() (480 °C). $(thing)Боросиликатному$() стеклу из песка и буры без извести нужно 1250 °C. Латунь плавится при 930 °C, поэтому ему подойдёт лишь керамическая трубка, между 1250 и 1500 °C: выше TFC возвращает пустую трубку."));
+                L.of("Glass is worked while the pipe is hot, and not hotter than the pipe stands. Ordinary glass works from $(4)Faint Red$() (480 °C). $(thing)Borosilicate$() glass, made of sand and borax with no lime, needs 1250 °C. Brass melts at 930 °C, so only a ceramic pipe will do for it, between 1250 and 1500 °C: above that TFC returns the pipe empty. See $(l:tfcpp/glass)Borosilicate Glass$().",
+                    "Стекло работают, пока трубка горяча, и не горячее, чем она выдерживает. Обычное стекло работается с $(4)тёмно-красного каления$() (480 °C). $(thing)Боросиликатному$() стеклу из песка и буры без извести нужно 1250 °C. Латунь плавится при 930 °C, поэтому ему подойдёт лишь керамическая трубка, между 1250 и 1500 °C: выше TFC возвращает пустую трубку. См. $(l:tfcpp/glass)Боросиликатное стекло$()."));
     }
 
     private static Entry kilns()
