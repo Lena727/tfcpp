@@ -1,0 +1,23 @@
+{
+  "type": "tfc:anvil",
+  "ingredient": {
+    "type": "neoforge:components",
+    "components": {
+      "tfcpp:arsenical": {}
+    },
+    "items": "tfc:metal/sheet/copper"
+  },
+  "result": {
+    "components": {
+      "tfcpp:arsenical": {}
+    },
+    "count": 1,
+    "id": "minecraft:copper_door"
+  },
+  "rules": [
+    "hit_last",
+    "punch_not_last",
+    "draw_not_last"
+  ],
+  "tier": 1
+}

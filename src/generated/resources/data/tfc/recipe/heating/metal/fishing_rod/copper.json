@@ -1,11 +1,21 @@
 {
   "type": "tfc:heating",
   "ingredient": {
-    "item": "tfc:metal/fishing_rod/copper"
+    "type": "neoforge:difference",
+    "base": {
+      "item": "tfc:metal/fishing_rod/copper"
+    },
+    "subtracted": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/fishing_rod/copper"
+    }
   },
   "result_fluid": {
     "amount": 200,
-    "id": "tfcpp:metal/arsenical_copper"
+    "id": "tfc:metal/copper"
   },
   "temperature": 1080.0,
   "use_durability": true

@@ -1,0 +1,31 @@
+{
+  "type": "tfc:welding",
+  "bonus": "copy_worst",
+  "first_input": {
+    "type": "neoforge:difference",
+    "base": {
+      "item": "tfc:metal/knife_blade/copper"
+    },
+    "subtracted": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/knife_blade/copper"
+    }
+  },
+  "result": {
+    "components": {
+      "tfcpp:arsenical": {}
+    },
+    "count": 1,
+    "id": "tfc:metal/shears/copper"
+  },
+  "second_input": {
+    "type": "neoforge:components",
+    "components": {
+      "tfcpp:arsenical": {}
+    },
+    "items": "tfc:metal/knife_blade/copper"
+  }
+}

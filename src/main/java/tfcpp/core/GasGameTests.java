@@ -529,8 +529,12 @@ public final class GasGameTests
         final HeatDefinition castIron = HeatCapability.getDefinition(new ItemStack(TFCItems.METAL_ITEMS.get(Metal.CAST_IRON).get(Metal.ItemType.INGOT).get()));
         helper.assertTrue(castIron != null && castIron.weldingTemperature() < ConverterBath.Grade.CAST_IRON.melt(), "Cast iron keeps working temperatures below its melting point, though no recipe forges or welds it");
 
-        final HeatingRecipe tool = HeatingRecipe.getRecipe(new ItemStack(TFCItems.METAL_ITEMS.get(Metal.COPPER).get(Metal.ItemType.AXE_HEAD).get()));
-        helper.assertTrue(tool != null && tool.getDisplayOutputFluid().getFluid() == Metallurgy.ARSENICAL_COPPER.get(), "Remelting a cast tool must not purify it");
+        final ItemStack axe = new ItemStack(TFCItems.METAL_ITEMS.get(Metal.COPPER).get(Metal.ItemType.AXE_HEAD).get());
+        final HeatingRecipe plain = HeatingRecipe.getRecipe(axe);
+        helper.assertTrue(plain != null && plain.assembleFluid(axe).getFluid() == TFCFluids.METALS.get(Metal.COPPER).getSource(), "A plain copper tool melts to copper");
+        axe.set(Metallurgy.ARSENICAL.get(), net.minecraft.util.Unit.INSTANCE);
+        final HeatingRecipe tool = HeatingRecipe.getRecipe(axe);
+        helper.assertTrue(tool != null && tool.assembleFluid(axe).getFluid() == Metallurgy.ARSENICAL_COPPER.get(), "Remelting a tool cast from arsenical copper must not purify it");
         helper.succeed();
     }
 

@@ -446,5 +446,6 @@
   "tfcpp.sulfur_burner.full": "The burner is full of sulfur",
   "tfcpp.sulfur_burner.no_air": "Oxygen is below %1$s%%: the sulfur smoulders out and does not burn",
   "tfcpp.sulfur_burner.no_network": "Not joined to a pipe: nothing burns without a network",
-  "tfcpp.sulfur_burner.status": "Sulfur in the burner: %1$s of %2$s powders"
+  "tfcpp.sulfur_burner.status": "Sulfur in the burner: %1$s of %2$s powders",
+  "tfcpp.tooltip.arsenical": "Arsenical copper: melts back to arsenical copper"
 }

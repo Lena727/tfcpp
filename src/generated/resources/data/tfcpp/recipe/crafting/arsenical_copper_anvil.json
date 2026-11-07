@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "item": "tfcpp:metal/double_ingot/arsenical_copper"
+    }
+  },
+  "pattern": [
+    "###",
+    " # ",
+    "###"
+  ],
+  "result": {
+    "components": {
+      "tfcpp:arsenical": {}
+    },
+    "count": 1,
+    "id": "tfc:metal/anvil/copper"
+  }
+}

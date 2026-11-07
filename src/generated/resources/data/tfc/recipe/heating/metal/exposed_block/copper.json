@@ -1,11 +1,21 @@
 {
   "type": "tfc:heating",
   "ingredient": {
-    "item": "tfc:metal/exposed_block/copper"
+    "type": "neoforge:difference",
+    "base": {
+      "item": "tfc:metal/exposed_block/copper"
+    },
+    "subtracted": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/exposed_block/copper"
+    }
   },
   "result_fluid": {
     "amount": 100,
-    "id": "tfcpp:metal/arsenical_copper"
+    "id": "tfc:metal/copper"
   },
   "temperature": 1080.0
 }

@@ -69,6 +69,11 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
     private static final int HEAT_STABILITY_TICKS = 5;
     /** Pressure of iron over the tuyeres, in atm above the air: a full vessel holds about 70 cm, as in the small converters of the 1860s. */
     private static final float FULL_HEAD_ATM = 0.7f;
+    /**
+     * What a wind box that nobody blows into can stand above the head of the iron: the air in it follows the weather, and a closed box on a day of 30 C is 3% above an atmosphere, and one of 50 C 7%.
+     * A tenth of an atmosphere (a metre of water) is a draught and no blast. Without this margin a vessel with a drop of iron in it was blown at by the weather, which burned the silicon of the first millilitres poured and left a whole charge a hair short of the silicon of pig iron.
+     */
+    private static final float AMBIENT_MARGIN_ATM = 0.1f;
     /** Some small holes in a clay floor. */
     private static final float TUYERE_AREA_SHARE = 1f / 16f;
     /** What the hearth of a blast furnace or a forge can pass into the iron through a runner or a lined wall, whatever its own heat. */
@@ -206,7 +211,7 @@ public final class ConverterBlockEntity extends BlockEntity implements IHeatCons
             PipeNetwork.hiss(level, worldPosition);
         }
 
-        final float head = 1f + FULL_HEAD_ATM * bath.metal / ConverterBath.MILLIBUCKETS;
+        final float head = 1f + FULL_HEAD_ATM * bath.metal / ConverterBath.MILLIBUCKETS + AMBIENT_MARGIN_ATM;
         final @Nullable PipeContents blast = network.blowInto(head, TUYERE_AREA_SHARE, seconds);
         if (blast == null)
         {

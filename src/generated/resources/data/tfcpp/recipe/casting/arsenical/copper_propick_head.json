@@ -1,0 +1,17 @@
+{
+  "type": "tfc:casting",
+  "fluid": {
+    "amount": 100,
+    "fluid": "tfcpp:metal/arsenical_copper"
+  },
+  "mold": {
+    "item": "tfc:ceramic/propick_head_mold"
+  },
+  "result": {
+    "components": {
+      "tfcpp:arsenical": {}
+    },
+    "count": 1,
+    "id": "tfc:metal/propick_head/copper"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "tfc:welding",
+  "bonus": "copy_best",
+  "first_input": {
+    "type": "neoforge:components",
+    "components": {
+      "tfcpp:arsenical": {}
+    },
+    "items": "tfc:metal/unfinished_boots/copper"
+  },
+  "result": {
+    "components": {
+      "tfcpp:arsenical": {}
+    },
+    "count": 1,
+    "id": "tfc:metal/boots/copper"
+  },
+  "second_input": {
+    "tag": "c:sheets/copper"
+  }
+}

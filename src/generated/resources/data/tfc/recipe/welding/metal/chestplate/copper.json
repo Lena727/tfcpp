@@ -1,0 +1,34 @@
+{
+  "type": "tfc:welding",
+  "bonus": "copy_best",
+  "first_input": {
+    "type": "neoforge:difference",
+    "base": {
+      "item": "tfc:metal/unfinished_chestplate/copper"
+    },
+    "subtracted": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/unfinished_chestplate/copper"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "tfc:metal/chestplate/copper"
+  },
+  "second_input": {
+    "type": "neoforge:difference",
+    "base": {
+      "tag": "c:double_sheets/copper"
+    },
+    "subtracted": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/double_sheet/copper"
+    }
+  }
+}

@@ -446,5 +446,6 @@
   "tfcpp.sulfur_burner.full": "Горелка полна серы",
   "tfcpp.sulfur_burner.no_air": "Кислорода меньше %1$s%%: сера тлеет и гаснет, не горя",
   "tfcpp.sulfur_burner.no_network": "Не соединена с трубой: без сети горелка не горит",
-  "tfcpp.sulfur_burner.status": "Серы в горелке: %1$s из %2$s порошков"
+  "tfcpp.sulfur_burner.status": "Серы в горелке: %1$s из %2$s порошков",
+  "tfcpp.tooltip.arsenical": "Мышьяковистая медь: переплавляется в мышьяковистую медь"
 }

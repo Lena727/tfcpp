@@ -4,6 +4,9 @@
     "item": "tfcpp:metal/ingot/arsenical_copper"
   },
   "result": {
+    "components": {
+      "tfcpp:arsenical": {}
+    },
     "count": 1,
     "id": "tfc:metal/unfinished_lamp/copper"
   },

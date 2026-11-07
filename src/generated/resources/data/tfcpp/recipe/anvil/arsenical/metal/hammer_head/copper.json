@@ -5,6 +5,9 @@
     "item": "tfcpp:metal/ingot/arsenical_copper"
   },
   "result": {
+    "components": {
+      "tfcpp:arsenical": {}
+    },
     "count": 1,
     "id": "tfc:metal/hammer_head/copper"
   },

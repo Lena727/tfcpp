@@ -1,11 +1,21 @@
 {
   "type": "tfc:heating",
   "ingredient": {
-    "item": "tfc:metal/mace/copper"
+    "type": "neoforge:difference",
+    "base": {
+      "item": "tfc:metal/mace/copper"
+    },
+    "subtracted": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/mace/copper"
+    }
   },
   "result_fluid": {
     "amount": 200,
-    "id": "tfcpp:metal/arsenical_copper"
+    "id": "tfc:metal/copper"
   },
   "temperature": 1080.0,
   "use_durability": true

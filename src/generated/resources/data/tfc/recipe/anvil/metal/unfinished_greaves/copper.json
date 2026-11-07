@@ -1,0 +1,27 @@
+{
+  "type": "tfc:anvil",
+  "apply_bonus": true,
+  "ingredient": {
+    "type": "neoforge:difference",
+    "base": {
+      "tag": "c:double_sheets/copper"
+    },
+    "subtracted": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/double_sheet/copper"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "tfc:metal/unfinished_greaves/copper"
+  },
+  "rules": [
+    "hit_any",
+    "draw_any",
+    "bend_any"
+  ],
+  "tier": 1
+}

@@ -173,7 +173,7 @@ public final class MetallurgyData implements DataProvider
         casting.add("result", stack("tfcpp:metal/ingot/arsenical_copper", 1));
         put("data/tfcpp/recipe/casting/arsenical_copper_ingot.json", casting);
 
-        // It casts into every copper tool: being harder than pure copper, it was what early bronze age tools were actually made of
+        // It casts into every copper tool, being harder than pure copper: it was what early bronze age tools were actually made of. The tool is the copper item, marked as made of arsenical copper, and melts back to it.
         final Path castingDir = tfcFile("data/tfc/recipe/casting");
         try (Stream<Path> recipes = Files.list(castingDir))
         {
@@ -183,13 +183,9 @@ public final class MetallurgyData implements DataProvider
                 if (name.startsWith("copper_") && !name.contains("ingot"))
                 {
                     final JsonObject recipe = read(path);
-                    final JsonObject mold = recipe.getAsJsonObject("fluid");
-                    final JsonObject tagged = new JsonObject();
-                    tagged.addProperty("amount", mold.get("amount").getAsInt());
-                    tagged.addProperty("tag", "tfcpp:castable_copper");
-                    recipe.add("fluid", tagged);
-                    put("data/tfc/recipe/casting/" + name, recipe);
-
+                    recipe.add("fluid", fluid("tfcpp:metal/arsenical_copper", recipe.getAsJsonObject("fluid").get("amount").getAsInt()));
+                    recipe.add("result", marked(recipe.getAsJsonObject("result")));
+                    put("data/tfcpp/recipe/casting/arsenical/" + name, recipe);
                 }
             }
         }
@@ -216,10 +212,14 @@ public final class MetallurgyData implements DataProvider
         }
     }
 
+    /** What marks an item of copper as made of arsenical copper. It melts back to arsenical copper, and an unmarked one to copper exactly as in TFC. */
+    static final String ARSENICAL_MARK = "tfcpp:arsenical";
+
     /**
      * Arsenical bronze tools were the first metal tools, hammered cold and hot, so arsenical copper can be forged and welded. It makes a double ingot, which is what a copper anvil is built from: without it a start on tetrahedrite alone would never leave the stone anvil.
      * <p>
-     * A tool or sheet made of arsenical copper is the same item as one made of pure copper, so melting any of them down has to give the impure metal. Otherwise forging and remelting would remove arsenic for nothing, which takes electrolysis in reality. Only the ingots and double ingots, which are separate items, keep their own metal. Scrap copper being of unknown purity is also how it really behaves.
+     * A tool or sheet made of arsenical copper is the same item as one made of pure copper, so what is made of arsenical copper carries the component {@link #ARSENICAL_MARK}, and melting a marked item gives arsenical copper. Otherwise forging and remelting would remove arsenic for nothing, which takes electrolysis in reality, and an unmarked item, from malachite or native copper, would melt to arsenical copper and lose its purity for nothing.
+     * TFC's own recipe of each kind is left to take the unmarked items alone, and ours takes the marked ones: the two never match the same stack, so no order of recipes can decide it.
      */
     private void forgeArsenicalCopper() throws IOException
     {
@@ -241,29 +241,90 @@ public final class MetallurgyData implements DataProvider
         weld.add("result", stack(doubleIngot, 1));
         put("data/tfcpp/recipe/welding/arsenical_copper_double_ingot.json", weld);
 
-        // The copper anvil takes the double ingot of either. It is not put in the tag of copper's, as that would also hand it copper's own heat data and melting recipe, and the pure metal back.
+        // The copper anvil of arsenical double ingots is a marked one, as it melts to what it was made of. TFC's recipe stays as it is, for copper's own.
         final JsonObject anvil = read(tfcFile("data/tfc/recipe/crafting/metal/anvil/copper.json"));
-        anvil.getAsJsonObject("key").add("#", eitherOf(tagIngredient("c:double_ingots/copper"), item(doubleIngot)));
-        put("data/tfc/recipe/crafting/metal/anvil/copper.json", anvil);
+        anvil.getAsJsonObject("key").add("#", item(doubleIngot));
+        anvil.add("result", marked(anvil.getAsJsonObject("result")));
+        put("data/tfcpp/recipe/crafting/arsenical_copper_anvil.json", anvil);
 
-        // Whatever copper is hammered into at the anvil, arsenical copper is as well. The result is the copper item, and remelts as arsenical copper.
+        // Whatever copper is hammered into at the anvil, arsenical copper is as well, marked. What is made of the marked item is marked in turn.
         final Path anvils = tfcFile("data/tfc/recipe/anvil");
         try (Stream<Path> paths = Files.walk(anvils))
         {
             for (Path path : (Iterable<Path>) paths::iterator)
             {
                 final String relative = anvils.relativize(path).toString().replace('\\', '/');
-                if (relative.endsWith(".json"))
+                final JsonObject recipe = relative.endsWith(".json") ? read(path) : null;
+                if (recipe == null || !recipe.has("ingredient") || !recipe.get("ingredient").isJsonObject() || !recipe.has("result"))
                 {
-                    final JsonObject recipe = read(path);
-                    if (replaceCopperIngot(recipe, ingot, doubleIngot))
-                    {
-                        put("data/tfcpp/recipe/anvil/arsenical/" + relative, recipe);
-                    }
+                    continue;
                 }
+                final JsonObject input = recipe.getAsJsonObject("ingredient");
+                final String tag = input.has("tag") ? input.get("tag").getAsString() : "";
+                final JsonObject variant = recipe.deepCopy();
+                if (tag.equals("c:ingots/copper") || tag.equals("c:double_ingots/copper"))
+                {
+                    variant.add("ingredient", item(tag.equals("c:ingots/copper") ? ingot : doubleIngot));
+                }
+                else if (isCopperItems(input))
+                {
+                    variant.add("ingredient", markedIngredient(input));
+                    recipe.add("ingredient", unmarkedIngredient(input));
+                    put("data/tfc/recipe/anvil/" + relative, recipe);
+                }
+                else
+                {
+                    continue;
+                }
+                variant.add("result", marked(variant.getAsJsonObject("result")));
+                put("data/tfcpp/recipe/anvil/arsenical/" + relative, variant);
             }
         }
 
+        // The same for welding: a weld with a marked piece in it is marked
+        final Path weldings = tfcFile("data/tfc/recipe/welding");
+        try (Stream<Path> paths = Files.walk(weldings))
+        {
+            for (Path path : (Iterable<Path>) paths::iterator)
+            {
+                final String relative = weldings.relativize(path).toString().replace('\\', '/');
+                if (!relative.endsWith("/copper.json") || relative.startsWith("metal/double_ingot/"))
+                {
+                    continue;
+                }
+                final JsonObject recipe = read(path);
+                final List<String> copper = new ArrayList<>();
+                for (String key : List.of("first_input", "second_input"))
+                {
+                    if (isCopperItems(recipe.getAsJsonObject(key)))
+                    {
+                        copper.add(key);
+                    }
+                }
+                if (copper.isEmpty())
+                {
+                    continue;
+                }
+                for (int k = 0; k < copper.size(); k++)
+                {
+                    final JsonObject variant = recipe.deepCopy();
+                    for (int i = 0; i < copper.size(); i++)
+                    {
+                        final JsonObject input = recipe.getAsJsonObject(copper.get(i));
+                        variant.add(copper.get(i), i < k ? unmarkedIngredient(input) : i == k ? markedIngredient(input) : input);
+                    }
+                    variant.add("result", marked(variant.getAsJsonObject("result")));
+                    put("data/tfcpp/recipe/welding/arsenical/" + relative.replace(".json", "_" + k + ".json"), variant);
+                }
+                for (String key : copper)
+                {
+                    recipe.add(key, unmarkedIngredient(recipe.getAsJsonObject(key)));
+                }
+                put("data/tfc/recipe/welding/" + relative, recipe);
+            }
+        }
+
+        // Melting: a marked item gives arsenical copper, and TFC's recipe takes the others. Ingots and double ingots are separate items and keep their own metal.
         final Path heating = tfcFile("data/tfc/recipe/heating/metal");
         try (Stream<Path> paths = Files.walk(heating))
         {
@@ -273,7 +334,12 @@ public final class MetallurgyData implements DataProvider
                 if (relative.endsWith("/copper.json") && !relative.startsWith("ingot/") && !relative.startsWith("double_ingot/"))
                 {
                     final JsonObject recipe = read(path);
-                    recipe.getAsJsonObject("result_fluid").addProperty("id", "tfcpp:metal/arsenical_copper");
+                    final JsonObject input = recipe.getAsJsonObject("ingredient");
+                    final JsonObject variant = recipe.deepCopy();
+                    variant.add("ingredient", markedIngredient(input));
+                    variant.getAsJsonObject("result_fluid").addProperty("id", "tfcpp:metal/arsenical_copper");
+                    put("data/tfcpp/recipe/heating/arsenical/" + relative, variant);
+                    recipe.add("ingredient", unmarkedIngredient(input));
                     put("data/tfc/recipe/heating/metal/" + relative, recipe);
                 }
             }
@@ -283,53 +349,67 @@ public final class MetallurgyData implements DataProvider
         addToTag("data/c/tags/item/double_ingots.json", "#c:double_ingots/arsenical_copper"); // TFC sizes double ingots by this parent tag
     }
 
-    private static JsonObject tagIngredient(String tag)
+    private static final Map<String, String> COPPER_TAG_ITEMS = Map.of(
+        "c:rods/copper", "tfc:metal/rod/copper",
+        "c:sheets/copper", "tfc:metal/sheet/copper",
+        "c:double_sheets/copper", "tfc:metal/double_sheet/copper",
+        "c:storage_blocks/copper", "tfc:metal/block/copper");
+
+    /** @return {@code true} if this ingredient is made of copper items (sheets, tool heads, tools), and not of the ingots whose arsenical kind is a separate item */
+    static boolean isCopperItems(JsonObject ingredient)
+    {
+        final String text = ingredient.toString();
+        return text.contains("copper") && !text.contains("ingots/copper");
+    }
+
+    /** @return the result stack, carrying the mark of arsenical copper */
+    static JsonObject marked(JsonObject result)
+    {
+        final JsonObject copy = result.deepCopy();
+        final JsonObject stack = copy.has("stack") ? copy.getAsJsonObject("stack") : copy;
+        final JsonObject components = new JsonObject();
+        components.add(ARSENICAL_MARK, new JsonObject());
+        stack.add("components", components);
+        return copy;
+    }
+
+    /** @return an ingredient for the items of this one that carry the mark. The ingredient is one tag or one item. */
+    static JsonObject markedIngredient(JsonObject ingredient)
     {
         final JsonObject json = new JsonObject();
-        json.addProperty("tag", tag);
+        json.addProperty("type", "neoforge:components");
+        if (ingredient.has("tag"))
+        {
+            // A tag would be read before the tags are bound and hold nothing, so the one item of the tag is named. TFC's tags of copper hold one item each.
+            final String item = COPPER_TAG_ITEMS.get(ingredient.get("tag").getAsString());
+            if (item == null)
+            {
+                throw new IllegalArgumentException("A tag of copper that is not known to hold one item: " + ingredient);
+            }
+            json.addProperty("items", item);
+        }
+        else if (ingredient.has("item"))
+        {
+            json.addProperty("items", ingredient.get("item").getAsString());
+        }
+        else
+        {
+            throw new IllegalArgumentException("Not one tag or one item: " + ingredient);
+        }
+        final JsonObject components = new JsonObject();
+        components.add(ARSENICAL_MARK, new JsonObject());
+        json.add("components", components);
         return json;
     }
 
-    private static JsonObject eitherOf(JsonObject... ingredients)
+    /** @return an ingredient for the items of this one that do not carry the mark */
+    static JsonObject unmarkedIngredient(JsonObject ingredient)
     {
-        final JsonArray list = new JsonArray();
-        for (JsonObject ingredient : ingredients)
-        {
-            list.add(ingredient);
-        }
         final JsonObject json = new JsonObject();
-        json.addProperty("type", "neoforge:compound");
-        json.add("ingredients", list);
+        json.addProperty("type", "neoforge:difference");
+        json.add("base", ingredient);
+        json.add("subtracted", markedIngredient(ingredient));
         return json;
-    }
-
-    /** Swaps the ingredients that are ingots or double ingots of copper for those of arsenical copper. @return {@code true} if anything was swapped */
-    private static boolean replaceCopperIngot(JsonElement json, String ingot, String doubleIngot)
-    {
-        boolean replaced = false;
-        if (json.isJsonArray())
-        {
-            for (JsonElement element : json.getAsJsonArray())
-            {
-                replaced |= replaceCopperIngot(element, ingot, doubleIngot);
-            }
-        }
-        else if (json.isJsonObject())
-        {
-            final JsonObject object = json.getAsJsonObject();
-            final String tag = object.has("tag") ? object.get("tag").getAsString() : "";
-            if (tag.equals("c:ingots/copper") || tag.equals("c:double_ingots/copper"))
-            {
-                object.remove("tag");
-                object.addProperty("item", tag.equals("c:ingots/copper") ? ingot : doubleIngot);
-                return true;
-            }
-            for (Map.Entry<String, JsonElement> entry : object.entrySet())
-            {
-                replaced |= replaceCopperIngot(entry.getValue(), ingot, doubleIngot);
-            }
-        }
-        return replaced;
     }
 
     private void retort()
@@ -1350,7 +1430,6 @@ public final class MetallurgyData implements DataProvider
         mercury.add("ingredient", mercuryIngredient);
         mercury.addProperty("may_drink_when_full", true);
         put("data/tfcpp/tfc/drinkable/mercury.json", mercury);
-        addToTag("data/tfcpp/tags/fluid/castable_copper.json", "tfc:metal/copper", "tfcpp:metal/arsenical_copper");
         addToTag("data/c/tags/fluid/mercury.json", "tfcpp:mercury");
         addToTag("data/c/tags/item/ingots/arsenical_copper.json", "tfcpp:metal/ingot/arsenical_copper");
         addToTag("data/c/tags/item/ingots.json", "#c:ingots/lead", "#c:ingots/work_lead", "#c:ingots/arsenical_copper", "#c:ingots/phosphoric_pig_iron", "#c:ingots/cold_short_iron"); // TFC sizes ingots by this parent tag, and without it they would count as tiny items that stack to 64

@@ -1,11 +1,21 @@
 {
   "type": "tfc:heating",
   "ingredient": {
-    "tag": "c:double_sheets/copper"
+    "type": "neoforge:difference",
+    "base": {
+      "tag": "c:double_sheets/copper"
+    },
+    "subtracted": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/double_sheet/copper"
+    }
   },
   "result_fluid": {
     "amount": 400,
-    "id": "tfcpp:metal/arsenical_copper"
+    "id": "tfc:metal/copper"
   },
   "temperature": 1080.0
 }

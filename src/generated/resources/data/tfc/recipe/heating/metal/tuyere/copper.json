@@ -1,11 +1,21 @@
 {
   "type": "tfc:heating",
   "ingredient": {
-    "item": "tfc:metal/tuyere/copper"
+    "type": "neoforge:difference",
+    "base": {
+      "item": "tfc:metal/tuyere/copper"
+    },
+    "subtracted": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/tuyere/copper"
+    }
   },
   "result_fluid": {
     "amount": 400,
-    "id": "tfcpp:metal/arsenical_copper"
+    "id": "tfc:metal/copper"
   },
   "temperature": 1080.0,
   "use_durability": true

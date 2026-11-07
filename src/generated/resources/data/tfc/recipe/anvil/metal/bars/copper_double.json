@@ -1,0 +1,26 @@
+{
+  "type": "tfc:anvil",
+  "ingredient": {
+    "type": "neoforge:difference",
+    "base": {
+      "tag": "c:double_sheets/copper"
+    },
+    "subtracted": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/double_sheet/copper"
+    }
+  },
+  "result": {
+    "count": 16,
+    "id": "tfc:metal/bars/copper"
+  },
+  "rules": [
+    "upset_last",
+    "punch_second_last",
+    "punch_third_last"
+  ],
+  "tier": 1
+}

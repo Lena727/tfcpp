@@ -6,7 +6,10 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.dries007.tfc.common.capabilities.BlockCapabilities;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.Unit;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -46,6 +49,10 @@ public final class Metallurgy
     public static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(Registries.RECIPE_TYPE, TFCpp.MOD_ID);
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, TFCpp.MOD_ID);
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, TFCpp.MOD_ID);
+    public static final DeferredRegister<DataComponentType<?>> COMPONENTS = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, TFCpp.MOD_ID);
+
+    /** Marks an item of copper as made of arsenical copper, which is what it melts back to: see {@code MetallurgyData.forgeArsenicalCopper}. An item without it is pure copper. */
+    public static final Supplier<DataComponentType<Unit>> ARSENICAL = COMPONENTS.register("arsenical", () -> DataComponentType.<Unit>builder().persistent(Unit.CODEC).networkSynchronized(StreamCodec.unit(Unit.INSTANCE)).build());
 
     public static final Supplier<Item> LEAD_INGOT = ITEMS.register("metal/ingot/lead", () -> new Item(new Item.Properties()));
     /** Lead from galena, with its silver still in it, until cupellation takes the silver out. Plain lead comes only from reducing litharge. */
@@ -242,6 +249,7 @@ public final class Metallurgy
         RECIPE_TYPES.register(modBus);
         RECIPE_SERIALIZERS.register(modBus);
         TABS.register(modBus);
+        COMPONENTS.register(modBus);
         modBus.addListener(Metallurgy::registerCapabilities);
     }
 

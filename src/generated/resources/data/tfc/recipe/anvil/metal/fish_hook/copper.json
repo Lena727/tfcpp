@@ -1,0 +1,27 @@
+{
+  "type": "tfc:anvil",
+  "apply_bonus": true,
+  "ingredient": {
+    "type": "neoforge:difference",
+    "base": {
+      "tag": "c:sheets/copper"
+    },
+    "subtracted": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/sheet/copper"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "tfc:metal/fish_hook/copper"
+  },
+  "rules": [
+    "hit_any",
+    "bend_any",
+    "draw_not_last"
+  ],
+  "tier": 1
+}

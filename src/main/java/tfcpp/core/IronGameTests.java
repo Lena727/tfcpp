@@ -365,7 +365,7 @@ public final class IronGameTests
             final ConverterBath bath = converter.bath();
             helper.assertTrue(bath.carbon < ConverterBath.Grade.PIG_IRON.carbon() || bath.silicon < 1f, "The blast should have burned something, carbon " + bath.carbon + ", silicon " + bath.silicon);
             final float pressure = networkAt(helper).pressure();
-            helper.assertTrue(pressure < 1.5f, "The receiver should have blown down to the head of the iron, at " + pressure);
+            helper.assertTrue(pressure < 1.7f, "The receiver should have blown down toward the head of the iron and its margin, at " + pressure);
 
             final float carbonGone = (1000f * ConverterBath.Grade.PIG_IRON.carbon() - bath.metal * bath.carbon) * ConverterBath.KG_PER_MILLIBUCKET * 10f / 12.011f;
             final float gas = carbon(helper, 4, 1, 4);
@@ -411,6 +411,24 @@ public final class IronGameTests
         helper.runAtTickTime(60, () -> {
             helper.assertTrue(networkAt(helper).pressure() > 2.9f, "The tuyeres are sealed, but pressure fell to " + networkAt(helper).pressure());
             helper.assertTrue(converter.bath().carbon == ConverterBath.Grade.PIG_IRON.carbon(), "Nothing should burn");
+            helper.succeed();
+        });
+    }
+
+    /** The flake of a blast furnace tap into a converter: weather alone, a few hundredths of an atmosphere in the closed wind box, blew at the first drops of iron. */
+    @GameTest(template = TEMPLATE, timeoutTicks = 100, batch = IRON_BATCH)
+    public static void aWindBoxNobodyBlowsIntoLeavesADropOfIronAlone(GameTestHelper helper)
+    {
+        final ConverterBlockEntity converter = converterWithAir(helper, 2, 1400f, 1.02f);
+        helper.onEachTick(() -> {
+            final @Nullable PipeNetwork network = PipeTracker.get(helper.getLevel()).networkAt(helper.absolutePos(new BlockPos(3, 1, 4)));
+            if (network != null)
+            {
+                network.contents().temperature = 293f; // The weather would otherwise move the pressure of the closed box
+            }
+        });
+        helper.runAtTickTime(80, () -> {
+            helper.assertTrue(converter.bath().silicon == ConverterBath.Grade.PIG_IRON.silicon() && converter.bath().carbon == ConverterBath.Grade.PIG_IRON.carbon(), "Air a hundredth over the head is not a blast, but " + converter.bath().silicon + "% silicon and " + converter.bath().carbon + "% carbon are left");
             helper.succeed();
         });
     }

@@ -1,0 +1,20 @@
+{
+  "type": "tfc:welding",
+  "first_input": {
+    "type": "neoforge:components",
+    "components": {
+      "tfcpp:arsenical": {}
+    },
+    "items": "tfc:metal/sheet/copper"
+  },
+  "result": {
+    "components": {
+      "tfcpp:arsenical": {}
+    },
+    "count": 1,
+    "id": "tfc:metal/double_sheet/copper"
+  },
+  "second_input": {
+    "tag": "c:sheets/copper"
+  }
+}

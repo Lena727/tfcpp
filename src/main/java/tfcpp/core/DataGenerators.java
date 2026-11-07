@@ -135,6 +135,7 @@ public final class DataGenerators
             add("item.tfcpp.metal.ingot.work_lead", "Work Lead Ingot");
             add("item.tfcpp.metal.sheet.lead", "Lead Sheet");
             add("item.tfcpp.metal.sheet.work_lead", "Work Lead Sheet");
+            add("tfcpp.tooltip.arsenical", "Arsenical copper: melts back to arsenical copper");
             add("item.tfcpp.metal.double_ingot.arsenical_copper", "Arsenical Copper Double Ingot");
             add("item.tfcpp.powder.bone_ash", "Bone Ash");
             add("item.tfcpp.powder.lead_oxide", "Litharge");
@@ -447,6 +448,7 @@ public final class DataGenerators
             add("item.tfcpp.metal.ingot.work_lead", "Слиток веркблея");
             add("item.tfcpp.metal.sheet.lead", "Свинцовый лист");
             add("item.tfcpp.metal.sheet.work_lead", "Лист веркблея");
+            add("tfcpp.tooltip.arsenical", "Мышьяковистая медь: переплавляется в мышьяковистую медь");
             add("item.tfcpp.metal.double_ingot.arsenical_copper", "Двойной слиток мышьяковистой меди");
             add("item.tfcpp.powder.bone_ash", "Костяная зола");
             add("item.tfcpp.powder.lead_oxide", "Глёт");

@@ -1,0 +1,25 @@
+{
+  "type": "tfc:anvil",
+  "ingredient": {
+    "type": "neoforge:difference",
+    "base": {
+      "tag": "c:double_sheets/copper"
+    },
+    "subtracted": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/double_sheet/copper"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "tfc:metal/tuyere/copper"
+  },
+  "rules": [
+    "bend_last",
+    "bend_second_last"
+  ],
+  "tier": 1
+}

@@ -168,29 +168,50 @@ public final class MetalDataGameTests
         final CraftingInput grid = CraftingInput.of(3, 3, List.of(doubled, doubled, doubled, none, doubled, none, doubled, doubled, doubled));
         final @Nullable RecipeHolder<?> anvil = recipes.getRecipeFor(RecipeType.CRAFTING, grid, helper.getLevel()).orElse(null);
         helper.assertTrue(anvil != null, "Seven arsenical double ingots must make an anvil");
-        helper.assertTrue(((net.minecraft.world.item.crafting.CraftingRecipe) anvil.value()).assemble(grid, helper.getLevel().registryAccess()).is(item("tfc:metal/anvil/copper")), "It is a copper anvil");
+        final ItemStack made = ((net.minecraft.world.item.crafting.CraftingRecipe) anvil.value()).assemble(grid, helper.getLevel().registryAccess());
+        helper.assertTrue(made.is(item("tfc:metal/anvil/copper")), "It is a copper anvil");
+        helper.assertTrue(made.has(Metallurgy.ARSENICAL.get()), "Made of arsenical copper, so it is marked as that");
 
         final ItemStack pureDouble = new ItemStack(item("tfc:metal/double_ingot/copper"));
         final CraftingInput pure = CraftingInput.of(3, 3, List.of(pureDouble, pureDouble, pureDouble, none, pureDouble, none, pureDouble, pureDouble, pureDouble));
-        helper.assertTrue(recipes.getRecipeFor(RecipeType.CRAFTING, pure, helper.getLevel()).isPresent(), "Copper's own anvil must still be made of its own double ingots");
+        final var pureAnvil = recipes.getRecipeFor(RecipeType.CRAFTING, pure, helper.getLevel());
+        helper.assertTrue(pureAnvil.isPresent(), "Copper's own anvil must still be made of its own double ingots");
+        helper.assertFalse(pureAnvil.get().value().assemble(pure, helper.getLevel().registryAccess()).has(Metallurgy.ARSENICAL.get()), "And is not marked");
 
         final @Nullable HeatingRecipe melt = HeatingRecipe.getRecipe(doubled);
         helper.assertTrue(melt != null && melt.assembleFluid(doubled).getFluid() == Metallurgy.ARSENICAL_COPPER.get() && melt.assembleFluid(doubled).getAmount() == 200, "The double ingot melts back to its 200 mB of arsenical copper");
-        helper.assertTrue(recipes.byKey(TFCpp.id("anvil/arsenical/metal/rod/copper")).isPresent(), "Arsenical copper must be hammered into rods as copper is");
+        final var rod = recipes.byKey(TFCpp.id("anvil/arsenical/metal/rod/copper"));
+        helper.assertTrue(rod.isPresent(), "Arsenical copper must be hammered into rods as copper is");
+        final ItemStack rodResult = rod.get().value().getResultItem(helper.getLevel().registryAccess());
+        helper.assertTrue(rodResult.is(item("tfc:metal/rod/copper")) && rodResult.has(Metallurgy.ARSENICAL.get()), "The rod is the copper rod, marked, got " + rodResult);
+        final var pureRod = recipes.byKey(ResourceLocation.fromNamespaceAndPath("tfc", "anvil/metal/rod/copper"));
+        helper.assertTrue(pureRod.isPresent() && !pureRod.get().value().getResultItem(helper.getLevel().registryAccess()).has(Metallurgy.ARSENICAL.get()), "Pure copper's own rod is not marked");
         helper.assertTrue(recipes.byKey(TFCpp.id("anvil/arsenical/metal/sheet/copper")).isPresent(), "And from its double ingot into sheets");
         helper.succeed();
     }
 
     @GameTest(template = TEMPLATE)
-    public static void nothingMadeOfArsenicalCopperMeltsBackToCleanCopper(GameTestHelper helper)
+    public static void copperMeltsToWhatItWasMadeOf(GameTestHelper helper)
     {
-        for (String part : List.of("rod", "sheet", "double_sheet", "anvil", "axe_head", "pickaxe"))
+        for (String part : List.of("rod", "sheet", "double_sheet", "anvil", "axe_head", "pickaxe", "hammer"))
         {
             final Item copper = item("tfc:metal/" + part + "/copper");
-            final ItemStack stack = new ItemStack(copper);
-            final @Nullable HeatingRecipe recipe = HeatingRecipe.getRecipe(stack);
-            helper.assertTrue(recipe != null && recipe.assembleFluid(stack).getFluid() == Metallurgy.ARSENICAL_COPPER.get(), "A copper " + part + " may have been forged from arsenical copper, so it melts to that");
+            final ItemStack plain = new ItemStack(copper);
+            final @Nullable HeatingRecipe plainRecipe = HeatingRecipe.getRecipe(plain);
+            helper.assertTrue(plainRecipe != null && plainRecipe.assembleFluid(plain).getFluid() == fluid("tfc:metal/copper"), "A plain copper " + part + " melts to copper exactly as in TFC");
+            final ItemStack mark = new ItemStack(copper);
+            mark.set(Metallurgy.ARSENICAL.get(), net.minecraft.util.Unit.INSTANCE);
+            final @Nullable HeatingRecipe markedRecipe = HeatingRecipe.getRecipe(mark);
+            helper.assertTrue(markedRecipe != null && markedRecipe.assembleFluid(mark).getFluid() == Metallurgy.ARSENICAL_COPPER.get(), "A copper " + part + " made of arsenical copper melts to that");
+            helper.assertTrue(markedRecipe.assembleFluid(mark).getAmount() == plainRecipe.assembleFluid(plain).getAmount(), "And to as much");
         }
+        final var recipes = helper.getLevel().getRecipeManager();
+        final var cast = recipes.byKey(TFCpp.id("casting/arsenical/copper_axe_head"));
+        helper.assertTrue(cast.isPresent() && cast.get().value().getResultItem(helper.getLevel().registryAccess()).has(Metallurgy.ARSENICAL.get()), "A head cast of arsenical copper is marked");
+        final var castPure = recipes.byKey(ResourceLocation.fromNamespaceAndPath("tfc", "casting/copper_axe_head"));
+        helper.assertTrue(castPure.isPresent() && !castPure.get().value().getResultItem(helper.getLevel().registryAccess()).has(Metallurgy.ARSENICAL.get()), "TFC's own casting of copper is not");
+        final var weld = recipes.byKey(TFCpp.id("welding/arsenical/metal/double_sheet/copper_0"));
+        helper.assertTrue(weld.isPresent() && weld.get().value().getResultItem(helper.getLevel().registryAccess()).has(Metallurgy.ARSENICAL.get()), "A weld of a marked sheet is marked");
         for (String part : List.of("ingot", "double_ingot"))
         {
             final ItemStack stack = new ItemStack(item("tfc:metal/" + part + "/copper"));

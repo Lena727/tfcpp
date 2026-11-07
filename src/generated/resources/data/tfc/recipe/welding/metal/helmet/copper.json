@@ -1,0 +1,34 @@
+{
+  "type": "tfc:welding",
+  "bonus": "copy_best",
+  "first_input": {
+    "type": "neoforge:difference",
+    "base": {
+      "item": "tfc:metal/unfinished_helmet/copper"
+    },
+    "subtracted": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/unfinished_helmet/copper"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "tfc:metal/helmet/copper"
+  },
+  "second_input": {
+    "type": "neoforge:difference",
+    "base": {
+      "tag": "c:sheets/copper"
+    },
+    "subtracted": {
+      "type": "neoforge:components",
+      "components": {
+        "tfcpp:arsenical": {}
+      },
+      "items": "tfc:metal/sheet/copper"
+    }
+  }
+}

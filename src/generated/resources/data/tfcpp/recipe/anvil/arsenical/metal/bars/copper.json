@@ -1,0 +1,23 @@
+{
+  "type": "tfc:anvil",
+  "ingredient": {
+    "type": "neoforge:components",
+    "components": {
+      "tfcpp:arsenical": {}
+    },
+    "items": "tfc:metal/sheet/copper"
+  },
+  "result": {
+    "components": {
+      "tfcpp:arsenical": {}
+    },
+    "count": 8,
+    "id": "tfc:metal/bars/copper"
+  },
+  "rules": [
+    "upset_last",
+    "punch_second_last",
+    "punch_third_last"
+  ],
+  "tier": 1
+}
