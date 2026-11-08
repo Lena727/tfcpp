@@ -266,15 +266,113 @@ def piece(seed, base, size):
     return pixels
 
 
+ORE_LOOK = {  # body, highlight, host rock, blocky
+    'galena': ((128, 134, 146), (210, 214, 224), (150, 144, 132), True),
+    'chromite': ((62, 46, 40), (150, 118, 96), (150, 144, 132), False),
+    'ilmenite': ((62, 62, 74), (160, 160, 176), (150, 144, 132), False),
+    'pyrolusite': ((44, 44, 50), (150, 154, 168), (150, 144, 132), False),
+    'apatite': ((102, 172, 152), (190, 232, 216), (150, 144, 132), False),
+    'barite': ((224, 208, 198), (246, 240, 236), (120, 116, 110), False),
+    'bauxite': ((164, 94, 60), None, None, False),
+}
+
+
+def ore_item(seed, kind, size, share):
+    """A hand specimen: an angular broken lump of host rock carrying the mineral, with a dark outline."""
+    import math
+    rng = random.Random(seed)
+    body, glint, host, blocky = ORE_LOOK[kind]
+    count = rng.randint(5, 7)
+    aspect = 0.7 + 0.2 * rng.random()
+    tilt = rng.random() * math.tau
+    phase = rng.random() * math.tau
+    verts = []
+    for i in range(count):
+        angle = phase + (i + 0.5 * (rng.random() - 0.5)) * math.tau / count
+        r = size * (0.74 + 0.52 * rng.random())
+        vx, vy = math.cos(angle) * r, math.sin(angle) * r * aspect
+        verts.append((vx * math.cos(tilt) - vy * math.sin(tilt), vx * math.sin(tilt) + vy * math.cos(tilt)))
+    reach = max(max(abs(vx), abs(vy)) for vx, vy in verts)
+    goal = min(6.4, size * 1.15)  # The long axis always spans the same, however thin the draw came out
+    verts = [(vx * goal / reach, vy * goal / reach) for vx, vy in verts]
+    xs, ys = [v[0] for v in verts], [v[1] for v in verts]
+    spanx, spany = max(xs) - min(xs), max(ys) - min(ys)
+    if spanx < 0.75 * spany:  # No slivers: a stone is at least three quarters as wide as it is tall
+        verts = [(vx * 0.75 * spany / spanx, vy) for vx, vy in verts]
+    elif spany < 0.75 * spanx:
+        verts = [(vx, vy * 0.75 * spanx / spany) for vx, vy in verts]
+    verts = [(vx + 8.0 - (max(v[0] for v in verts) + min(v[0] for v in verts)) / 2, vy + 8.0 - (max(v[1] for v in verts) + min(v[1] for v in verts)) / 2) for vx, vy in verts]
+
+    def contains(px, py):
+        hit = False
+        for i in range(count):
+            (x1, y1), (x2, y2) = verts[i], verts[(i + 1) % count]
+            if (y1 > py) != (y2 > py) and px < (x2 - x1) * (py - y1) / (y2 - y1) + x1:
+                hit = not hit
+        return hit
+
+    inside = {(x, y) for y in range(1, 15) for x in range(1, 15) if contains(x + 0.5, y + 0.5)}
+    raw = {(x, y): rng.random() for x in range(-4, 20) for y in range(-4, 20)}
+    ox, oy = rng.randint(0, 1), rng.randint(0, 1)
+    if blocky:
+        field = {(x, y): raw[((x + ox) // 2 * 2, (y + oy) // 2 * 2)] * 0.8 + raw[(x, y)] * 0.2 for x in range(-2, 18) for y in range(-2, 18)}
+    else:
+        field = raw
+        for _ in range(2):
+            field = {(x, y): sum(field.get((x + a, y + b), 0.5) for a in (-1, 0, 1) for b in (-1, 0, 1)) / 9 for x in range(-2, 18) for y in range(-2, 18)}
+    cx = sum(x for x, _ in inside) / len(inside) + 0.5
+    cy = sum(y for _, y in inside) / len(inside) + 0.5
+    ox0, oy0 = cx + rng.uniform(-1.5, 1.5), cy + rng.uniform(-1.5, 1.5)  # The biggest patch grows from here
+    rays = [rng.random() * math.tau for _ in range(rng.randint(5, 7))]
+
+    def score(c):
+        x, y = c[0] + 0.5, c[1] + 0.5
+        value = field[c] - 0.06 * math.hypot(x - ox0, y - oy0)
+        if kind == 'pyrolusite':  # Radiating fibres: distance to the nearest stroke from the origin
+            near = 9.0
+            for angle in rays:
+                t = max(0.0, (x - ox0) * math.cos(angle) + (y - oy0) * math.sin(angle))
+                near = min(near, math.hypot(x - ox0 - t * math.cos(angle), y - oy0 - t * math.sin(angle)))
+            value = -near + 0.5 * field[c]
+        return value
+
+    mineral = set(sorted(inside, key=lambda c: -score(c))[:round(len(inside) * share)]) if host else set(inside)
+    pixels = [[(0, 0, 0, 0)] * 16 for _ in range(16)]
+    for (x, y) in inside:
+        light = int(((cx - x) + (cy - y)) * 2.2)  # Upper left lighter, lower right darker
+        if kind == 'bauxite':
+            colour = shade(body, rng.randint(-10, 10) + light)
+        elif (x, y) in mineral:
+            if rng.random() < (0.10 + (0.12 if x + y < cx + cy else 0)):
+                colour = shade(glint, rng.randint(-10, 8) + light // 2)
+            else:
+                colour = shade(body, rng.randint(-7, 7) + light)
+        else:
+            colour = shade(host, rng.randint(-9, 9) + light)
+        pixels[y][x] = colour
+    if kind == 'bauxite':
+        for _ in range(9):
+            gx, gy = rng.randint(2, 13), rng.randint(2, 13)
+            tone = (196, 124, 80) if rng.random() < 0.6 else (118, 64, 40)
+            for dx in (0, 1):
+                for dy in (0, 1):
+                    if (gx + dx, gy + dy) in inside:
+                        pixels[gy + dy][gx + dx] = shade(tone, rng.randint(-6, 6))
+    for (x, y) in inside:
+        if any((x + a, y + b) not in inside for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+            pixels[y][x] = shade((34, 30, 28), 0)
+    return pixels
+
+
 ORE_COLORS = {'galena': (120, 126, 136), 'bauxite': (162, 92, 58), 'chromite': (46, 42, 44), 'ilmenite': (66, 62, 70), 'pyrolusite': (34, 32, 38)}
 for index, (name, color) in enumerate(ORE_COLORS.items()):
-    for grade, density, size in (('poor', 2, 3.2), ('normal', 3.5, 4.2), ('rich', 5, 5.2)):
+    for grade, density, size, share in (('poor', 2, 5.4, 0.5), ('normal', 3.5, 6.0, 0.65), ('rich', 5, 6.6, 0.8)):
         write_png(ROOT / f'block/ore/{grade}_{name}.png', overlay(90 + index, color, density))
-        write_png(ROOT / f'item/ore/{grade}_{name}.png', piece(100 + index, color, size))
-    write_png(ROOT / f'item/ore/small_{name}.png', piece(110 + index, color, 2.4))
+        write_png(ROOT / f'item/ore/{grade}_{name}.png', ore_item(100 + index, name, size, share))
+    write_png(ROOT / f'item/ore/small_{name}.png', ore_item(110 + index, name, 4.8, 0.6))
 for index, (name, color) in enumerate({'apatite': (102, 172, 152), 'barite': (224, 208, 198)}.items()):
     write_png(ROOT / f'block/ore/{name}.png', overlay(120 + index, color, 3.5))
-    write_png(ROOT / f'item/ore/{name}.png', piece(125 + index, color, 4.2))
+    write_png(ROOT / f'item/ore/{name}.png', ore_item(125 + index, name, 6.0, 0.65))
 write_png(ROOT / 'item/slag/iron.png', heap(71, (72, 58, 54)))
 write_png(ROOT / 'item/slag/furnace.png', heap(72, (168, 168, 150)))
 
