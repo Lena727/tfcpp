@@ -1,10 +1,10 @@
 {
   "category": "tfc:tfcpp",
   "extra_recipe_mappings": {
-    "tfcpp:coke": 6,
+    "tfcpp:coke": 7,
     "tfcpp:coke_oven": 1,
-    "tfcpp:gas_burner": 12,
-    "tfcpp:lignite_char": 6
+    "tfcpp:gas_burner": 13,
+    "tfcpp:lignite_char": 7
   },
   "icon": "tfcpp:coke_oven",
   "name": "Coal Chemistry",
@@ -39,6 +39,11 @@
     },
     {
       "type": "patchouli:text",
+      "text": "Coal and lignite char give exactly 950 °C on the natural draught of a forge, and only in fresh air: the oven sits on the edge. Blow into the fire through a $(l:crafting/glassworking#blowpipe)blowpipe$() or use a $(l:metalworking/bellows)bellows$(), and the oven stays above 950 °C.",
+      "title": "Heating the oven"
+    },
+    {
+      "type": "patchouli:text",
       "text": "$(thing)Lignite$() chars at 700 °C in 18 hours and does not cake. Each piece gives 0.4 piece of $(thing)lignite char$(), 0.24 L of tar, 0.4 L of liquor and 15 mol of gas, mostly carbon dioxide. The char is a fuel, but no charge for the blast furnace.$(br2)$(thing)Logs$() are done at 400 °C in 12 hours. Each 5 kg log gives 0.5 piece of charcoal (30% of its mass), 0.25 L of wood tar, 2 L of $(thing)pyroligneous liquor$() and 30 mol of gas, mostly carbon dioxide and monoxide.",
       "title": "Lignite and wood"
     },
@@ -47,12 +52,12 @@
       "anchor": "coke",
       "item": "tfcpp:coke",
       "link_recipes": false,
-      "text": "Coke burns at $(bold)1250 °C$() for 2200 ticks and feeds the $(l:metalworking/blast_furnace)blast furnace$(): hard enough to bear the ore, open enough to pass the blast. Raw coal is refused there. It carries less sulfur too: 0.9 mol of sulfur dioxide a piece, against 1.4 for coal.",
+      "text": "Coke burns for 2200 ticks. In a blast furnace it gives $(bold)1250 °C$(); in a forge or firepit it is nearly unreactive and gives only 850 °C without a blast. It feeds the $(l:metalworking/blast_furnace)blast furnace$(): hard enough to bear the ore, open enough to pass the blast. Raw coal is refused there. It carries less sulfur too: 0.9 mol of sulfur dioxide a piece, against 1.4 for coal.",
       "title": "Coke"
     },
     {
       "type": "patchouli:text",
-      "text": "Lignite char burns at 1100 °C for 1500 ticks and gives 1.0 mol of sulfur dioxide a piece. The blast furnace refuses it: it is crumbly and ashy.$(br2)A quern grinds coke into 4 coke powders and raises 2 g of coal dust into the air (see $(l:tfcpp/mine_safety#dust)Mine Safety$())."
+      "text": "Lignite char burns for 1500 ticks, at 950 °C on a forge's own draught and 1600 °C with a full bellows, and gives 1.0 mol of sulfur dioxide a piece. The blast furnace refuses it: it is crumbly and ashy.$(br2)A quern grinds coke into 4 coke powders and raises 2 g of coal dust into the air (see $(l:tfcpp/mine_safety#dust)Mine Safety$())."
     },
     {
       "type": "patchouli:text",

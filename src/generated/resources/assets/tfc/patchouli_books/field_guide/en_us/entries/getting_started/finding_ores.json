@@ -64,7 +64,11 @@
     },
     {
       "type": "patchouli:text",
-      "text": "You will need:$(li)a $(l:getting_started/pottery#vessel)Small Vessel$()$(li)a heat that melts the metal: a $(l:metalworking/charcoal_forge)Charcoal Forge$() for copper (1080 °C), gold and silver. A $(l:getting_started/pit_kiln)Pit Kiln$() (about 900 °C) melts only tin, bismuth, zinc and lead$(li)one or more $(l:getting_started/pottery#mold)Molds$()$(li)at least 100 mB of a castable metal: $(thing)Copper$() in any of its ore forms$(br2)$(italic)Some $(l:getting_started/primitive_alloys)Alloys$() can be cast too.$()"
+      "text": "You will need:$(li)a $(l:getting_started/pottery#vessel)Small Vessel$()$(li)a heat that melts the metal: a $(l:metalworking/charcoal_forge)Charcoal Forge$() with forced air for copper (1080 °C) and gold (1060 °C): see below. A $(l:getting_started/pit_kiln)Pit Kiln$() (about 900 °C) melts only tin, bismuth, zinc and lead$(li)one or more $(l:getting_started/pottery#mold)Molds$()$(li)at least 100 mB of a castable metal: $(thing)Copper$() in any of its ore forms$(br2)$(italic)Some $(l:getting_started/primitive_alloys)Alloys$() can be cast too.$()"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "On its own draught a charcoal forge gives only 1000 °C, and that in fresh air: enough for silver (961 °C) and no more. Air makes the heat: blow into the fire through a $(l:crafting/glassworking#blowpipe)ceramic blowpipe$(), knapped from clay and fired at 850 °C, which you can make before any metal. Hold $(item)$(k:key.use)$() with the empty pipe in hand while looking at the forge. It is as tiring as running, and gives 1204 °C; two people blowing together give 1347 °C. Bellows come later."
     },
     {
       "type": "patchouli:text",

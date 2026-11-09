@@ -32,13 +32,43 @@
     },
     {
       "type": "patchouli:text",
-      "text": "The five lower slots hold fuel, and the forge burns one piece at a time:$(li)Charcoal 1100 °C$(li)Lignite 1000 °C$(li)Coal 1200 °C$(li)Lignite char 1100 °C$(li)Coke 1250 °C$(br)The five upper slots heat items up to the gauge. The slots at the side hold vessels and molds, which fill with the metal that melts.",
+      "text": "The five lower slots hold fuel, and the forge burns one piece at a time. The five upper slots heat items up to the gauge. The slots at the side hold vessels and molds, which fill with the metal that melts.$(br2)Every carbon fuel burns at about 2000 °C in plenty of air. The heat of a forge is set by its air, and the fuel matters when the air is little.",
       "title": "Fuel"
     },
     {
       "type": "patchouli:text",
-      "text": "A bellows adds at most 500 °C to the fuel and doubles its burn: charcoal reaches 1600 °C. Iron, steel and fire clay need that. Rain falling on an open forge cools it by 300 °C and doubles the burn too.$(br2)Coal, lignite and coke carry sulfur, and every piece they burn releases sulfur dioxide.",
+      "text": "On the draught of the forge alone, with one person blowing through a $(l:crafting/glassworking#blowpipe)blowpipe$(), with two, and with a full bellows:$(li)Charcoal: 1000 °C, 1204 °C, 1347 °C, 1600 °C$(li)Lignite char: 950 °C, 1180 °C, 1334 °C, 1600 °C$(li)Coal: 950 °C, 1228 °C, 1405 °C, 1700 °C$(li)Coke: 850 °C, 1217 °C, 1422 °C, 1750 °C$(li)Lignite: 750 °C, 1046 °C, 1219 °C, 1500 °C",
+      "title": "Heat by fuel"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Porous charcoal burns readily without a blast. Coal has to drive its volatile matter out first. Coke is nearly unreactive and hardly keeps alight without a blast. Raw lignite carries a third to a half of its weight in water.$(br2)Coal, lignite and coke carry sulfur, and every piece they burn releases sulfur dioxide.",
+      "title": "Why the fuel matters"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A bellows adds up to 500 °C: charcoal reaches 1600 °C. Iron, steel and fire clay need that. The fuel burns as fast as the air drives it, up to twice as fast on a full bellows. Rain falling on an open forge cools it by 300 °C and doubles the burn too.$(br2)Heat escapes by radiation, which goes as the fourth power of the temperature, so air adds to the fourth power and not to the degrees.",
       "title": "Blast and rain"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A person blowing through an empty blowpipe, clay or iron, gives a fifth of a bellows: charcoal reaches 1204 °C. Hold $(item)$(k:key.use)$() with the pipe in hand while looking at the forge, or at a vessel standing on it: a crucible, a retort, a coke oven, a sand bath. It is as tiring as running.$(br2)Several people add up, to four: two give charcoal 1347 °C. The forge opens its screen only when the pipe is put away.",
+      "title": "Blowing"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Wind across an open hearth feeds it only a little, and cools its surface as much: up to a twentieth of a bellows from 10 m/s, which takes charcoal to 1055 °C. It does not add to bellows or to blowers: the best source counts. Under a roof or deep below the surface there is none.$(br2)Stale air hurts: the fire draws the oxygen of its room, and heat falls with it. At 16.5% oxygen charcoal reaches only 800 °C, and below 12% the forge goes out.",
+      "title": "Wind and stale air"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Natural draught gives about 1000 °C only in fresh air. Anything near that, or above it, wants a pipe or a bellows: bismuth bronze (985 °C), a zinc retort (1000 °C), a coke oven (950 °C, where coal and lignite char sit exactly on the edge), arsenical copper remelted (1050 °C), black bronze (1070 °C), copper (1080 °C).$(br2)One blower reaches neither 1250 °C, for borosilicate, nor 1300 °C, for fire clay. Two or three blowers do, or a bellows.",
+      "title": "Near a thousand degrees"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Egyptian tomb paintings show rows of men blowing through reeds with clay tips, and furnaces in Sri Lanka stood to catch the monsoon. Copper was always smelted with forced air. Bellows need lumber, and so a saw, which comes after copper: the first forced draught is a clay pipe.",
+      "title": "Why it is so"
     }
   ],
   "read_by_default": true,

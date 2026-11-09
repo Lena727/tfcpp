@@ -3,10 +3,10 @@
   "extra_recipe_mappings": {
     "tfc:ore/normal_sphalerite": 5,
     "tfc:ore/normal_tetrahedrite": 2,
-    "tfcpp:condensation_tower": 10,
+    "tfcpp:condensation_tower": 11,
     "tfcpp:retort": 6,
     "tfcpp:retort_condenser": 6,
-    "tfcpp:settling_baffle": 10
+    "tfcpp:settling_baffle": 11
   },
   "icon": "tfcpp:retort",
   "name": "Sulfide Ores and the Retort",
@@ -25,7 +25,7 @@
     {
       "type": "tfc:heat_recipe",
       "recipe": "tfc:heating/ore/normal_tetrahedrite",
-      "text": "$(thing)Tetrahedrite$() melts at 1080 °C into arsenical copper. The pit kiln cannot reach it: use a forge with bellows, or a crucible."
+      "text": "$(thing)Tetrahedrite$() melts at 1080 °C into arsenical copper. The pit kiln cannot reach it: use a forge with forced air (a blowpipe or bellows), or a crucible."
     },
     {
       "type": "patchouli:text",
@@ -56,6 +56,11 @@
       "type": "patchouli:text",
       "text": "Carbon takes the oxygen from zinc oxide only above about 1000 °C, and zinc boils at 907 °C. So zinc comes off as vapour, and in an open crucible burns at once to a white smoke of zinc oxide, which gives metal fume fever. A closed retort leads the vapour to a cool $(thing)condenser$(), where it runs off as liquid zinc.$(br2)A calcine needs 1000 °C, charcoal for its carbon (a normal piece takes 2.7 moles, and one charcoal holds 200) and gives zinc by its size, with carbon monoxide.",
       "title": "Zinc: why a retort"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A charcoal forge gives exactly 1000 °C on its own draught, and only in fresh air: in a stuffy room it falls short. Heat the retort with a blown fire, a person with a $(l:crafting/glassworking#blowpipe)blowpipe$() or a $(l:metalworking/bellows)bellows$(), and look at the gauge.",
+      "title": "Heating the retort"
     },
     {
       "type": "patchouli:text",

@@ -95,6 +95,9 @@ final class CraftingGuide
             .knapping("tfc:knapping/ceramic/unfired_blowpipe",
                 L.of("The key tool is the $(thing)Blowpipe$(). Knap it from clay and fire it into a $(thing)Ceramic Blowpipe$().", "Главный инструмент $(thing)стеклодувная трубка$(). Выбейте её из глины и обожгите в $(thing)керамическую трубку$()."))
             .anchor("blowpipe")
+            .text(
+                L.of("An empty pipe has a second use: it blows air into a $(l:metalworking/charcoal_forge)Charcoal Forge$() or a firepit, and that is how the first copper was melted.",
+                    "У пустой трубки есть второе применение: она вдувает воздух в $(l:metalworking/charcoal_forge)угольную кузницу$() или костёр, так плавили первую медь."))
             .anvil("tfc:anvil/blowpipe",
                 L.of("Ceramic blowpipes are brittle and may break in use. A sturdier pipe is forged at the anvil from a $(thing)Brass Rod$(), but brass melts at 930 °C.", "Керамические трубки хрупки и могут разбиться при работе. Прочнее выкованная из $(thing)латунного прута$() на наковальне, но латунь плавится при 930 °C."))
             .crafting("tfc:crafting/paddle",

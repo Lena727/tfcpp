@@ -703,7 +703,7 @@
       "anchor": "lignite",
       "item": "tfc:ore/lignite",
       "link_recipes": false,
-      "text": "Lignite is a low-grade $(thing)Coal$(): very large flat beds in $(l:the_world/geology#sedimentary)Sedimentary$() rock near the surface. It burns at 1000 °C, carries sulfur, and its beds hold gas that comes out when they are mined.",
+      "text": "Lignite is a low-grade $(thing)Coal$(): very large flat beds in $(l:the_world/geology#sedimentary)Sedimentary$() rock near the surface. It gives only 750 °C on a forge's own draught and 1500 °C with a full bellows, carries sulfur, and its beds hold gas that comes out when they are mined.",
       "title": "Lignite"
     },
     {
@@ -730,7 +730,7 @@
       "anchor": "bituminous_coal",
       "item": "tfc:ore/bituminous_coal",
       "link_recipes": false,
-      "text": "Bituminous Coal is a medium-grade $(thing)Coal$(): very large flat beds in $(l:the_world/geology#sedimentary)Sedimentary$() rock near the surface. It burns at 1200 °C. Its seams hold methane, which explodes, and its dust burns too.",
+      "text": "Bituminous Coal is a medium-grade $(thing)Coal$(): very large flat beds in $(l:the_world/geology#sedimentary)Sedimentary$() rock near the surface. It gives 950 °C on a forge's own draught and 1700 °C with a full bellows. Its seams hold methane, which explodes, and its dust burns too.",
       "title": "Bituminous Coal"
     },
     {

@@ -1,7 +1,7 @@
 {
   "category": "tfc:tfcpp",
   "extra_recipe_mappings": {
-    "tfcpp:glass_carboy": 17,
+    "tfcpp:glass_carboy": 19,
     "tfcpp:glass_retort": 9,
     "tfcpp:lead_chamber": 3,
     "tfcpp:sand_bath": 10,
@@ -73,8 +73,18 @@
     },
     {
       "type": "patchouli:text",
-      "text": "An empty hand adds a layer of sand, from 1 to 8; a crouching hand takes one off. Of what a fire has above the room only 1 part in (1 + depth) reaches the flask: 20 + (T - 20) / (1 + depth).$(br2)A charcoal fire of 1100 °C gives 236 °C at depth 4 and 290 °C at depth 3, which is why oil of vitriol, at 280 to 350 °C, wants the sand thinned. Sand evens the heat out: glass cannot take a fire.",
+      "text": "An empty hand adds a layer of sand, from 1 to 8; a crouching hand takes one off. Of what a fire has above the room only 1 part in (1 + depth) reaches the flask: 20 + (T - 20) / (1 + depth).$(br2)Sand evens the heat out: glass cannot take a fire.",
       "title": "Choosing the depth"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A charcoal fire depends on its air. On its own draught it stands at 1000 °C and gives 216 °C at depth 4 (the default), 265 °C at depth 3 and 347 °C at depth 2. One person blowing through a $(l:crafting/glassworking#blowpipe)blowpipe$() takes it to 1204 °C: 316 °C at depth 3, 257 °C at depth 4. Two blowers, 1347 °C: 285 °C at depth 4. A full bellows, 1600 °C: 336 °C at depth 4, 283 °C at depth 5.",
+      "title": "Depth and the fire"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Oil of vitriol, at 280 to 350 °C, wants a thin bed: depth 2 on an unblown fire (3 °C to spare, and the wind of an open sky spoils it), depth 3 with one blower, depth 4 with two, depth 4 or 5 with a bellows.$(br2)Aqua fortis, at 120 to 200 °C, wants a deep bed: depth 5 to 8 unblown, 6 to 8 with one blower, 7 or 8 with two, 8 with a bellows.$(br2)Spirit of salt, at 150 to 300 °C: depth 3 to 6 unblown, 4 to 8 with one or two blowers, 5 to 8 with a bellows.",
+      "title": "Depth for each acid"
     },
     {
       "type": "patchouli:text",

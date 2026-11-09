@@ -6,6 +6,11 @@
   "mixins": [
     "BorosilicateGlassMixin",
     "CharcoalForgeBlockMixin",
+    "DraughtMixins$CrucibleBlockUse",
+    "DraughtMixins$Firepit",
+    "DraughtMixins$FirepitBlockUse",
+    "DraughtMixins$Forge",
+    "DraughtMixins$ForgeBlock",
     "DrinkableMixin",
     "FuelSulfurMixins$BlastFurnace",
     "FuelSulfurMixins$Firebox",

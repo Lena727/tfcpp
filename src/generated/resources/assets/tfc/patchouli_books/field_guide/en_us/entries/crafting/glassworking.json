@@ -1,9 +1,9 @@
 {
   "category": "tfc:crafting",
   "extra_recipe_mappings": {
-    "tfc:gem_saw": 9,
-    "tfc:jacks": 8,
-    "tfc:paddle": 7,
+    "tfc:gem_saw": 10,
+    "tfc:jacks": 9,
+    "tfc:paddle": 8,
     "tfc:powder/lime": 2,
     "tfc:powder/soda_ash": 3
   },
@@ -41,6 +41,10 @@
       "anchor": "blowpipe",
       "recipe": "tfc:knapping/ceramic/unfired_blowpipe",
       "text": "The key tool is the $(thing)Blowpipe$(). Knap it from clay and fire it into a $(thing)Ceramic Blowpipe$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "An empty pipe has a second use: it blows air into a $(l:metalworking/charcoal_forge)Charcoal Forge$() or a firepit, and that is how the first copper was melted."
     },
     {
       "type": "tfc:anvil_recipe",

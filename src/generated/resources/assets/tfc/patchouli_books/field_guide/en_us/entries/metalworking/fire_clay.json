@@ -36,7 +36,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "Fire clay ware needs 1300 °C. That is hotter than a pit kiln gets (about 900 °C), and than coal burns in a forge without blast (1200 °C). Fire it in a $(l:metalworking/charcoal_forge)Charcoal Forge$() with a $(l:metalworking/bellows)Bellows$(). Ordinary clay ware needs only 850 °C.",
+      "text": "Fire clay ware needs 1300 °C. That is hotter than a pit kiln gets (about 900 °C), and than coal reaches in a forge without bellows (950 °C on its own draught, 1228 °C with one person blowing, 1405 °C with two). Fire it in a $(l:metalworking/charcoal_forge)Charcoal Forge$() with a $(l:metalworking/bellows)Bellows$(). Ordinary clay ware needs only 850 °C.",
       "title": "Firing"
     }
   ],

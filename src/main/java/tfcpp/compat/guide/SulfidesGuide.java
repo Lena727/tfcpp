@@ -29,8 +29,8 @@ final class SulfidesGuide
                 L.of("A normal piece of tetrahedrite gives 3.8 moles of sulfur dioxide at once, which is 9% of the air of a whole cell: 92 000 ppm, against 1000 ppm that kills. In a closed hall of 100 cubic metres it is still 920 ppm.$(br2)So roast in the open air, where the gas goes upward and away, or under a chimney. In a closed room it is a death trap, and the poison does not drop below the deadly level for a long while (see $(l:tfcpp/gases)Gases$() and $(l:tfcpp/poisons#lungs)Poisons$()).",
                     "Обычный кусок тетраэдрита сразу даёт 3,8 моля сернистого газа, это 9% воздуха целой клетки: 92 000 ppm против 1000 ppm, которые убивают. В закрытом зале в 100 кубометров это всё равно 920 ppm.$(br2)Поэтому обжигайте на открытом воздухе, где газ уходит вверх и прочь, или под дымоходом. В закрытой комнате это ловушка смерти, и яд долго не опускается ниже смертельного уровня (см. $(l:tfcpp/gases)Газы$() и $(l:tfcpp/poisons#lungs)Яды$())."))
             .heating("tfc:heating/ore/normal_tetrahedrite",
-                L.of("$(thing)Tetrahedrite$() melts at 1080 °C into arsenical copper. The pit kiln cannot reach it: use a forge with bellows, or a crucible.",
-                    "$(thing)Тетраэдрит$() плавится при 1080 °C в мышьяковистую медь. Ямная печь до этого не доходит: нужен горн с мехами или тигель."))
+                L.of("$(thing)Tetrahedrite$() melts at 1080 °C into arsenical copper. The pit kiln cannot reach it: use a forge with forced air (a blowpipe or bellows), or a crucible.",
+                    "$(thing)Тетраэдрит$() плавится при 1080 °C в мышьяковистую медь. Земляная печь до этого не доходит: нужен горн с принудительным воздухом (трубка или меха) или тигель."))
             .showsOnLastPage("tfc:ore/normal_tetrahedrite")
             .titled(
                 L.of("Arsenic and antimony fume", "Дым мышьяка и сурьмы"),
@@ -56,6 +56,10 @@ final class SulfidesGuide
                 L.of("Zinc: why a retort", "Цинк: зачем реторта"),
                 L.of("Carbon takes the oxygen from zinc oxide only above about 1000 °C, and zinc boils at 907 °C. So zinc comes off as vapour, and in an open crucible burns at once to a white smoke of zinc oxide, which gives metal fume fever. A closed retort leads the vapour to a cool $(thing)condenser$(), where it runs off as liquid zinc.$(br2)A calcine needs 1000 °C, charcoal for its carbon (a normal piece takes 2.7 moles, and one charcoal holds 200) and gives zinc by its size, with carbon monoxide.",
                     "Углерод забирает кислород у оксида цинка только выше 1000 °C, а цинк кипит при 907 °C. Поэтому цинк уходит паром, а в открытом тигле тут же сгорает в белый дым оксида цинка, дающий литейную лихорадку. Закрытая реторта ведёт пар в холодный $(thing)конденсатор$(), где он стекает жидким цинком.$(br2)Огарку нужно 1000 °C и древесный уголь как источник углерода (обычному куску 2,7 моля, а в одном куске угля 200). Цинка выходит по размеру куска, и ещё угарный газ."))
+            .titled(
+                L.of("Heating the retort", "Нагрев реторты"),
+                L.of("A charcoal forge gives exactly 1000 °C on its own draught, and only in fresh air: in a stuffy room it falls short. Heat the retort with a blown fire, a person with a $(l:crafting/glassworking#blowpipe)blowpipe$() or a $(l:metalworking/bellows)bellows$(), and look at the gauge.",
+                    "Угольная кузница на своей тяге даёт ровно 1000 °C, и то лишь на свежем воздухе: в спёртой комнате не хватает. Грейте реторту раздутым огнём, человеком с $(l:crafting/glassworking#blowpipe)трубкой$() или $(l:metalworking/bellows)мехами$(), и смотрите на шкалу."))
             .titled(
                 L.of("Mercury from cinnabar", "Ртуть из киновари"),
                 L.of("Mercury boils at 357 °C, so cinnabar roasted in the open loses all its mercury as vapour, and the room stays poisoned for hours (see $(l:tfcpp/poisons#mercury)Poisons$()). In the retort it is held at 600 °C beside a condenser and runs off as $(thing)liquid mercury$(): 25 mB for each piece of cinnabar, with 1.7 moles of sulfur dioxide that escape anyway, so ventilate.$(br2)Carry mercury in a jug or a bottle. A $(thing)glass bulb$() (a glass pane) takes 5 mB for a thermometer or manometer.",

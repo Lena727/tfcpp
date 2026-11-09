@@ -19,6 +19,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.metallurgy.Hearth;
+
 /**
  * A TFC device that burns fuel, polled once per second. Each kind has a characteristic thermal power and share of carbon leaving as CO:
  * <ul>
@@ -158,8 +160,13 @@ public final class FireSource
         };
     }
 
+    /** A forge or a firepit burns faster by the share of full bellows it has, from a pipe or from wind as well; full bellows give the factor of 2. A blast furnace has only its bellows. */
     private float bellowsFactor()
     {
+        if (entity instanceof Hearth hearth)
+        {
+            return 1f + hearth.tfcpp$draught().air();
+        }
         final int air;
         if (entity instanceof AbstractFirepitBlockEntity<?> firepit) air = firepit.getAirTicks();
         else if (entity instanceof CharcoalForgeBlockEntity forge) air = forge.getAirTicks();

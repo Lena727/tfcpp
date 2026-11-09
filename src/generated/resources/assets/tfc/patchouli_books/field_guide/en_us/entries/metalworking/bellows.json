@@ -5,7 +5,11 @@
   "pages": [
     {
       "type": "patchouli:text",
-      "text": "A $(thing)Bellows$() pushes air into the device it faces, or into one a block lower than that: a $(l:getting_started/firepit)Firepit$(), a $(l:metalworking/charcoal_forge)Charcoal Forge$(), a blast furnace. More air makes the fuel burn hotter and twice as fast, and gives off twice the gas.$(br2)The blast adds at most 500 °C to the fuel. A forge on charcoal tops out at 1600 °C, so melting steel is hard, as it should be. For the gas, see $(l:tfcpp/gases#fires)Gases$() and $(l:tfcpp/poisons)Poisons$()."
+      "text": "A $(thing)Bellows$() pushes air into the device it faces, or into one a block lower than that: a $(l:getting_started/firepit)Firepit$(), a $(l:metalworking/charcoal_forge)Charcoal Forge$(), a blast furnace. More air makes the fuel burn hotter and twice as fast, and gives off twice the gas. For the gas, see $(l:tfcpp/gases#fires)Gases$() and $(l:tfcpp/poisons)Poisons$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The air sets the heat of a hearth, not the fuel. A forge on charcoal gives 1000 °C on its own draught, 1204 °C with one person blowing through a $(l:crafting/glassworking#blowpipe)blowpipe$() (the first forced draught, before there are planks for bellows), 1347 °C with two, and a full bellows adds 500 °C: 1600 °C, so melting steel is hard, as it should be. See the $(l:metalworking/charcoal_forge)Charcoal Forge$() page."
     },
     {
       "type": "patchouli:crafting",

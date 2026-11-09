@@ -28,7 +28,7 @@
     {
       "type": "patchouli:text",
       "anchor": "heat",
-      "text": "Borosilicate softens at about 820 °C and is worked from 1250 °C up to 1500 °C: hotter than that, TFC takes the glass off the pipe. A charcoal forge at 1100 °C never gets there, and with a $(l:metalworking/bellows)bellows$() it reaches 1600 °C.$(br2)Only a $(thing)ceramic$() blowpipe will serve. Brass melts at 930 °C, and a brass pipe refuses the batch, by hand and in the recipe. Sawing the glass off needs no heat.",
+      "text": "Borosilicate softens at about 820 °C and is worked from 1250 °C up to 1500 °C: hotter than that, TFC takes the glass off the pipe. A charcoal forge never gets there on its own draught (1000 °C), and one blower gives only 1204 °C. Two reach 1347 °C, and a $(l:metalworking/bellows)bellows$() 1600 °C.$(br2)Only a $(thing)ceramic$() blowpipe will serve. Brass melts at 930 °C, and a brass pipe refuses the batch, by hand and in the recipe. Sawing the glass off needs no heat.",
       "title": "The heat and the pipe"
     },
     {

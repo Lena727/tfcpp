@@ -13,6 +13,7 @@ import tfcpp.chemistry.Chemistry;
 import tfcpp.mechanics.WaterBodies;
 import tfcpp.geology.OreSurvey;
 import tfcpp.geology.Ores;
+import tfcpp.metallurgy.Blowing;
 import tfcpp.metallurgy.Metallurgy;
 import tfcpp.pneumatics.gas.GasAttachments;
 import tfcpp.pneumatics.gas.GasEvents;
@@ -43,6 +44,7 @@ public final class TFCpp
 
         NeoForge.EVENT_BUS.register(GasEvents.class);
         NeoForge.EVENT_BUS.register(PipeEvents.class);
+        NeoForge.EVENT_BUS.register(Blowing.class);
         NeoForge.EVENT_BUS.addListener(WaterBodies::onCreateFluidSource);
         NeoForge.EVENT_BUS.addListener(OreSurvey::onServerStarted);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, BorosilicateGlass::onItemStacked);

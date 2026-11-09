@@ -1,9 +1,9 @@
 {
   "category": "tfc:crafting",
   "extra_recipe_mappings": {
-    "tfc:gem_saw": 9,
-    "tfc:jacks": 8,
-    "tfc:paddle": 7,
+    "tfc:gem_saw": 10,
+    "tfc:jacks": 9,
+    "tfc:paddle": 8,
     "tfc:powder/lime": 2,
     "tfc:powder/soda_ash": 3
   },
@@ -41,6 +41,10 @@
       "anchor": "blowpipe",
       "recipe": "tfc:knapping/ceramic/unfired_blowpipe",
       "text": "Главный инструмент $(thing)стеклодувная трубка$(). Выбейте её из глины и обожгите в $(thing)керамическую трубку$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "У пустой трубки есть второе применение: она вдувает воздух в $(l:metalworking/charcoal_forge)угольную кузницу$() или костёр, так плавили первую медь."
     },
     {
       "type": "tfc:anvil_recipe",

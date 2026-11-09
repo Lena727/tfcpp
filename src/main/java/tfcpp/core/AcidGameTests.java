@@ -50,6 +50,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import tfcpp.chemistry.BorosilicateGlass;
+import tfcpp.metallurgy.Hearth;
 import tfcpp.chemistry.Distillation;
 import tfcpp.chemistry.DistillationRecipe;
 import tfcpp.chemistry.DistillationTable;
@@ -1990,13 +1991,15 @@ public final class AcidGameTests
 
         final boolean[] done = new boolean[1], received = new boolean[1];
         final float[] peak = new float[1];
+        final UUID blower = UUID.randomUUID();
+        helper.onEachTick(() -> ((Hearth) firepit).tfcpp$draught().blow(blower, helper.getLevel().getGameTime())); // The person at the fire, blowing through the pipe
         helper.runAtTickTime(2, () -> {
             for (int slot = 0; slot < 4; slot++)
             {
                 firepit.getInventory().setStackInSlot(slot, new ItemStack(Items.CHARCOAL));
             }
             helper.assertTrue(firepit.light(helper.getLevel().getBlockState(absoluteFire)), "The firepit takes the charcoal and lights");
-            // A charcoal firepit stands at 1100 C, and the sand at its default depth of 4 passes up only 236 C of that, short of the 280 C the acid needs: the person crouches and takes a layer off, which gives 290 C
+            // A charcoal firepit on natural draught stands at 1000 C, and the sand at its default depth of 4 passes up only 216 C of that, short of the 280 C the acid needs. With a person blowing through a pipe it stands at 1204 C, and the person crouches and takes a layer off: depth 3 gives 316 C, which wind does not change, as it adds nothing to a blower
             player.setShiftKeyDown(true);
             useAsPlayer(helper, player, bathPos);
             player.setShiftKeyDown(false);

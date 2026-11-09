@@ -26,6 +26,9 @@ import com.google.gson.JsonParser;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import tfcpp.metallurgy.Draught;
+import tfcpp.metallurgy.DraughtFuel;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -634,10 +637,18 @@ class GuideDataTest
     void figuresOfFuelsAndAlloysAreThoseOfTheData() throws IOException
     {
         final String forge = allText("metalworking/charcoal_forge");
-        for (String fuel : List.of("data/tfc/tfc/fuel/charcoal.json", "data/tfc/tfc/fuel/coal.json", "data/tfc/tfc/fuel/ore/lignite.json", "data/tfcpp/tfc/fuel/coke.json", "data/tfcpp/tfc/fuel/lignite_char.json"))
+        final Map<String, String> fuelItems = Map.of("data/tfc/tfc/fuel/charcoal.json", "minecraft:charcoal", "data/tfc/tfc/fuel/coal.json", "minecraft:coal", "data/tfc/tfc/fuel/ore/lignite.json", "tfc:ore/lignite", "data/tfcpp/tfc/fuel/coke.json", "tfcpp:coke", "data/tfcpp/tfc/fuel/lignite_char.json", "tfcpp:lignite_char");
+        for (Map.Entry<String, String> fuel : fuelItems.entrySet())
         {
-            final int temperature = (int) generated(fuel).get("temperature").getAsFloat();
-            assertTrue(forge.contains(temperature + " °C"), "The forge page does not give " + temperature + " °C of " + fuel);
+            // The page gives what each fuel reaches on the draught of the forge alone, with a person blowing, and on a full bellows
+            final float burn = generated(fuel.getKey()).get("temperature").getAsFloat();
+            final float natural = DraughtFuel.natural(fuel.getValue(), burn), top = Draught.fullBlastTemperature(burn);
+            final float one = Draught.temperature(natural, top, Draught.pipeAir(1), 1f), two = Draught.temperature(natural, top, Draught.pipeAir(2), 1f);
+            assertEquals(burn, DraughtFuel.of(fuel.getValue()).burnTemperature(), "The table of DraughtFuel has the burn temperature of the data for " + fuel.getValue());
+            for (float temperature : new float[] {natural, one, two, top})
+            {
+                assertTrue(forge.contains(Math.round(temperature) + " °C"), "The forge page does not give " + Math.round(temperature) + " °C of " + fuel.getKey());
+            }
         }
         final JsonObject brass = generated("data/tfc/recipe/alloy/brass.json");
         final JsonObject copper = brass.getAsJsonArray("contents").get(0).getAsJsonObject();
