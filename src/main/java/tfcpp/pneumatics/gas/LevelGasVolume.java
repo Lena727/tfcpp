@@ -16,6 +16,7 @@ import net.neoforged.neoforge.common.Tags;
 import org.jetbrains.annotations.Nullable;
 
 import tfcpp.core.ServerConfig;
+import tfcpp.ecology.RegionalAir;
 import tfcpp.geology.SeamGas;
 
 /**
@@ -23,6 +24,7 @@ import tfcpp.geology.SeamGas;
  */
 public final class LevelGasVolume implements GasVolume
 {
+    private static final int MAX_FLUE = 256;
     private static final TagKey<Block> GLASS_PANES = Tags.Blocks.GLASS_PANES;
 
     private final ServerLevel level;
@@ -220,6 +222,62 @@ public final class LevelGasVolume implements GasVolume
     {
         final @Nullable LevelChunk chunk = x >> 4 == home.getPos().x && z >> 4 == home.getPos().z ? home : chunk(x, z);
         return chunk == null ? Integer.MIN_VALUE : chunk.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x & 15, z & 15);
+    }
+
+    /**
+     * @return the air that a living thing or an instrument at this position is in: the cell of the grid, if there is one, and where the position exchanges with the open air, the larger of the cell's amount and the regional air's of each gas that the regional air carries (a sleeping cell of settled dust outdoors holds none of the smog that is around it). {@code null} if there is nothing but clean air. Allocates only when the regional air adds something.
+     */
+    @Nullable
+    public float[] breathableAir(int x, int y, int z)
+    {
+        final @Nullable float[] own = cell(x, y, z);
+        final @Nullable tfcpp.ecology.AirGrid.Cell region = RegionalAir.get(level).cellAt(x, z);
+        if (region == null || !region.hasAir() || atmosphereExchangeRate(x, y, z) <= 0f)
+        {
+            return own;
+        }
+        @Nullable float[] air = null;
+        for (tfcpp.ecology.AirSpecies species : tfcpp.ecology.AirSpecies.VALUES)
+        {
+            final int i = species.gas().ordinal();
+            final float outside = (float) region.molesPerCubicMetre(species);
+            if (outside > (own == null ? 0f : own[i]))
+            {
+                if (air == null)
+                {
+                    air = own == null ? new float[Gas.COUNT] : own.clone();
+                }
+                air[i] = outside;
+            }
+        }
+        return air != null ? air : own;
+    }
+
+    /** @return the height of the top of the flue that stands over this height of an open column: it climbs while the four sides of the column are solid, and stops where one of them is not or the column is closed above. A column with no walls has its rim where the gas came out. */
+    public int flueRim(int x, int y, int z)
+    {
+        int rim = y;
+        for (int climbed = 0; climbed < MAX_FLUE && isPassable(x, rim + 1, z); climbed++)
+        {
+            if (isPassable(x + 1, rim, z) || isPassable(x - 1, rim, z) || isPassable(x, rim, z + 1) || isPassable(x, rim, z - 1))
+            {
+                break;
+            }
+            rim++;
+        }
+        return rim;
+    }
+
+    /** Gas that has come out of an outlet under open sky, for the regional air. */
+    public void releaseToSky(int x, int foot, int rim, int z, float[] gases)
+    {
+        RegionalAir.get(level).emit(level, x, foot, rim, z, gases);
+    }
+
+    @Override
+    public Atmosphere atmosphere(int x, int z)
+    {
+        return RegionalAir.get(level).atmosphere(x, z);
     }
 
     /** Uses the heightmap and not sky light, which lags behind block changes. Leaves do not hold gas in. */

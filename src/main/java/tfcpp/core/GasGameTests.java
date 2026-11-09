@@ -128,6 +128,8 @@ public final class GasGameTests
 
     private static LevelGasVolume volume(GameTestHelper helper)
     {
+        final BlockPos site = helper.absolutePos(BlockPos.ZERO);
+        tfcpp.ecology.RegionalAir.get(helper.getLevel()).clearCellAt(site.getX(), site.getZ()); // The regional air over the site starts clean: smoke that an earlier test let out must not be breathed by this one
         return GasTracker.get(helper.getLevel()).volume(helper.getLevel());
     }
 

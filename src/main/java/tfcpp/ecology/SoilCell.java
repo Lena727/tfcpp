@@ -27,6 +27,8 @@ public final class SoilCell
     final double[] input = new double[Pollutant.COUNT];
     final double[] present = new double[Pollutant.COUNT];
     final double[] decayed = new double[Pollutant.COUNT];
+    /** For each pollutant, the cumulative fall per square metre of the regional air cell over this chunk that the soil has already taken in. */
+    final double[] claimed = new double[Pollutant.COUNT];
     /** The calendar tick that this state is as of. It never goes back. */
     long lastTick;
 
@@ -68,6 +70,7 @@ public final class SoilCell
         System.arraycopy(input, 0, copy.input, 0, Pollutant.COUNT);
         System.arraycopy(present, 0, copy.present, 0, Pollutant.COUNT);
         System.arraycopy(decayed, 0, copy.decayed, 0, Pollutant.COUNT);
+        System.arraycopy(claimed, 0, copy.claimed, 0, Pollutant.COUNT);
         copy.lastTick = lastTick;
         return copy;
     }
@@ -199,6 +202,26 @@ public final class SoilCell
             acid -= fromExchanger;
         }
         aluminium += acid; // Past base saturation 0 the acid goes on collecting, though the pH stays at its floor
+    }
+
+    /**
+     * Takes in what the regional air has let fall on this chunk since the last time: the difference between the cumulative fall per square metre and what was taken before, over the 256 square metres of the cell. Called before the cell is brought forward in time, so that the fall decays or is weathered for the whole interval; the error of that is at most the weathering flux over the interval, 0.01 eq/m2 a year, since the other pollutants of the air do not decay.
+     */
+    public void absorb(Pollutant pollutant, double cumulativePerM2)
+    {
+        final int i = pollutant.ordinal();
+        if (cumulativePerM2 > claimed[i])
+        {
+            final double fall = (cumulativePerM2 - claimed[i]) * SoilConstants.AREA;
+            claimed[i] = cumulativePerM2;
+            deposit(pollutant, fall);
+        }
+    }
+
+    /** @return the cumulative fall per square metre that has been taken in so far */
+    public double claimed(Pollutant pollutant)
+    {
+        return claimed[pollutant.ordinal()];
     }
 
     /** Brings the cell forward to this calendar tick. The clock never goes back: a tick before the last one does nothing, as when the calendar has not yet read its saved date. */

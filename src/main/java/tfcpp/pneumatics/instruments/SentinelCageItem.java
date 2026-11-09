@@ -116,7 +116,7 @@ public final class SentinelCageItem extends Item
     private static void breathe(ItemStack stack, SentinelData data, ServerLevel level, ServerPlayer player)
     {
         final BlockPos eye = BlockPos.containing(player.getEyePosition());
-        final @Nullable float[] air = GasTracker.get(level).volume(level).cell(eye.getX(), eye.getY(), eye.getZ());
+        final @Nullable float[] air = GasTracker.get(level).volume(level).breathableAir(eye.getX(), eye.getY(), eye.getZ());
 
         final float oxygen = air == null ? GasMath.OXYGEN_IN_AIR : GasMath.oxygenFraction(air);
         final float carbonMonoxide = air == null ? 0 : GasMath.ppm(air[Gas.CARBON_MONOXIDE.ordinal()]);

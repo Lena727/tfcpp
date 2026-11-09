@@ -85,7 +85,7 @@ public final class DavyLamp
             return true;
         }
         final BlockPos eye = BlockPos.containing(player.getEyePosition());
-        return burns(read(GasTracker.get(level).volume(level).cell(eye.getX(), eye.getY(), eye.getZ())));
+        return burns(read(GasTracker.get(level).volume(level).breathableAir(eye.getX(), eye.getY(), eye.getZ())));
     }
 
     /** @return the gauze temperature after this long in this reading. It heats while gas burns inside it, and cools at the same rate otherwise. */
@@ -124,7 +124,7 @@ public final class DavyLamp
 
         final ServerLevel level = player.serverLevel();
         final BlockPos eye = BlockPos.containing(player.getEyePosition());
-        final @Nullable float[] air = GasTracker.get(level).volume(level).cell(eye.getX(), eye.getY(), eye.getZ());
+        final @Nullable float[] air = GasTracker.get(level).volume(level).breathableAir(eye.getX(), eye.getY(), eye.getZ());
         final Reading reading = read(air);
 
         final BreathingState state = player.getData(GasAttachments.BREATHING);

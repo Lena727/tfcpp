@@ -90,15 +90,30 @@ public final class GasSimulator
         }
 
         final float exchange = volume.atmosphereExchangeRate(x, y, z);
+        final @Nullable Atmosphere air = exchange > 0 ? volume.atmosphere(x, z) : null;
         if (exchange > 0)
         {
-            final float remaining = (float) Math.exp(-exchange * seconds);
+            final float share = 1f - (float) Math.exp(-exchange * seconds);
             for (int i = 0; i < Gas.COUNT; i++)
             {
                 if (MOBILE[i]) // Wind carries off airborne dust with the air, but not what has settled
                 {
-                    largestChange = Math.max(largestChange, cell[i] * (1f - remaining));
-                    cell[i] *= remaining;
+                    // The cell relaxes towards the outside air and not towards nothing: what leaves goes to the outside air, and what comes in is taken from it
+                    final float outside = air == null ? 0f : air.molesPerCubicMetre(Gas.VALUES[i]);
+                    final float delta = (cell[i] - outside) * share;
+                    if (delta > 0f)
+                    {
+                        cell[i] -= delta;
+                        if (air != null)
+                        {
+                            air.receive(Gas.VALUES[i], delta);
+                        }
+                    }
+                    else if (delta < 0f && air != null)
+                    {
+                        cell[i] += air.give(Gas.VALUES[i], -delta);
+                    }
+                    largestChange = Math.max(largestChange, Math.abs(delta));
                 }
             }
         }
@@ -117,6 +132,17 @@ public final class GasSimulator
         // A cell is kept for as long as it holds anything: dust that has settled stays on its surfaces after the air above it is clean, and so does a film of liquid that is still giving off vapour
         if (!GasMath.holdsMobileContent(cell) && GasMath.settledContent(cell) < REMOVE_CELL_MOLES && !volume.holdsFilm(x, y, z))
         {
+            if (air != null)
+            {
+                // A cell that is open to the sky gives what little it holds back to the air before it goes, so that smog that flowed in is not lost with it
+                for (int i = 0; i < Gas.COUNT; i++)
+                {
+                    if (MOBILE[i] && cell[i] > 0f)
+                    {
+                        air.receive(Gas.VALUES[i], cell[i]);
+                    }
+                }
+            }
             volume.removeCell(x, y, z);
         }
     }

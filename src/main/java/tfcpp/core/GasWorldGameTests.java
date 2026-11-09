@@ -41,6 +41,7 @@ public final class GasWorldGameTests
         final BlockPos origin = helper.absolutePos(BlockPos.ZERO);
         final int chunkX = (origin.getX() >> 4) + offset, chunkZ = origin.getZ() >> 4;
         level.setChunkForced(chunkX, chunkZ, true);
+        tfcpp.ecology.RegionalAir.get(level).clearCellAt(chunkX << 4, chunkZ << 4);
         return level.getChunk(chunkX, chunkZ);
     }
 

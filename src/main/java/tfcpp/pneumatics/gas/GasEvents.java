@@ -17,6 +17,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import tfcpp.core.TickProfiler;
 import tfcpp.ecology.PollutionCommand;
+import tfcpp.ecology.RegionalAir;
 import tfcpp.geology.SeamGas;
 import tfcpp.mechanics.ShaftTracker;
 import tfcpp.pneumatics.instruments.DavyLamp;
@@ -37,6 +38,7 @@ public final class GasEvents
             final long shaftDone = System.nanoTime();
             PipeTracker.get(level).tick(level);
             final long pipeDone = System.nanoTime();
+            RegionalAir.get(level).tick(level); // Records its own time, only when it takes a step
 
             TickProfiler.PROFILE.record(TickProfiler.GAS, gasDone - start);
             TickProfiler.PROFILE.record(TickProfiler.SHAFT, shaftDone - gasDone);

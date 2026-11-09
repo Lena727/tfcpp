@@ -14,6 +14,9 @@ public enum Pollutant
     MERCURY("g"),
     ZINC("g"),
     COPPER("g"),
+    /** Antimony, from the fume of tetrahedrite and of its smelting: as toxic as arsenic at a third of the dose. */
+    ANTIMONY("g"),
+    NICKEL("g"),
     /** Coal tar and the phenols of gas liquor, in kilograms. */
     TAR("kg"),
     /** Raw sewage, in litres of it: the amount of pathogens is counted by what it was diluted from. */

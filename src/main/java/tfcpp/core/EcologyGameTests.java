@@ -70,6 +70,7 @@ public final class EcologyGameTests
         final ServerLevel level = helper.getLevel();
         final int chunkX = FIRST_CHUNK_X + slot * 8, chunkZ = CHUNK_Z;
         level.setChunkForced(chunkX, chunkZ, true);
+        tfcpp.ecology.RegionalAir.get(level).clearCellAt(chunkX << 4, chunkZ << 4); // Nothing has fallen on the site before this test
         final LevelChunk chunk = level.getChunk(chunkX, chunkZ);
         chunk.removeData(EcologyAttachments.CHUNK); // The test world is kept between runs, and these chunks with it
         return chunk;
@@ -326,7 +327,10 @@ public final class EcologyGameTests
         helper.assertTrue(Pollution.soakableOf(Metallurgy.WORK_LEAD.get()) == Soakable.LEAD, "work lead is lead");
         helper.assertTrue(Pollution.soakableOf(Metallurgy.ARSENICAL_COPPER.get()) == Soakable.ARSENICAL_COPPER, "arsenical copper");
         helper.assertTrue(Pollution.soakableOf(TFCFluids.METALS.get(Metal.ZINC).getSource()) == Soakable.ZINC, "zinc");
-        helper.assertTrue(Pollution.soakableOf(TFCFluids.METALS.get(Metal.COPPER).getSource()) == null, "pure copper leaves no record (not asked for in stage A)");
+        helper.assertTrue(Pollution.soakableOf(TFCFluids.METALS.get(Metal.COPPER).getSource()) == Soakable.COPPER, "pure copper");
+        helper.assertTrue(Pollution.soakableOf(TFCFluids.METALS.get(Metal.BRASS).getSource()) == Soakable.BRASS, "brass");
+        helper.assertTrue(Pollution.soakableOf(TFCFluids.METALS.get(Metal.NICKEL).getSource()) == Soakable.NICKEL, "nickel");
+        helper.assertTrue(Pollution.soakableOf(TFCFluids.METALS.get(Metal.TIN).getSource()) == null, "tin is not a pollutant here");
         helper.assertTrue(Pollution.soakableOf(Fluids.WATER) == null && Pollution.soakableOf(fluidOf("tfc:salt_water")) == null, "water leaves none");
         helper.succeed();
     }

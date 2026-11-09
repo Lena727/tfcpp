@@ -103,4 +103,23 @@ class SoakableTest
         final double hydrochloric = AcidVapour.unvapourised(Liquid.HYDROCHLORIC_ACID, 10.0);
         assertTrue(hydrochloric >= 0.0 && hydrochloric < 0.5, "Almost all of spirit of salt fumes, got " + hydrochloric);
     }
+
+    @Test
+    void copperAndItsAlloysRecordTheCopperAndZincAndNickelTheyHold()
+    {
+        final double[] copper = Soakable.COPPER.load(100.0);
+        assertEquals(802.0, copper[Pollutant.COPPER.ordinal()], 1e-9);
+        final double[] brass = Soakable.BRASS.load(100.0);
+        assertEquals(100.0 * 0.9 * 8.02, brass[Pollutant.COPPER.ordinal()], 1e-9);
+        assertEquals(100.0 * 0.1 * 6.57, brass[Pollutant.ZINC.ordinal()], 1e-9);
+        final double[] bronze = Soakable.BRONZE.load(100.0);
+        assertEquals(100.0 * 0.9 * 8.02, bronze[Pollutant.COPPER.ordinal()], 1e-9, "The tin is not a pollutant here");
+        assertEquals(0.0, bronze[Pollutant.ZINC.ordinal()], 0.0);
+        assertEquals(781.0, Soakable.NICKEL.load(100.0)[Pollutant.NICKEL.ordinal()], 1e-9);
+        final double[] bismuth = Soakable.BISMUTH_BRONZE.load(1.0);
+        assertEquals(0.575 / 0.975 * 8.02, bismuth[Pollutant.COPPER.ordinal()], 1e-9, "The midpoints are made up to 1");
+        assertTrue(Soakable.ROSE_GOLD.load(1.0)[Pollutant.COPPER.ordinal()] > 0.0);
+        assertTrue(Soakable.STERLING_SILVER.load(1.0)[Pollutant.COPPER.ordinal()] > 0.0);
+        assertTrue(Soakable.BLACK_BRONZE.load(1.0)[Pollutant.COPPER.ordinal()] > 0.0);
+    }
 }

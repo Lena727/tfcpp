@@ -70,7 +70,7 @@ public final class DavyLampBlock extends LampBlock
         {
             return;
         }
-        final @Nullable float[] air = GasTracker.get(level).volume(level).cell(pos.getX(), pos.getY(), pos.getZ());
+        final @Nullable float[] air = GasTracker.get(level).volume(level).breathableAir(pos.getX(), pos.getY(), pos.getZ());
         if (DavyLamp.burns(DavyLamp.read(air)))
         {
             level.scheduleTick(pos, this, CHECK_TICKS);
@@ -93,7 +93,7 @@ public final class DavyLampBlock extends LampBlock
         if (state.getValue(LIT) && random.nextFloat() < 0.5f)
         {
             final GasTracker tracker = GasTracker.get(level);
-            final @Nullable float[] air = tracker.volume(level).cell(pos.getX(), pos.getY(), pos.getZ());
+            final @Nullable float[] air = tracker.volume(level).breathableAir(pos.getX(), pos.getY(), pos.getZ());
             if (air != null && Flammability.isFlammable(air))
             {
                 tracker.queueIgnition(pos);
@@ -110,7 +110,7 @@ public final class DavyLampBlock extends LampBlock
             {
                 if (level instanceof ServerLevel serverLevel)
                 {
-                    final @Nullable float[] air = GasTracker.get(serverLevel).volume(serverLevel).cell(pos.getX(), pos.getY(), pos.getZ());
+                    final @Nullable float[] air = GasTracker.get(serverLevel).volume(serverLevel).breathableAir(pos.getX(), pos.getY(), pos.getZ());
                     player.displayClientMessage(Component.translatable(DavyLamp.read(air).translationKey()), true);
                 }
                 return ItemInteractionResult.sidedSuccess(level.isClientSide);

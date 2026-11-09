@@ -51,7 +51,8 @@ public final class Breathing
     {
         final ServerLevel level = player.serverLevel();
         final BlockPos mouth = BlockPos.containing(player.getEyePosition());
-        final @Nullable float[] air = GasTracker.get(level).volume(level).cell(mouth.getX(), mouth.getY(), mouth.getZ());
+        final LevelGasVolume volume = GasTracker.get(level).volume(level);
+        final @Nullable float[] air = volume.breathableAir(mouth.getX(), mouth.getY(), mouth.getZ()); // The larger of the cell and the regional air, at a place that exchanges with the open air
 
         if (air == null && !player.hasData(GasAttachments.BREATHING))
         {

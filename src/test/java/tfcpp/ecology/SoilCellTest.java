@@ -382,4 +382,37 @@ class SoilCellTest
         final CompoundTag tag = PollutionChunkData.SERIALIZER.write(data, null);
         assertNotNull(tag);
     }
+
+    @Test
+    void aSoilTakesInTheFallFromTheAirOnceAndOnlyTheDifference()
+    {
+        final SoilCell cell = cell(SoilOrder.PODZOL, false);
+        cell.absorb(Pollutant.ARSENIC, 0.5);
+        assertEquals(0.5 * SoilConstants.AREA, cell.total(Pollutant.ARSENIC), 1e-9);
+        cell.absorb(Pollutant.ARSENIC, 0.5);
+        assertEquals(0.5 * SoilConstants.AREA, cell.total(Pollutant.ARSENIC), 1e-9, "The same counter again adds nothing");
+        cell.absorb(Pollutant.ARSENIC, 0.75);
+        assertEquals(0.75 * SoilConstants.AREA, cell.total(Pollutant.ARSENIC), 1e-9);
+        cell.absorb(Pollutant.ARSENIC, 0.1);
+        assertEquals(0.75 * SoilConstants.AREA, cell.total(Pollutant.ARSENIC), 1e-9, "A counter never runs back");
+        final double before = cell.pH();
+        cell.absorb(Pollutant.ACIDITY, 2.0);
+        assertTrue(cell.pH() < before, "Acid from the air acidifies like any other");
+        assertEquals(2.0 * SoilConstants.AREA, cell.totalInput(Pollutant.ACIDITY), 1e-9);
+        final SoilCell saved = PollutionChunkData.load(PollutionChunkData.save(cell));
+        assertEquals(0.75, saved.claimed(Pollutant.ARSENIC), 0.0, "What was taken in is saved with the soil");
+        assertEquals(0.75, cell.copy().claimed(Pollutant.ARSENIC), 0.0);
+    }
+
+    @Test
+    void aSoilThatWasNeverTouchedClaimsTheWholeHistoryWhenFirstTouched()
+    {
+        final SoilCell late = cell(SoilOrder.ENTISOL, false), early = cell(SoilOrder.ENTISOL, false);
+        for (double counter : new double[] {0.1, 0.4, 0.9, 1.5})
+        {
+            early.absorb(Pollutant.LEAD, counter);
+        }
+        late.absorb(Pollutant.LEAD, 1.5);
+        assertEquals(early.total(Pollutant.LEAD), late.total(Pollutant.LEAD), 1e-9, "The cumulative counter makes it exact");
+    }
 }

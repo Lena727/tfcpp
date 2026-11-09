@@ -19,10 +19,19 @@ public enum Soakable
     SULFURIC_ACID(Liquid.SULFURIC_ACID),
     NITRIC_ACID(Liquid.NITRIC_ACID),
     HYDROCHLORIC_ACID(Liquid.HYDROCHLORIC_ACID),
-    MERCURY(null),
-    LEAD(null),
-    ZINC(null),
-    ARSENICAL_COPPER(null);
+    MERCURY((Liquid) null),
+    LEAD((Liquid) null),
+    ZINC((Liquid) null),
+    ARSENICAL_COPPER((Liquid) null),
+    /** Pure copper and the alloys of TFC that hold it, by the midpoints of the ranges of TFC's own alloy recipes (volume fractions of the molten metals, made up to 1). Only the metals that are pollutants here are recorded: tin, silver, gold and bismuth are not. */
+    COPPER(mix(1.0, 0, 0, 0, 0, 0, 0)),
+    BRONZE(mix(0.90, 0, 0, 0.10, 0, 0, 0)),
+    BISMUTH_BRONZE(mix(0.575, 0.25, 0, 0, 0.15, 0, 0)),
+    BLACK_BRONZE(mix(0.60, 0, 0, 0, 0, 0.175, 0.175)),
+    BRASS(mix(0.90, 0.10, 0, 0, 0, 0, 0)),
+    ROSE_GOLD(mix(0.225, 0, 0, 0, 0, 0, 0.775)),
+    STERLING_SILVER(mix(0.30, 0, 0, 0, 0, 0.70, 0)),
+    NICKEL(mix(0, 0, 1.0, 0, 0, 0, 0));
 
     /**
      * Grams per millilitre of the metal as it runs out of a pipe, which is molten: lead from our fluid type (10 660 kg/m3), mercury from ours (13 530), zinc as the liquid metal (6.57, CRC Handbook), and arsenical copper from ours (8 000).
@@ -48,11 +57,37 @@ public enum Soakable
     public static final double PYROLIGNEOUS_TAR_GRAMS_PER_LITRE = 15.0;
     // Wood spirit (methanol and acetone) has no entry: both are eaten by soil bacteria within days and leave nothing behind that this model counts.
 
+    /** Grams per millilitre of molten metal, CRC Handbook near the melting points. Kept in a class of their own so that the constants of the enum can use them. */
+    private static final class Density
+    {
+        static final double COPPER = 8.02, ZINC = 6.57, NICKEL = 7.81, TIN = 6.99, BISMUTH = 10.05, SILVER = 9.32, GOLD = 17.31;
+    }
+
     private final @Nullable Liquid liquid;
+    /** For a metal of TFC: grams of copper, zinc and nickel in a millilitre of it. */
+    private final double copperPerMl, zincPerMl, nickelPerMl;
 
     Soakable(@Nullable Liquid liquid)
     {
         this.liquid = liquid;
+        this.copperPerMl = 0.0;
+        this.zincPerMl = 0.0;
+        this.nickelPerMl = 0.0;
+    }
+
+    Soakable(double[] grams)
+    {
+        this.liquid = null;
+        this.copperPerMl = grams[0];
+        this.zincPerMl = grams[1];
+        this.nickelPerMl = grams[2];
+    }
+
+    /** @return grams of copper, zinc and nickel in a millilitre of an alloy of these volume fractions (which are made up to 1) */
+    private static double[] mix(double copper, double zinc, double nickel, double tin, double bismuth, double silver, double gold)
+    {
+        final double total = copper + zinc + nickel + tin + bismuth + silver + gold;
+        return new double[] {copper / total * Density.COPPER, zinc / total * Density.ZINC, nickel / total * Density.NICKEL};
     }
 
     /** @return the record that a chemical liquid leaves in the soil, or {@code null} if it leaves none */
@@ -103,6 +138,12 @@ public enum Soakable
             {
                 result[Pollutant.ARSENIC.ordinal()] = millibuckets * ARSENICAL_COPPER_DENSITY * ARSENICAL_COPPER_ARSENIC_FRACTION;
                 result[Pollutant.COPPER.ordinal()] = millibuckets * ARSENICAL_COPPER_DENSITY * (1.0 - ARSENICAL_COPPER_ARSENIC_FRACTION);
+            }
+            case COPPER, BRONZE, BISMUTH_BRONZE, BLACK_BRONZE, BRASS, ROSE_GOLD, STERLING_SILVER, NICKEL ->
+            {
+                result[Pollutant.COPPER.ordinal()] = millibuckets * copperPerMl;
+                result[Pollutant.ZINC.ordinal()] = millibuckets * zincPerMl;
+                result[Pollutant.NICKEL.ordinal()] = millibuckets * nickelPerMl;
             }
         }
         return result;

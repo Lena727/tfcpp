@@ -1,6 +1,8 @@
 package tfcpp.ecology;
 
+import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import net.dries007.tfc.common.fluids.TFCFluids;
 import net.dries007.tfc.util.Metal;
@@ -92,6 +94,26 @@ public final class Pollution
         }
     }
 
+    private static @Nullable Map<Metal, Soakable> metalSoakables;
+
+    private static Map<Metal, Soakable> metalSoakables()
+    {
+        if (metalSoakables == null)
+        {
+            final Map<Metal, Soakable> map = new EnumMap<>(Metal.class);
+            map.put(Metal.COPPER, Soakable.COPPER);
+            map.put(Metal.BRONZE, Soakable.BRONZE);
+            map.put(Metal.BISMUTH_BRONZE, Soakable.BISMUTH_BRONZE);
+            map.put(Metal.BLACK_BRONZE, Soakable.BLACK_BRONZE);
+            map.put(Metal.BRASS, Soakable.BRASS);
+            map.put(Metal.ROSE_GOLD, Soakable.ROSE_GOLD);
+            map.put(Metal.STERLING_SILVER, Soakable.STERLING_SILVER);
+            map.put(Metal.NICKEL, Soakable.NICKEL);
+            metalSoakables = map;
+        }
+        return metalSoakables;
+    }
+
     /** @return the record that a fluid leaves in soil, or {@code null} if it leaves none */
     @Nullable
     public static Soakable soakableOf(Fluid fluid)
@@ -118,6 +140,13 @@ public final class Pollution
         {
             return Soakable.ZINC;
         }
+        for (Map.Entry<Metal, Soakable> entry : metalSoakables().entrySet())
+        {
+            if (type == TFCFluids.METALS.get(entry.getKey()).getType())
+            {
+                return entry.getValue();
+            }
+        }
         return null;
     }
 
@@ -132,11 +161,14 @@ public final class Pollution
             if (cell != null)
             {
                 final SoilCell copy = cell.copy();
+                claim(level, chunk, copy);
                 copy.catchUp(now);
                 return copy;
             }
         }
-        return SoilReader.pristine(level, chunk, now);
+        final SoilCell pristine = SoilReader.pristine(level, chunk, now);
+        claim(level, chunk, pristine);
+        return pristine;
     }
 
     /** @return {@code true} if something has been put into the chunk at this position, so that it keeps a cell */
@@ -151,6 +183,14 @@ public final class Pollution
     {
         final LevelChunk chunk = level.getChunkAt(pos);
         final SoilCell cell = SoilCell.fresh(order, carbonateBedrock, now());
+        final @Nullable AirGrid.Cell region = RegionalAir.get(level).grid().cellAt(chunk.getPos().x >> 3, chunk.getPos().z >> 3);
+        if (region != null)
+        {
+            for (Pollutant pollutant : RegionalAir.FALLING)
+            {
+                cell.claimed[pollutant.ordinal()] = region.cumulative(pollutant); // A known start: what has fallen already is not this soil's
+            }
+        }
         chunk.getData(EcologyAttachments.CHUNK).set(cell);
         chunk.setUnsaved(true);
         return cell;
@@ -166,10 +206,21 @@ public final class Pollution
             cell = SoilReader.pristine(level, chunk, now);
             data.set(cell);
         }
-        else
-        {
-            cell.catchUp(now);
-        }
+        claim(level, chunk, cell); // First what fell from the air, then the passage of time: see SoilCell#absorb
+        cell.catchUp(now);
         return cell;
+    }
+
+    /** Takes in what the regional air has let fall on the chunk since this soil last looked. */
+    private static void claim(ServerLevel level, LevelChunk chunk, SoilCell cell)
+    {
+        final @Nullable AirGrid.Cell region = RegionalAir.get(level).grid().cellAt(chunk.getPos().x >> 3, chunk.getPos().z >> 3);
+        if (region != null)
+        {
+            for (Pollutant pollutant : RegionalAir.FALLING)
+            {
+                cell.absorb(pollutant, region.cumulative(pollutant));
+            }
+        }
     }
 }

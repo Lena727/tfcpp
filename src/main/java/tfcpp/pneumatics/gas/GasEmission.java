@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * How hot gas from a furnace enters the air. It rises as a plume until it hits a ceiling, then cools and spreads down from there, the way a smoke layer fills a room. Under open sky or up a chimney it is simply gone.
+ * How hot gas from a furnace enters the air. It rises as a plume until it hits a ceiling, then cools and spreads down from there, the way a smoke layer fills a room. Under open sky or up a chimney it goes into the regional air, see {@code RegionalAir}.
  */
 public final class GasEmission
 {
@@ -120,7 +120,8 @@ public final class GasEmission
         {
             if (volume.isOpenToSky(x, y, z))
             {
-                return; // Goes straight into the atmosphere, without creating any cells
+                volume.releaseToSky(x, y, volume.flueRim(x, y, z), z, gases); // Goes straight into the atmosphere, without creating any cells: the regional air takes what falls out of it
+                return;
             }
             if (!volume.isPassable(x, y + 1, z))
             {

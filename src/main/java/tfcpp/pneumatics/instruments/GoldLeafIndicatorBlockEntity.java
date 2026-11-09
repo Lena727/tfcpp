@@ -65,7 +65,7 @@ public final class GoldLeafIndicatorBlockEntity extends BlockEntity
             return;
         }
         final BlockPos pos = getBlockPos();
-        final @Nullable float[] cell = GasTracker.get(level).volume(level).cell(pos.getX(), pos.getY(), pos.getZ());
+        final @Nullable float[] cell = GasTracker.get(level).volume(level).breathableAir(pos.getX(), pos.getY(), pos.getZ());
         if (cell == null)
         {
             return;

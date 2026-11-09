@@ -43,6 +43,13 @@ public interface GasVolume
         return false;
     }
 
+    /** @return the open air outside the grid at this position, which a cell exchanges with, or {@code null} if the volume has none and what leaves is simply gone */
+    @Nullable
+    default Atmosphere atmosphere(int x, int z)
+    {
+        return null;
+    }
+
     /** @return the fraction of gas per second escaping to the atmosphere from this position */
     float atmosphereExchangeRate(int x, int y, int z);
 }
