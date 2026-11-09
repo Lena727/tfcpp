@@ -20,6 +20,7 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
 import tfcpp.chemistry.Remainder;
+import tfcpp.ecology.Pollution;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasEmission;
 import tfcpp.pneumatics.instruments.DustStore;
@@ -226,7 +227,7 @@ public final class CondensationTowerBlockEntity extends BlockEntity
     }
 
     /**
-     * Breaking the tower open drops the whole items of powder and lets the rest blow away as dust, as for a baffle. The mercury in the tank, and the fraction of a millibucket not yet in it, evaporates into the room.
+     * Breaking the tower open drops the whole items of powder and lets the rest blow away as dust, as for a baffle. The mercury in the tank, and the fraction of a millibucket not yet in it, runs into the ground if the tower is cold, and evaporates into the room if it is hot.
      */
     public void dropContents()
     {
@@ -238,9 +239,19 @@ public final class CondensationTowerBlockEntity extends BlockEntity
         final float millibuckets = tank.getFluidAmount() + (float) carry.pending();
         if (millibuckets > 0f && level instanceof ServerLevel server)
         {
-            final float[] gases = new float[Gas.COUNT];
-            gases[Gas.MERCURY_VAPOR.ordinal()] = millibuckets * MOLES_PER_MILLIBUCKET;
-            GasEmission.release(server, worldPosition, gases);
+            final @Nullable PipeNetwork network = PipeTracker.get(server).networkAt(worldPosition);
+            if (network != null && !TowerCondensation.catchesMercury(network.contents().temperature))
+            {
+                // A hot charge flashes to vapour in the room
+                final float[] gases = new float[Gas.COUNT];
+                gases[Gas.MERCURY_VAPOR.ordinal()] = millibuckets * MOLES_PER_MILLIBUCKET;
+                GasEmission.release(server, worldPosition, gases);
+            }
+            else
+            {
+                // Cold liquid mercury, below 100 C, does not evaporate to speak of: it runs into the ground
+                Pollution.soak(server, worldPosition, Metallurgy.MERCURY.get(), millibuckets);
+            }
         }
         tank.setFluid(FluidStack.EMPTY);
         carry = new Remainder();

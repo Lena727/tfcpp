@@ -16,6 +16,7 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import tfcpp.core.TickProfiler;
+import tfcpp.ecology.PollutionCommand;
 import tfcpp.geology.SeamGas;
 import tfcpp.mechanics.ShaftTracker;
 import tfcpp.pneumatics.instruments.DavyLamp;
@@ -123,6 +124,7 @@ public final class GasEvents
     public static void onRegisterCommands(RegisterCommandsEvent event)
     {
         GasCommand.register(event.getDispatcher());
+        PollutionCommand.register(event.getDispatcher());
     }
 
     private GasEvents() {}

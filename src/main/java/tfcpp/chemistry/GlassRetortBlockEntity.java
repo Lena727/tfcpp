@@ -40,6 +40,7 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import tfcpp.ecology.Pollution;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasEmission;
 
@@ -497,7 +498,7 @@ public final class GlassRetortBlockEntity extends BlockEntity implements IHeatCo
         {
             if (!tank.isEmpty())
             {
-                corrosive |= addVapour(gases, tank.fluid(), tank.litres());
+                corrosive |= addVapour(server, worldPosition, gases, tank.fluid(), tank.litres());
             }
         }
         for (FluidTank tank : new FluidTank[] {receiver, residue})
@@ -505,7 +506,7 @@ public final class GlassRetortBlockEntity extends BlockEntity implements IHeatCo
             if (!tank.isEmpty())
             {
                 final Fluid fluid = tank.getFluid().getFluid();
-                corrosive |= addVapour(gases, fluid, tank.getFluidAmount() + pending(fluid));
+                corrosive |= addVapour(server, worldPosition, gases, fluid, tank.getFluidAmount() + pending(fluid));
             }
         }
         if (active && batchRecipe != null)
@@ -514,10 +515,10 @@ public final class GlassRetortBlockEntity extends BlockEntity implements IHeatCo
             if (holder != null && holder.value() instanceof DistillationRecipe recipe)
             {
                 final double left = 1.0 - progress / (dry ? recipe.unabsorbed() : recipe.batch()).seconds();
-                corrosive |= addVapour(gases, recipe.fluid().fluid(), recipe.fluid().litres() * left);
+                corrosive |= addVapour(server, worldPosition, gases, recipe.fluid().fluid(), recipe.fluid().litres() * left);
                 if (recipe.reagent().isPresent())
                 {
-                    corrosive |= addVapour(gases, recipe.reagent().get().fluid(), recipe.reagent().get().litres() * left);
+                    corrosive |= addVapour(server, worldPosition, gases, recipe.reagent().get().fluid(), recipe.reagent().get().litres() * left);
                 }
                 Containers.dropItemStack(server, x, y, z, recipe.chargeStack((int) Math.floor(recipe.items() * left + EPSILON)));
                 final double done = 1.0 - left;
@@ -546,13 +547,15 @@ public final class GlassRetortBlockEntity extends BlockEntity implements IHeatCo
     }
 
     /** @return {@code true} if the liquid is a corrosive one */
-    private static boolean addVapour(float[] gases, Fluid fluid, double litres)
+    private static boolean addVapour(ServerLevel server, BlockPos pos, float[] gases, Fluid fluid, double litres)
     {
         final @Nullable Liquid liquid = Chemistry.liquidOf(fluid);
         if (liquid == null)
         {
             return false;
         }
+        // What does not go up as vapour runs over the floor and into the ground: all of a tar or a sulfuric acid, and the part of a fuming acid that stayed liquid
+        Pollution.soak(server, pos, fluid, AcidVapour.unvapourised(liquid, litres));
         final float[] vapour = AcidVapour.of(liquid, litres);
         for (int i = 0; i < Gas.COUNT; i++)
         {
@@ -664,7 +667,7 @@ public final class GlassRetortBlockEntity extends BlockEntity implements IHeatCo
             if (!tank.isEmpty() && tank.wholeMillibuckets() == 0)
             {
                 found = true;
-                corrosive |= addVapour(gases, tank.fluid(), tank.litres());
+                corrosive |= addVapour(server, worldPosition, gases, tank.fluid(), tank.litres());
                 tank.clear();
             }
         }

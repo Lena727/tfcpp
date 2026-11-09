@@ -62,6 +62,16 @@ public final class PistonPumpBlock extends HorizontalDirectionalBlock implements
     }
 
     @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
+    {
+        if (!state.is(newState.getBlock()) && level instanceof ServerLevel server && level.getBlockEntity(pos) instanceof PistonPumpBlockEntity pump)
+        {
+            pump.soakHeld(server);
+        }
+        super.onRemove(state, level, pos, newState, isMoving);
+    }
+
+    @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
     {
         return new PistonPumpBlockEntity(pos, state);

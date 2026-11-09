@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import tfcpp.chemistry.Chemistry;
 import tfcpp.chemistry.CorrosiveSpill;
+import tfcpp.ecology.Pollution;
 import tfcpp.core.ServerConfig;
 import tfcpp.pneumatics.gas.GasAttachments;
 import tfcpp.pneumatics.gas.GasIgnition;
@@ -37,6 +38,7 @@ public final class PipeTracker
     /** A wall that has lost more than this is scrap, so that breaking and replacing a pipe does not mend it: a block gives itself back only while it is above 95% whole. */
     public static final float KEEPS_ABOVE = 0.95f;
     private static final int MAX_SPILLED_BLOCKS = 64;
+    private static final float LITRES_PER_BLOCK = 1000f;
     /** A hand wheel is not turned twice in a second: the network is rebuilt at every turn. */
     private static final long VALVE_COOLDOWN_TICKS = 20L;
     private static final int VALVE_CLICKS_KEPT = 256;
@@ -494,13 +496,13 @@ public final class PipeTracker
         contents.air = PipePhysics.moles(1f, Math.max(contents.temperature, 1f), volume);
 
         final boolean corrosive = (litres > 0f && fluid.is(Chemistry.CORROSIVE)) || (runoff > 0f && runoffFluid.is(Chemistry.CORROSIVE));
-        if (litres >= 1000f)
+        if (litres > 0f)
         {
-            spill(level, hole, fluid, Math.min((int) (litres / 1000f), MAX_SPILLED_BLOCKS));
+            spillAndSoak(level, hole, fluid, litres);
         }
-        if (runoff >= 1000f)
+        if (runoff > 0f)
         {
-            spill(level, hole, runoffFluid, Math.min((int) (runoff / 1000f), MAX_SPILLED_BLOCKS));
+            spillAndSoak(level, hole, runoffFluid, runoff);
         }
         if (corrosive)
         {
@@ -527,10 +529,7 @@ public final class PipeTracker
             final float litres = part == 0 ? rejected.litres : rejected.runoff;
             if (fluid != null && litres > 0f)
             {
-                if (litres >= 1000f)
-                {
-                    spill(level, pos, fluid, Math.min((int) (litres / 1000f), MAX_SPILLED_BLOCKS));
-                }
+                spillAndSoak(level, pos, fluid, litres);
                 if (fluid.is(Chemistry.CORROSIVE))
                 {
                     CorrosiveSpill.at(level, pos);
@@ -544,17 +543,39 @@ public final class PipeTracker
      *
      * @return {@code false} if there is no such place
      */
-    static boolean placeBlock(ServerLevel level, BlockPos outlet, Fluid fluid)
+    public static boolean placeBlock(ServerLevel level, BlockPos outlet, Fluid fluid)
     {
         if (spill(level, outlet, fluid, 1) < 1)
         {
             return false;
+        }
+        if (!hasBlock(fluid))
+        {
+            Pollution.soak(level, outlet, fluid, LITRES_PER_BLOCK); // A liquid with no block of its own went into the ground
         }
         if (fluid.is(Chemistry.CORROSIVE)) // A whole block of it on the ground splashes whoever is by it
         {
             CorrosiveSpill.at(level, outlet);
         }
         return true;
+    }
+
+    /** @return {@code true} if this liquid has a block of its own that can be put down: our chemical liquids, mercury and molten metals have none */
+    private static boolean hasBlock(Fluid fluid)
+    {
+        return !fluid.defaultFluidState().createLegacyBlock().isAir();
+    }
+
+    /**
+     * Puts the whole blocks of what ran out on the ground around a hole, and gives the rest to the soil: less than a block of any liquid, what could not be put down, and every litre of a liquid with no block of its own.
+     *
+     * @param millibuckets how much came out, which is a litre of a chemical liquid for each
+     */
+    private static void spillAndSoak(ServerLevel level, BlockPos hole, Fluid fluid, float millibuckets)
+    {
+        final int whole = Math.min((int) (millibuckets / LITRES_PER_BLOCK), MAX_SPILLED_BLOCKS);
+        final int placed = whole >= 1 && hasBlock(fluid) ? spill(level, hole, fluid, whole) : 0;
+        Pollution.soak(level, hole, fluid, millibuckets - placed * LITRES_PER_BLOCK);
     }
 
     /**

@@ -1,5 +1,6 @@
 package tfcpp.chemistry;
 
+import tfcpp.ecology.Soakable;
 import tfcpp.pneumatics.gas.Gas;
 
 /**
@@ -30,6 +31,22 @@ public final class AcidVapour
             default -> {} // Sulfuric and chamber acid: steam only. Tar, liquors and spirit are not gases of the mod.
         }
         return gases;
+    }
+
+    /**
+     * @param liquid the liquid that is let go
+     * @param litres how much of it
+     * @return the litres of it that do not go up as fume and are left on the floor: all of a liquid with no vapour in the model, and for the two fuming acids the share of their acid that the fume does not account for
+     */
+    public static double unvapourised(Liquid liquid, double litres)
+    {
+        final double fumed = switch (liquid)
+        {
+            case NITRIC_ACID -> NITROGEN_OXIDES_PER_LITRE / Soakable.equivalentsPerLitre(Liquid.NITRIC_ACID, Soakable.NITRIC_ACID_FRACTION, Soakable.HNO3_MOLAR_MASS, 1);
+            case HYDROCHLORIC_ACID -> HYDROGEN_CHLORIDE_PER_LITRE / Soakable.equivalentsPerLitre(Liquid.HYDROCHLORIC_ACID, Soakable.HYDROCHLORIC_ACID_FRACTION, Soakable.HCL_MOLAR_MASS, 1);
+            default -> 0.0;
+        };
+        return litres * (1.0 - Math.min(fumed, 1.0));
     }
 
     private AcidVapour() {}

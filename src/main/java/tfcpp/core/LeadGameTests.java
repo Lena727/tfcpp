@@ -792,9 +792,15 @@ public final class LeadGameTests
         final CondensationTowerBlockEntity tower = towerAt(helper, TOWER);
         tower.dust().add(Gas.ARSENIC_TRIOXIDE, 0.6f); // Two powders and a tenth of a mole
         tower.tank().fill(new FluidStack(Metallurgy.MERCURY.get(), 50), IFluidHandler.FluidAction.EXECUTE);
-        helper.getLevel().destroyBlock(helper.absolutePos(TOWER), false);
+        // A hot tower, above 100 C, flashes its mercury to vapour. A cold one lets it run into the ground, which the ecology tests check
+        helper.runAtTickTime(3, () -> {
+            final @Nullable PipeNetwork network = PipeTracker.get(helper.getLevel()).networkAt(helper.absolutePos(TOWER));
+            helper.assertTrue(network != null, "The tower forms a network of its own");
+            network.contents().temperature = 450f;
+            helper.getLevel().destroyBlock(helper.absolutePos(TOWER), false);
+        });
 
-        helper.runAfterDelay(1, () -> {
+        helper.runAtTickTime(5, () -> {
             helper.assertTrue(droppedItems(helper, TOWER, Instruments.ARSENIC_TRIOXIDE.get()) == 2, "Two whole powders drop, got " + droppedItems(helper, TOWER, Instruments.ARSENIC_TRIOXIDE.get()));
             // Dust settles out of the air at once, so what has blown away is the air and the settled part of it together
             final float blown = totalInBox(helper, 5, 3, Gas.ARSENIC_TRIOXIDE) + helper.getLevel().getChunkAt(helper.absolutePos(TOWER)).getData(GasAttachments.CHUNK).deposit(Gas.ARSENIC_TRIOXIDE);

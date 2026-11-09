@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -32,6 +33,7 @@ import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.ecology.Pollution;
 import tfcpp.metallurgy.Metallurgy;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasEmission;
@@ -249,7 +251,12 @@ public final class CokeOvenBlockEntity extends BlockEntity implements IHeatConsu
             collect(recipe.tar(), step.tar(), tarTank);
             collect(recipe.liquor(), step.liquor(), liquorTank);
         }
-        // Without a condenser the vapours of tar and liquor simply escape and are lost, and the gas is no less for it
+        else
+        {
+            // Without a condenser the vapours of tar and liquor escape and cool and condense close by: they soak into the ground around the oven. Stage B may later send part of them to the atmosphere
+            Pollution.soak(level, worldPosition, recipe.tar().fluid(), step.tar());
+            Pollution.soak(level, worldPosition, recipe.liquor().fluid(), step.liquor());
+        }
 
         final float[] gases = new float[Gas.COUNT];
         for (int i = 0; i < Gas.COUNT; i++)
@@ -479,6 +486,28 @@ public final class CokeOvenBlockEntity extends BlockEntity implements IHeatConsu
             }
         }
         Containers.dropItemStack(level, x, y, z, product);
+
+        // Tar and liquor run out of the broken oven into the ground, with the part of a millibucket of each that was still waiting to be counted, whether or not its tank has anything in it
+        if (level instanceof ServerLevel server)
+        {
+            final Map<Fluid, Double> soaked = new HashMap<>();
+            for (FluidTank tank : new FluidTank[] {tarTank, liquorTank})
+            {
+                if (!tank.isEmpty())
+                {
+                    soaked.merge(tank.getFluid().getFluid(), (double) tank.getFluidAmount(), Double::sum);
+                }
+            }
+            for (Map.Entry<String, Remainder> entry : carry.entrySet())
+            {
+                final @Nullable ResourceLocation id = ResourceLocation.tryParse(entry.getKey());
+                if (id != null && BuiltInRegistries.FLUID.containsKey(id) && entry.getValue().pending() > 0.0)
+                {
+                    soaked.merge(BuiltInRegistries.FLUID.get(id), entry.getValue().pending(), Double::sum);
+                }
+            }
+            soaked.forEach((fluid, millibuckets) -> Pollution.soak(server, worldPosition, fluid, millibuckets));
+        }
     }
 
     @Override

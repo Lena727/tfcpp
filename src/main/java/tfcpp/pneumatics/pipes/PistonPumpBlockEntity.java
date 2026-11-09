@@ -27,6 +27,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.ecology.Pollution;
 import tfcpp.mechanics.ShaftPhysics;
 import tfcpp.pneumatics.gas.GasTracker;
 import tfcpp.pneumatics.gas.LevelGasVolume;
@@ -93,6 +94,18 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
         super.loadAdditional(tag, provider);
         heldLitres = tag.getFloat("heldLitres");
         heldLiquid = tag.getString("heldLiquid");
+    }
+
+    /** Breaking the pump lets out what it was holding between strokes, which runs into the ground. */
+    public void soakHeld(ServerLevel level)
+    {
+        final @Nullable Fluid fluid = PipeNetwork.fluidOf(heldLiquid);
+        if (heldLitres > 0f && fluid != null)
+        {
+            Pollution.soak(level, worldPosition, fluid, heldLitres);
+        }
+        heldLitres = 0f;
+        heldLiquid = "";
     }
 
     /** @return the torque this takes from the shaft; a pump that is not turning is still loaded by the pressure it stands against, which is what holds a shaft that the load has stopped */

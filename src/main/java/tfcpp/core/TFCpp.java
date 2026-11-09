@@ -10,6 +10,7 @@ import net.neoforged.neoforge.common.NeoForge;
 
 import tfcpp.chemistry.BorosilicateGlass;
 import tfcpp.chemistry.Chemistry;
+import tfcpp.ecology.EcologyAttachments;
 import tfcpp.mechanics.WaterBodies;
 import tfcpp.geology.OreSurvey;
 import tfcpp.geology.Ores;
@@ -36,6 +37,7 @@ public final class TFCpp
         container.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
 
         GasAttachments.TYPES.register(modBus);
+        EcologyAttachments.TYPES.register(modBus);
         Ores.load();
         Metallurgy.register(modBus);
         Instruments.register(modBus);

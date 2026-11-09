@@ -14,6 +14,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -22,6 +23,7 @@ import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.ecology.Pollution;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.pipes.PipeContents;
 import tfcpp.pneumatics.pipes.PipeNetwork;
@@ -223,6 +225,13 @@ public final class LeadChamberBlockEntity extends BlockEntity
         if (!tank.isEmpty())
         {
             CorrosiveSpill.at(level, worldPosition);
+        }
+        final double drops = carry.pending();
+        if (!tank.isEmpty() || drops > 0.0)
+        {
+            // The acid goes into the ground under the chamber, with the part of a millibucket that was still waiting to be counted
+            final Fluid acid = tank.isEmpty() ? Chemistry.fluid(Liquid.CHAMBER_ACID) : tank.getFluid().getFluid();
+            Pollution.soak(level, worldPosition, acid, tank.getFluidAmount() + drops);
         }
         tank.setFluid(FluidStack.EMPTY);
         carry = new Remainder();
