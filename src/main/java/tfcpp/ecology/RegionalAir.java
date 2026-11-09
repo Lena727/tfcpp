@@ -39,6 +39,7 @@ public final class RegionalAir extends SavedData
     private final AirGrid grid = new AirGrid();
     private double carbonMoles;
     private long lastHour = Long.MIN_VALUE;
+    private long lastSweepDay = Long.MIN_VALUE;
     private long forcedHours;
     private @Nullable AirWeather weather;
     private @Nullable LevelAirWeather skyWeather;
@@ -53,6 +54,20 @@ public final class RegionalAir extends SavedData
     public AirGrid grid()
     {
         return grid;
+    }
+
+    /** @return the annual mean of sulfur dioxide in ug/m3 over this block, as of the calendar now; 0 where nothing was ever in the air */
+    public double annualSo2(int x, int z)
+    {
+        final @Nullable AirGrid.Cell cell = grid.cellAt(x >> 7, z >> 7);
+        return cell == null ? 0.0 : cell.annualSo2(AirCadence.hourOf(Calendars.SERVER.getCalendarTicks()));
+    }
+
+    /** @return the present concentration of sulfur dioxide in ug/m3 over this block */
+    public double so2Now(int x, int z)
+    {
+        final @Nullable AirGrid.Cell cell = grid.cellAt(x >> 7, z >> 7);
+        return cell == null ? 0.0 : cell.microgramsPerCubicMetre(AirSpecies.SULFUR_DIOXIDE);
     }
 
     /** @return moles of carbon dioxide, and of monoxide that turns to it within months, that have gone into the open air of this level */
@@ -283,6 +298,16 @@ public final class RegionalAir extends SavedData
     /** Called every tick of the level: does nothing until an hour of the calendar has passed. */
     public void tick(ServerLevel level)
     {
+        SoilConstants.setDaysPerYear(Calendars.SERVER.getCalendarDaysInMonth() * (double) net.dries007.tfc.util.calendar.ICalendar.MONTHS_IN_YEAR);
+        final long hourNow = AirCadence.hourOf(Calendars.SERVER.getCalendarTicks()), dayNow = Math.floorDiv(hourNow, 24L);
+        if (dayNow != lastSweepDay)
+        {
+            if (lastSweepDay != Long.MIN_VALUE && grid.sweep(hourNow) > 0)
+            {
+                setDirty();
+            }
+            lastSweepDay = dayNow;
+        }
         stepTo(level, AirCadence.hourOf(Calendars.SERVER.getCalendarTicks()));
     }
 
@@ -395,6 +420,14 @@ public final class RegionalAir extends SavedData
                 entry.putLongArray("air", bits(cell.air, SPECIES));
             }
             entry.putLongArray("fall", bits(cell.cumulative, FALL));
+            if (cell.annualHour != Long.MIN_VALUE)
+            {
+                entry.putDouble("annualSo2", cell.annualSo2);
+                entry.putLong("annualHour", cell.annualHour);
+                entry.putLong("annualSince", cell.annualSince);
+                entry.putDouble("excessConifer", cell.excess[0]);
+                entry.putDouble("excessBroadleaf", cell.excess[1]);
+            }
             if (cell.hasWind())
             {
                 entry.putDouble("windX", cell.windX);
@@ -442,6 +475,10 @@ public final class RegionalAir extends SavedData
                 }
             }
             unbits(entry.getLongArray("fall"), FALL, cell.cumulative);
+            if (entry.contains("annualHour"))
+            {
+                cell.restoreAnnual(entry.getDouble("annualSo2"), entry.getLong("annualHour"), entry.getLong("annualSince"), entry.getDouble("excessConifer"), entry.getDouble("excessBroadleaf"));
+            }
             if (entry.contains("windDay"))
             {
                 cell.setWind(entry.getDouble("windX"), entry.getDouble("windZ"), entry.getLong("windDay"));

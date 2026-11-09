@@ -38,12 +38,32 @@ public final class SoilConstants
     public static final double ALUMINIUM_RANGE = 500.0;
 
     /**
-     * Silicate weathering is a flux and not a stock: 0.01 eq/m2 a year, 0.1 keq/ha/yr, of base cations given to the exchanger. The range in the literature is 0.02 to 0.2 keq/ha/yr (UBA, Manual on Critical Loads, 2004, for mineral soils). It brings base saturation back up to where the soil started and not above it.
+     * Silicate weathering is a flux and not a stock: 0.01 eq/m2 a TFC year, 0.1 keq/ha/yr, of base cations given to the exchanger. The range in the literature is 0.02 to 0.2 keq/ha/yr (UBA, Manual on Critical Loads, 2004, for mineral soils). It brings base saturation back up to where the soil started and not above it.
      */
     public static final double WEATHERING_PER_YEAR = 0.01;
 
-    /** Days of TFC's calendar in a year, taken as the real one: the constants of the model are the real ones. */
-    public static final double DAYS_PER_YEAR = 365.0;
+    /** TFC years. The half-life of what lime raised above where the soil started: base cations and carbonate leach from the root zone of humid soils, and the effect of one liming lasts years (Haynes and Naidu 1998, Nutr. Cycl. Agroecosyst. 51: the effect of lime on soil pH is gone in 3-10 years). 3 years is the short end, a GAME FIGURE, so that lime must be renewed. */
+    public static final double LIME_HALF_LIFE_YEARS = 3.0;
+
+    /**
+     * THE RULE OF TIME UNITS. Nature follows TFC's calendar, and TFC squeezes the year into its seasons (8 days a month, 96 days a year by default), so that a season of the game is a season of the real year. Everything of nature that is a rate or a time per YEAR (weathering, runoff shares, the time constants of annual means, the damage and recovery of forests, the half-life of lime, irrigation depth) is per TFC calendar year, {@link #daysPerYear()} days, read from the calendar. Everything that is a rate per DAY or less (tar half-life, pathogen T90, residence times, settling per day) stays in days of the calendar. A TFC year is 32 hours of play at TFC's day of 20 minutes.
+     */
+    private static volatile double daysPerYear = 96.0;
+
+    /** @return days of TFC's calendar in a year: months in a year times the days of a month that the server sets (96 by default) */
+    public static double daysPerYear()
+    {
+        return daysPerYear;
+    }
+
+    /** Sets the length of the TFC year in days: read from the calendar by {@link Pollution#now()}. */
+    public static void setDaysPerYear(double days)
+    {
+        if (days > 0.0)
+        {
+            daysPerYear = days;
+        }
+    }
     /** Ticks of the calendar in a day: {@code ICalendar.CALENDAR_TICKS_IN_DAY}, which does not depend on the length of a day that a server sets. */
     public static final long CALENDAR_TICKS_PER_DAY = 24_000L;
 
@@ -57,11 +77,14 @@ public final class SoilConstants
     /** @return the share of a pollutant's load in the soil of a chunk that drains to water that runs off to it per day, as a first-order rate: the figures of {@link WaterConstants}, per year, over the days of a year. Acid is not in this: it leaves from the aluminium range only, see {@link #ALUMINIUM_ACID_RUNOFF_PER_DAY} */
     public static double runoffPerDay(Pollutant pollutant)
     {
-        return WaterConstants.runoffPerYear(pollutant) / DAYS_PER_YEAR;
+        return WaterConstants.runoffPerYear(pollutant) / daysPerYear();
     }
 
     /** Per day: the share of the acid that is held as aluminium that runs off to the water, 10% a year ({@link WaterConstants#ALUMINIUM_ACID_RUNOFF_PER_YEAR}). */
-    public static final double ALUMINIUM_ACID_RUNOFF_PER_DAY = WaterConstants.ALUMINIUM_ACID_RUNOFF_PER_YEAR / DAYS_PER_YEAR;
+    public static double aluminiumAcidRunoffPerDay()
+    {
+        return WaterConstants.ALUMINIUM_ACID_RUNOFF_PER_YEAR / daysPerYear();
+    }
 
     /** @return the fraction of a pollutant that breaks down in a day in soil, as a first-order rate in 1/day. Metals do not break down: leaching is not modelled in v1.5 */
     public static double decayPerDay(Pollutant pollutant)

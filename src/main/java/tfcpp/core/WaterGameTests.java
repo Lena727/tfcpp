@@ -280,7 +280,7 @@ public final class WaterGameTests
             // A year of the calendar passes
             final CompoundTag saved = PollutionChunkData.SERIALIZER.write(chunk.getData(EcologyAttachments.CHUNK), level.registryAccess());
             final CompoundTag cell = saved;
-            cell.putLong("lastTick", cell.getLong("lastTick") - (long) (365 * SoilConstants.CALENDAR_TICKS_PER_DAY));
+            cell.putLong("lastTick", cell.getLong("lastTick") - (long) (SoilConstants.daysPerYear() * SoilConstants.CALENDAR_TICKS_PER_DAY));
             chunk.setData(EcologyAttachments.CHUNK, PollutionChunkData.SERIALIZER.read(chunk, cell, level.registryAccess()));
             Pollution.refresh(level, chunk);
 
@@ -327,7 +327,7 @@ public final class WaterGameTests
             helper.assertTrue(waters.watchedCount() == 1, "and is watched, so that the water does not have to wait for a touch");
 
             final CompoundTag cell = PollutionChunkData.SERIALIZER.write(chunk.getData(EcologyAttachments.CHUNK), level.registryAccess());
-            cell.putLong("lastTick", cell.getLong("lastTick") - (long) (365 * SoilConstants.CALENDAR_TICKS_PER_DAY));
+            cell.putLong("lastTick", cell.getLong("lastTick") - (long) (SoilConstants.daysPerYear() * SoilConstants.CALENDAR_TICKS_PER_DAY));
             chunk.setData(EcologyAttachments.CHUNK, PollutionChunkData.SERIALIZER.read(chunk, cell, level.registryAccess()));
             waters.tick(level); // The daily refresh, with nothing touching the soil
             helper.assertTrue(waters.ledger().input(Pollutant.TAR) > 0.0, "A day's refresh gave the lake the tar that ran off: " + waters.ledger().input(Pollutant.TAR));

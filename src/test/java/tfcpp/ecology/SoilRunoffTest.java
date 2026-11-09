@@ -26,7 +26,7 @@ class SoilRunoffTest
         for (Drainage drainage : new Drainage[] {Drainage.NONE})
         {
             final SoilCell cell = polluted(drainage);
-            cell.advance(365.0);
+            cell.advance(SoilConstants.daysPerYear());
             assertNull(cell.takeOutbox(), drainage.name());
             for (Pollutant pollutant : Pollutant.VALUES)
             {
@@ -39,7 +39,7 @@ class SoilRunoffTest
     void whileItIsNotKnownWhereASoilDrainsItsRunoffIsHeldAndNotCountedAsLost()
     {
         final SoilCell cell = polluted(Drainage.UNKNOWN);
-        cell.advance(365.0);
+        cell.advance(SoilConstants.daysPerYear());
         assertTrue(cell.holdsOutbox());
         final double held = cell.totalWashed(Pollutant.LEAD);
         assertEquals(500.0 * (1.0 - Math.exp(-0.01)), held, 1e-9, "The runoff is worked out as for a draining chunk");
@@ -54,7 +54,7 @@ class SoilRunoffTest
         assertEquals(0.0, cell.totalWashed(Pollutant.LEAD), 1e-12);
         assertEquals(cell.totalInput(Pollutant.ACIDITY), cell.total(Pollutant.ACIDITY) + cell.totalNeutralised(Pollutant.ACIDITY) + cell.totalWashed(Pollutant.ACIDITY), 1e-6, "also for the acid");
         final SoilCell coast = polluted(Drainage.SEA);
-        coast.advance(365.0);
+        coast.advance(SoilConstants.daysPerYear());
         assertNotNull(coast.takeOutbox(), "A coastal chunk hands its runoff on, to the sea");
     }
 
@@ -62,16 +62,16 @@ class SoilRunoffTest
     void aSoilThatDrainsToAriverLosesTheFiguresOfTheYearAndTheBooksClose()
     {
         final SoilCell cell = polluted(Drainage.RIVER);
-        cell.advance(365.0);
+        cell.advance(SoilConstants.daysPerYear());
         final double[] out = cell.takeOutbox();
         assertNotNull(out);
         // Metals: 1% a year, and they do not decay
         assertEquals(500.0 * (1.0 - Math.exp(-0.01)), out[Pollutant.LEAD.ordinal()], 1e-9);
         assertEquals(500.0 * Math.exp(-0.01), cell.total(Pollutant.LEAD), 1e-9);
         // Sewage breaks down (T90 21 days) and runs off (30% a year) together: the runoff takes its share of what leaves, which is small beside the breakdown
-        final double sewageRate = Math.log(10.0) / 21.0 + 0.30 / 365.0;
-        final double sewageLost = 1000.0 * -Math.expm1(-sewageRate * 365.0);
-        assertEquals(sewageLost * (0.30 / 365.0) / sewageRate, out[Pollutant.SEWAGE.ordinal()], 1e-9);
+        final double sewageRate = Math.log(10.0) / 21.0 + 0.30 / SoilConstants.daysPerYear();
+        final double sewageLost = 1000.0 * -Math.expm1(-sewageRate * SoilConstants.daysPerYear());
+        assertEquals(sewageLost * (0.30 / SoilConstants.daysPerYear()) / sewageRate, out[Pollutant.SEWAGE.ordinal()], 1e-9);
         // Everything is somewhere: held + decayed + washed = put in
         for (Pollutant pollutant : new Pollutant[] {Pollutant.SEWAGE, Pollutant.TAR, Pollutant.LEAD})
         {
@@ -92,7 +92,7 @@ class SoilRunoffTest
         cell.setDrainage(Drainage.LAKE);
         cell.deposit(Pollutant.ACIDITY, 20.0 * AREA); // Well inside the exchanger: it stays on the exchange sites
         assertEquals(0.0, cell.aluminiumPerM2(), 0.0);
-        cell.advance(3650.0);
+        cell.advance(10.0 * SoilConstants.daysPerYear());
         assertEquals(0.0, cell.totalWashed(Pollutant.ACIDITY), 0.0, "A soil above pH 4.2 gives no acid to streams");
     }
 
@@ -104,7 +104,7 @@ class SoilRunoffTest
         cell.deposit(Pollutant.ACIDITY, 100.0 * AREA); // 100 eq/m2: base cations all gone, the rest is aluminium
         final double before = cell.aluminiumPerM2();
         assertTrue(before > 50.0);
-        cell.advance(365.0);
+        cell.advance(SoilConstants.daysPerYear());
         final double w = SoilConstants.WEATHERING_PER_YEAR, r = WaterConstants.ALUMINIUM_ACID_RUNOFF_PER_YEAR;
         // da/dt = -r a - w, a year long
         final double expected = (before + w / r) * Math.exp(-r) - w / r;

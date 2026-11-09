@@ -42,6 +42,19 @@ public final class SoilCell
     double landFraction = 1.0;
     /** The calendar tick that this state is as of. It never goes back. */
     long lastTick;
+    /** Cumulative equivalents per square metre of acid that liming neutralised. */
+    double limedNeutralised;
+    /** Health of a stand of broadleaf trees and of conifers in this chunk, 0 to 1, and the calendar tick and annual mean of SO2 (ug/m3) they are as of. See {@link ForestHealth}. */
+    double forestBroadleaf = 1.0, forestConifer = 1.0;
+    /** The integrals of the excess of the annual mean of SO2 over the critical levels (ug/m3 hours) that this soil last saw in its regional air cell, for conifers and for broadleaves. The difference of two readings is the exact mean excess over the gap between them. */
+    double seenExcessConifer, seenExcessBroadleaf;
+    /** Lime: equivalents per square metre ever put on, what has leached back out of the base saturation and carbonate that lime raised above where the soil started, and the part of the free carbonate that came from lime. */
+    double limeApplied, limeLeached, limeCarbonate;
+    long forestTick = Long.MIN_VALUE;
+    /** What plants have taken out of the soil, in the unit of each pollutant, for the whole cell. Not saved apart from the soil: it is part of the books. */
+    final double[] harvested = new double[Pollutant.COUNT];
+    /** The calendar hour at which the forest was last brought up to date by a look from a random tick. Not saved. */
+    long forestCheckedHour = Long.MIN_VALUE;
 
     SoilCell()
     {
@@ -56,6 +69,7 @@ public final class SoilCell
     {
         final SoilCell cell = new SoilCell();
         cell.lastTick = nowTick;
+        cell.forestTick = nowTick;
         cell.cec = order.cecPerM2();
         final boolean carbonate = carbonateBedrock || order.hasFreeCarbonate();
         if (carbonate)
@@ -88,6 +102,16 @@ public final class SoilCell
         copy.drainage = drainage;
         copy.landFraction = landFraction;
         copy.lastTick = lastTick;
+        copy.limedNeutralised = limedNeutralised;
+        copy.forestBroadleaf = forestBroadleaf;
+        copy.forestConifer = forestConifer;
+        copy.seenExcessConifer = seenExcessConifer;
+        copy.seenExcessBroadleaf = seenExcessBroadleaf;
+        copy.limeApplied = limeApplied;
+        copy.limeLeached = limeLeached;
+        copy.limeCarbonate = limeCarbonate;
+        copy.forestTick = forestTick;
+        System.arraycopy(harvested, 0, copy.harvested, 0, Pollutant.COUNT);
         return copy;
     }
 
@@ -152,7 +176,7 @@ public final class SoilCell
     {
         if (pollutant == Pollutant.ACIDITY)
         {
-            return ((startSaturation - baseSaturation) * cec + aluminium) * SoilConstants.AREA;
+            return (Math.max(0.0, startSaturation - baseSaturation) * cec + aluminium) * SoilConstants.AREA;
         }
         return present[pollutant.ordinal()];
     }
@@ -178,7 +202,7 @@ public final class SoilCell
     /** @return acid neutralised by carbonate or weathering, in equivalents of the whole cell. Nothing else is neutralised */
     public double totalNeutralised(Pollutant pollutant)
     {
-        return pollutant == Pollutant.ACIDITY ? (carbonateSpent + weathered) * SoilConstants.AREA : 0.0;
+        return pollutant == Pollutant.ACIDITY ? (carbonateSpent + weathered + limedNeutralised) * SoilConstants.AREA : 0.0;
     }
 
     public long lastTick()
@@ -288,11 +312,13 @@ public final class SoilCell
         final double neutralised = Math.min(acid, carbonate);
         carbonate -= neutralised;
         carbonateSpent += neutralised;
+        limeCarbonate = Math.min(limeCarbonate, carbonate);
         acid -= neutralised;
 
         final double fromExchanger = Math.min(acid, baseSaturation * cec);
         if (fromExchanger > 0.0)
         {
+            limedNeutralised += Math.min(fromExchanger, Math.max(0.0, (baseSaturation - startSaturation) * cec)); // Base that lime put above the start neutralises first, and is counted as lime's work
             baseSaturation = Math.max(0.0, baseSaturation - fromExchanger / cec);
             acid -= fromExchanger;
         }
@@ -319,6 +345,156 @@ public final class SoilCell
         return claimed[pollutant.ordinal()];
     }
 
+    // --- Plants and lime -----------------------------------------------------------------------------------------------------------------------------------------------
+
+    /** @return the concentration of a metal in the dry soil, mg/kg */
+    public double mgPerKg(Pollutant metal)
+    {
+        return CropEffects.mgPerKg(present[metal.ordinal()]);
+    }
+
+    /** Takes this much of a pollutant out of the soil into a plant, no more than there is; the amount taken is returned and counted as harvested. */
+    public double uptake(Pollutant pollutant, double amount)
+    {
+        final int i = pollutant.ordinal();
+        final double taken = Math.max(0.0, Math.min(amount, present[i]));
+        present[i] -= taken;
+        harvested[i] += taken;
+        return taken;
+    }
+
+    /** @return everything of this kind that plants have taken out of the soil, for the whole cell */
+    public double totalHarvested(Pollutant pollutant)
+    {
+        return harvested[pollutant.ordinal()];
+    }
+
+    /**
+     * Lime on the soil, in equivalents of carbonate for the whole cell. It neutralises what is acid in the order that acid is held: aluminium first, then the exchanger back to the saturation the soil started at; what is left raises the exchanger above its start (up to full saturation) and then is free carbonate that holds the pH at its plateau. Metals do not leave. What lime raised above the start does not stay: it leaches at first order with a half-life of {@link SoilConstants#LIME_HALF_LIFE_YEARS} TFC years, and weathering still returns the soil only to its original saturation, so that lime must be renewed.
+     */
+    public void lime(double equivalents)
+    {
+        if (!(equivalents > 0.0))
+        {
+            return;
+        }
+        double eq = equivalents / SoilConstants.AREA;
+        limeApplied += eq;
+        final double fromAluminium = Math.min(eq, aluminium);
+        aluminium -= fromAluminium;
+        limedNeutralised += fromAluminium;
+        eq -= fromAluminium;
+        if (cec > 0.0)
+        {
+            final double deficit = Math.max(0.0, (startSaturation - baseSaturation) * cec);
+            final double toExchanger = Math.min(eq, deficit);
+            baseSaturation += toExchanger / cec;
+            limedNeutralised += toExchanger;
+            eq -= toExchanger;
+            final double room = Math.max(0.0, (1.0 - baseSaturation) * cec);
+            final double surplus = Math.min(eq, room);
+            baseSaturation += surplus / cec;
+            eq -= surplus;
+        }
+        carbonate += eq;
+        limeCarbonate += eq;
+    }
+
+    /** @return equivalents per square metre of what lime has put into the soil that is still there above the start: base saturation over where it started, and carbonate that came from lime */
+    public double limeSurplusPerM2()
+    {
+        return Math.max(0.0, baseSaturation - startSaturation) * cec + limeCarbonate;
+    }
+
+    /** @return equivalents per square metre of lime ever put on */
+    public double limeAppliedPerM2()
+    {
+        return limeApplied;
+    }
+
+    /** @return equivalents per square metre of what lime raised that has leached out again */
+    public double limeLeachedPerM2()
+    {
+        return limeLeached;
+    }
+
+    /** @return equivalents per square metre of acid that lime has neutralised */
+    public double limeNeutralisedPerM2()
+    {
+        return limedNeutralised;
+    }
+
+    /** @return the pH that the soil started at, from the base saturation it started with (a soil with free carbonate started full, which is the same to a crop: above 5.5) */
+    public double startPh()
+    {
+        return SoilConstants.PH_EXCHANGER_BOTTOM + (SoilConstants.PH_EXCHANGER_TOP - SoilConstants.PH_EXCHANGER_BOTTOM) * startSaturation;
+    }
+
+    public double forestHealth(boolean conifer)
+    {
+        return conifer ? forestConifer : forestBroadleaf;
+    }
+
+    /** Sets the health of both kinds of stand as of this tick, and the integrals that the soil has seen, for tests that need a forest in a known state. */
+    public void setForestHealth(double broadleaf, double conifer, long tick, double seenConifer, double seenBroadleaf)
+    {
+        forestBroadleaf = broadleaf;
+        forestConifer = conifer;
+        forestTick = tick;
+        seenExcessConifer = seenConifer;
+        seenExcessBroadleaf = seenBroadleaf;
+    }
+
+    /** Says that the soil has seen the air of its region up to these integrals, as when it is made in a region that smoke has been over before the years that matter. */
+    public void markSeen(double excessConifer, double excessBroadleaf)
+    {
+        seenExcessConifer = excessConifer;
+        seenExcessBroadleaf = excessBroadleaf;
+    }
+
+    /** Sets where the forest clock starts, for a soil that is first made after smoke has been over the region for a while: at the first hour of the region's annual mean, from which its integrals count, so that what happened in the years before the first touch is not lost. */
+    public void startForestAt(long tick)
+    {
+        if (tick < forestTick)
+        {
+            forestTick = tick;
+            seenExcessConifer = 0.0;
+            seenExcessBroadleaf = 0.0;
+        }
+    }
+
+    /**
+     * Brings the health of the forest to this calendar tick. The stress from SO2 over the gap is that of the mean excess of the annual mean over the critical level, worked out exactly from the two readings of the region's integrals; the stress of the soil is that of the soil now. Under constant stress the equation is solved in closed form, so a step of any length is one evaluation. Called when the soil is touched or looked at: nothing ticks.
+     *
+     * @param excessConifer the integral now of the excess of the annual mean over 10 ug/m3, in ug/m3 hours
+     * @param excessBroadleaf the same over 20 ug/m3
+     */
+    public void advanceForest(long nowTick, double excessConifer, double excessBroadleaf)
+    {
+        if (forestTick == Long.MIN_VALUE)
+        {
+            forestTick = nowTick;
+            seenExcessConifer = excessConifer;
+            seenExcessBroadleaf = excessBroadleaf;
+            return;
+        }
+        if (nowTick <= forestTick)
+        {
+            return;
+        }
+        final double hours = (nowTick - forestTick) / (double) AirScale.TICKS_PER_HOUR;
+        final double years = (nowTick - forestTick) / (SoilConstants.CALENDAR_TICKS_PER_DAY * SoilConstants.daysPerYear());
+        // A region cell that was forgotten and made again starts its integrals from zero: then what it shows is all of the gap
+        final double meanConifer = (excessConifer >= seenExcessConifer ? excessConifer - seenExcessConifer : excessConifer) / hours;
+        final double meanBroadleaf = (excessBroadleaf >= seenExcessBroadleaf ? excessBroadleaf - seenExcessBroadleaf : excessBroadleaf) / hours;
+        final double soil = ForestHealth.soilStress(pH(), mgPerKg(Pollutant.COPPER), mgPerKg(Pollutant.ZINC));
+        forestBroadleaf = ForestHealth.advance(forestBroadleaf, years, ForestHealth.so2Stress(false, meanBroadleaf) + soil);
+        forestConifer = ForestHealth.advance(forestConifer, years, ForestHealth.so2Stress(true, meanConifer) + soil);
+        forestTick = nowTick;
+        seenExcessConifer = excessConifer;
+        seenExcessBroadleaf = excessBroadleaf;
+    }
+
     /** Brings the cell forward to this calendar tick. The clock never goes back: a tick before the last one does nothing, as when the calendar has not yet read its saved date. */
     public void catchUp(long nowTick)
     {
@@ -339,6 +515,21 @@ public final class SoilCell
         if (!(days > 0.0))
         {
             return;
+        }
+        // What lime raised above where the soil started leaches back out at first order
+        final double keep = Math.exp(-Math.log(2.0) / (SoilConstants.LIME_HALF_LIFE_YEARS * SoilConstants.daysPerYear()) * days);
+        if (cec > 0.0 && baseSaturation > startSaturation)
+        {
+            final double excess = baseSaturation - startSaturation;
+            limeLeached += excess * (1.0 - keep) * cec;
+            baseSaturation = startSaturation + excess * keep;
+        }
+        if (limeCarbonate > 0.0)
+        {
+            final double lost = limeCarbonate * (1.0 - keep);
+            limeCarbonate -= lost;
+            carbonate -= lost;
+            limeLeached += lost;
         }
         final boolean drains = drainage.mayDrain(); // Until it is known where the chunk drains, the runoff is worked out and held in the outbox
         for (Pollutant pollutant : Pollutant.VALUES)
@@ -362,10 +553,10 @@ public final class SoilCell
             }
         }
         // Weathering gives base cations back to the exchanger, after the acid held as aluminium is used up, and only to the saturation it started at
-        double supply = SoilConstants.WEATHERING_PER_YEAR * days / SoilConstants.DAYS_PER_YEAR;
+        double supply = SoilConstants.WEATHERING_PER_YEAR * days / SoilConstants.daysPerYear();
         if (drains && aluminium > 0.0)
         {
-            final double w = SoilConstants.WEATHERING_PER_YEAR / SoilConstants.DAYS_PER_YEAR, r = SoilConstants.ALUMINIUM_ACID_RUNOFF_PER_DAY;
+            final double w = SoilConstants.WEATHERING_PER_YEAR / SoilConstants.daysPerYear(), r = SoilConstants.aluminiumAcidRunoffPerDay();
             final double gone = Math.log1p(r * aluminium / w) / r; // Days until the aluminium acid is used up
             final double t = Math.min(days, gone);
             final double left = gone <= days ? 0.0 : Math.max(0.0, (aluminium + w / r) * Math.exp(-r * t) - w / r);

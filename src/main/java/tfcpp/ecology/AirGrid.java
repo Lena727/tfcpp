@@ -20,6 +20,10 @@ public final class AirGrid
     /** The most of a cell that may leave it in one substep. */
     public static final double MAX_OUTFLOW = 0.5;
     public static final int MAX_SUBSTEPS = 256;
+    /** ug/m3: a cell whose annual mean of SO2 is below this and which holds nothing is forgotten (half the clean-air background of SO2). */
+    static final double ANNUAL_KEEP = 0.5;
+    /** The critical levels of annual SO2 for conifers and broadleaves, ug/m3 (UNECE): see ForestHealth. */
+    static final double[] EXCESS_LEVELS = {ForestHealth.SO2_CRITICAL_CONIFER, ForestHealth.SO2_CRITICAL_BROADLEAF};
 
     private static final double[] ZERO = new double[AirSpecies.COUNT];
     private static final int[][] DIRECTIONS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
@@ -63,6 +67,13 @@ public final class AirGrid
         /** The average rainfall and its yearly variance at the cell, found once and saved with it. */
         boolean hasRain;
         float rainAverage, rainVariance;
+        /** Annual mean of the SO2 concentration in ug/m3, an exponential moving average with a time constant of one calendar year, as of {@link #annualHour}; and the first hour it was above zero. UNECE critical levels are annual means. */
+        double annualSo2;
+        long annualHour = Long.MIN_VALUE, annualSince = Long.MIN_VALUE;
+        /** Integrals of the excess of the annual mean over 10 and over 20 ug/m3, in ug/m3 hours, as of {@link #annualHour}. */
+        final double[] excess = new double[2];
+        private double so2Mark;
+        private long so2MarkStep = -1L;
 
         Cell(int x, int z)
         {
@@ -89,6 +100,101 @@ public final class AirGrid
         public double cumulative(Pollutant pollutant)
         {
             return cumulative[pollutant.ordinal()];
+        }
+
+        /** @return the annual mean of SO2 in ug/m3 as of this calendar hour: it falls by e per TFC year after the last update, for the cell held no air in the hours between */
+        public double annualSo2(long hour)
+        {
+            if (annualHour == Long.MIN_VALUE || annualSo2 <= 0.0)
+            {
+                return 0.0;
+            }
+            return annualSo2 * Math.exp(-Math.max(0L, hour - annualHour) / AirScale.hoursPerYear());
+        }
+
+        /** @return the hour the annual mean first rose above zero in this cell, or {@code Long.MIN_VALUE} */
+        public long annualSince()
+        {
+            return annualSince;
+        }
+
+        /**
+         * @return the integral over time, in ug/m3 times hours since the cell began to keep it, of the excess of the annual mean over the critical level of conifers (10 ug/m3) or of broadleaves (20), as of this hour. The part since the last update is the closed form of the exponential decay of the mean. A soil takes the difference of two readings and has the exact mean excess over the gap, whatever happened in it.
+         */
+        public double excessIntegral(boolean conifer, long hour)
+        {
+            if (annualHour == Long.MIN_VALUE)
+            {
+                return 0.0;
+            }
+            final int i = conifer ? 0 : 1;
+            return excess[i] + decayExcess(annualSo2, Math.max(0L, hour - annualHour), EXCESS_LEVELS[i], AirScale.hoursPerYear());
+        }
+
+        /** The integral of max(0, A - c) for A decaying exponentially from a0 with time constant tau over g hours. */
+        static double decayExcess(double a0, double g, double c, double tau)
+        {
+            if (!(a0 > c) || !(g > 0.0))
+            {
+                return 0.0;
+            }
+            final double above = tau * Math.log(a0 / c); // Hours until the mean is down to c
+            final double m = Math.min(g, above);
+            return a0 * tau * -Math.expm1(-m / tau) - c * m;
+        }
+
+        /** The integral of max(0, A - c) over one hour for A going in a line from a to b. */
+        static double lineExcess(double a, double b, double c)
+        {
+            final double hi = Math.max(a, b), lo = Math.min(a, b);
+            if (!(hi > c))
+            {
+                return 0.0;
+            }
+            if (lo >= c)
+            {
+                return 0.5 * (a + b) - c;
+            }
+            final double share = (hi - c) / (hi - lo);
+            return 0.5 * (hi - c) * share;
+        }
+
+        /** Takes the mean concentration of the hour that ends at the start of {@code hour} into the annual mean and its integrals. An hour that is already in is not counted twice. */
+        public void recordHour(long hour, double micrograms)
+        {
+            if (annualHour == Long.MIN_VALUE)
+            {
+                if (!(micrograms > 0.0))
+                {
+                    return;
+                }
+                annualHour = hour - 1L;
+                annualSince = hour - 1L;
+            }
+            if (hour <= annualHour)
+            {
+                return;
+            }
+            final double tau = AirScale.hoursPerYear();
+            final long quiet = hour - annualHour - 1L; // Hours with nothing recorded: the mean only decays
+            final double before = annualSo2 * Math.exp(-quiet / tau);
+            final double after = before * Math.exp(-1.0 / tau) + micrograms * -Math.expm1(-1.0 / tau);
+            for (int i = 0; i < EXCESS_LEVELS.length; i++)
+            {
+                excess[i] += decayExcess(annualSo2, quiet, EXCESS_LEVELS[i], tau) + lineExcess(before, after, EXCESS_LEVELS[i]);
+            }
+            annualSo2 = after;
+            annualHour = hour;
+        }
+
+        /** Sets the annual mean as it was saved. */
+        void restoreAnnual(double value, long hour, long since, double excessConifer, double excessBroadleaf)
+        {
+            annualSo2 = value;
+            annualHour = hour;
+            annualSince = since;
+            excess[0] = excessConifer;
+            excess[1] = excessBroadleaf;
         }
 
         public boolean hasAir()
@@ -175,9 +281,9 @@ public final class AirGrid
         }
 
         /** @return whether the cell holds no air, has no anchor that the wind of a stack is found by, and a fall that is not worth keeping */
-        private boolean forgettable()
+        private boolean forgettable(long hour)
         {
-            if (hasAir || hasAnchor)
+            if (hasAir || hasAnchor || annualSo2(hour == Long.MIN_VALUE ? annualHour : hour) >= ANNUAL_KEEP)
             {
                 return false;
             }
@@ -197,6 +303,8 @@ public final class AirGrid
     /** The cells that held air at any time of the step that is running: the only ones that can be forgotten at its end. */
     private final ArrayList<Cell> touched = new ArrayList<>();
     private boolean stepping;
+    /** The calendar hour that the grid was last stepped or swept to; what the lazy annual means are read at when a cell is looked at for forgetting. */
+    private long clockHour = Long.MIN_VALUE;
     final double[] emitted = new double[AirSpecies.COUNT];
     final double[] taken = new double[AirSpecies.COUNT];
     final double[] returned = new double[AirSpecies.COUNT];
@@ -464,6 +572,12 @@ public final class AirGrid
         stepId++;
         touched.clear();
         touched.addAll(active);
+        final AirSpecies so2 = AirSpecies.SULFUR_DIOXIDE;
+        for (Cell cell : active)
+        {
+            cell.so2Mark = cell.microgramsPerCubicMetre(so2);
+            cell.so2MarkStep = stepId;
+        }
         stepping = true;
         final double crossing = 1.0 / (metresPerBlock * AirScale.CELL_BLOCKS);
         final double mixing = AirScale.mixingPerSecond(metresPerBlock);
@@ -488,6 +602,13 @@ public final class AirGrid
             substeps++;
         }
         deposit();
+        final long hourIndex = Math.floorDiv(middleTick, AirScale.TICKS_PER_HOUR) + 1L;
+        clockHour = hourIndex;
+        for (Cell cell : touched)
+        {
+            final double start = cell.so2MarkStep == stepId ? cell.so2Mark : 0.0;
+            cell.recordHour(hourIndex, 0.5 * (start + cell.microgramsPerCubicMetre(so2)));
+        }
         drop();
         stepping = false;
         forget(touched);
@@ -612,12 +733,39 @@ public final class AirGrid
         }
     }
 
+    /**
+     * Forgets, for the whole map, the cells that hold no air, have no anchor, whose annual mean of SO2 has fallen under the floor and whose fall is not worth keeping. Run once a day of the calendar: a cell that smoke has left is looked at by no step, and without this it would stay as long as the world does.
+     *
+     * @return how many cells were forgotten
+     */
+    public int sweep(long hour)
+    {
+        clockHour = Math.max(clockHour, hour);
+        final ArrayList<Cell> gone = new ArrayList<>();
+        for (Cell cell : cells.values())
+        {
+            if (cell.forgettable(hour))
+            {
+                gone.add(cell);
+            }
+        }
+        for (Cell cell : gone)
+        {
+            for (Pollutant pollutant : Pollutant.VALUES)
+            {
+                scattered[pollutant.ordinal()] += cell.cumulative[pollutant.ordinal()] * AirScale.CELL_AREA;
+            }
+            cells.remove(key(cell.x, cell.z));
+        }
+        return gone.size();
+    }
+
     /** Forgets the cells among these that hold nothing worth keeping, and counts their fall as scattered. */
     private void forget(ArrayList<Cell> candidates)
     {
         for (Cell cell : candidates)
         {
-            if (cell.forgettable() && cells.get(key(cell.x, cell.z)) == cell)
+            if (cell.forgettable(clockHour) && cells.get(key(cell.x, cell.z)) == cell)
             {
                 for (Pollutant pollutant : Pollutant.VALUES)
                 {

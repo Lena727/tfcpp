@@ -38,6 +38,7 @@ public final class TFCpp
 
         GasAttachments.TYPES.register(modBus);
         EcologyAttachments.TYPES.register(modBus);
+        tfcpp.ecology.FoodContamination.COMPONENTS.register(modBus);
         Ores.load();
         Metallurgy.register(modBus);
         Instruments.register(modBus);
@@ -48,6 +49,9 @@ public final class TFCpp
         NeoForge.EVENT_BUS.register(PipeEvents.class);
         NeoForge.EVENT_BUS.register(Blowing.class);
         NeoForge.EVENT_BUS.addListener(WaterBodies::onCreateFluidSource);
+        NeoForge.EVENT_BUS.addListener(tfcpp.ecology.FoodEvents::onDrops);
+        NeoForge.EVENT_BUS.addListener(tfcpp.ecology.FoodEvents::onEaten);
+        NeoForge.EVENT_BUS.addListener(tfcpp.ecology.LimingEvents::onUse);
         NeoForge.EVENT_BUS.addListener(OreSurvey::onServerStarted);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, BorosilicateGlass::onItemStacked);
     }

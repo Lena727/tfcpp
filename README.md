@@ -63,6 +63,13 @@ tfcpp supports one exact TFC version and changes TFC freely wherever that gives 
 | `MeltContextMixins` | `serverTick` of crucible, forge, firepit, pit kiln, firebox | Tells `HeatingRecipeMixin` where the conversion is happening, as a vessel melting its contents has no idea where it is |
 | `BorosilicateGlassMixin` | `GlassOperation.hasRequiredTemperature`, at return (`@ModifyReturnValue`) | TFC compares every glassworking step with one temperature written into the operation in code, 480 C, so no data can make a glass worked hotter. Borosilicate is worked above 1250 C and, being above the 930 C at which brass melts, only on a ceramic blowpipe |
 | `QuernMixin` | `QuernBlockEntity.finishGrinding`, at `ItemStack.shrink` | A quern lets no event out when it finishes a grind. Grinding coal, charcoal or coke raises 2 g of coal dust into the air of the cell the quern stands in, at the moment the input is used up |
+| `CropGrowthMixin$Step` | `CropHelpers.growthTickStep`, at head; `@ModifyVariable` on the second store of `growth` and on the store of `healthy` (by local name) | The ground and the air act on a crop: the growth that the step adds (not the expiry) is multiplied by what soil acidity (relative to the soil's own start), metals and sulfur dioxide allow, and aluminium or an acute hour of SO2 makes the step unhealthy, TFC's own way for a crop to die. The field is irrigated from the water that hydrates it, with what that water carries |
+| `CropGrowthMixin$Fertilize` | `CropHelpers.useFertilizer`, at `ItemStack.shrink` (`@WrapOperation`) | Wood ash that TFC takes as fertiliser also limes the field, by its neutralising value for each piece taken |
+| `CropGrowthMixin$Picked` | `IPickableCrop.getItemInteractionResult`, at `ItemHandlerHelper.giveItemToPlayer` (`@WrapOperation`, both calls) | Fruit picked from a crop that keeps growing takes up the metals of the soil, as the drops of a broken crop do (that one is an event) |
+| `FoodMetalsMixins$Provider` | `ItemStackProvider.getStack(ItemStack, Context)`, at return | Every TFC recipe that makes food from one input (heating, quern, barrel, pot) goes through it: the metal of the input goes to the output |
+| `FoodMetalsMixins$Shapeless`, `$Shaped` | `AdvancedShapelessRecipe.assemble`, `AdvancedShapedRecipe.assemble`, at return | A crafting recipe of many foods adds up the metal of all its inputs and shares it among its outputs |
+| `ForestMixins$Leaves` | `TFCLeavesBlock.randomTick`, at head | A leaf of a stand in poor health falls on a random tick as TFC's own leaves fall |
+| `ForestMixins$Sapling` | `TFCSaplingBlock.randomTick`, at head | A sapling in a dying stand does not grow |
 
 ## Documentation
 

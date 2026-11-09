@@ -182,7 +182,7 @@ public final class ReachInfo
      */
     public double alkalinityFluxPerSecond()
     {
-        return still ? alkalinityStock() / (WaterConstants.LAKE_ALKALINITY_RENEWAL_DAYS * WaterConstants.SECONDS_PER_DAY) : alkalinity * discharge;
+        return still ? alkalinityStock() / (WaterConstants.lakeAlkalinityRenewalDays() * WaterConstants.SECONDS_PER_DAY) : alkalinity * discharge;
     }
 
     /** @return equivalents of alkalinity in the volume of still water when it is full: meq/L is eq/m3 */

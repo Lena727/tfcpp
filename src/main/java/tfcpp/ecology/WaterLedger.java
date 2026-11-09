@@ -98,6 +98,8 @@ public final class WaterLedger
     final double[] neutralised = new double[Pollutant.COUNT];
     final double[] toSea = new double[Pollutant.COUNT];
     final double[] dropped = new double[Pollutant.COUNT];
+    /** What crops took with the irrigation water. */
+    final double[] irrigated = new double[Pollutant.COUNT];
     private Reach[] snapshot = new Reach[0];
 
     public WaterLedger()
@@ -164,7 +166,7 @@ public final class WaterLedger
             map.clear();
         }
         claimedAir.clear();
-        for (double[] totals : new double[][] {input, fromAir, decayed, neutralised, toSea, dropped})
+        for (double[] totals : new double[][] {input, fromAir, decayed, neutralised, toSea, dropped, irrigated})
         {
             java.util.Arrays.fill(totals, 0.0);
         }
@@ -257,6 +259,26 @@ public final class WaterLedger
     {
         final @Nullable double[] claimed = claimedAir.get(id);
         return claimed == null ? 0.0 : claimed[pollutant.ordinal()];
+    }
+
+    /** Takes an amount out of the water column of a reach for irrigation, no more than it holds; returns what was taken. Counted as irrigated. */
+    public double withdraw(long id, Pollutant pollutant, double wanted)
+    {
+        final @Nullable Reach reach = active.get(id);
+        if (reach == null || !(wanted > 0.0))
+        {
+            return 0.0;
+        }
+        final int i = pollutant.ordinal();
+        final double taken = Math.min(wanted, reach.water[i]);
+        reach.water[i] -= taken;
+        irrigated[i] += taken;
+        return taken;
+    }
+
+    public double irrigated(Pollutant pollutant)
+    {
+        return irrigated[pollutant.ordinal()];
     }
 
     /** Puts an amount straight into the sea, which is the case of a discharge into salt water. */
@@ -598,6 +620,6 @@ public final class WaterLedger
     /** @return what is missing from the books: put in, less everything that it can be found as. Zero up to rounding. */
     public double imbalance(Pollutant pollutant)
     {
-        return input(pollutant) + fromAir(pollutant) - inWater(pollutant) - onBed(pollutant) - decayed(pollutant) - neutralised(pollutant) - toSea(pollutant) - dropped(pollutant) - pendingTotal(pollutant);
+        return input(pollutant) + fromAir(pollutant) - inWater(pollutant) - onBed(pollutant) - decayed(pollutant) - neutralised(pollutant) - toSea(pollutant) - dropped(pollutant) - irrigated(pollutant) - pendingTotal(pollutant);
     }
 }

@@ -38,6 +38,7 @@ public final class Pollution
     /** @return the calendar tick that every cell is dated by */
     public static long now()
     {
+        SoilConstants.setDaysPerYear(Calendars.SERVER.getCalendarDaysInMonth() * (double) net.dries007.tfc.util.calendar.ICalendar.MONTHS_IN_YEAR);
         return Calendars.SERVER.getCalendarTicks();
     }
 
@@ -174,11 +175,14 @@ public final class Pollution
                 }
                 claim(level, chunk, copy);
                 copy.catchUp(now);
+                forest(level, chunk, copy, now);
                 return copy;
             }
         }
         final SoilCell pristine = SoilReader.pristine(level, chunk, now);
+        bornInAir(level, chunk, pristine);
         claim(level, chunk, pristine);
+        forest(level, chunk, pristine, now);
         return pristine;
     }
 
@@ -214,6 +218,8 @@ public final class Pollution
             {
                 cell.claimed[pollutant.ordinal()] = region.cumulative(pollutant); // A known start: what has fallen already is not this soil's
             }
+            final long hour = AirCadence.hourOf(now());
+            cell.markSeen(region.excessIntegral(true, hour), region.excessIntegral(false, hour)); // and nor is what the air has done to forests
         }
         if (!had)
         {
@@ -232,6 +238,7 @@ public final class Pollution
         if (cell == null)
         {
             cell = SoilReader.pristine(level, chunk, now);
+            bornInAir(level, chunk, cell);
             data.set(cell);
             LevelWaters.get(level).registerLand(chunk.getPos(), SoilConstants.AREA * cell.landFraction());
         }
@@ -242,6 +249,7 @@ public final class Pollution
         }
         LevelWaters.get(level).watch(chunk.getPos(), cell.drainage());
         cell.catchUp(now);
+        forest(level, chunk, cell, now);
         if (cell.drainage() == Drainage.NONE)
         {
             cell.returnOutbox(); // What was held while it was not known turns out to have nowhere to go: it stays in the soil
@@ -255,6 +263,101 @@ public final class Pollution
             }
         } // While it is not known where the chunk drains, the runoff is held in the outbox of the cell, and is not counted as lost
         return cell;
+    }
+
+    private static @Nullable AirGrid.Cell regionOf(ServerLevel level, LevelChunk chunk)
+    {
+        return RegionalAir.get(level).grid().cellAt(chunk.getPos().x >> 3, chunk.getPos().z >> 3);
+    }
+
+    /** A soil first made after smoke has been over the region for a while: its forest clock starts when the annual mean of the region first rose above zero, at zero, so that the years it missed are not lost. */
+    private static void bornInAir(ServerLevel level, LevelChunk chunk, SoilCell cell)
+    {
+        final @Nullable AirGrid.Cell region = regionOf(level, chunk);
+        if (region != null && region.annualSince() != Long.MIN_VALUE)
+        {
+            cell.startForestAt(region.annualSince() * AirScale.TICKS_PER_HOUR);
+        }
+    }
+
+    private static void forest(ServerLevel level, LevelChunk chunk, SoilCell cell, long now)
+    {
+        final @Nullable AirGrid.Cell region = regionOf(level, chunk);
+        final long hour = AirCadence.hourOf(now);
+        cell.advanceForest(now, region == null ? 0.0 : region.excessIntegral(true, hour), region == null ? 0.0 : region.excessIntegral(false, hour));
+    }
+
+    /**
+     * The soil that holds the forest health of the chunk at this position, brought up to date at most once an hour of the calendar per chunk, for the random ticks of leaves and saplings. Returns {@code null} at once, before anything is worked out, for a chunk that nothing has touched in a region that no smoke has been over: its forest is healthy and no soil is made for it. One look at the chunk's attachment and one comparison on most calls.
+     */
+    @Nullable
+    public static SoilCell forestCell(ServerLevel level, BlockPos pos)
+    {
+        final LevelChunk chunk = level.getChunkAt(pos);
+        @Nullable SoilCell cell = chunk.hasData(EcologyAttachments.CHUNK) ? chunk.getData(EcologyAttachments.CHUNK).cell() : null;
+        if (cell == null && regionOf(level, chunk) == null)
+        {
+            return null;
+        }
+        final long hour = AirCadence.hourOf(now());
+        if (cell == null || cell.forestCheckedHour != hour)
+        {
+            cell = touch(level, chunk);
+            chunk.setUnsaved(true);
+            cell.forestCheckedHour = hour;
+        }
+        return cell;
+    }
+
+    /**
+     * The health of the trees of the chunk at this position, 0 to 1.
+     */
+    public static double forestHealth(ServerLevel level, BlockPos pos, boolean conifer)
+    {
+        final @Nullable SoilCell cell = forestCell(level, pos);
+        return cell == null ? 1.0 : cell.forestHealth(conifer);
+    }
+
+    /**
+     * The soil of a chunk for a crop that is growing in it, or {@code null} if nothing can have changed it (the chunk is untouched and no smoke has been over its region). Makes a cell, as a touch does, when smoke has been over the region: a soil that is looked at over and over must not be rebuilt from the ground each time.
+     */
+    @Nullable
+    public static SoilCell soilForCrop(ServerLevel level, BlockPos pos)
+    {
+        final LevelChunk chunk = level.getChunkAt(pos);
+        if (!(chunk.hasData(EcologyAttachments.CHUNK) && chunk.getData(EcologyAttachments.CHUNK).cell() != null) && regionOf(level, chunk) == null)
+        {
+            return null;
+        }
+        final SoilCell cell = touch(level, chunk);
+        chunk.setUnsaved(true);
+        return cell;
+    }
+
+    /** Puts lime on the chunk's soil, in equivalents for the whole cell. */
+    public static void lime(ServerLevel level, BlockPos pos, double equivalents)
+    {
+        if (!(equivalents > 0.0))
+        {
+            return;
+        }
+        final LevelChunk chunk = level.getChunkAt(pos);
+        touch(level, chunk).lime(equivalents);
+        chunk.setUnsaved(true);
+    }
+
+    /** Takes what a crop carries out of the soil of the chunk, in grams of each of {@link FoodMetals#METALS}; returns what was taken. */
+    public static double[] uptake(ServerLevel level, BlockPos pos, double[] grams)
+    {
+        final LevelChunk chunk = level.getChunkAt(pos);
+        final SoilCell cell = touch(level, chunk);
+        final double[] taken = new double[grams.length];
+        for (int i = 0; i < grams.length; i++)
+        {
+            taken[i] = cell.uptake(FoodMetals.METALS[i], grams[i]);
+        }
+        chunk.setUnsaved(true);
+        return taken;
     }
 
     /** Takes in what the regional air has let fall on the chunk since this soil last looked. */

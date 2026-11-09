@@ -158,7 +158,7 @@ class SoilCellTest
         final SoilCell cell = cell(SoilOrder.PODZOL, false);
         cell.deposit(Pollutant.ACIDITY, 0.5 * AREA);
         final double before = cell.baseSaturation();
-        cell.advance(SoilConstants.DAYS_PER_YEAR);
+        cell.advance(SoilConstants.daysPerYear());
         assertEquals(SoilConstants.WEATHERING_PER_YEAR, (cell.baseSaturation() - before) * cell.cecPerM2(), EPS, "0.01 eq/m2 in a year");
         assertEquals(SoilConstants.WEATHERING_PER_YEAR * AREA, cell.totalNeutralised(Pollutant.ACIDITY), EPS);
     }
@@ -170,9 +170,9 @@ class SoilCellTest
         {
             final SoilCell cell = cell(order, false);
             cell.deposit(Pollutant.ACIDITY, 0.3 * AREA);
-            cell.advance(100.0 * SoilConstants.DAYS_PER_YEAR);
+            cell.advance(100.0 * SoilConstants.daysPerYear());
             assertEquals(order.startPh(), cell.pH(), 1e-9, order + " is healed back to where it started");
-            cell.advance(1000.0 * SoilConstants.DAYS_PER_YEAR);
+            cell.advance(1000.0 * SoilConstants.daysPerYear());
             assertEquals(order.startPh(), cell.pH(), 1e-9, order + " and no further");
             assertEquals(0.0, cell.total(Pollutant.ACIDITY), 1e-9);
         }
@@ -184,10 +184,10 @@ class SoilCellTest
         final SoilCell cell = cell(SoilOrder.PODZOL, false);
         cell.deposit(Pollutant.ACIDITY, (cell.baseSaturation() * cell.cecPerM2() + 2.0) * AREA); // Down to saturation 0, 2 eq/m2 in aluminium
         assertEquals(SoilCell.Range.ALUMINIUM, cell.range());
-        cell.advance(100.0 * SoilConstants.DAYS_PER_YEAR); // 1 eq/m2
+        cell.advance(100.0 * SoilConstants.daysPerYear()); // 1 eq/m2
         assertEquals(1.0, cell.aluminiumPerM2(), 1e-9);
         assertEquals(0.0, cell.baseSaturation(), 1e-9);
-        cell.advance(100.0 * SoilConstants.DAYS_PER_YEAR);
+        cell.advance(100.0 * SoilConstants.daysPerYear());
         assertEquals(0.0, cell.aluminiumPerM2(), 1e-9);
         assertEquals(0.0, cell.baseSaturation(), 1e-9, "only what comes after that raises saturation");
     }

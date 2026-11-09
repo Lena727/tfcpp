@@ -438,6 +438,33 @@ public final class LevelWaters extends SavedData
         setDirty();
     }
 
+    /**
+     * Irrigation: a square metre of field takes {@link CropEffects#IRRIGATION_LITRES_PER_M2_YEAR} litres a year from this water, and what the water holds goes into the soil at {@code fieldPos}. Taken out of the ledger, so that what the field gets the river has lost (itai-itai disease: cadmium from the mine water of the Jinzu river on the rice fields of Toyama).
+     *
+     * @param years the length of the step in calendar years
+     */
+    public void irrigate(ServerLevel level, WaterBody body, BlockPos fieldPos, double years)
+    {
+        if (!body.resolved() || body.type() == WaterBody.Type.SEA || body.info() == null || !(years > 0.0))
+        {
+            return;
+        }
+        final double litres = CropEffects.IRRIGATION_LITRES_PER_M2_YEAR * years;
+        for (Pollutant pollutant : Pollutant.VALUES)
+        {
+            final double wanted = body.perLitre(pollutant) * litres;
+            if (wanted > 0.0)
+            {
+                final double taken = ledger.withdraw(body.id(), pollutant, wanted);
+                if (taken > 0.0)
+                {
+                    Pollution.deposit(level, fieldPos, pollutant, taken);
+                    setDirty();
+                }
+            }
+        }
+    }
+
     /** What the soil of a chunk has given up to the water that it drains to. */
     public void runoff(ServerLevel level, ChunkPos chunk, Drainage drainage, double[] amounts)
     {
@@ -769,6 +796,7 @@ public final class LevelWaters extends SavedData
         tag.put("neutralised", amounts(ledger.neutralised));
         tag.put("toSea", amounts(ledger.toSea));
         tag.put("dropped", amounts(ledger.dropped));
+        tag.put("irrigated", amounts(ledger.irrigated));
 
         // The geometry of the reaches that hold something, and of everything downstream of them: the water in them flows there
         final LongOpenHashSet needed = new LongOpenHashSet();
@@ -870,6 +898,7 @@ public final class LevelWaters extends SavedData
         readAmounts(tag.getCompound("neutralised"), ledger.neutralised);
         readAmounts(tag.getCompound("toSea"), ledger.toSea);
         readAmounts(tag.getCompound("dropped"), ledger.dropped);
+        readAmounts(tag.getCompound("irrigated"), ledger.irrigated);
         for (Tag raw : tag.getList("infos", Tag.TAG_COMPOUND))
         {
             final CompoundTag entry = (CompoundTag) raw;

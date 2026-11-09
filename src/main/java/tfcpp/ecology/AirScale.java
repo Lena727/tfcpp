@@ -33,6 +33,11 @@ public final class AirScale
     /** Calendar ticks and seconds in an hour of TFC's calendar: a day is 24 000 ticks, which stand for 86 400 s. */
     public static final long TICKS_PER_HOUR = 1000L;
     public static final double SECONDS_PER_HOUR = 3600.0;
+    /** Hours in a TFC calendar year (96 days by default): the time constant of the annual means. */
+    public static double hoursPerYear()
+    {
+        return SoilConstants.daysPerYear() * 24.0;
+    }
 
     /** An emission whose outlet stands this much above the ground around it is a tall stack. */
     public static final double TALL_STACK_METRES = 20.0;

@@ -426,7 +426,7 @@ public final class EcologyGameTests
             helper.assertTrue(Math.abs(after.total(Pollutant.TAR) - 50.0) < 0.01, "Tar has lost half in its half-life of 180 days, got " + after.total(Pollutant.TAR));
             helper.assertTrue(Math.abs(after.total(Pollutant.SEWAGE) - 1000.0 * Math.pow(10.0, -180.0 / 21.0)) < 0.01, "and the sewage has died out, got " + after.total(Pollutant.SEWAGE));
             helper.assertTrue(after.total(Pollutant.LEAD) == 500.0, "Lead is where it was");
-            final double weathered = SoilConstants.WEATHERING_PER_YEAR * 180.0 / 365.0 * SoilConstants.AREA;
+            final double weathered = SoilConstants.WEATHERING_PER_YEAR * 180.0 / SoilConstants.daysPerYear() * SoilConstants.AREA;
             helper.assertTrue(Math.abs((before.total(Pollutant.ACIDITY) - after.total(Pollutant.ACIDITY)) - weathered) < 0.01, "The acid is weathered at 0.01 eq/m2 a year: " + weathered + ", got " + (before.total(Pollutant.ACIDITY) - after.total(Pollutant.ACIDITY)));
             helper.assertTrue(Math.abs(after.pH() - before.pH()) < 0.01, "and the pH is where it was but for that, " + before.pH() + " and " + after.pH());
             helper.assertTrue(Math.abs(after.lastTick() - Pollution.now()) <= 1, "The cell is dated by the calendar now");

@@ -47,8 +47,18 @@ public final class PollutionCommand
                 (pollutant == Pollutant.ACIDITY ? "neutralised " + f(neutralised) : "decayed " + f(decayed)) + ", ran off " + f(cell.totalWashed(pollutant))));
         }
         air(source, level, pos);
+        forestAndCrops(source, level, pos, cell);
         water(source, level, pos);
         return 1;
+    }
+
+    private static void forestAndCrops(CommandSourceStack source, ServerLevel level, BlockPos pos, SoilCell cell)
+    {
+        final RegionalAir air = RegionalAir.get(level);
+        send(source, "Forest health: broadleaf %s, conifer %s; annual mean SO2 %s ug/m3 (present %s ug/m3); harvested from the soil: lead %s g, arsenic %s g".formatted(
+            f(cell.forestHealth(false)), f(cell.forestHealth(true)), f(air.annualSo2(pos.getX(), pos.getZ())), f(air.so2Now(pos.getX(), pos.getZ())), f(cell.totalHarvested(Pollutant.LEAD)), f(cell.totalHarvested(Pollutant.ARSENIC))));
+        final CropEffects.Result crop = CropSoil.of(level, pos, cell);
+        send(source, "Crop growth multiplier here: %s%s".formatted(f(crop.growth()), crop.unhealthy() ? " (a step here is unhealthy: the crop dies)" : ""));
     }
 
     private static void air(CommandSourceStack source, ServerLevel level, BlockPos pos)

@@ -47,6 +47,29 @@ public final class Breathing
         }
     }
 
+    /**
+     * One item of food has been eaten, carrying these micrograms of each of {@code FoodMetals.METALS}. The gut takes up its share of each ({@code FoodMetals.absorption}) and it joins the same body burdens that breathing builds. Antimony counts as arsenic at its relative toxicity. Zinc, copper and nickel are not a burden to a person here.
+     */
+    public static void onEat(ServerPlayer player, double[] micrograms)
+    {
+        final BreathingState state = player.getData(GasAttachments.BREATHING);
+        for (int i = 0; i < tfcpp.ecology.FoodMetals.METALS.length; i++)
+        {
+            final tfcpp.ecology.Pollutant metal = tfcpp.ecology.FoodMetals.METALS[i];
+            final float mg = (float) tfcpp.ecology.FoodMetals.absorbedMilligrams(metal, micrograms[i]);
+            switch (metal)
+            {
+                case LEAD -> state.leadMg += mg;
+                case ARSENIC -> state.arsenicMg += mg;
+                case MERCURY -> state.mercuryMg += mg;
+                case ANTIMONY -> state.arsenicMg += ANTIMONY_RELATIVE_TOXICITY * mg;
+                default ->
+                {
+                }
+            }
+        }
+    }
+
     public static void tick(ServerPlayer player)
     {
         final ServerLevel level = player.serverLevel();

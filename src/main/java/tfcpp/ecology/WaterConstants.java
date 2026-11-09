@@ -17,8 +17,11 @@ public final class WaterConstants
     /** Metres of depth of a lake. A GAME FIGURE for a shallow lake, which makes the volume of a cell {@code 128 * 128 * 5} = 81 920 m3. Counting the water blocks of the real lake would mean scanning chunks, and the lake is not the point of the model: the figure is nominal. A lake has no outflow here, so what is put into it accumulates. */
     public static final double LAKE_DEPTH = 5.0;
     public static final double LAKE_VOLUME = LAKE_AREA * LAKE_DEPTH;
-    /** Days over which the alkalinity of a still water cell is renewed from its catchment: the flushing time of small lakes is months to years (Wetzel, Limnology), and a year is taken. */
-    public static final double LAKE_ALKALINITY_RENEWAL_DAYS = 365.0;
+    /** Days over which the alkalinity of a still water cell is renewed from its catchment: the flushing time of small lakes is months to years (Wetzel, Limnology), and a TFC year is taken (per-year figures follow the TFC calendar, see SoilConstants#daysPerYear). */
+    public static double lakeAlkalinityRenewalDays()
+    {
+        return SoilConstants.daysPerYear();
+    }
 
     // --- Fates in water ----------------------------------------------------------------------------------------------------------------------------------------------------
 
