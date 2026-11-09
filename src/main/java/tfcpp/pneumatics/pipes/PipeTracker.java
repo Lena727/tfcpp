@@ -560,7 +560,7 @@ public final class PipeTracker
     /**
      * Puts what ran out on the ground around a hole, the lowest and nearest places first. Less than a whole block soaks away.
      *
-     * @return the number of blocks put down
+     * @return the number of blocks that left the pipe: put down, or soaked into the ground at once for a liquid with no block of its own
      */
     private static int spill(ServerLevel level, BlockPos hole, Fluid fluid, int blocks)
     {
@@ -568,6 +568,13 @@ public final class PipeTracker
         final LongOpenHashSet seen = new LongOpenHashSet();
         queue.add(hole);
         seen.add(hole.asLong());
+
+        // Our chemical liquids, mercury and molten metals have no block of their own, and their legacy block is air: putting that down would wipe out the grass or snow it fell on. They soak into the ground instead
+        final BlockState liquid = fluid.defaultFluidState().createLegacyBlock();
+        if (liquid.isAir())
+        {
+            return blocks; // All of it is out of the pipe, and none of it stands on the ground
+        }
 
         int left = blocks;
         while (!queue.isEmpty() && left > 0)
@@ -578,7 +585,7 @@ public final class PipeTracker
             {
                 if (!pos.equals(hole))
                 {
-                    level.setBlockAndUpdate(pos, fluid.defaultFluidState().createLegacyBlock());
+                    level.setBlockAndUpdate(pos, liquid);
                     left--;
                 }
                 for (Direction side : new Direction[] {Direction.DOWN, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST})
