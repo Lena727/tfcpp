@@ -73,6 +73,7 @@ public final class EcologyGameTests
         tfcpp.ecology.RegionalAir.get(level).clearCellAt(chunkX << 4, chunkZ << 4); // Nothing has fallen on the site before this test
         final LevelChunk chunk = level.getChunk(chunkX, chunkZ);
         chunk.removeData(EcologyAttachments.CHUNK); // The test world is kept between runs, and these chunks with it
+        clearFluidsInColumns(level, chunk); // and so is the liquid that tests put on the ground, which builds towers that reach the top of the world in a few runs
         return chunk;
     }
 
@@ -91,6 +92,38 @@ public final class EcologyGameTests
     private static Fluid fluidOf(String id)
     {
         return BuiltInRegistries.FLUID.get(ResourceLocation.parse(id));
+    }
+
+    /** Removes every fluid block, to the full height of the world, from the columns of this chunk and the ones beside it, which a test that puts liquid on the ground leaves in a world that is kept between runs. */
+    private static void clearFluidsInColumns(ServerLevel level, LevelChunk chunk)
+    {
+        final int x0 = chunk.getPos().getMinBlockX() - 8, z0 = chunk.getPos().getMinBlockZ() - 8;
+        for (int x = x0; x < x0 + 32; x++)
+        {
+            for (int z = z0; z < z0 + 32; z++)
+            {
+                for (int y = level.getMinBuildHeight(); y < level.getMaxBuildHeight(); y++)
+                {
+                    final BlockPos pos = new BlockPos(x, y, z);
+                    if (level.isLoaded(pos) && !level.getFluidState(pos).isEmpty())
+                    {
+                        level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+                    }
+                }
+            }
+        }
+    }
+
+    /** Puts air in the column of blocks down to the ground at this position and around it, where a test has put down liquid that the world kept. */
+    private static void clearBelow(ServerLevel level, BlockPos outlet)
+    {
+        for (BlockPos pos : BlockPos.betweenClosed(outlet.offset(-9, -64, -9), outlet.offset(9, 0, 9)))
+        {
+            if (!level.getFluidState(pos).isEmpty())
+            {
+                level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+            }
+        }
     }
 
     private static double acidityOf(ServerLevel level, BlockPos pos)
@@ -450,6 +483,7 @@ public final class EcologyGameTests
         final ServerLevel level = helper.getLevel();
         final LevelChunk chunk = farChunk(helper, 21);
         final BlockPos outlet = spot(level, chunk);
+        clearBelow(level, outlet); // The water that an earlier run of this test put down on the ground would take the acid now
         try
         {
             Pollution.seed(level, outlet, SoilOrder.PODZOL, false);
@@ -463,6 +497,7 @@ public final class EcologyGameTests
         }
         finally
         {
+            clearBelow(level, outlet); // So that the next run finds the ground as it was
             release(level, chunk);
         }
     }

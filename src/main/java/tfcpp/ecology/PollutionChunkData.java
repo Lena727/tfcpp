@@ -53,19 +53,25 @@ public final class PollutionChunkData
         tag.putDouble("carbonateSpent", cell.carbonateSpent);
         tag.putDouble("weathered", cell.weathered);
         tag.putLong("lastTick", cell.lastTick);
+        tag.putString("drainage", cell.drainage.name());
+        tag.putDouble("landFraction", cell.landFraction);
         // By name, so that a kind added to the enum later does not shift the others
-        final CompoundTag input = new CompoundTag(), present = new CompoundTag(), decayed = new CompoundTag(), claimed = new CompoundTag();
+        final CompoundTag input = new CompoundTag(), present = new CompoundTag(), decayed = new CompoundTag(), claimed = new CompoundTag(), washed = new CompoundTag(), outbox = new CompoundTag();
         for (Pollutant pollutant : Pollutant.VALUES)
         {
             input.putDouble(pollutant.id(), cell.input[pollutant.ordinal()]);
             present.putDouble(pollutant.id(), cell.present[pollutant.ordinal()]);
             decayed.putDouble(pollutant.id(), cell.decayed[pollutant.ordinal()]);
             claimed.putDouble(pollutant.id(), cell.claimed[pollutant.ordinal()]);
+            washed.putDouble(pollutant.id(), cell.washed[pollutant.ordinal()]);
+            outbox.putDouble(pollutant.id(), cell.outbox[pollutant.ordinal()]);
         }
         tag.put("input", input);
         tag.put("present", present);
         tag.put("decayed", decayed);
         tag.put("claimed", claimed);
+        tag.put("washed", washed);
+        tag.put("outbox", outbox);
         return tag;
     }
 
@@ -80,13 +86,18 @@ public final class PollutionChunkData
         cell.carbonateSpent = tag.getDouble("carbonateSpent");
         cell.weathered = tag.getDouble("weathered");
         cell.lastTick = tag.getLong("lastTick");
-        final CompoundTag input = tag.getCompound("input"), present = tag.getCompound("present"), decayed = tag.getCompound("decayed"), claimed = tag.getCompound("claimed");
+        cell.landFraction = tag.contains("landFraction") ? tag.getDouble("landFraction") : 1.0;
+        cell.drainage = tag.contains("drainage") ? Drainage.valueOf(tag.getString("drainage")) : Drainage.UNKNOWN;
+        final CompoundTag input = tag.getCompound("input"), present = tag.getCompound("present"), decayed = tag.getCompound("decayed"), claimed = tag.getCompound("claimed"), washed = tag.getCompound("washed"), outbox = tag.getCompound("outbox");
         for (Pollutant pollutant : Pollutant.VALUES)
         {
             cell.input[pollutant.ordinal()] = input.getDouble(pollutant.id());
             cell.present[pollutant.ordinal()] = present.getDouble(pollutant.id());
             cell.decayed[pollutant.ordinal()] = decayed.getDouble(pollutant.id());
             cell.claimed[pollutant.ordinal()] = claimed.getDouble(pollutant.id());
+            cell.washed[pollutant.ordinal()] = washed.getDouble(pollutant.id());
+            cell.outbox[pollutant.ordinal()] = outbox.getDouble(pollutant.id());
+            cell.hasOutbox |= cell.outbox[pollutant.ordinal()] > 0.0;
         }
         return cell;
     }

@@ -88,6 +88,13 @@ public final class Pollution
             return;
         }
         final double[] load = soakable.load(millibuckets);
+        final @Nullable Waters.Meeting water = Waters.meeting(level, pos);
+        if (water != null)
+        {
+            // Let out into water, or falling or spilling into it: it is in the water now and not in the ground
+            LevelWaters.get(level).discharge(level, water.pos(), water.kind(), load, soakable.sinks());
+            return;
+        }
         for (Pollutant pollutant : Pollutant.VALUES)
         {
             deposit(level, pos, pollutant, load[pollutant.ordinal()]);
@@ -161,6 +168,10 @@ public final class Pollution
             if (cell != null)
             {
                 final SoilCell copy = cell.copy();
+                if (copy.drainage() == Drainage.UNKNOWN)
+                {
+                    copy.setDrainage(LevelWaters.get(level).classify(level, chunk)); // What is known now, for the look: nothing is kept
+                }
                 claim(level, chunk, copy);
                 copy.catchUp(now);
                 return copy;
@@ -169,6 +180,18 @@ public final class Pollution
         final SoilCell pristine = SoilReader.pristine(level, chunk, now);
         claim(level, chunk, pristine);
         return pristine;
+    }
+
+    /**
+     * Brings the soil of a chunk that keeps a cell up to the calendar, and gives the water what it has run off since: nothing else is changed. The waters do this once a day for the loaded chunks that drain to them, so that runoff does not wait for something to touch the soil.
+     */
+    public static void refresh(ServerLevel level, LevelChunk chunk)
+    {
+        if (chunk.hasData(EcologyAttachments.CHUNK) && chunk.getData(EcologyAttachments.CHUNK).cell() != null)
+        {
+            touch(level, chunk);
+            chunk.setUnsaved(true);
+        }
     }
 
     /** @return {@code true} if something has been put into the chunk at this position, so that it keeps a cell */
@@ -181,6 +204,7 @@ public final class Pollution
     /** Gives a chunk a new soil of a given kind, for tests that need a known start. */
     public static SoilCell seed(ServerLevel level, BlockPos pos, SoilOrder order, boolean carbonateBedrock)
     {
+        final boolean had = isTouched(level, pos);
         final LevelChunk chunk = level.getChunkAt(pos);
         final SoilCell cell = SoilCell.fresh(order, carbonateBedrock, now());
         final @Nullable AirGrid.Cell region = RegionalAir.get(level).grid().cellAt(chunk.getPos().x >> 3, chunk.getPos().z >> 3);
@@ -190,6 +214,10 @@ public final class Pollution
             {
                 cell.claimed[pollutant.ordinal()] = region.cumulative(pollutant); // A known start: what has fallen already is not this soil's
             }
+        }
+        if (!had)
+        {
+            LevelWaters.get(level).registerLand(chunk.getPos(), SoilConstants.AREA * cell.landFraction());
         }
         chunk.getData(EcologyAttachments.CHUNK).set(cell);
         chunk.setUnsaved(true);
@@ -205,9 +233,27 @@ public final class Pollution
         {
             cell = SoilReader.pristine(level, chunk, now);
             data.set(cell);
+            LevelWaters.get(level).registerLand(chunk.getPos(), SoilConstants.AREA * cell.landFraction());
         }
         claim(level, chunk, cell); // First what fell from the air, then the passage of time: see SoilCell#absorb
+        if (cell.drainage() == Drainage.UNKNOWN)
+        {
+            cell.setDrainage(LevelWaters.get(level).classify(level, chunk)); // A fact of the place: found once, and kept
+        }
+        LevelWaters.get(level).watch(chunk.getPos(), cell.drainage());
         cell.catchUp(now);
+        if (cell.drainage() == Drainage.NONE)
+        {
+            cell.returnOutbox(); // What was held while it was not known turns out to have nowhere to go: it stays in the soil
+        }
+        else if (cell.drainage() != Drainage.UNKNOWN)
+        {
+            final @Nullable double[] washed = cell.takeOutbox();
+            if (washed != null)
+            {
+                LevelWaters.get(level).runoff(level, chunk.getPos(), cell.drainage(), washed); // What the soil gave up goes into the water ledger, possibly pending, or to the sea
+            }
+        } // While it is not known where the chunk drains, the runoff is held in the outbox of the cell, and is not counted as lost
         return cell;
     }
 

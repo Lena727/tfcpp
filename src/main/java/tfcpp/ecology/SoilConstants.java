@@ -54,6 +54,15 @@ public final class SoilConstants
 
     private SoilConstants() {}
 
+    /** @return the share of a pollutant's load in the soil of a chunk that drains to water that runs off to it per day, as a first-order rate: the figures of {@link WaterConstants}, per year, over the days of a year. Acid is not in this: it leaves from the aluminium range only, see {@link #ALUMINIUM_ACID_RUNOFF_PER_DAY} */
+    public static double runoffPerDay(Pollutant pollutant)
+    {
+        return WaterConstants.runoffPerYear(pollutant) / DAYS_PER_YEAR;
+    }
+
+    /** Per day: the share of the acid that is held as aluminium that runs off to the water, 10% a year ({@link WaterConstants#ALUMINIUM_ACID_RUNOFF_PER_YEAR}). */
+    public static final double ALUMINIUM_ACID_RUNOFF_PER_DAY = WaterConstants.ALUMINIUM_ACID_RUNOFF_PER_YEAR / DAYS_PER_YEAR;
+
     /** @return the fraction of a pollutant that breaks down in a day in soil, as a first-order rate in 1/day. Metals do not break down: leaching is not modelled in v1.5 */
     public static double decayPerDay(Pollutant pollutant)
     {

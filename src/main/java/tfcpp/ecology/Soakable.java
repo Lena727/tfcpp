@@ -90,6 +90,12 @@ public enum Soakable
         return new double[] {copper / total * Density.COPPER, zinc / total * Density.ZINC, nickel / total * Density.NICKEL};
     }
 
+    /** @return {@code true} for mercury and the molten metals: a liquid that, let into water, freezes to shot or sinks and goes to the bed and not into the water column */
+    public boolean sinks()
+    {
+        return liquid == null;
+    }
+
     /** @return the record that a chemical liquid leaves in the soil, or {@code null} if it leaves none */
     @Nullable
     public static Soakable of(Liquid liquid)

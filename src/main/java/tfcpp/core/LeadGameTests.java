@@ -117,6 +117,25 @@ public final class LeadGameTests
         cell[gas.ordinal()] += moles;
     }
 
+    /** What has settled out as dust or liquid on the floor, summed over every chunk that the box spans: a box can straddle a chunk border, and each chunk keeps its own count. */
+    private static float settledInBox(GameTestHelper helper, int size, Gas gas)
+    {
+        final java.util.Set<net.minecraft.world.level.ChunkPos> chunks = new java.util.HashSet<>();
+        for (int x = 1; x <= size; x += size - 1)
+        {
+            for (int z = 1; z <= size; z += size - 1)
+            {
+                chunks.add(new net.minecraft.world.level.ChunkPos(helper.absolutePos(new BlockPos(x, 1, z))));
+            }
+        }
+        float total = 0f;
+        for (net.minecraft.world.level.ChunkPos chunk : chunks)
+        {
+            total += helper.getLevel().getChunk(chunk.x, chunk.z).getData(GasAttachments.CHUNK).deposit(gas);
+        }
+        return total;
+    }
+
     private static float totalInBox(GameTestHelper helper, int size, int height, Gas gas)
     {
         float total = 0;
@@ -803,11 +822,11 @@ public final class LeadGameTests
         helper.runAtTickTime(5, () -> {
             helper.assertTrue(droppedItems(helper, TOWER, Instruments.ARSENIC_TRIOXIDE.get()) == 2, "Two whole powders drop, got " + droppedItems(helper, TOWER, Instruments.ARSENIC_TRIOXIDE.get()));
             // Dust settles out of the air at once, so what has blown away is the air and the settled part of it together
-            final float blown = totalInBox(helper, 5, 3, Gas.ARSENIC_TRIOXIDE) + helper.getLevel().getChunkAt(helper.absolutePos(TOWER)).getData(GasAttachments.CHUNK).deposit(Gas.ARSENIC_TRIOXIDE);
+            final float blown = totalInBox(helper, 5, 3, Gas.ARSENIC_TRIOXIDE) + settledInBox(helper, 5, Gas.ARSENIC_TRIOXIDE);
             helper.assertTrue(Math.abs(blown - 0.1f) < 1e-3f, "The rest blows away as dust, got " + blown);
             final float expected = Sulfide.CINNABAR.metalMoles(50f);
             // Mercury vapour over what the air can hold at once settles out as liquid on the floor, which the chunk keeps count of
-            final float vapour = totalInBox(helper, 5, 3, Gas.MERCURY_VAPOR) + helper.getLevel().getChunkAt(helper.absolutePos(TOWER)).getData(GasAttachments.CHUNK).deposit(Gas.MERCURY_VAPOR);
+            final float vapour = totalInBox(helper, 5, 3, Gas.MERCURY_VAPOR) + settledInBox(helper, 5, Gas.MERCURY_VAPOR);
             helper.assertTrue(Math.abs(vapour - expected) < 0.01f * expected, "50 mB of mercury evaporates into the room as " + expected + " mol, got " + vapour);
             helper.assertTrue(totalInBox(helper, 5, 3, Gas.MERCURY_VAPOR) > 0f, "And some of it is in the air");
             helper.succeed();

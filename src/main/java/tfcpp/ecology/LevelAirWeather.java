@@ -1,5 +1,6 @@
 package tfcpp.ecology;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -48,6 +49,8 @@ public final class LevelAirWeather implements AirWeather
     private final ServerLevel level;
     private final ConcurrentLinkedQueue<Result> arrived = new ConcurrentLinkedQueue<>();
     private final LongOpenHashSet pending = new LongOpenHashSet();
+    /** Cells that the waters ask the rain of and that are not in the air grid: kept here with their rainfall, so that a river that no smoke has touched can be asked too. */
+    private final Long2ObjectOpenHashMap<AirGrid.Cell> rainCells = new Long2ObjectOpenHashMap<>();
     private volatile boolean generatorFailed;
     private double lastX, lastZ, dayX, dayZ;
     private long lastDay = Long.MIN_VALUE, preparedDay = Long.MIN_VALUE;
@@ -87,9 +90,17 @@ public final class LevelAirWeather implements AirWeather
         {
             pending.remove(AirGrid.key(result.cellX(), result.cellZ()));
             final @Nullable AirGrid.Cell cell = grid.cellAt(result.cellX(), result.cellZ());
-            if (cell != null && !Float.isNaN(result.average()))
+            final @Nullable AirGrid.Cell kept = rainCells.get(AirGrid.key(result.cellX(), result.cellZ()));
+            if (!Float.isNaN(result.average()))
             {
-                cell.setRain(result.average(), result.variance());
+                if (cell != null)
+                {
+                    cell.setRain(result.average(), result.variance());
+                }
+                if (kept != null)
+                {
+                    kept.setRain(result.average(), result.variance());
+                }
             }
         }
     }
@@ -103,7 +114,18 @@ public final class LevelAirWeather implements AirWeather
             prepareDay(day, tick);
         }
         windInto(cell, day, tick, out);
-        out.raining = raining(cell, tick);
+        final float intensity = precipitation(cell, tick);
+        out.raining = intensity > 0f;
+        out.rainIntensity = intensity;
+    }
+
+    @Override
+    public void sampleRain(int cellX, int cellZ, long tick, Sample out)
+    {
+        final AirGrid.Cell cell = rainCells.computeIfAbsent(AirGrid.key(cellX, cellZ), key -> new AirGrid.Cell(cellX, cellZ));
+        final float intensity = precipitation(cell, tick);
+        out.raining = intensity > 0f;
+        out.rainIntensity = intensity;
     }
 
     /** Reads the wind of a new day once, at the position of an online player or else at the spawn, if its chunk is loaded. */
@@ -175,24 +197,25 @@ public final class LevelAirWeather implements AirWeather
         out.windZ = cell.hasWind() ? cell.windZ() : 0.0;
     }
 
-    private boolean raining(AirGrid.Cell cell, long tick)
+    /** @return TFC's rain intensity at the place, 0 to 1 (the intensity of the storm less what the rainfall of the place takes off it), if it is precipitating there; 0 if it is not, or cannot be told yet */
+    private float precipitation(AirGrid.Cell cell, long tick)
     {
         final ClimateModel model = Climate.get(level);
         if (!model.supportsRain() || !WorldTracker.get(level).isWeatherEnabled())
         {
-            return false;
+            return 0f;
         }
         final float intensity = model.getRain(tick);
         if (!(intensity > 0f))
         {
-            return false; // The same for the whole world, and the cheap answer nearly all of the time
+            return 0f; // The same for the whole world, and the cheap answer nearly all of the time
         }
         if (!cell.hasRain() && !findInLoadedChunk(cell))
         {
             request(cell);
-            return false;
+            return 0f;
         }
-        return WeatherHelpers.isPrecipitating(intensity, instantRainfall(cell.rainAverage(), cell.rainVariance(), tick));
+        return Math.max(0f, WeatherHelpers.calculateRealRainIntensity(intensity, instantRainfall(cell.rainAverage(), cell.rainVariance(), tick)));
     }
 
     /** TFC's own formula for the rainfall at a time of the year, from the average and the variance of a place. */

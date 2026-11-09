@@ -103,9 +103,36 @@ public final class SoilReader
         return false;
     }
 
+    /** @return the share of the 256 surface columns of a loaded chunk whose top block (by the MOTION_BLOCKING_NO_LEAVES heightmap) is not fluid */
+    public static double landFraction(LevelChunk chunk)
+    {
+        int land = 0;
+        final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (int x = 0; x < 16; x++)
+        {
+            for (int z = 0; z < 16; z++)
+            {
+                // The heightmap says where the top block is; blocks put there since it was last brought up to date (a loaded chunk is kept so by the game, but not one that is being built in a test) are walked over
+                int y = chunk.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+                for (int up = 0; up < 8 && !chunk.getBlockState(pos.set(chunk.getPos().getMinBlockX() + x, y, chunk.getPos().getMinBlockZ() + z)).isAir(); up++)
+                {
+                    y++;
+                }
+                pos.set(chunk.getPos().getMinBlockX() + x, y - 1, chunk.getPos().getMinBlockZ() + z);
+                if (chunk.getFluidState(pos).isEmpty())
+                {
+                    land++;
+                }
+            }
+        }
+        return land / 256.0;
+    }
+
     /** @return the soil of a chunk as it was before anything was put into it */
     public static SoilCell pristine(ServerLevel level, LevelChunk chunk, long nowTick)
     {
-        return SoilCell.fresh(surfaceOrder(level, chunk.getPos()), carbonateBedrock(chunk), nowTick);
+        final SoilCell cell = SoilCell.fresh(surfaceOrder(level, chunk.getPos()), carbonateBedrock(chunk), nowTick);
+        cell.setLandFraction(landFraction(chunk));
+        return cell;
     }
 }

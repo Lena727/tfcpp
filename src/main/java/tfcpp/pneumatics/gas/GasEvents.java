@@ -12,6 +12,8 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
@@ -39,6 +41,7 @@ public final class GasEvents
             PipeTracker.get(level).tick(level);
             final long pipeDone = System.nanoTime();
             RegionalAir.get(level).tick(level); // Records its own time, only when it takes a step
+            tfcpp.ecology.LevelWaters.get(level).tick(level); // The same, for the rivers and lakes
 
             TickProfiler.PROFILE.record(TickProfiler.GAS, gasDone - start);
             TickProfiler.PROFILE.record(TickProfiler.SHAFT, shaftDone - gasDone);

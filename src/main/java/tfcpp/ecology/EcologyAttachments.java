@@ -16,5 +16,10 @@ public final class EcologyAttachments
         .serialize(PollutionChunkData.SERIALIZER)
         .build());
 
+    /** Which river is nearest to the middle of a chunk, from TFC's graph. Saved with the chunk, and not sent to clients. */
+    public static final Supplier<AttachmentType<WaterChunkData>> WATER_CHUNK = TYPES.register("water_chunk", () -> AttachmentType.builder(WaterChunkData::new)
+        .serialize(WaterChunkData.SERIALIZER)
+        .build());
+
     private EcologyAttachments() {}
 }

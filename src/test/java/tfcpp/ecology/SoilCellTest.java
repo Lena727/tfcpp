@@ -13,7 +13,9 @@ class SoilCellTest
 
     private static SoilCell cell(SoilOrder order, boolean carbonate)
     {
-        return SoilCell.fresh(order, carbonate, 0L);
+        final SoilCell cell = SoilCell.fresh(order, carbonate, 0L);
+        cell.setDrainage(Drainage.NONE); // These tests are about the soil alone: a chunk that drains nowhere
+        return cell;
     }
 
     // --- Where a soil starts ---------------------------------------------------------------------------------------------------------------------------------------
@@ -283,6 +285,7 @@ class SoilCellTest
     {
         // The cell was saved on day 100. At a restart the spawn chunks load before TFC has read its saved calendar, which says day 0, and then the calendar reads day 150
         final SoilCell cell = SoilCell.fresh(SoilOrder.ENTISOL, false, 100 * DAY);
+        cell.setDrainage(Drainage.NONE);
         cell.deposit(Pollutant.TAR, 100.0);
         cell.catchUp(0L);
         cell.catchUp(150 * DAY);
@@ -290,6 +293,7 @@ class SoilCellTest
         assertEquals(150 * DAY, cell.lastTick());
 
         final SoilCell control = SoilCell.fresh(SoilOrder.ENTISOL, false, 100 * DAY);
+        control.setDrainage(Drainage.NONE);
         control.deposit(Pollutant.TAR, 100.0);
         control.catchUp(150 * DAY);
         assertEquals(control.total(Pollutant.TAR), cell.total(Pollutant.TAR), 0.0, "the same as a calendar that read the right date at once");

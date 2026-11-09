@@ -11,9 +11,9 @@ import java.util.Locale;
  */
 public final class TickProfiler
 {
-    public static final int GAS = 0, SHAFT = 1, PIPE = 2, BREATHING = 3, AIR = 4;
+    public static final int GAS = 0, SHAFT = 1, PIPE = 2, BREATHING = 3, AIR = 4, WATER = 5;
 
-    public static final TickProfile PROFILE = new TickProfile("gas", "shaft", "pipe", "breathing", "air");
+    public static final TickProfile PROFILE = new TickProfile("gas", "shaft", "pipe", "breathing", "air", "water");
 
     /** The time a tick has before the server falls behind, which is what every figure is compared with. */
     private static final double TICK_MILLIS = 50.0;
