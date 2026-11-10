@@ -195,6 +195,7 @@ public final class Metallurgy
                 Instruments.addToTab(output);
                 Pipes.addToTab(output);
                 Chemistry.addToTab(output);
+                tfcpp.health.Hygiene.addToTab(output);
             })
             .build());
     }

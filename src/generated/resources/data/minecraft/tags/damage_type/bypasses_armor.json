@@ -3,6 +3,7 @@
     "tfcpp:asphyxiation",
     "tfcpp:carbon_monoxide",
     "tfcpp:toxic_gas",
-    "tfcpp:blast"
+    "tfcpp:blast",
+    "tfcpp:fever"
   ]
 }

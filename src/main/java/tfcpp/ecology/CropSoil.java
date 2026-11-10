@@ -63,7 +63,7 @@ public final class CropSoil
         final double[] metals = new double[Pollutant.COUNT];
         for (Pollutant pollutant : Pollutant.VALUES)
         {
-            if (pollutant != Pollutant.ACIDITY && pollutant != Pollutant.TAR && pollutant != Pollutant.SEWAGE)
+            if (pollutant != Pollutant.ACIDITY && pollutant != Pollutant.TAR && !pollutant.isSewage())
             {
                 metals[pollutant.ordinal()] = soil.mgPerKg(pollutant);
             }

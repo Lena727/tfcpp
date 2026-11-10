@@ -49,6 +49,7 @@ public final class PollutionCommand
         air(source, level, pos);
         forestAndCrops(source, level, pos, cell);
         water(source, level, pos);
+        tfcpp.health.HygieneCommand.report(source, level, pos);
         return 1;
     }
 
@@ -131,7 +132,7 @@ public final class PollutionCommand
         {
             case ACIDITY -> f(perLitre * 1e6) + " ueq/L";
             case TAR -> f(perLitre * 1e6) + " mg/L";
-            case SEWAGE -> f(perLitre * 1e3) + " mL/L";
+            case SEWAGE, SHED_DYSENTERY, SHED_TYPHOID -> f(perLitre * 1e3) + " mL/L";
             default -> f(perLitre * 1e6) + " ug/L";
         };
     }

@@ -566,4 +566,33 @@ class WaterLedgerTest
         assertEquals(500, ledger.activeCount());
         assertBalanced(ledger);
     }
+
+    @Test
+    void waterDrawnIntoContainersLeavesTheWaterColumnNotTheBedAndNeverMoreThanTheReachHeldAndTheLedgerStillCloses()
+    {
+        final WaterLedger ledger = chain(2, 8.0, 0.1, EDGE_BLOCKS);
+        ledger.add(1, LEAD, 1000.0);
+        ledger.add(1, SEWAGE, 50.0);
+        run(ledger, 6, null);
+        final double lead = ledger.reach(1).water(LEAD), sewage = ledger.reach(1).water(SEWAGE), bed = ledger.onBed(LEAD);
+        assertTrue(lead > 0.0 && sewage > 0.0);
+        double carriedLead = 0.0, carriedSewage = 0.0;
+        for (int stroke = 0; stroke < 1000; stroke++)
+        {
+            final double l = ledger.draw(1, LEAD, lead / 100.0), s = ledger.draw(1, SEWAGE, sewage / 37.0);
+            assertTrue(l >= 0.0 && s >= 0.0 && l <= lead / 100.0 + 1e-15);
+            carriedLead += l;
+            carriedSewage += s;
+            assertBalanced(ledger);
+        }
+        assertEquals(lead, carriedLead, 1e-9 * lead, "Repeated draws carry away what the reach held and no more");
+        assertEquals(sewage, carriedSewage, 1e-9 * sewage);
+        assertEquals(0.0, ledger.reach(1).water(LEAD), 1e-9 * lead);
+        assertEquals(0.0, ledger.draw(1, LEAD, 5.0), 0.0, "and nothing is left to take");
+        assertEquals(bed, ledger.onBed(LEAD), 0.0, "The bed is not drawn from");
+        assertEquals(carriedLead, ledger.drawn(LEAD), 0.0);
+        assertEquals(0.0, ledger.draw(99, LEAD, 5.0), 0.0, "A reach that does not exist gives nothing");
+        run(ledger, 24, null);
+        assertBalanced(ledger);
+    }
 }

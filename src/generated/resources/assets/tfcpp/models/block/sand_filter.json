@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "tfcpp:block/sand_filter_side",
+    "side": "tfcpp:block/sand_filter_side",
+    "top": "tfcpp:block/sand_filter_top"
+  }
+}

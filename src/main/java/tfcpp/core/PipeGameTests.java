@@ -1105,5 +1105,77 @@ public final class PipeGameTests
         });
     }
 
+    // ---- Quality of the water through a pump ----
+
+    private static tfcpp.health.WaterQuality foulWater(double lead)
+    {
+        final double[] metals = new double[tfcpp.ecology.FoodMetals.METALS.length];
+        metals[tfcpp.ecology.FoodMetals.indexOf(tfcpp.ecology.Pollutant.LEAD)] = lead;
+        return new tfcpp.health.WaterQuality(2e-3, 5e-4, 1e-4, metals, 0.0);
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = BATCH)
+    public static void aPumpBetweenTwoNetworksCarriesTheQualityOfTheWaterAndConservesWhatItCarries(GameTestHelper helper)
+    {
+        helper.setBlock(2, 1, 3, ironPipe());
+        helper.setBlock(2, 1, 2, pump(Direction.NORTH));
+        helper.setBlock(2, 1, 1, ironPipe());
+
+        helper.runAtTickTime(5, () -> {
+            final PipeNetwork source = requireNetwork(helper, 2, 1, 3), target = requireNetwork(helper, 2, 1, 1);
+            helper.assertTrue(source != target, "The pump keeps the two networks apart");
+            source.contents().addLiquid(WATER, 3f, PipePhysics.ROOM_TEMPERATURE, foulWater(40.0));
+            setAirPressure(source, 1f);
+            setAirPressure(target, 1f);
+        });
+        helper.runAtTickTime(6, () -> {
+            final PipeNetwork source = requireNetwork(helper, 2, 1, 3), target = requireNetwork(helper, 2, 1, 1);
+            final int lead = tfcpp.ecology.FoodMetals.indexOf(tfcpp.ecology.Pollutant.LEAD);
+            final double sewageBefore = source.contents().quality.faecal * source.contents().litres, leadBefore = source.contents().quality.metal(lead) * source.contents().litres;
+            pumpAt(helper, 2, 1, 2).pump(level(helper), 0.001f);
+            final var moved = target.contents();
+            helper.assertTrue(moved.litres > 0.5f && source.contents().litres > 0f, "The pump moved some of the water, got " + moved.litres);
+            helper.assertTrue(moved.quality != null && Math.abs(moved.quality.faecal - 2e-3) < 2e-3 * 1e-6 && Math.abs(moved.quality.shedTyphoid - 1e-4) < 1e-4 * 1e-6 && Math.abs(moved.quality.metal(lead) - 40.0) < 40.0 * 1e-6, "The water that arrives has the quality it left with, got " + moved.quality);
+            final double sewageAfter = source.contents().quality.faecal * source.contents().litres + moved.quality.faecal * moved.litres;
+            final double leadAfter = source.contents().quality.metal(lead) * source.contents().litres + moved.quality.metal(lead) * moved.litres;
+            helper.assertTrue(Math.abs(sewageAfter - sewageBefore) < sewageBefore * 1e-5 && Math.abs(leadAfter - leadBefore) < leadBefore * 1e-5, "Over both networks the sewage (" + sewageBefore + " to " + sewageAfter + ") and the lead (" + leadBefore + " to " + leadAfter + ") are what they were");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60, batch = BATCH)
+    public static void aPumpThatHoldsBrineTakesNoWaterFromAPoolAndDeliversTheBrineAlone(GameTestHelper helper) throws Exception
+    {
+        helper.setBlock(2, 1, 3, net.minecraft.world.level.block.Blocks.WATER);
+        helper.setBlock(2, 1, 2, pump(Direction.NORTH));
+        helper.setBlock(2, 1, 1, ironPipe());
+
+        helper.runAtTickTime(5, () -> {
+            final PipeNetwork target = requireNetwork(helper, 2, 1, 1);
+            setAirPressure(target, 1f);
+            try
+            {
+                final PistonPumpBlockEntity pump = pumpAt(helper, 2, 1, 2);
+                final java.lang.reflect.Field litres = PistonPumpBlockEntity.class.getDeclaredField("heldLitres"), liquid = PistonPumpBlockEntity.class.getDeclaredField("heldLiquid"), quality = PistonPumpBlockEntity.class.getDeclaredField("heldQuality");
+                litres.setAccessible(true);
+                liquid.setAccessible(true);
+                quality.setAccessible(true);
+                litres.setFloat(pump, 0.5f);
+                liquid.set(pump, "tfc:brine");
+                quality.set(pump, null);
+                pump.pump(level(helper), 0.001f); // 1 L a stroke: the brine is delivered, and the pool is not drawn on
+                final var delivered = target.contents();
+                helper.assertTrue("tfc:brine".equals(delivered.liquid) && Math.abs(delivered.litres - 0.5f) < 1e-3f, "Only the brine that was held is delivered, got " + delivered.liquid + " " + delivered.litres);
+                helper.assertTrue(delivered.quality == null, "and it carries no quality of water");
+                helper.assertTrue(helper.getBlockState(new BlockPos(2, 1, 3)).getFluidState().isSource(), "The pool was not drawn on while the pump held another liquid");
+                helper.succeed();
+            }
+            catch (ReflectiveOperationException failure)
+            {
+                throw new IllegalStateException(failure);
+            }
+        });
+    }
+
     // ---- P9, P10 etc. recipes and data are checked elsewhere ----
 }

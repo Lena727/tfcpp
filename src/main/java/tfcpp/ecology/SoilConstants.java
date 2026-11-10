@@ -92,7 +92,7 @@ public final class SoilConstants
         return switch (pollutant)
         {
             case TAR -> Math.log(2.0) / TAR_HALF_LIFE_DAYS;
-            case SEWAGE -> Math.log(10.0) / SEWAGE_T90_DAYS;
+            case SEWAGE, SHED_DYSENTERY, SHED_TYPHOID -> Math.log(10.0) / SEWAGE_T90_DAYS;
             default -> 0.0;
         };
     }

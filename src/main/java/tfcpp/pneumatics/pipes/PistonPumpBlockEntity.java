@@ -48,6 +48,9 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
     /** Liquid taken out of a pool a block at a time, or out of a barrel by the millilitre, and not yet pushed on. */
     private float heldLitres;
     private String heldLiquid = "";
+    /** What the water that is held carries: it mixes with what is drawn, and goes into the pipe with the water. */
+    @Nullable
+    private tfcpp.health.WaterQuality heldQuality;
 
     public PistonPumpBlockEntity(BlockPos pos, BlockState state)
     {
@@ -86,6 +89,11 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
         super.saveAdditional(tag, provider);
         tag.putFloat("heldLitres", heldLitres);
         tag.putString("heldLiquid", heldLiquid);
+        final net.minecraft.nbt.ListTag savedQuality = tfcpp.health.FluidQuality.toTag(heldQuality);
+        if (savedQuality != null)
+        {
+            tag.put("heldQuality", savedQuality);
+        }
     }
 
     @Override
@@ -94,6 +102,7 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
         super.loadAdditional(tag, provider);
         heldLitres = tag.getFloat("heldLitres");
         heldLiquid = tag.getString("heldLiquid");
+        heldQuality = tag.contains("heldQuality", net.minecraft.nbt.Tag.TAG_LIST) ? tfcpp.health.FluidQuality.fromTag(tag.getList("heldQuality", tfcpp.health.FluidQuality.TAG_TYPE)) : null;
     }
 
     /** Breaking the pump lets out what it was holding between strokes, which runs into the ground. */
@@ -154,6 +163,10 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
         }
 
         final BlockPos inletPos = worldPosition.relative(facing.getOpposite());
+        if (!level.isLoaded(inletPos))
+        {
+            return FRICTION_TORQUE; // The inlet lies in a chunk that is not loaded: reading it would load it
+        }
         // A device such as a lead chamber is a block of a network too, but its tank is the only thing open toward the pump: the water and the gas of its network are what it works with, and are not for drawing out into an acid line. With the tank empty the pump takes nothing
         final boolean tankOnly = isTankOnly(level, inletPos, facing);
         final @Nullable PipeNetwork input = opensToward(level, inletPos, facing) && !tankOnly ? pipes.networkAt(inletPos) : null;
@@ -216,7 +229,7 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
                 return new Moved(true, 0f);
             }
             final float amount = Math.min(litres, from.litres);
-            if (output.contents().addLiquid(from.liquid, amount, from.temperature))
+            if (output.contents().addLiquid(from.liquid, amount, from.temperature, from.quality))
             {
                 from.litres -= amount;
                 from.tidy();
@@ -245,13 +258,14 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
         if (heldLitres > 0f && to.takesLiquid(heldLiquid))
         {
             final float amount = Math.min(litres, heldLitres);
-            to.addLiquid(heldLiquid, amount, PipePhysics.ROOM_TEMPERATURE);
+            to.addLiquid(heldLiquid, amount, PipePhysics.ROOM_TEMPERATURE, heldQuality);
             final float density = densityOf(heldLiquid);
             heldLitres -= amount;
             if (heldLitres <= 0f)
             {
                 heldLitres = 0f;
                 heldLiquid = "";
+                heldQuality = null;
             }
             setChanged();
             return density;
@@ -287,6 +301,7 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
                     final FluidStack drained = handler.drain(contained.copyWithAmount((int) Math.ceil(litres - heldLitres)), IFluidHandler.FluidAction.EXECUTE);
                     if (!drained.isEmpty()) // A sealed barrel gives nothing
                     {
+                        holdQuality(drained.getAmount(), tfcpp.health.FluidQuality.carries(drained.getFluid()) ? tfcpp.health.FluidQuality.get(drained) : null);
                         heldLiquid = id;
                         heldLitres += drained.getAmount();
                         setChanged();
@@ -303,20 +318,35 @@ public final class PistonPumpBlockEntity extends TFCBlockEntity implements Rotat
             return Moved.NOTHING;
         }
 
-        if (heldLitres < litres && !tooHotToPump(state.getType()) && level.getBlockState(inlet).getBlock() == TFCBlocks.RIVER_WATER.get())
+        // What is held stays one liquid: a river or a pool does not fill a pump that holds something else, as the barrel does not
+        final String inletId = idOf(state.getType());
+        final boolean takesFromRiver = heldLitres <= 0f || heldLiquid.equals(idOf(Fluids.WATER));
+        final boolean takesFromPool = heldLitres <= 0f || heldLiquid.equals(inletId);
+        if (heldLitres < litres && takesFromRiver && !tooHotToPump(state.getType()) && level.getBlockState(inlet).getBlock() == TFCBlocks.RIVER_WATER.get())
         {
+            holdQuality(LITRES_PER_BLOCK, tfcpp.health.WaterSource.take(level, inlet, LITRES_PER_BLOCK));
             heldLiquid = idOf(Fluids.WATER); // A river does not run out for one pump
             heldLitres += LITRES_PER_BLOCK;
             setChanged();
         }
-        else if (heldLitres < litres && state.isSource() && !tooHotToPump(state.getType()) && FluidHelpers.isAirOrEmptyFluid(level.getBlockState(inlet)))
+        else if (heldLitres < litres && takesFromPool && state.isSource() && !tooHotToPump(state.getType()) && FluidHelpers.isAirOrEmptyFluid(level.getBlockState(inlet)))
         {
+            holdQuality(LITRES_PER_BLOCK, tfcpp.health.FluidQuality.carries(state.getType()) ? tfcpp.health.WaterSource.take(level, inlet, LITRES_PER_BLOCK) : null);
             heldLiquid = idOf(state.getType());
             heldLitres += LITRES_PER_BLOCK;
             level.setBlockAndUpdate(inlet, FluidHelpers.emptyFluidFrom(level.getBlockState(inlet)));
             setChanged();
         }
         return new Moved(true, deliverHeld(to, litres));
+    }
+
+    /** Mixes the quality of water that is about to be held with what is held already. */
+    private void holdQuality(float amount, @Nullable tfcpp.health.WaterQuality incoming)
+    {
+        if (heldQuality != null || incoming != null)
+        {
+            heldQuality = tfcpp.health.WaterQuality.mix(heldQuality, heldLitres, incoming, amount);
+        }
     }
 
     private static boolean accepts(PipeContents to, Fluid fluid)

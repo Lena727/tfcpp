@@ -465,6 +465,17 @@ public final class LevelWaters extends SavedData
         }
     }
 
+    /** Water was drawn from this body into a container or a pump: what it carries leaves the water column of the reach, no more than it holds. @return what was taken */
+    public double draw(long reach, Pollutant pollutant, double wanted)
+    {
+        final double taken = ledger.draw(reach, pollutant, wanted);
+        if (taken > 0.0)
+        {
+            setDirty();
+        }
+        return taken;
+    }
+
     /** What the soil of a chunk has given up to the water that it drains to. */
     public void runoff(ServerLevel level, ChunkPos chunk, Drainage drainage, double[] amounts)
     {
@@ -797,6 +808,7 @@ public final class LevelWaters extends SavedData
         tag.put("toSea", amounts(ledger.toSea));
         tag.put("dropped", amounts(ledger.dropped));
         tag.put("irrigated", amounts(ledger.irrigated));
+        tag.put("drawn", amounts(ledger.drawn));
 
         // The geometry of the reaches that hold something, and of everything downstream of them: the water in them flows there
         final LongOpenHashSet needed = new LongOpenHashSet();
@@ -899,6 +911,7 @@ public final class LevelWaters extends SavedData
         readAmounts(tag.getCompound("toSea"), ledger.toSea);
         readAmounts(tag.getCompound("dropped"), ledger.dropped);
         readAmounts(tag.getCompound("irrigated"), ledger.irrigated);
+        readAmounts(tag.getCompound("drawn"), ledger.drawn);
         for (Tag raw : tag.getList("infos", Tag.TAG_COMPOUND))
         {
             final CompoundTag entry = (CompoundTag) raw;

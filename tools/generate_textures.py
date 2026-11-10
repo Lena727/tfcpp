@@ -589,3 +589,77 @@ def marsh_flask(seed):
 
 
 write_png(ROOT / 'item/marsh_apparatus.png', marsh_flask(185))
+
+
+# Stage E of v1.5: the cesspit, the sand filter, night soil and the icons of the symptoms (no icon names a disease)
+cesspit_top = noise(190, (122, 92, 56), 8)
+for y in range(16):
+    for x in range(16):
+        if y % 4 == 3:
+            cesspit_top[y][x] = shade((70, 52, 32), 0)  # The joints of the planks of the lid
+        if x in (0, 15) or y in (0, 15):
+            cesspit_top[y][x] = shade((84, 62, 38), 0)  # The frame
+write_png(ROOT / 'block/cesspit_top.png', cesspit_top)
+
+cesspit_side = noise(191, (128, 124, 118), 9)
+for y in range(16):
+    for x in range(16):
+        offset = 4 if (y // 4) % 2 else 0
+        if y % 4 == 3 or (x + offset) % 8 == 7:
+            cesspit_side[y][x] = shade((84, 80, 76), 0)  # The stone lining
+write_png(ROOT / 'block/cesspit_side.png', cesspit_side)
+
+filter_top = noise(192, (212, 192, 140), 10)
+for y in range(16):
+    for x in range(16):
+        if x in (0, 15) or y in (0, 15):
+            filter_top[y][x] = shade((122, 92, 56), 0)  # The rim of the box
+write_png(ROOT / 'block/sand_filter_top.png', filter_top)
+
+filter_side = noise(193, (126, 96, 60), 8)
+for y in range(16):
+    for x in range(16):
+        if y % 5 == 4:
+            filter_side[y][x] = shade((76, 56, 34), 0)  # The boards
+        if y > 10 and x % 3 != 1:
+            filter_side[y][x] = shade((120, 118, 114), (x + y) % 5 - 2)  # Gravel seen through the slats at the foot
+write_png(ROOT / 'block/sand_filter_side.png', filter_side)
+
+
+def night_soil(seed):
+    """A clod of dark, damp waste with straw in it."""
+    rng = random.Random(seed)
+    pixels = [[(0, 0, 0, 0)] * 16 for _ in range(16)]
+    for y in range(16):
+        for x in range(16):
+            distance = ((x - 7.5) / 6.0) ** 2 + ((y - 8.5) / 4.5) ** 2
+            if distance <= 1.0:
+                base = (66, 50, 34) if distance < 0.7 else (50, 38, 26)
+                pixels[y][x] = shade(base, rng.randint(-8, 8))
+    for x, y in ((4, 7), (6, 6), (9, 9), (11, 7), (7, 11)):
+        pixels[y][x] = (190, 164, 90, 255)  # Straw
+    return pixels
+
+
+write_png(ROOT / 'item/night_soil.png', night_soil(194))
+
+
+def effect_icon(seed, base, mark):
+    """An 18 x 18 round icon of a symptom, with a simple mark on it."""
+    rng = random.Random(seed)
+    size = 18
+    pixels = [[(0, 0, 0, 0)] * size for _ in range(size)]
+    for y in range(size):
+        for x in range(size):
+            distance = ((x - 8.5) ** 2 + (y - 8.5) ** 2) ** 0.5
+            if distance <= 8.0:
+                pixels[y][x] = shade(base, rng.randint(-6, 6) - int(distance * 2))
+    for x, y in mark:
+        pixels[y][x] = (240, 236, 224, 255)
+    return pixels
+
+
+# Fever: a thermometer; diarrhoea: drops; weakness: a drooping arrow
+write_png(ROOT / 'mob_effect/fever.png', effect_icon(195, (176, 70, 52), [(8, y) for y in range(4, 12)] + [(9, y) for y in range(4, 12)] + [(7, 12), (8, 12), (9, 12), (10, 12), (7, 13), (8, 13), (9, 13), (10, 13)]))
+write_png(ROOT / 'mob_effect/diarrhoea.png', effect_icon(196, (140, 120, 58), [(5, 5), (5, 6), (5, 7), (6, 8), (9, 4), (9, 5), (9, 6), (10, 7), (12, 9), (12, 10), (12, 11), (11, 12), (7, 11), (7, 12), (7, 13)]))
+write_png(ROOT / 'mob_effect/illness_weakness.png', effect_icon(197, (112, 126, 128), [(x, 6) for x in range(4, 13)] + [(12, 7), (11, 8), (10, 9), (9, 10), (8, 11), (7, 12), (6, 12), (5, 12)]))

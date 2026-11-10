@@ -7,6 +7,8 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 
+import tfcpp.health.Filtration;
+import tfcpp.health.WaterQuality;
 import tfcpp.pneumatics.gas.Gas;
 import tfcpp.pneumatics.gas.GasMath;
 
@@ -20,6 +22,11 @@ public final class PipeContents
     /** The id of the one liquid held, or empty. Two liquids in one pipe are not modelled: networks of different liquids do not join, and {@link #add} returns what a clash would leave over. */
     public String liquid = "";
     public float litres;
+    /** What the water in here carries (sewage, metals, acid), or {@code null} for water that carries nothing and for every other liquid. It mixes by volume with the water that comes in, and is boiled clean at the boiling point (stage E of v1.5). */
+    @Nullable
+    public WaterQuality quality;
+    /** Seconds the water has been held at the boiling point since it last took in water that could carry pathogens. */
+    public float boilSeconds;
     /** Less than this much liquid cannot be drained through a tap, and counts as the wet of the walls, not as a liquid that keeps another out. */
     public static final float FILM_LITRES = PipePhysics.WHOLE_MILLILITRE;
     /** Liquid that has run over at an opening and waits there for a whole block to be placed. It takes no room in the pipe and no part in its pressure, and it is kept through every rebuild and save, so that nothing is lost on the way. */
@@ -104,6 +111,40 @@ public final class PipeContents
         {
             litres = 0f;
             liquid = "";
+            quality = null;
+            boilSeconds = 0f;
+        }
+    }
+
+    /** Mixes in water of this quality, {@code amount} litres of it, to the {@code litres} that are already here (call before they are added). */
+    private void mixQuality(float held, @Nullable WaterQuality incoming, float amount)
+    {
+        if (quality != null || incoming != null)
+        {
+            quality = WaterQuality.mix(quality, held, incoming, amount);
+            if (quality.isClean())
+            {
+                quality = null;
+            }
+            else if (incoming != null && incoming.hasPathogens())
+            {
+                boilSeconds = 0f; // Water that can carry pathogens has to be boiled for a minute from the moment it comes in
+            }
+        }
+    }
+
+    /** Called every second of the pipe's step: water at the boiling point for a minute is boiled (WHO: a rolling boil, a minute is enough). Above 100 C counts: water in a boiler under pressure is hotter than that. */
+    public void watchBoiling(float seconds)
+    {
+        if (quality == null || litres <= 0f || !isWater() || temperature < 273.15f + (float) Filtration.BOILING_CELSIUS)
+        {
+            boilSeconds = 0f;
+            return;
+        }
+        boilSeconds += seconds;
+        if (boilSeconds >= Filtration.BOIL_SECONDS && quality.hasPathogens())
+        {
+            quality = quality.boiled();
         }
     }
 
@@ -126,16 +167,20 @@ public final class PipeContents
                 rejected.liquid = liquid;
                 rejected.litres = litres;
                 rejected.temperature = temperature;
+                rejected.quality = quality;
                 liquid = "";
                 litres = 0f;
+                quality = null;
             }
             else
             {
                 rejected.liquid = other.liquid;
                 rejected.litres = other.litres;
                 rejected.temperature = other.temperature;
+                rejected.quality = other.quality;
                 other.liquid = "";
                 other.litres = 0f;
+                other.quality = null;
             }
         }
 
@@ -154,11 +199,13 @@ public final class PipeContents
 
         if (other.litres > 0f)
         {
+            mixQuality(litres, other.quality, other.litres);
             liquid = other.liquid;
             litres += other.litres;
         }
         other.litres = 0f;
         other.liquid = "";
+        other.quality = null;
 
         if (other.runoff > 0f)
         {
@@ -198,6 +245,7 @@ public final class PipeContents
         taken.litres = litres * share;
         litres -= taken.litres;
         taken.liquid = taken.litres > 0f ? liquid : "";
+        taken.quality = taken.litres > 0f ? quality : null;
         tidy();
         taken.runoff = runoff * share;
         runoff -= taken.runoff;
@@ -232,6 +280,12 @@ public final class PipeContents
      */
     public boolean addLiquid(String id, float amount, float sourceTemperature)
     {
+        return addLiquid(id, amount, sourceTemperature, null);
+    }
+
+    /** As {@link #addLiquid(String, float, float)}, for water that carries this quality. */
+    public boolean addLiquid(String id, float amount, float sourceTemperature, @Nullable WaterQuality incoming)
+    {
         if (!takesLiquid(id))
         {
             return false;
@@ -239,8 +293,10 @@ public final class PipeContents
         if (!liquid.equals(id))
         {
             litres = 0f;
+            quality = null;
         }
         mixHeat(amount * 4.186f, sourceTemperature);
+        mixQuality(litres, incoming, amount);
         liquid = id;
         litres += amount;
         return true;
@@ -268,6 +324,7 @@ public final class PipeContents
         copy.air = air * share;
         copy.litres = litres * share;
         copy.liquid = copy.litres > 0f ? liquid : "";
+        copy.quality = copy.litres > 0f ? quality : null;
         copy.runoff = runoff * share;
         copy.runoffLiquid = copy.runoff > 0f ? runoffLiquid : "";
         return copy;
@@ -304,6 +361,11 @@ public final class PipeContents
             tag.putString("runoffLiquid", runoffLiquid);
         }
         tag.putFloat("temperature", temperature);
+        final ListTag savedQuality = tfcpp.health.FluidQuality.toTag(quality);
+        if (savedQuality != null)
+        {
+            tag.put("quality", savedQuality);
+        }
         return tag;
     }
 
@@ -326,6 +388,10 @@ public final class PipeContents
         contents.runoff = tag.getFloat("runoff");
         contents.runoffLiquid = contents.runoff > 0f ? tag.getString("runoffLiquid") : "";
         contents.temperature = tag.contains("temperature") ? tag.getFloat("temperature") : PipePhysics.ROOM_TEMPERATURE;
+        if (tag.contains("quality", Tag.TAG_LIST) && contents.litres > 0f)
+        {
+            contents.quality = tfcpp.health.FluidQuality.fromTag(tag.getList("quality", tfcpp.health.FluidQuality.TAG_TYPE));
+        }
         return contents;
     }
 }

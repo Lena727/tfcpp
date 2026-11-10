@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "tfcpp:pipe/wood"
+    "tfcpp:pipe/wood",
+    "tfcpp:cesspit"
   ]
 }

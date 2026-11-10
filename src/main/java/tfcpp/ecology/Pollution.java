@@ -346,6 +346,23 @@ public final class Pollution
         chunk.setUnsaved(true);
     }
 
+    /**
+     * Takes this much of a pollutant out of the soil of the chunk (water that was drawn from the ground, a crop): no more than the soil holds. Counted with what plants harvested, so that the balance of the soil stays closed.
+     *
+     * @return what was taken, in the unit of the pollutant
+     */
+    public static double take(ServerLevel level, BlockPos pos, Pollutant pollutant, double amount)
+    {
+        if (!(amount > 0.0))
+        {
+            return 0.0;
+        }
+        final LevelChunk chunk = level.getChunkAt(pos);
+        final double taken = touch(level, chunk).uptake(pollutant, amount);
+        chunk.setUnsaved(true);
+        return taken;
+    }
+
     /** Takes what a crop carries out of the soil of the chunk, in grams of each of {@link FoodMetals#METALS}; returns what was taken. */
     public static double[] uptake(ServerLevel level, BlockPos pos, double[] grams)
     {

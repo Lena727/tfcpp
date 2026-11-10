@@ -49,6 +49,7 @@ public final class DataGenerators
                 context.register(GasIgnition.BLAST, new DamageType("tfcpp.blast", 0.1f));
                 context.register(CorrosiveSpill.CORROSIVE, new DamageType("tfcpp.corrosive", 0f));
                 context.register(SteamBurst.SCALD, new DamageType("tfcpp.scald", 0f));
+                context.register(tfcpp.health.Hygiene.FEVER, new DamageType("tfcpp.fever", 0f));
             }), Set.of(TFCpp.MOD_ID)));
 
         event.getGenerator().addProvider(event.includeServer(), new DamageTags(output, datapack.getRegistryProvider(), event.getExistingFileHelper()));
@@ -56,6 +57,9 @@ public final class DataGenerators
         event.getGenerator().addProvider(event.includeServer(), new MetallurgyData(output));
         event.getGenerator().addProvider(event.includeServer(), new ChemistryData(output));
         event.getGenerator().addProvider(event.includeServer(), new OreData(output));
+        event.getGenerator().addProvider(event.includeServer(), new tfcpp.health.HygieneData(output));
+        event.getGenerator().addProvider(event.includeClient(), new tfcpp.health.HygieneAssets.Models(output, event.getExistingFileHelper()));
+        event.getGenerator().addProvider(event.includeClient(), new tfcpp.health.HygieneAssets.BlockStates(output, event.getExistingFileHelper()));
         event.getGenerator().addProvider(event.includeClient(), new MetallurgyAssets.Models(output, event.getExistingFileHelper()));
         event.getGenerator().addProvider(event.includeClient(), new MetallurgyAssets.BlockStates(output, event.getExistingFileHelper()));
         event.getGenerator().addProvider(event.includeClient(), new ChemistryAssets.Models(output, event.getExistingFileHelper()));
@@ -94,6 +98,13 @@ public final class DataGenerators
                 tag(tag).add(Breathing.ASPHYXIATION, Breathing.CARBON_MONOXIDE, Breathing.TOXIC_GAS);
             }
             tag(DamageTypeTags.BYPASSES_ARMOR).add(GasIgnition.BLAST); // A pressure wave passes straight through armour and into the lungs
+            for (TagKey<DamageType> tag : List.of(DamageTypeTags.BYPASSES_ARMOR, DamageTypeTags.BYPASSES_SHIELD, DamageTypeTags.NO_KNOCKBACK))
+            {
+                tag(tag).add(tfcpp.health.Hygiene.FEVER); // A fever is in the blood, and armour does nothing against it
+            }
+            // The fever of the end of typhoid is not a blow that a potion or the body's own defence can turn aside: Resistance does not cancel it
+            tag(DamageTypeTags.BYPASSES_RESISTANCE).add(tfcpp.health.Hygiene.FEVER);
+            tag(DamageTypeTags.BYPASSES_EFFECTS).add(tfcpp.health.Hygiene.FEVER);
             tag(DamageTypeTags.IS_EXPLOSION).add(GasIgnition.BLAST);
         }
     }
@@ -413,6 +424,13 @@ public final class DataGenerators
             add("tfcpp.gold_leaf.stage.1", "Traces: the leaf has whitened at its edges, from mercury in the air");
             add("tfcpp.gold_leaf.stage.2", "Exposed: the leaf is pale, and the air here has held mercury for a long time");
             add("tfcpp.gold_leaf.stage.3", "Heavily poisoned: the leaf is white, and the mercury in it will not come out");
+            add("death.attack.tfcpp.fever", "%1$s died of a fever");
+            add("effect.tfcpp.fever", "Fever");
+            add("effect.tfcpp.diarrhoea", "Diarrhoea");
+            add("effect.tfcpp.illness_weakness", "Weakness from Illness");
+            add("block.tfcpp.cesspit", "Cesspit");
+            add("block.tfcpp.sand_filter", "Sand Filter");
+            add("item.tfcpp.night_soil", "Night Soil");
         }
     }
 
@@ -732,6 +750,13 @@ public final class DataGenerators
             add("tfcpp.gold_leaf.stage.1", "Следы: лист побелел по краям от ртути в воздухе");
             add("tfcpp.gold_leaf.stage.2", "Подвержен: лист бледный, воздух здесь долго держал ртуть");
             add("tfcpp.gold_leaf.stage.3", "Сильно отравлен: лист белый, ртуть из него уже не выйдет");
+            add("death.attack.tfcpp.fever", "%1$s умер от горячки");
+            add("effect.tfcpp.fever", "Жар");
+            add("effect.tfcpp.diarrhoea", "Понос");
+            add("effect.tfcpp.illness_weakness", "Слабость от болезни");
+            add("block.tfcpp.cesspit", "Выгребная яма");
+            add("block.tfcpp.sand_filter", "Песчаный фильтр");
+            add("item.tfcpp.night_soil", "Ночное золото");
         }
     }
 

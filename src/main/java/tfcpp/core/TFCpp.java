@@ -44,10 +44,12 @@ public final class TFCpp
         Instruments.register(modBus);
         Pipes.register(modBus);
         Chemistry.register(modBus);
+        tfcpp.health.Hygiene.register(modBus);
 
         NeoForge.EVENT_BUS.register(GasEvents.class);
         NeoForge.EVENT_BUS.register(PipeEvents.class);
         NeoForge.EVENT_BUS.register(Blowing.class);
+        NeoForge.EVENT_BUS.register(tfcpp.health.HygieneEvents.class);
         NeoForge.EVENT_BUS.addListener(WaterBodies::onCreateFluidSource);
         NeoForge.EVENT_BUS.addListener(tfcpp.ecology.FoodEvents::onDrops);
         NeoForge.EVENT_BUS.addListener(tfcpp.ecology.FoodEvents::onEaten);

@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
  * <p>
  * Each reach is a well mixed volume. An hour (or, when the clock is behind, a stretch of hours) is one step: first what happens inside each reach (breakdown, settling to the bed, scour from it in heavy rain, neutralisation of acid by the alkalinity that the catchment brings), then what runs on to the next reach downstream, worked out from the content at the start of the transport so that the order of the reaches does not matter. If a reach would pass on more than half of itself in one substep the step is cut into substeps, as the air grid does.
  * <p>
- * Every amount that goes in is counted, and {@link #imbalance} is what is missing: inputs = in water + on the bed + broken down + neutralised + run to the sea + dropped as dust + waiting for its reach to be found.
+ * Every amount that goes in is counted, and {@link #imbalance} is what is missing: inputs = in water + on the bed + broken down + neutralised + run to the sea + dropped as dust + irrigated + drawn into containers + waiting for its reach to be found.
  */
 public final class WaterLedger
 {
@@ -100,6 +100,8 @@ public final class WaterLedger
     final double[] dropped = new double[Pollutant.COUNT];
     /** What crops took with the irrigation water. */
     final double[] irrigated = new double[Pollutant.COUNT];
+    /** What containers and pumps have carried away in the water they took from the water column. */
+    final double[] drawn = new double[Pollutant.COUNT];
     private Reach[] snapshot = new Reach[0];
 
     public WaterLedger()
@@ -166,7 +168,7 @@ public final class WaterLedger
             map.clear();
         }
         claimedAir.clear();
-        for (double[] totals : new double[][] {input, fromAir, decayed, neutralised, toSea, dropped, irrigated})
+        for (double[] totals : new double[][] {input, fromAir, decayed, neutralised, toSea, dropped, irrigated, drawn})
         {
             java.util.Arrays.fill(totals, 0.0);
         }
@@ -274,6 +276,26 @@ public final class WaterLedger
         reach.water[i] -= taken;
         irrigated[i] += taken;
         return taken;
+    }
+
+    /** Takes an amount out of the water column of a reach because water was drawn from it into a container or a pump (what the water carries away is no longer in the river), no more than it holds; never from the bed. Returns what was taken. Counted as drawn. */
+    public double draw(long id, Pollutant pollutant, double wanted)
+    {
+        final @Nullable Reach reach = active.get(id);
+        if (reach == null || !(wanted > 0.0))
+        {
+            return 0.0;
+        }
+        final int i = pollutant.ordinal();
+        final double taken = Math.min(wanted, reach.water[i]);
+        reach.water[i] -= taken;
+        drawn[i] += taken;
+        return taken;
+    }
+
+    public double drawn(Pollutant pollutant)
+    {
+        return drawn[pollutant.ordinal()];
     }
 
     public double irrigated(Pollutant pollutant)
@@ -620,6 +642,6 @@ public final class WaterLedger
     /** @return what is missing from the books: put in, less everything that it can be found as. Zero up to rounding. */
     public double imbalance(Pollutant pollutant)
     {
-        return input(pollutant) + fromAir(pollutant) - inWater(pollutant) - onBed(pollutant) - decayed(pollutant) - neutralised(pollutant) - toSea(pollutant) - dropped(pollutant) - irrigated(pollutant) - pendingTotal(pollutant);
+        return input(pollutant) + fromAir(pollutant) - inWater(pollutant) - onBed(pollutant) - decayed(pollutant) - neutralised(pollutant) - toSea(pollutant) - dropped(pollutant) - irrigated(pollutant) - drawn(pollutant) - pendingTotal(pollutant);
     }
 }

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": {
+      "tag": "tfc:lumber"
+    },
+    "S": {
+      "tag": "c:stones/loose"
+    }
+  },
+  "pattern": [
+    "LLL",
+    "S S",
+    "SSS"
+  ],
+  "result": {
+    "count": 1,
+    "id": "tfcpp:cesspit"
+  }
+}

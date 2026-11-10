@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": {
+      "tag": "c:gravels"
+    },
+    "L": {
+      "tag": "tfc:lumber"
+    },
+    "S": {
+      "tag": "c:sands"
+    }
+  },
+  "pattern": [
+    "LSL",
+    "LGL",
+    "LLL"
+  ],
+  "result": {
+    "count": 1,
+    "id": "tfcpp:sand_filter"
+  }
+}

@@ -20,7 +20,11 @@ public enum Pollutant
     /** Coal tar and the phenols of gas liquor, in kilograms. */
     TAR("kg"),
     /** Raw sewage, in litres of it: the amount of pathogens is counted by what it was diluted from. */
-    SEWAGE("L");
+    SEWAGE("L"),
+    /** The part of the sewage that came from people who were shedding Shigella, in litres of it: a share of {@link #SEWAGE}, which dies out with it, and carries the pathogens at the concentration of an ill person's stool and not the endemic one. Kept apart for each disease, since a person with dysentery does not shed typhoid. */
+    SHED_DYSENTERY("L"),
+    /** As {@link #SHED_DYSENTERY}, for people shedding Salmonella Typhi. */
+    SHED_TYPHOID("L");
 
     public static final Pollutant[] VALUES = values();
     public static final int COUNT = VALUES.length;
@@ -35,6 +39,12 @@ public enum Pollutant
     public String id()
     {
         return name().toLowerCase(Locale.ROOT);
+    }
+
+    /** @return {@code true} for the kinds that are sewage or a part of it: they die out and run off as sewage does */
+    public boolean isSewage()
+    {
+        return this == SEWAGE || this == SHED_DYSENTERY || this == SHED_TYPHOID;
     }
 
     /** @return the unit that totals of this kind are kept in */

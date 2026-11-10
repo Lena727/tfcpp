@@ -66,6 +66,10 @@ final class CropGrowthMixin
             {
                 Pollution.lime(server, farmlandPos, eq * count);
             }
+            if (level instanceof ServerLevel server)
+            {
+                tfcpp.health.NightSoil.spread(server, farmlandPos, stack, count); // Night soil is a fertiliser, and what it carries goes into the soil of the field
+            }
             original.call(stack, count);
         }
     }

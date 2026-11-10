@@ -287,6 +287,7 @@ public final class PipeNetwork
             final float limit = Math.abs(power) / conductance;
             contents.temperature += Math.clamp(power * seconds / capacity, -limit, limit); // A step can only go as far as the temperature it is heading to
         }
+        contents.watchBoiling(seconds); // Water that has been at the boiling point for a minute has had its pathogens killed
     }
 
     /**
@@ -631,7 +632,9 @@ public final class PipeNetwork
         int filled = 0;
         if (owed.whole() > 0)
         {
-            filled = handler.fill(new FluidStack(fluid, owed.whole()), IFluidHandler.FluidAction.EXECUTE);
+            final FluidStack out = new FluidStack(fluid, owed.whole());
+            final @Nullable tfcpp.health.WaterQuality carried = contents.quality;
+            filled = handler.fill(carried != null ? tfcpp.health.FluidQuality.with(out, carried) : out, IFluidHandler.FluidAction.EXECUTE);
             contents.litres -= filled;
             contents.tidy();
         }

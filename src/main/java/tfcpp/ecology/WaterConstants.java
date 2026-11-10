@@ -80,7 +80,7 @@ public final class WaterConstants
     {
         return switch (pollutant)
         {
-            case SEWAGE -> SEWAGE_RUNOFF_PER_YEAR;
+            case SEWAGE, SHED_DYSENTERY, SHED_TYPHOID -> SEWAGE_RUNOFF_PER_YEAR;
             case TAR -> TAR_RUNOFF_PER_YEAR;
             case ACIDITY -> 0.0;
             default -> METAL_RUNOFF_PER_YEAR;
@@ -92,7 +92,7 @@ public final class WaterConstants
     {
         return switch (pollutant)
         {
-            case SEWAGE -> Math.log(10.0) / (still ? SEWAGE_T90_LAKE_DAYS : SEWAGE_T90_RIVER_DAYS);
+            case SEWAGE, SHED_DYSENTERY, SHED_TYPHOID -> Math.log(10.0) / (still ? SEWAGE_T90_LAKE_DAYS : SEWAGE_T90_RIVER_DAYS);
             case TAR -> Math.log(2.0) / TAR_HALF_LIFE_DAYS;
             default -> 0.0;
         };

@@ -15,6 +15,7 @@
     "tfcpp:sulfur_burner",
     "tfcpp:glass_retort",
     "tfcpp:sand_bath",
+    "tfcpp:sand_filter",
     "#tfcpp:pipe_pickaxe",
     "#tfcpp:ore_pickaxe"
   ]
